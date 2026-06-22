@@ -46,8 +46,9 @@ export interface ContrastWarning {
 
 /** AA: 4.5 for body text, 3.0 for large text / UI / focus. */
 export function checkContrast(fg: string, bg: string, label: string, threshold = 4.5): ContrastWarning | null {
+  // compare the UNROUNDED ratio (rounding first let 4.4955→4.50 pass and suppressed the warning)
+  if (contrastRatio(fg, bg) >= threshold) return null;
   const ratio = Math.round(contrastRatio(fg, bg) * 100) / 100;
-  if (ratio >= threshold) return null;
   return {
     pair: label,
     ratio,

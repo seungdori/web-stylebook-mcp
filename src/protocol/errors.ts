@@ -2,7 +2,6 @@
 
 export type ErrorCode =
   | 'INVALID_INPUT'
-  | 'UNSUPPORTED_LOCALE'
   | 'STYLE_NOT_FOUND'
   | 'MOTION_NOT_FOUND'
   | 'COMPONENT_NOT_FOUND'
@@ -13,6 +12,22 @@ export type ErrorCode =
   | 'CATALOG_SCHEMA_MISMATCH'
   | 'CATALOG_INTEGRITY_ERROR'
   | 'OUTPUT_TOO_LARGE';
+
+/** Stable error codes with one-line meanings — surfaced in the manifest resource so an
+ *  agent can read the full set up front. Record<ErrorCode,…> keeps it in sync with the union. */
+export const ERROR_CODES: Record<ErrorCode, string> = {
+  INVALID_INPUT: 'malformed or out-of-range input',
+  STYLE_NOT_FOUND: 'unknown style id (near-miss suggestions provided)',
+  MOTION_NOT_FOUND: 'unknown motion id',
+  COMPONENT_NOT_FOUND: 'unknown component id',
+  STATE_SURFACE_NOT_FOUND: 'unknown surface id (suggestions provided)',
+  STATE_RECIPE_NOT_FOUND: 'unknown surface/state recipe',
+  PRODUCT_NOT_FOUND: 'unknown product archetype id',
+  NO_COMPATIBLE_STYLE: 'every candidate was hard-rejected — relax constraints/avoid',
+  CATALOG_SCHEMA_MISMATCH: 'bundled catalog failed schema validation',
+  CATALOG_INTEGRITY_ERROR: 'bundled catalog failed integrity checks',
+  OUTPUT_TOO_LARGE: 'result exceeded the size budget',
+};
 
 export interface ToolErrorPayload {
   error: { code: ErrorCode; message: string; details?: Record<string, unknown> };

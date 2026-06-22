@@ -39,7 +39,9 @@ function blend(a: string, b: string, t: number): string {
   return toHex({ r: ra.r + (rb.r - ra.r) * t, g: ra.g + (rb.g - ra.g) * t, b: ra.b + (rb.b - ra.b) * t });
 }
 function bestTextOn(bg: string): string {
-  return contrastRatio('#ffffff', bg) >= contrastRatio('#111111', bg) ? '#ffffff' : '#111111';
+  // true black/white maximize contrast; #111 silently lost ~0.4 ratio and pushed
+  // mid-tone accents (e.g. #ab6b49) below AA on the primary-action label.
+  return contrastRatio('#ffffff', bg) >= contrastRatio('#000000', bg) ? '#ffffff' : '#000000';
 }
 
 const STATUS = {
@@ -185,6 +187,10 @@ function warningsFor(t: DesignTokens, mode: string, accentOverridden: boolean): 
   }
   const focus = checkContrast(t.color.focus, t.color.canvas, `focus ring (${mode})`, 3);
   if (focus) warnings.push(focus.message);
+  // accent as a fill / icon / link on canvas needs >=3:1 for non-text UI; >=4.5 if used as text.
+  const accentOnCanvas = checkContrast(t.color.accent, t.color.canvas, `accent on canvas (${mode})`, 3);
+  if (accentOnCanvas) warnings.push(accentOnCanvas.message);
+  else notes.push(`Accent on canvas passes for large fills/icons/borders (>=3:1); if you use the accent as TEXT, verify >=4.5:1 first.`);
   if (accentOverridden) notes.push(`Accent was overridden — verify accent/status color distinction and contrast in context.`);
   notes.push(`Status colors are accessible defaults, not brand-derived — confirm they fit the product.`);
   return { warnings, notes };

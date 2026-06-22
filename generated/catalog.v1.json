@@ -1,6 +1,6 @@
 {
   "catalogVersion": "0.1.0",
-  "contentHash": "sha256:b488ad6a09e013c68d89f2f180f20b4e6b52c58d6853814d8b89d67600b545c5",
+  "contentHash": "sha256:3d5b8bfcb67bb5dde396ce68920b431d778db31e9d8c84890ae809a7a53c2ab3",
   "data": {
     "componentCategories": [
       {
@@ -14221,7 +14221,10 @@
             "manage",
             "configure",
             "review",
-            "scan"
+            "scan",
+            "triage",
+            "communicate",
+            "schedule"
           ],
           "tones": [
             "calm",
@@ -14325,7 +14328,11 @@
             "configure",
             "manage",
             "read",
-            "navigate"
+            "navigate",
+            "triage",
+            "communicate",
+            "schedule",
+            "upload"
           ],
           "tones": [
             "technical",
@@ -14429,7 +14436,8 @@
             "analyze",
             "read",
             "audit",
-            "status legibility"
+            "status legibility",
+            "triage"
           ],
           "tones": [
             "technical",
@@ -15127,7 +15135,9 @@
             "browse",
             "compare",
             "onboard",
-            "modular features"
+            "modular features",
+            "checkout",
+            "communicate"
           ],
           "tones": [
             "playful",
@@ -15815,7 +15825,10 @@
             "browse",
             "onboard",
             "compare",
-            "soft depth"
+            "soft depth",
+            "checkout",
+            "communicate",
+            "upload"
           ],
           "tones": [
             "premium",
@@ -15914,7 +15927,9 @@
             "browse",
             "onboard",
             "reveal timing",
-            "hover depth"
+            "hover depth",
+            "communicate",
+            "upload"
           ],
           "tones": [
             "bold",
@@ -16208,7 +16223,9 @@
             "browse",
             "author",
             "read",
-            "gentle tone"
+            "gentle tone",
+            "communicate",
+            "schedule"
           ],
           "tones": [
             "calm",
@@ -16805,7 +16822,8 @@
             "manage",
             "configure",
             "navigate",
-            "native familiarity"
+            "native familiarity",
+            "checkout"
           ],
           "tones": [
             "premium",

@@ -31,6 +31,13 @@ const productContextShape = {
   avoid: z.array(z.string().max(300)).max(20).optional(),
 };
 
+// NOTE (audit L4): a tool `outputSchema` was evaluated and deliberately NOT added.
+// MCP clients validate structuredContent strictly (additionalProperties:false) for
+// EVERY result, including error results — which here carry a structured `{error:{…}}`
+// envelope for agent introspection. A success-shaped outputSchema therefore rejects
+// error results outright. Keeping the structured-error envelope is the better DX, so
+// the result shape is documented in the README/types instead of an outputSchema.
+
 function toToolError(e: unknown, repo: CatalogRepository): ToolError {
   if (e instanceof ToolError) return e;
   if (e instanceof StatePlanError) {
@@ -42,7 +49,12 @@ function toToolError(e: unknown, repo: CatalogRepository): ToolError {
     // a color/format problem is INVALID_INPUT, not a missing style
     return new ToolError('INVALID_INPUT', e.message);
   }
-  if (e instanceof CompareError) return new ToolError('INVALID_INPUT', e.message);
+  if (e instanceof CompareError) {
+    // mirror the token/state tools: an unknown style id is STYLE_NOT_FOUND + near-miss suggestions
+    const m = /unknown (?:secondary )?style '([^']+)'/.exec(e.message);
+    if (m && m[1]) return new ToolError('STYLE_NOT_FOUND', e.message, nearestIds(m[1], repo.allStyles().map((s) => s.id)));
+    return new ToolError('INVALID_INPUT', e.message);
+  }
   return new ToolError('INVALID_INPUT', e instanceof Error ? e.message : String(e));
 }
 
@@ -50,7 +62,7 @@ export function registerTools(server: McpServer, repo: CatalogRepository): void 
   // ---------------------------------------------------------------- recommend
   server.registerTool('recommend_design_direction', {
     title: 'Recommend a design direction',
-    description: 'Given product context, return scored style candidates with reason codes, rejected styles with reasons, secondary pairings, assumptions and confidence. Evidence-provider: the host model makes the final pick. Call before writing UI. Note: the tone field is "tone" (singular) and accepts ONLY: calm, technical, trustworthy, premium, editorial, playful, bold, experimental.',
+    description: 'Given product context, return scored style candidates with reason codes, rejected styles with reasons, secondary pairings, assumptions and confidence. Evidence-provider: the host model makes the final pick. Call before writing UI. The "tone" field (named "tone", not "tones") is an ARRAY of zero or more of: calm, technical, trustworthy, premium, editorial, playful, bold, experimental. Each candidate.score already includes soft penalties (density/motion/tone fit) that are not itemized in scoreBreakdown.',
     inputSchema: { ...productContextShape, locale: LOCALE.optional(), candidateLimit: z.number().int().min(1).max(10).optional() },
     annotations: READ_ONLY,
   }, async (args): Promise<ToolResult> => {
@@ -90,11 +102,11 @@ export function registerTools(server: McpServer, repo: CatalogRepository): void 
     title: 'Plan UI states for a surface',
     description: 'For a surface (data-table, form, checkout, chat, developer-console), return required / recommended / domain-specific states with triggers, must-show, must-not, accessibility and motion guidance, plus an implementation order. Covers the non-happy-path.',
     inputSchema: {
-      surfaceId: z.string(),
+      surfaceId: z.string().describe(`surface id — one of: ${repo.listSurfaces().map((s) => s.id).join(' | ')}`),
       productContext: z.string().max(2000).optional(),
       domainSignals: z.array(z.string().max(200)).max(20).optional(),
       includeCategories: z.array(z.enum(STATE_CATEGORIES)).optional(),
-      styleId: z.string().optional(),
+      styleId: z.string().describe('optional catalog style id (see webstylebook://styles) to tailor state guidance').optional(),
       criticalOnly: z.boolean().optional(),
       locale: LOCALE.optional(),
     },

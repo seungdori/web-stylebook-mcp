@@ -6,6 +6,24 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+- Recommendation: a constraint like `reduced-motion-required` no longer cross-matches
+  `high-contrast-required` (shared word "required"), which had wrongly hard-rejected 16 styles.
+- Tokens: on-accent label color uses true black, so mid-tone accents meet WCAG AA on the primary
+  action; `checkContrast` now compares the unrounded ratio (a 4.4955 case no longer rounds to pass).
+- `compare_design_directions`: an unknown style id returns `STYLE_NOT_FOUND` with near-miss suggestions.
+- `--validate-catalog` recomputes the content hash and checks all entity references (motion,
+  components, product archetypes, style families), not just styles + recipes.
+
+### Added
+- `errorCodes` and `resourceUriTemplates` in the manifest resource.
+- A contrast warning when the accent is too low against the canvas for non-text UI use.
+- Task tags (triage, checkout, communicate, upload, schedule) backed by style strengths.
+- `tests/audit-regression.test.ts`.
+
+### Removed
+- Vestigial `UNSUPPORTED_LOCALE` error code (unreachable — locale is a closed enum).
+
 ## [0.1.0] — 2026-06-22
 
 ### Added

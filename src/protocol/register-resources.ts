@@ -4,6 +4,7 @@
 import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { CatalogRepository } from '../catalog/repository.js';
 import { TOOL_NAMES, SERVER_NAME, SERVER_VERSION } from '../server-info.js';
+import { ERROR_CODES } from './errors.js';
 
 const JSON_MIME = 'application/json';
 function json(uri: string, value: unknown) {
@@ -34,6 +35,15 @@ export function registerResources(server: McpServer, repo: CatalogRepository): v
     },
     domains: ['styles', 'motion', 'components', 'states', 'products', 'policies'],
     tools: TOOL_NAMES,
+    errorCodes: ERROR_CODES,
+    resourceUriTemplates: [
+      'webstylebook://styles/{id}',
+      'webstylebook://motion/{id}',
+      'webstylebook://components/{id}',
+      'webstylebook://states/{surface}',
+      'webstylebook://states/{surface}/{state}',
+      'webstylebook://products/{id}',
+    ],
   }));
 
   fixed('styles', 'webstylebook://styles', 'Compact list of visual directions', () => repo.listStyles());

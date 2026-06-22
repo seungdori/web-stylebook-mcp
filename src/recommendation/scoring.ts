@@ -99,11 +99,22 @@ function computeFits(ctx: ResolvedContext, s: CatalogStyle, ont: Ontology): FitB
   };
 }
 
+// generic qualifier words that are NOT distinguishing — must not drive a match
+// (e.g. "required" is shared by reduced-motion-required AND high-contrast-required).
+const CONSTRAINT_STOPWORDS = new Set([
+  'required', 'first', 'only', 'mode', 'friendly', 'preferred', 'ready',
+  'support', 'level', 'compliant', 'compliance', 'default', 'please', 'need', 'needs', 'want', 'wants',
+]);
+function constraintSignature(s: string): string[] {
+  return s.split(/[^a-z0-9]+/).filter((w) => w.length >= 4 && !CONSTRAINT_STOPWORDS.has(w));
+}
 function mappingsForConstraint(constraintToken: string, ont: Ontology): ConstraintMapping[] {
-  const tokenWords = constraintToken.split(/[^a-z0-9]+/).filter((w) => w.length >= 4);
+  const tokenWords = new Set(constraintSignature(constraintToken));
   return ont.constraintMappings.filter((m) => {
-    const mWords = m.constraint.split('-').filter((w) => w.length >= 4);
-    return mWords.some((w) => tokenWords.includes(w)) || tokenWords.some((w) => m.constraint.includes(w));
+    const mWords = constraintSignature(m.constraint);
+    // require EVERY distinguishing word of the mapping to be present in the token —
+    // a single shared qualifier no longer cross-matches unrelated mappings.
+    return mWords.length > 0 && mWords.every((w) => tokenWords.has(w));
   });
 }
 

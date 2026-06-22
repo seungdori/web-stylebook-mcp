@@ -80,6 +80,8 @@ The fastest "AI smell" is filler content dressed as substance. Hold the line:
 
 When the user is torn between looks, pass 2–4 directions. It returns each one's favorable
 conditions and likely failure mode — there is deliberately no single winner; choose by product fit.
+Each direction may carry an optional `secondaryStyleId` to model a primary+secondary pairing; the
+comparison reflects the merged pairing in its axes (e.g. a louder secondary raises distinctiveness).
 
 ## Rules
 
