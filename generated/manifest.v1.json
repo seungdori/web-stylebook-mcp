@@ -1,0 +1,27 @@
+{
+  "catalogVersion": "0.1.0",
+  "contentHash": "sha256:b488ad6a09e013c68d89f2f180f20b4e6b52c58d6853814d8b89d67600b545c5",
+  "counts": {
+    "components": 20,
+    "fusions": 16,
+    "motionPatterns": 29,
+    "productArchetypes": 14,
+    "stateRecipes": 57,
+    "stateSurfaces": 5,
+    "styles": 32
+  },
+  "domains": [
+    "styles",
+    "motion",
+    "components",
+    "states",
+    "products",
+    "policies"
+  ],
+  "languages": [
+    "en",
+    "ko",
+    "ja"
+  ],
+  "schema": "webstylebook.catalog.v1"
+}

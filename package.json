@@ -1,0 +1,50 @@
+{
+  "name": "@web-stylebook/mcp",
+  "version": "0.1.0",
+  "description": "Design intelligence for coding agents — choose a product-fit visual direction, cover real UI states, and compose design tokens from the Web Stylebook catalog.",
+  "type": "module",
+  "license": "MIT",
+  "bin": {
+    "web-stylebook-mcp": "./dist/cli.js"
+  },
+  "main": "./dist/server.js",
+  "types": "./dist/server.d.ts",
+  "files": [
+    "dist",
+    "generated",
+    "skill",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/seungdori/web-stylebook-mcp.git"
+  },
+  "homepage": "https://github.com/seungdori/web-stylebook-mcp#readme",
+  "bugs": "https://github.com/seungdori/web-stylebook-mcp/issues",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "pretest": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "start": "node dist/cli.js",
+    "dev": "tsx src/cli.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": ["mcp", "model-context-protocol", "design", "ui", "design-system", "coding-agent"],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.29.0",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9"
+  }
+}
