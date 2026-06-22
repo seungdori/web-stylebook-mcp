@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.1] — 2026-06-23
+
 ### Fixed
 - Recommendation: a constraint like `reduced-motion-required` no longer cross-matches
   `high-contrast-required` (shared word "required"), which had wrongly hard-rejected 16 styles.
@@ -38,5 +40,6 @@ All notable changes to this project are documented here. The format follows
 - Output localization in English, Korean, and Japanese.
 - Fully offline at runtime: no API key, no model call, no network, no filesystem access.
 
-[Unreleased]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/seungdori/web-stylebook-mcp/releases/tag/v0.1.0

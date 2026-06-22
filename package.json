@@ -1,6 +1,6 @@
 {
   "name": "web-stylebook-mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Design intelligence for coding agents — choose a product-fit visual direction, cover real UI states, and compose design tokens from the Web Stylebook catalog.",
   "type": "module",
   "license": "MIT",
