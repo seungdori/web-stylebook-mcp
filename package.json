@@ -13,7 +13,8 @@
     "dist",
     "generated",
     "skill",
-    "README.md"
+    "README.md",
+    "README.ko.md"
   ],
   "engines": {
     "node": ">=20"
