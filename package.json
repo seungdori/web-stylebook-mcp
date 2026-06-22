@@ -1,5 +1,5 @@
 {
-  "name": "@web-stylebook/mcp",
+  "name": "web-stylebook-mcp",
   "version": "0.1.0",
   "description": "Design intelligence for coding agents — choose a product-fit visual direction, cover real UI states, and compose design tokens from the Web Stylebook catalog.",
   "type": "module",
@@ -24,9 +24,6 @@
   },
   "homepage": "https://github.com/seungdori/web-stylebook-mcp#readme",
   "bugs": "https://github.com/seungdori/web-stylebook-mcp/issues",
-  "publishConfig": {
-    "access": "public"
-  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",

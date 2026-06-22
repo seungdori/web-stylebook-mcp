@@ -1,4 +1,4 @@
-# @web-stylebook/mcp
+# web-stylebook-mcp
 
 **Design intelligence for coding agents.**
 
@@ -17,7 +17,7 @@ design tokens, and avoid generic AI‑looking interfaces — without writing the
   "mcpServers": {
     "web-stylebook": {
       "command": "npx",
-      "args": ["-y", "@web-stylebook/mcp@latest"]
+      "args": ["-y", "web-stylebook-mcp@latest"]
     }
   }
 }
@@ -93,4 +93,8 @@ deterministic function of the input — the same request always yields the same 
 
 ## License
 
-MIT.
+MIT — covers both the code and the bundled catalog snapshot. Use this package, including its
+catalog data, freely and commercially.
+
+> The [Web Stylebook](https://webstylebook.com) website is separately licensed CC BY-NC; this
+> package's MIT grant is provided by the same copyright holder for the catalog snapshot shipped here.
