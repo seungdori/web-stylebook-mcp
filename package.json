@@ -4,6 +4,7 @@
   "description": "Design intelligence for coding agents — choose a product-fit visual direction, cover real UI states, and compose design tokens from the Web Stylebook catalog.",
   "type": "module",
   "license": "MIT",
+  "author": { "name": "Web Stylebook", "url": "https://webstylebook.com" },
   "bin": {
     "web-stylebook-mcp": "./dist/cli.js"
   },
