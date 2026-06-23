@@ -22,18 +22,39 @@ to scaffold a page from memory, stop and run step 1 first.
    confidence. Treat `candidates` as evidence — *you* pick using product context; `candidates[0]`
    is the strongest match, not a mandate.
 2. **Read the chosen styles** — `webstylebook://styles/{id}` for each pick (primary + any pairing).
-3. **Write `design.md`** — a brief with: intent, audience/tasks, chosen direction + why, rejected
+3. **Get direction approval before component work** — for open-ended UI requests, compose and show
+   2-3 distinct candidate directions or page previews, each with a concise critique and a clear
+   recommendation. Then ask the user which feeling/direction is right. **Stop here** until the user
+   picks a direction or explicitly tells you to proceed. Do not build the final component system,
+   reusable components, or production page before this approval gate.
+4. **Confirm scope & resolve open details — before building.** Once a direction is approved, do
+   **not** start implementing. First surface the decisions that change *what* you build, as a short,
+   concrete checklist — ask, don't assume:
+   - **Scope & deliverable** — the full reusable component library, or a single page/screen? One
+     surface or several? A throwaway preview, or production code committed to the repo?
+   - **Stack & integration** — framework (React / Vue / Svelte / plain), styling (CSS variables /
+     Tailwind / CSS-in-JS), TypeScript, and any existing design system or components to reuse/extend.
+   - **Real content & data** — brand/product name, real copy or placeholder, actual data shape and
+     entities, must-have features, and explicitly what to leave out. (This is where you get the real
+     numbers or omit them — never invent metrics to fill space.)
+   - **Audience & environment** — primary devices/breakpoints, light/dark/both, locales, accessibility
+     level, any performance budget.
+   Turn the `design.md` assumptions into **confirmed facts** here. Build only after the user answers —
+   or explicitly says "use your judgment," in which case record the assumption and proceed. Keep it to
+   3–6 high-leverage questions; don't interrogate.
+5. **Write `design.md`** — a brief with: intent, audience/tasks, chosen direction + why, rejected
    directions, tone, color *roles* (not a raw palette), type roles, spacing/density, layout rules,
    surface hierarchy, component behavior, motion (use AND avoid), UI-state coverage, responsive,
-   accessibility, anti-patterns, assumptions, verification checklist. Never leave a section empty.
-4. **Plan each screen** — organize hierarchy by the primary user task. Do **not** default to
+   accessibility, anti-patterns, confirmed decisions (from step 4), verification checklist. Never
+   leave a section empty.
+6. **Plan each screen** — organize hierarchy by the primary user task. Do **not** default to
    Hero + Features + Testimonial + CTA. Look up component vocabulary in `webstylebook://components`.
-5. **`get_ui_state_plan`** — for each surface (data-table, form, checkout, chat, developer-console).
+7. **`get_ui_state_plan`** — for each surface (data-table, form, checkout, chat, developer-console).
    Implement the required + recommended states, honoring `mustNot` (e.g. no silent auto-retry, don't
    lose user input, don't imply a charge that didn't happen).
-6. **`compose_design_tokens`** — emit a starting token set (css-variables / tailwind / typescript).
+8. **`compose_design_tokens`** — emit a starting token set (css-variables / tailwind / typescript).
    Heed the contrast warnings; don't ship 8–12% ghost borders.
-7. **Implement, then self-audit** against `webstylebook://policies/verification` and
+9. **Implement, then self-audit** against `webstylebook://policies/verification` and
    `…/anti-patterns`.
 
 ## Active design — compose, don't recolor
@@ -47,7 +68,8 @@ vocabulary, not just its tokens.
 - **Offer a candidate set, not one screen.** For an open-ended design request, take the top
   context-fit candidates and **fully compose each as a distinct page** (different layouts, not the
   same layout recolored). Present them with an honest per-candidate critique + a recommendation, and
-  let the user choose. A single one-shot output is the weaker default.
+  let the user choose. This is an approval gate: after presenting candidates, ask whether the feeling
+  is right and wait. A single one-shot output is the weaker default.
 - **Apply active judgment over the score.** Drop a high-scored candidate when the context defeats it
   — e.g. low-contrast styles (neumorphism) for elderly / medical / high-trust — even if it ranks #1.
   The score is evidence; product context decides. The MCP's own guidance says so.
@@ -87,6 +109,9 @@ comparison reflects the merged pairing in its axes (e.g. a louder secondary rais
 
 - **Never present a token-swap recolor as a design direction** — compose each direction's own layout.
 - **Default to a multi-candidate set + an honest recommendation**, not one screen; the user picks.
+  Stop before final component/system implementation until the user approves a direction.
+- **After the direction is picked, confirm scope + open details before building** — don't silently
+  assume the deliverable, stack, real content/data, or what to leave out; ask a short checklist first.
 - **Component states are owned by the component.** Interaction states (hover/focus/active/disabled)
   live on the primitive's own classes — never let an ancestor/context selector (`nav a:hover`,
   `.card a`) bleed in and override them. Scope context rules with `:not(.btn)` etc. A primitive must

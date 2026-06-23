@@ -2,3 +2,7 @@ node_modules/
 dist/
 *.tgz
 .DS_Store
+
+# local agent/codex test artifacts (machine-specific)
+.agents/
+.codex/

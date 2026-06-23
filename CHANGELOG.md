@@ -6,6 +6,20 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+- Codex setup documentation for `codex mcp add`, `config.toml`, `.agents/skills`, and
+  `AGENTS.md` fallback instructions.
+- MCP server `instructions` so Codex and other clients receive the intended design workflow
+  during initialization.
+- An explicit direction-approval gate in the companion skill: open-ended UI work should present
+  2-3 candidate directions and wait for user approval before final component/system implementation.
+- A scope & detail-confirmation step after the direction is approved: confirm deliverable, stack,
+  real content/data, and target environment (don't silently assume) before building. Reflected in
+  SKILL.md, the CLAUDE.md/AGENTS.md fragments, and the on-init server instructions.
+
+### Fixed
+- Runtime and package-lock metadata now match the published package name and `0.1.1` version.
+
 ## [0.1.1] — 2026-06-23
 
 ### Fixed

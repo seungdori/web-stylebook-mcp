@@ -101,7 +101,32 @@ The agent describes the product; the server scores its curated catalog and retur
 
 ## Install
 
+Requires **Node ≥ 20**.
+
 <details open>
+<summary><b>Codex CLI · IDE extension</b></summary>
+
+Use the Codex CLI:
+
+```bash
+codex mcp add web-stylebook -- npx -y web-stylebook-mcp@latest
+```
+
+Or add it to `~/.codex/config.toml`. You can also use a project-scoped
+`.codex/config.toml` in a trusted repository:
+
+```toml
+[mcp_servers.web-stylebook]
+command = "npx"
+args = ["-y", "web-stylebook-mcp@latest"]
+```
+
+Restart Codex or open a new session after editing config. In the Codex TUI, run `/mcp`
+to confirm the server is active.
+
+</details>
+
+<details>
 <summary><b>Claude Code</b></summary>
 
 ```bash
@@ -148,8 +173,6 @@ Add the same block to your `claude_desktop_config.json`, then restart:
 ```
 
 </details>
-
-Requires **Node ≥ 20**.
 
 ## Tools
 
@@ -203,8 +226,17 @@ web-stylebook-mcp --validate-catalog
 
 A companion skill ships in [`skill/`](./skill) so your agent reaches for these tools at the right moment — and uses the results well (compose, don't recolor; offer multiple candidates; earn trust, don't fake it; land on reusable components):
 
+**Codex**
+
+- Copy or symlink `skill/web-stylebook-design/` into a Codex skill location such as
+  `.agents/skills/web-stylebook-design/` in your repo, or `~/.agents/skills/web-stylebook-design/`
+  for your user profile.
+- If you do not want to install the skill, copy `skill/AGENTS.md` into your project's `AGENTS.md`.
+
+**Claude Code and other agents**
+
 - Point your agent's skills directory at `skill/web-stylebook-design/`, **or**
-- Copy `skill/CLAUDE.md` into your project's `CLAUDE.md`.
+- Copy `skill/CLAUDE.md` into your project's `CLAUDE.md` or equivalent rules file.
 
 ## Privacy & security
 
@@ -222,7 +254,7 @@ The server reads from a catalog snapshot bundled in the package. Nothing is sent
 
 - **Node:** ≥ 20
 - **Transport:** stdio (Model Context Protocol)
-- **Clients:** Claude Code, Claude Desktop, Cursor, Windsurf, and any MCP-compatible client
+- **Clients:** Codex CLI / IDE extension, Claude Code, Claude Desktop, Cursor, Windsurf, and any MCP-compatible client
 
 ## License
 

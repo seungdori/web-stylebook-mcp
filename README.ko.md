@@ -101,7 +101,32 @@ flowchart LR
 
 ## 설치
 
+**Node 20 이상** 필요.
+
 <details open>
+<summary><b>Codex CLI · IDE 확장</b></summary>
+
+Codex CLI로 추가:
+
+```bash
+codex mcp add web-stylebook -- npx -y web-stylebook-mcp@latest
+```
+
+또는 `~/.codex/config.toml`에 추가하세요. 신뢰한 저장소에서는 프로젝트 범위
+`.codex/config.toml`도 사용할 수 있습니다:
+
+```toml
+[mcp_servers.web-stylebook]
+command = "npx"
+args = ["-y", "web-stylebook-mcp@latest"]
+```
+
+설정을 편집한 뒤 Codex를 재시작하거나 새 세션을 여세요. Codex TUI에서는 `/mcp`로
+서버 활성 상태를 확인할 수 있습니다.
+
+</details>
+
+<details>
 <summary><b>Claude Code</b></summary>
 
 ```bash
@@ -148,8 +173,6 @@ MCP 설정에 추가:
 ```
 
 </details>
-
-**Node 20 이상** 필요.
 
 ## 툴
 
@@ -203,8 +226,17 @@ web-stylebook-mcp --validate-catalog
 
 [`skill/`](./skill)에 동반 스킬이 함께 들어있어, 에이전트가 적절한 순간에 이 툴들을 꺼내 쓰고 결과를 제대로 활용하게 합니다(색만 바꾸지 말 것, 후보를 여러 개 제시할 것, 신뢰는 지어내지 말 것, 재사용 컴포넌트로 떨어뜨릴 것):
 
+**Codex**
+
+- `skill/web-stylebook-design/`를 저장소의 `.agents/skills/web-stylebook-design/` 또는
+  사용자 범위 `~/.agents/skills/web-stylebook-design/` 같은 Codex 스킬 위치로 복사하거나
+  심볼릭 링크하세요.
+- 스킬을 설치하지 않을 경우 `skill/AGENTS.md`를 프로젝트의 `AGENTS.md`에 복사하세요.
+
+**Claude Code 및 기타 에이전트**
+
 - 에이전트의 스킬 디렉터리를 `skill/web-stylebook-design/`로 지정하거나,
-- `skill/CLAUDE.md`를 프로젝트의 `CLAUDE.md`에 복사하세요.
+- `skill/CLAUDE.md`를 프로젝트의 `CLAUDE.md` 또는 해당 에이전트의 rules 파일에 복사하세요.
 
 ## 프라이버시 · 보안
 
@@ -222,7 +254,7 @@ web-stylebook-mcp --validate-catalog
 
 - **Node:** 20 이상
 - **전송:** stdio (Model Context Protocol)
-- **클라이언트:** Claude Code · Claude Desktop · Cursor · Windsurf, 그리고 모든 MCP 호환 클라이언트
+- **클라이언트:** Codex CLI / IDE 확장 · Claude Code · Claude Desktop · Cursor · Windsurf, 그리고 모든 MCP 호환 클라이언트
 
 ## 라이선스
 

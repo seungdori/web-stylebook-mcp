@@ -7,10 +7,13 @@ import { CatalogRepository } from './catalog/repository.js';
 import { registerResources } from './protocol/register-resources.js';
 import { registerTools } from './protocol/register-tools.js';
 import { registerPrompts } from './protocol/register-prompts.js';
-import { SERVER_NAME, SERVER_VERSION } from './server-info.js';
+import { SERVER_INSTRUCTIONS, SERVER_NAME, SERVER_VERSION } from './server-info.js';
 
 export function createWebStylebookServer(repo: CatalogRepository = CatalogRepository.load()): McpServer {
-  const server = new McpServer({ name: SERVER_NAME, version: SERVER_VERSION });
+  const server = new McpServer(
+    { name: SERVER_NAME, version: SERVER_VERSION },
+    { instructions: SERVER_INSTRUCTIONS },
+  );
   registerResources(server, repo);
   registerTools(server, repo);
   registerPrompts(server);

@@ -15,6 +15,13 @@ beforeAll(async () => {
 });
 
 describe('MCP contract', () => {
+  it('advertises server instructions and the packaged server version', () => {
+    expect(client.getServerVersion()).toEqual({ name: 'web-stylebook', version: '0.1.1' });
+    const instructions = client.getInstructions() ?? '';
+    expect(instructions).toContain('recommend_design_direction');
+    expect(instructions).toContain('read-only');
+  });
+
   it('exposes exactly the 4 compute tools, all read-only', async () => {
     const { tools } = await client.listTools();
     expect(tools.map((t) => t.name).sort()).toEqual([
