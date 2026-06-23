@@ -22,11 +22,17 @@ to scaffold a page from memory, stop and run step 1 first.
    confidence. Treat `candidates` as evidence — *you* pick using product context; `candidates[0]`
    is the strongest match, not a mandate.
 2. **Read the chosen styles** — `webstylebook://styles/{id}` for each pick (primary + any pairing).
-3. **Get direction approval before component work** — for open-ended UI requests, compose and show
-   2-3 distinct candidate directions or page previews, each with a concise critique and a clear
-   recommendation. Then ask the user which feeling/direction is right. **Stop here** until the user
-   picks a direction or explicitly tells you to proceed. Do not build the final component system,
-   reusable components, or production page before this approval gate.
+3. **Intake, then get direction approval — before component work.** First run a short intake so the
+   previews use the right material (ask, don't assume):
+   - **Assets** — do they have images/brand assets to use (and which)? If not, may you pull
+     **license-free** sample imagery (e.g. Unsplash, free for commercial use) for the example, or is
+     no imagery needed? *(A: provided — they say which · B: none — you source license-free samples ·
+     C: not needed)*
+   - **Emphasis** — anything they specifically want emphasized, or any must-have / non-negotiable?
+   Then, for open-ended UI requests, compose and show 2-3 distinct candidate directions or page
+   previews, each with a concise critique and a clear recommendation, and ask which feeling/direction
+   is right. **Stop here** until the user picks a direction or explicitly tells you to proceed. Do not
+   build the final component system, reusable components, or production page before this approval gate.
 4. **Confirm scope & resolve open details — before building.** Once a direction is approved, do
    **not** start implementing. First surface the decisions that change *what* you build, as a short,
    concrete checklist — ask, don't assume:

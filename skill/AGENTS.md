@@ -13,9 +13,12 @@ dashboard, form, checkout, chat, developer console), call the **`web-stylebook`*
 2. Read `webstylebook://styles/{id}` for your picks; write a `design.md` brief (intent, color
    *roles*, type roles, layout, motion use/avoid, UI-state coverage, a11y, anti-patterns,
    assumptions, verification) with no empty sections.
-3. For open-ended UI requests, show 2-3 distinct candidate directions or page previews with a
-   concise critique and recommendation, then ask the user whether the feeling is right. Stop before
-   final component/system implementation until the user approves a direction.
+3. Before composing previews, run a short intake: (a) assets - do they have images/brand assets
+   (which), should you source **license-free** samples (e.g. Unsplash, free for commercial use), or
+   is none needed; (b) anything to emphasize / any must-haves. Then, for open-ended UI requests, show
+   2-3 distinct candidate directions or page previews with a concise critique and recommendation, and
+   ask whether the feeling is right. Stop before final component/system implementation until the user
+   approves a direction.
 4. After a direction is approved, before building: confirm scope and the open details with a short
    checklist - full component library vs one page; framework + existing components/design system to
    reuse; real brand/copy/data and must-have features (and what to leave out); target devices,

@@ -16,6 +16,8 @@ All notable changes to this project are documented here. The format follows
 - A scope & detail-confirmation step after the direction is approved: confirm deliverable, stack,
   real content/data, and target environment (don't silently assume) before building. Reflected in
   SKILL.md, the CLAUDE.md/AGENTS.md fragments, and the on-init server instructions.
+- A short intake before composing candidate previews: ask whether the user has image/brand assets
+  (or should source license-free samples, e.g. Unsplash) and anything to emphasize.
 
 ### Fixed
 - Runtime and package-lock metadata now match the published package name and `0.1.1` version.
