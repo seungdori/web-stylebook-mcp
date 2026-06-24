@@ -30,7 +30,10 @@ dashboard, form, checkout, chat, developer console), call the **`web-stylebook`*
 7. Self-audit against `webstylebook://policies/verification`.
 
 **Compose, don't recolor.** Tokens are scalars, not a design. Swapping a token block over one
-layout is a reskin and is not acceptable. Give each direction its own composition. For open-ended
+layout is a reskin and is not acceptable. The chosen style is a starting tone, not a layout mold:
+start from what THIS brief/content needs, compose the fitting components, and adapt the style
+(override fonts/grid/structure where it calls for it) so the result reads as "built for this product,"
+not "a page in style X." Give each direction its own composition. For open-ended
 requests, fully compose **several candidate pages** (distinct layouts) and let the user pick; drop
 context-inappropriate styles even if high-scored (e.g. low-contrast for elderly/medical). Land on
 **reusable components** (tokens = shared foundation, component states = the `get_ui_state_plan`

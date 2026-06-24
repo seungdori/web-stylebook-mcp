@@ -18,6 +18,9 @@ All notable changes to this project are documented here. The format follows
   SKILL.md, the CLAUDE.md/AGENTS.md fragments, and the on-init server instructions.
 - A short intake before composing candidate previews: ask whether the user has image/brand assets
   (or should source license-free samples, e.g. Unsplash) and anything to emphasize.
+- Stronger active-composition guidance: the chosen style is a starting tone, not a layout mold —
+  compose the components the brief needs and adapt the style to fit, never a generic "page in style X."
+- `publish.yml` GitHub Actions workflow: build + test + publish to npm on a `v*` tag (with provenance).
 
 ### Fixed
 - Runtime and package-lock metadata now match the published package name and `0.1.1` version.

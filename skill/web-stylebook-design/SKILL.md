@@ -71,6 +71,13 @@ and is **not acceptable** as a design direction. A real direction has its **own 
 layout, hierarchy, density, component choice, motion — built from the style's facets + component
 vocabulary, not just its tokens.
 
+- **The chosen direction is a starting tone, not a mold.** Don't pour the content into the style's
+  "typical" layout — that produces a generic "page in style X." Start from what THIS brief and THIS
+  content actually need: decide the sections and components from the product, then apply the style as
+  *tone*, **adapting freely** — override its fonts, grid, density, and structure where the brief calls
+  for it (the token `notes` literally invite this, e.g. a "mono" style that ships serif defaults). The
+  result should read as "built for this product," not "applied a catalog style." When one style is too
+  rigid, pair a secondary (`compare_design_directions`) or treat the style as inspiration.
 - **Offer a candidate set, not one screen.** For an open-ended design request, take the top
   context-fit candidates and **fully compose each as a distinct page** (different layouts, not the
   same layout recolored). Present them with an honest per-candidate critique + a recommendation, and
@@ -114,6 +121,8 @@ comparison reflects the merged pairing in its axes (e.g. a louder secondary rais
 ## Rules
 
 - **Never present a token-swap recolor as a design direction** — compose each direction's own layout.
+- **Direction = starting tone, not a mold** — compose the components THIS brief needs and adapt the
+  style (fonts, grid, structure) to fit; never ship a generic "page in style X."
 - **Default to a multi-candidate set + an honest recommendation**, not one screen; the user picks.
   Stop before final component/system implementation until the user approves a direction.
 - **After the direction is picked, confirm scope + open details before building** — don't silently
