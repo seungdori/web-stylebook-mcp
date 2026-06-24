@@ -3,6 +3,7 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { readFileSync } from 'node:fs';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { createWebStylebookServer } from '../src/server.js';
@@ -11,9 +12,12 @@ import { recommendDesignDirection } from '../src/recommendation/index.js';
 import { composeDesignTokens } from '../src/tokens/compile.js';
 import { compareDirections } from '../src/recommendation/compare.js';
 import { contrastRatio } from '../src/tokens/contrast.js';
+import { SERVER_INSTRUCTIONS } from '../src/server-info.js';
 
 const repo = CatalogRepository.load();
-const cli = join(dirname(fileURLToPath(import.meta.url)), '..', 'dist', 'cli.js');
+const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+const cli = join(root, 'dist', 'cli.js');
+const read = (rel: string) => readFileSync(join(root, rel), 'utf8');
 
 function rejectedFor(constraint: string): Set<string> {
   const r = recommendDesignDirection({ productDescription: 'an app', constraints: [constraint] } as never, repo);
@@ -90,6 +94,67 @@ describe('audit L12 — all five workflow prompts render a non-empty user messag
       const text = (res.messages[0]?.content as { text?: string }).text ?? '';
       expect(text.length, name).toBeGreaterThan(40);
       expect(text, name).toMatch(/webstylebook:\/\/|recommend_design_direction|get_ui_state_plan|compare_design_directions|compose_design_tokens|anti-patterns/);
+    }
+  });
+});
+
+describe('anti-formulaic-opening guidance targets generic furniture (not column count) across all three layers', () => {
+  it('the bundled catalog carries the formulaic-opening anti-pattern + the furniture verification check', () => {
+    const catalog = read('generated/catalog.v1.json');
+    expect(catalog).toContain('formulaic-opening');
+    expect(catalog).toContain('generic furniture');
+    expect(catalog).toContain('bespoke product demonstration');
+  });
+  it('the on-init server instructions target generic furniture + require structurally-distinct candidates', () => {
+    expect(SERVER_INSTRUCTIONS).toMatch(/generic furniture/i);
+    expect(SERVER_INSTRUCTIONS).toMatch(/bespoke demonstration/i);
+    expect(SERVER_INSTRUCTIONS).toMatch(/differ in opening STRUCTURE/i);
+  });
+  it('SKILL.md encodes the forcing function + the furniture-check (not a buried prohibition, not a blunt two-column ban)', () => {
+    const skill = read('skill/web-stylebook-design/SKILL.md');
+    expect(skill).toContain('the one thing, not a hero');
+    expect(skill).toContain('generic furniture');
+    expect(skill).toContain('bespoke demonstration of THIS product');
+    expect(skill).toMatch(/three structurally-different openings/i);
+    expect(skill).toMatch(/no running-text column/i);
+  });
+  it('the CLAUDE.md and AGENTS.md fragments mirror the furniture-check (seam does not launder a generic visual)', () => {
+    for (const rel of ['skill/CLAUDE.md', 'skill/AGENTS.md']) {
+      const frag = read(rel);
+      expect(frag, rel).toContain('No formulaic opening');
+      expect(frag, rel).toContain('generic furniture');
+      expect(frag, rel).toMatch(/furniture-check/i);
+      expect(frag, rel).toMatch(/seam.*does NOT launder|does NOT launder a generic visual/i);
+    }
+  });
+});
+
+describe('anti-AI-headline-cadence guidance is present and example-free', () => {
+  it('the bundled catalog carries the ai-headline-cadence anti-pattern (described abstractly)', () => {
+    const catalog = read('generated/catalog.v1.json');
+    expect(catalog).toContain('ai-headline-cadence');
+    expect(catalog).toContain('italicized in the accent color');
+  });
+  it('the on-init server instructions name the AI headline cadence + the paste-test', () => {
+    expect(SERVER_INSTRUCTIONS).toMatch(/AI headline cadence/i);
+    expect(SERVER_INSTRUCTIONS).toMatch(/paste-test/i);
+  });
+  it('SKILL.md and both fragments encode the "kill the AI headline cadence" rule', () => {
+    expect(read('skill/web-stylebook-design/SKILL.md')).toMatch(/Kill the AI headline cadence/i);
+    for (const rel of ['skill/CLAUDE.md', 'skill/AGENTS.md']) {
+      expect(read(rel), rel).toMatch(/Kill the AI headline cadence/i);
+    }
+  });
+  it('the guidance describes the cliché abstractly — no baked example headline phrases', () => {
+    const corpus = [
+      'skill/web-stylebook-design/SKILL.md',
+      'skill/CLAUDE.md',
+      'skill/AGENTS.md',
+      'src/server-info.ts',
+      'generated/catalog.v1.json',
+    ].map(read).join('\n');
+    for (const phrase of ['깊이 들어가는 시간', '단 하나의 상', 'Find the throughline']) {
+      expect(corpus, `example phrase leaked into guidance: ${phrase}`).not.toContain(phrase);
     }
   });
 });

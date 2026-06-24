@@ -7,6 +7,28 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Added
+- **Anti-formulaic-opening guidance with teeth.** A new "The opening — the one thing, not a hero"
+  section in the skill replaces the buried "don't default to the formulaic hero" one-liner with a
+  forcing function (derive the centerpiece from the product; enumerate three structurally-different
+  openings, ≥1 with no running-text column) and a **furniture-check**: the disease is not two columns
+  — strong products put copy beside a visual — it is *generic furniture*. A two-column opening passes
+  only when the visual is a **bespoke demonstration of the product's core mechanic** (nonsensical if
+  pasted onto another product); a stock photo / abstract blob / generic card fails, and a decorative
+  seam bridging the columns does not launder a generic visual. The all-text centered-stack and
+  giant-word defaults are out too, and opening prose is capped at a headline + one short line + one
+  action. Wired into workflow steps 3 (candidates must differ in opening structure), 6 (per-screen),
+  and 9 (self-audit), and mirrored in the on-init server instructions and the CLAUDE.md / AGENTS.md
+  fragments.
+- New catalog policy: a `formulaic-opening` anti-pattern and a layout verification check (the
+  opening's visual is a bespoke product demonstration, not generic furniture, and the copy column is
+  not the full quartet), so the self-audit enforces it regardless of whether the skill is installed.
+- **"Kill the AI headline cadence" rule.** Names the other recurring tell — the evocative, abstract
+  noun-phrase fragment headline with one word italicized in the accent color, repeated on every
+  product. The headline must be specific to the product (paste-test: it couldn't sit on a competitor
+  by swapping a noun) and vary its form + emphasis each time; no house voice. Added to the skill's
+  opening section, the Rules, the on-init instructions, the CLAUDE.md / AGENTS.md fragments, and as an
+  `ai-headline-cadence` catalog anti-pattern + a style-fidelity verification check. The guidance is
+  described abstractly — no generated example phrases are baked in (a regression test guards this).
 - Codex setup documentation for `codex mcp add`, `config.toml`, `.agents/skills`, and
   `AGENTS.md` fallback instructions.
 - MCP server `instructions` so Codex and other clients receive the intended design workflow

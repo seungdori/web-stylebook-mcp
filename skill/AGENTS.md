@@ -42,7 +42,29 @@ contracts), not a one-off HTML file.
 **Earn trust, don't fake it.** No invented metrics ("99.2% on-time") and no compliance/IT-jargon
 trust signals (TLS, AES-256, ISO 27001). Choose signals by what the real user weighs (for a patient:
 doctors, departments, hours, location, insurance, emergency care). Back every claim with browsable
-content (don't say "214 doctors" then show three). Never default to the formulaic hero.
+content (don't say "214 doctors" then show three).
+
+**No formulaic opening.** The disease was never *two columns* — strong products (Linear, Stripe) put
+copy beside a visual. The disease is **generic furniture**: a copy stack
+(eyebrow+headline+sub+buttons+stats) next to a *decorative* panel — a stock photo, an abstract blob,
+generic app chrome, or a card you could paste onto another product by swapping the logo. Method: (1)
+derive the opening from the product's single most important object/action/feeling; (2) enumerate three
+structurally-different openings (each: organizing device + what owns >50% of the frame + first-read
+element), at least one with no running-text column; (3) furniture-check — the visual passes ONLY if
+it's a bespoke demonstration of THIS product's core mechanic (its actual input→output with realistic
+domain content, nonsensical if pasted onto another product); a stock photo / abstract shape / generic
+card FAILS, and a decorative seam bridging the columns does NOT launder a generic visual. Also avoid
+the all-text centered-stack and giant-word defaults. Cap opening prose at a headline + one short line
++ one action. The 2-3 candidate directions must differ in opening structure, not just color/tone.
+Apply the same furniture-check to every screen so the default can't migrate below the fold.
+
+**Kill the AI headline cadence.** Don't default to the evocative, abstract noun-phrase fragment with
+one word italicized in the accent color — the same cadence + same emphasis move on every product is
+the tell. The headline must be specific to THIS product (paste-test: it couldn't sit on a competitor
+by swapping a noun), and its form + emphasis must vary per project (sentence vs fragment, plain vs
+blunt, emphasis or none) — don't reflexively italic one accent word. No house voice; write what this
+product actually is.
+
 **Component states (hover/focus/active/disabled) are owned by the component** - never let context
 selectors (`nav a:hover`) bleed in and override a primitive's own states.
 

@@ -83,6 +83,16 @@ Then turn the chosen direction into real tokens:
 
 One request in — and the agent chose a direction, saw what was rejected and why, and got tokens that pass WCAG, without generating a line of code.
 
+## What an agent builds with it
+
+A different brief — *"a marketing landing page for **Throughline**, a B2B SaaS that turns scattered customer feedback (support tickets, sales calls, app reviews, Slack) into one prioritized roadmap."* No layout, no hero, no styling was specified. Following the companion skill, the agent composed the opening **from the product's core idea** instead of reaching for a stock hero: the right half is a bespoke diagram of the product's actual mechanic — feedback sources converging into an auto-ranked roadmap — not a decorative card you could paste onto any other site.
+
+<div align="center">
+<img src="https://raw.githubusercontent.com/seungdori/web-stylebook-mcp/master/docs/example-throughline-hero.png" alt="A landing-page hero an AI agent composed using web-stylebook-mcp — a bespoke feedback-to-roadmap visualization rather than a generic hero" width="840">
+</div>
+
+<div align="center"><sub>Composed by an AI agent following the companion skill — the prompt described the product and stack, nothing about the layout.</sub></div>
+
 ## How it works
 
 ```mermaid
