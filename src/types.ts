@@ -60,6 +60,50 @@ export const TASK_TAGS = [
 ] as const;
 export type TaskTag = (typeof TASK_TAGS)[number];
 
+export const UX_PRINCIPLE_CATEGORIES = [
+  'perception', 'cognition', 'decision', 'interaction', 'motivation', 'memory',
+] as const;
+export type UxPrincipleCategory = (typeof UX_PRINCIPLE_CATEGORIES)[number];
+
+export const UX_OUTCOMES = [
+  'attention', 'comprehension', 'decision', 'action', 'feedback', 'progress', 'memory', 'trust',
+] as const;
+export type UxOutcome = (typeof UX_OUTCOMES)[number];
+
+export const UX_SURFACES = [
+  'global', 'landing-page', 'navigation', 'search', 'form', 'data-table', 'checkout',
+  'onboarding', 'content', 'chat', 'developer-console', 'settings',
+] as const;
+export type UxSurface = (typeof UX_SURFACES)[number];
+
+export const UX_PHASES = [
+  'discover', 'structure', 'interaction', 'content', 'validation',
+] as const;
+export type UxPhase = (typeof UX_PHASES)[number];
+
+export const UX_EVIDENCE_KINDS = [
+  'empirical', 'gestalt', 'heuristic', 'systems-maxim',
+] as const;
+export type UxEvidenceKind = (typeof UX_EVIDENCE_KINDS)[number];
+
+export const UX_EVIDENCE_CONFIDENCE = [
+  'strong', 'contextual', 'contested',
+] as const;
+export type UxEvidenceConfidence = (typeof UX_EVIDENCE_CONFIDENCE)[number];
+
+export const DESIGN_PRINCIPLE_CATEGORIES = [
+  'intent-iteration', 'hierarchy-semantics', 'adaptation-density',
+  'typography-localization', 'tokens-color-themes',
+  'interaction-accessibility', 'states-feedback-recovery',
+] as const;
+export type DesignPrincipleCategory = (typeof DESIGN_PRINCIPLE_CATEGORIES)[number];
+
+export const DESIGN_CONCERNS = [
+  'focus', 'scanability', 'readability', 'grouping', 'balance',
+  'consistency', 'responsiveness', 'accessibility', 'restraint', 'resilience',
+] as const;
+export type DesignConcern = (typeof DESIGN_CONCERNS)[number];
+
 export interface OntologyTerm {
   value: string;
   label: LocalizedText;
@@ -199,6 +243,76 @@ export interface ComponentTerm {
   example?: string;
 }
 
+export interface UxPrincipleCategoryDef {
+  id: UxPrincipleCategory;
+  label: LocalizedText;
+  description: LocalizedText;
+}
+
+export interface UxPrinciple {
+  id: string;
+  name: LocalizedText;
+  aliases: string[];
+  category: UxPrincipleCategory;
+  summary: LocalizedText;
+  designQuestion: LocalizedText;
+  apply: LocalizedText[];
+  verify: LocalizedText[];
+  caution: LocalizedText;
+  outcomeTags: UxOutcome[];
+  surfaceTags: UxSurface[];
+  phaseTags: UxPhase[];
+  evidence: {
+    kind: UxEvidenceKind;
+    confidence: UxEvidenceConfidence;
+    references: Array<{
+      title: string;
+      url: string;
+    }>;
+  };
+  relatedPrincipleIds: string[];
+  referenceUrl: string;
+}
+
+export interface UxPrincipleAttribution {
+  sourceName: string;
+  creator: string;
+  sourceUrl: string;
+  sourceLicense: {
+    name: string;
+    url: string;
+  };
+  authoredContentLicense: {
+    name: string;
+    url: string;
+  };
+  notice: LocalizedText;
+}
+
+export interface DesignPrincipleCategoryDef {
+  id: DesignPrincipleCategory;
+  label: LocalizedText;
+  description: LocalizedText;
+}
+
+export interface DesignPrinciple {
+  id: string;
+  name: LocalizedText;
+  aliases: string[];
+  category: DesignPrincipleCategory;
+  summary: LocalizedText;
+  designQuestion: LocalizedText;
+  placement: LocalizedText[];
+  apply: LocalizedText[];
+  verify: LocalizedText[];
+  caution: LocalizedText;
+  concernTags: DesignConcern[];
+  surfaceTags: UxSurface[];
+  phaseTags: UxPhase[];
+  relatedDesignPrincipleIds: string[];
+  relatedUxPrincipleIds: string[];
+}
+
 export interface ProductArchetype {
   id: string;
   name: LocalizedText;
@@ -283,6 +397,14 @@ export interface CatalogOntologyEnums {
   trustLevels: string[];
   stateCategories: string[];
   taskTags: string[];
+  uxPrincipleCategories: string[];
+  uxOutcomes: string[];
+  uxSurfaces: string[];
+  uxPhases: string[];
+  uxEvidenceKinds: string[];
+  uxEvidenceConfidence: string[];
+  designPrincipleCategories: string[];
+  designConcerns: string[];
 }
 
 export interface WebStylebookCatalogV1 {
@@ -295,6 +417,11 @@ export interface WebStylebookCatalogV1 {
   motionPatterns: MotionPattern[];
   componentCategories: ComponentCategoryDef[];
   components: ComponentTerm[];
+  uxPrincipleCategories: UxPrincipleCategoryDef[];
+  uxPrinciples: UxPrinciple[];
+  uxPrincipleAttribution: UxPrincipleAttribution;
+  designPrincipleCategories: DesignPrincipleCategoryDef[];
+  designPrinciples: DesignPrinciple[];
   productArchetypes: ProductArchetype[];
   stateSurfaces: StateSurface[];
   stateRecipes: StateRecipe[];

@@ -8,7 +8,7 @@ import { dirname, join } from 'node:path';
 import type {
   CatalogEnvelope, WebStylebookCatalogV1, CatalogStyle, MotionPattern, ComponentTerm,
   ProductArchetype, StateSurface, StateRecipe, StyleFamily, Ontology, NotIdealMap,
-  Policies, Lang,
+  Policies, Lang, UxPrinciple, UxPrincipleAttribution, DesignPrinciple,
 } from '../types.js';
 import { text } from '../localization.js';
 
@@ -21,6 +21,14 @@ export interface MotionSummary {
 }
 export interface ComponentSummary {
   id: string; category: string; name: string; resourceUri: string;
+}
+export interface PrincipleSummary {
+  id: string; category: string; name: string; summary: string;
+  outcomeTags: string[]; surfaceTags: string[]; confidence: string; resourceUri: string;
+}
+export interface DesignPrincipleSummary {
+  id: string; category: string; name: string; summary: string;
+  concernTags: string[]; surfaceTags: string[]; resourceUri: string;
 }
 export interface SurfaceSummary {
   id: string; name: string; requiredStateIds: string[]; recommendedStateIds: string[]; resourceUri: string;
@@ -43,6 +51,8 @@ export class CatalogRepository {
   private readonly styleById = new Map<string, CatalogStyle>();
   private readonly motionById = new Map<string, MotionPattern>();
   private readonly componentById = new Map<string, ComponentTerm>();
+  private readonly principleById = new Map<string, UxPrinciple>();
+  private readonly designPrincipleById = new Map<string, DesignPrinciple>();
   private readonly productById = new Map<string, ProductArchetype>();
   private readonly surfaceById = new Map<string, StateSurface>();
   private readonly recipeById = new Map<string, StateRecipe>();
@@ -58,6 +68,8 @@ export class CatalogRepository {
     for (const s of this.data.styles) this.styleById.set(s.id, s);
     for (const m of this.data.motionPatterns) this.motionById.set(m.id, m);
     for (const c of this.data.components) this.componentById.set(c.id, c);
+    for (const p of this.data.uxPrinciples) this.principleById.set(p.id, p);
+    for (const p of this.data.designPrinciples) this.designPrincipleById.set(p.id, p);
     for (const p of this.data.productArchetypes) this.productById.set(p.id, p);
     for (const f of this.data.styleFamilies) this.familyById.set(f.id, f);
     for (const surf of this.data.stateSurfaces) {
@@ -87,15 +99,19 @@ export class CatalogRepository {
   get ontology(): Ontology { return this.data.ontology; }
   get notIdealMap(): NotIdealMap { return this.data.notIdealMap; }
   get policies(): Policies { return this.data.policies; }
+  get uxPrincipleAttribution(): UxPrincipleAttribution { return this.data.uxPrincipleAttribution; }
   get styleFamilies(): StyleFamily[] { return this.data.styleFamilies; }
   get catalogVersion(): string { return this.envelope.catalogVersion; }
   get contentHash(): string { return this.envelope.contentHash; }
 
   allStyles(): CatalogStyle[] { return this.data.styles; }
+  allDesignPrinciples(): DesignPrinciple[] { return this.data.designPrinciples; }
   getStyle(id: string): CatalogStyle | undefined { return this.styleById.get(id); }
   getFamily(id: string): StyleFamily | undefined { return this.familyById.get(id); }
   getMotion(id: string): MotionPattern | undefined { return this.motionById.get(id); }
   getComponent(id: string): ComponentTerm | undefined { return this.componentById.get(id); }
+  getPrinciple(id: string): UxPrinciple | undefined { return this.principleById.get(id); }
+  getDesignPrinciple(id: string): DesignPrinciple | undefined { return this.designPrincipleById.get(id); }
   getProduct(id: string): ProductArchetype | undefined { return this.productById.get(id); }
   getSurface(id: string): StateSurface | undefined { return this.surfaceById.get(id); }
   getRecipe(id: string): StateRecipe | undefined { return this.recipeById.get(id); }
@@ -118,6 +134,29 @@ export class CatalogRepository {
     return this.data.components.map((c) => ({
       id: c.id, category: c.category, name: text(c.name, locale),
       resourceUri: `webstylebook://components/${c.id}`,
+    }));
+  }
+  listPrinciples(locale: Lang = 'en'): PrincipleSummary[] {
+    return this.data.uxPrinciples.map((p) => ({
+      id: p.id,
+      category: p.category,
+      name: text(p.name, locale),
+      summary: text(p.summary, locale),
+      outcomeTags: p.outcomeTags,
+      surfaceTags: p.surfaceTags,
+      confidence: p.evidence.confidence,
+      resourceUri: `webstylebook://principles/${p.id}`,
+    }));
+  }
+  listDesignPrinciples(locale: Lang = 'en'): DesignPrincipleSummary[] {
+    return this.data.designPrinciples.map((p) => ({
+      id: p.id,
+      category: p.category,
+      name: text(p.name, locale),
+      summary: text(p.summary, locale),
+      concernTags: p.concernTags,
+      surfaceTags: p.surfaceTags,
+      resourceUri: `webstylebook://design-principles/${p.id}`,
     }));
   }
   listSurfaces(locale: Lang = 'en'): SurfaceSummary[] {

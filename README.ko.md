@@ -3,7 +3,7 @@
 # web-stylebook-mcp
 
 **AI 코딩 에이전트를 위한 디자인 인텔리전스.** 매번 똑같은 히어로 + 카드 3개는 그만.
-에이전트가 점수화된 디자인 *계약*(방향·UI 상태 계획·토큰)을 받아, 근거를 바탕으로 코드를 씁니다.
+에이전트가 점수화된 디자인 *계약*(방향·시각 디자인 계획·UX 원칙 계획·UI 상태 계획·토큰)을 받아, 근거를 바탕으로 코드를 씁니다.
 
 [![npm version](https://img.shields.io/npm/v/web-stylebook-mcp?logo=npm&color=cb3837)](https://www.npmjs.com/package/web-stylebook-mcp)
 [![downloads](https://img.shields.io/npm/dm/web-stylebook-mcp?color=cb3837)](https://www.npmjs.com/package/web-stylebook-mcp)
@@ -17,9 +17,9 @@
 
 ---
 
-코딩 에이전트는 *무엇이 어떻게 생겨야 하는지*를 정하지 못해서 매번 똑같은 UI로 도망칩니다 — 히어로 + 카드 3개 + 그라데이션. `web-stylebook-mcp`는 에이전트에게 **디자인 계약**(점수화된 시각 방향, UI 상태 계획, 디자인 토큰)을 건네는 Model Context Protocol 서버이고, [webstylebook.com](https://webstylebook.com)과 동일한 큐레이션 카탈로그에서 가져옵니다. **코드가 아니라 근거**를 돌려줍니다. 코드는 여전히 에이전트가 쓰지만, 이제 무엇을 만들지 알고 씁니다.
+코딩 에이전트는 *무엇이 어떻게 생겨야 하는지*를 정하지 못해서 매번 똑같은 UI로 도망칩니다 — 히어로 + 카드 3개 + 그라데이션. `web-stylebook-mcp`는 에이전트에게 **디자인 계약**(점수화된 시각 방향, 배치 중심 시각 디자인 계획, 근거 수준이 표시된 UX 원칙 계획, UI 상태 계획, 디자인 토큰)을 건네는 Model Context Protocol 서버이고, [webstylebook.com](https://webstylebook.com)과 동일한 큐레이션 카탈로그에서 가져옵니다. **코드가 아니라 근거**를 돌려줍니다. 코드는 여전히 에이전트가 쓰지만, 이제 무엇을 만들고 무엇을 검증할지 알고 씁니다.
 
-API 키 없음. 모델 호출 없음. 네트워크 없음. 파일시스템 접근 없음. **결정적이고, 읽기 전용이며, 완전히 로컬.**
+API 키 없음. 모델 호출 없음. 네트워크 없음. 프로젝트 파일시스템 접근 없음. **결정적이고, 읽기 전용이며, 완전히 로컬.**
 
 ## 없을 때 / 있을 때
 
@@ -42,7 +42,8 @@ API 키 없음. 모델 호출 없음. 네트워크 없음. 파일시스템 접�
   "tone": ["calm", "technical"],
   "density": "high",
   "usageFrequency": "daily",
-  "avoid": ["cyberpunk"]
+  "avoid": ["cyberpunk"],
+  "locale": "ko"
 }
 ```
 
@@ -51,21 +52,30 @@ API 키 없음. 모델 호출 없음. 네트워크 없음. 파일시스템 접�
 {
   "confidence": "high",
   "candidates": [                      // 모두 0.91 동점 — 순서는 의미 없음
-    { "style": "notion-style",   "score": 0.91 },
-    { "style": "platform-core",  "score": 0.91 },
-    { "style": "quiet-utility",  "score": 0.91 },
-    { "style": "runtime-signal", "score": 0.91 }
+    { "styleId": "notion-style",   "score": 0.91 },
+    { "styleId": "platform-core",  "score": 0.91 },
+    { "styleId": "quiet-utility",  "score": 0.91 },
+    { "styleId": "runtime-signal", "score": 0.91 },
+    { "styleId": "console-launch", "score": 0.91 }
   ],
   "rejected": [
-    { "style": "cyberpunk-glitch", "reasons": ["EXPLICITLY_AVOIDED", "DAILY_USE_OVERSTIMULATION"] },
-    { "style": "aurora-gradient",  "reasons": ["PRODUCT_NOT_IDEAL", "DAILY_USE_OVERSTIMULATION"] }
+    { "styleId": "aurora-gradient",  "reasonCodes": ["PRODUCT_NOT_IDEAL", "DAILY_USE_OVERSTIMULATION"] },
+    { "styleId": "claymorphism",     "reasonCodes": ["PRODUCT_NOT_IDEAL"] },
+    { "styleId": "cyberpunk-glitch", "reasonCodes": ["EXPLICITLY_AVOIDED", "DAILY_USE_OVERSTIMULATION"] }
   ],
-  "pairing": "macos-liquid-glass + notion-style (조용한 폼 / 내비)",
-  "guidance": "Treat candidates as scored evidence; pick by product context. 4 are tied — ordering isn't meaningful; use differentiators."
+  "pairings": [
+    {
+      "styleId": "macos-liquid-glass",
+      "pairWith": "notion-style",
+      "role": ["forms", "navigation", "repetitive surfaces"],
+      "rationale": "operational-saas용으로 짝지은 보조 스타일 — notion-style의 차분하고 반복적인 화면을 보완한다."
+    }
+  ],
+  "guidance": "후보는 점수화된 근거다 — 제품 맥락으로 직접 고르라. candidates[0]은 가장 강한 후보일 뿐 강제가 아니다. 상위 5개 후보가 동점이다 — 그 사이 순서는 의미가 없으니 각 후보의 differentiators와 제품 맥락으로 고르라."
 }
 ```
 
-여기서 *하지 않는* 것에 주목하세요 — 정답 하나를 내세우지 않습니다. 네 방향이 0.91로 동점이고, 탈락에는 사유 코드가 붙고, 가이던스는 최종 선택을 모델에게 넘깁니다. 그 정직함이 핵심입니다. 서버는 근거를 주고, 결정은 에이전트가 합니다.
+여기서 *하지 않는* 것에 주목하세요 — 정답 하나를 내세우지 않습니다. 다섯 방향이 0.91로 동점이고, 탈락한 스타일에는 사유 코드가 붙으며, 페어링은 강제가 아니라 제안입니다. 그 정직함이 핵심입니다. 서버는 근거를 주고, 결정은 에이전트가 합니다.
 
 그다음 고른 방향을 실제 토큰으로:
 
@@ -190,10 +200,12 @@ MCP 설정에 추가:
 |------|--------------|-----------------|
 | **`recommend_design_direction`** | 사유 코드가 붙은 점수화 스타일 후보, *이유*가 붙은 **탈락** 스타일, 보조 페어링, 신뢰도 | 최종 선택은 모델이 — 이건 근거 제공자입니다 |
 | **`compare_design_directions`** | 2~4개 방향을 제품 적합성·반복 사용·밀도·신뢰·차별성·접근성 리스크·모션·유지보수로 비교 | 정답 하나를 선언하지 않습니다 |
+| **`get_design_principle_plan`** | 시각적 관심사·화면·설계 단계·원칙 ID로 고른 배치/적용/검증 계획 | 제작 원칙은 경험 법칙이나 고정 레시피가 아니라 검증 가능한 점검 질문입니다 |
+| **`get_ux_principle_plan`** | 결과 목표·화면·설계 단계·원칙 ID로 고른 적용/검증 계획 — 질문·주의점·근거 신뢰도·참고 링크 포함 | 원칙은 보편 법칙이나 사용자 조사의 대체물이 아니라 맥락별 점검 질문입니다 |
 | **`get_ui_state_plan`** | 표면(데이터 테이블·폼·체크아웃·채팅·개발자 콘솔)의 필수/권장/도메인 UI 상태 — 트리거·표시 필수·금지·접근성·모션 | 에이전트가 잊는 상태까지: 빈·에러·로딩·엣지 |
 | **`compose_design_tokens`** | 역할 기반 토큰(색·타이포·간격·radius·모션·밀도)을 `json` / `css-variables` / `tailwind` / `typescript`, light / dark / both | WCAG 대비 경고를 숨기지 않고 내보냅니다 |
 
-**카탈로그:** 스타일 48 · 컴포넌트 20 · 표면 5 · UI 상태 레시피 57 · 모션 프로파일 29 · 제품 아키타입 14.
+**카탈로그:** 스타일 48 · 시각 디자인 원칙 21 · UX 원칙 23 · 컴포넌트 20 · 표면 5 · UI 상태 레시피 57 · 모션 프로파일 29 · 제품 아키타입 14.
 
 ## 다국어 출력
 
@@ -212,6 +224,8 @@ webstylebook://manifest
 webstylebook://styles · /styles/{id}
 webstylebook://motion · /motion/{id}
 webstylebook://components · /components/{id}
+webstylebook://principles · /principles/{id}
+webstylebook://design-principles · /design-principles/{id}
 webstylebook://states/surfaces · /states/{surface} · /states/{surface}/{state}
 webstylebook://products · /products/{id}
 webstylebook://policies/anti-patterns · /policies/verification
@@ -221,7 +235,7 @@ webstylebook://policies/anti-patterns · /policies/verification
 
 자주 쓰는 워크플로우용 MCP 프롬프트:
 
-`design-product` · `design-screen` · `complete-ui-states` · `redesign-with-style` · `audit-design-direction`
+`design-product` · `design-screen` · `complete-ui-states` · `redesign-with-style` · `audit-design-direction` · `audit-design-principles` · `audit-ux-principles`
 
 ## CLI
 
@@ -255,10 +269,24 @@ web-stylebook-mcp --validate-catalog
 | API 키 | 없음 |
 | 모델 호출 | 없음 |
 | 네트워크 접근 | 없음 — 완전 오프라인 동작 |
-| 프로젝트 / 파일시스템 접근 | 없음 |
+| 프로젝트 파일시스템 접근 | 없음 — 서버는 번들된 카탈로그 스냅샷만 읽음 |
 | 동작 | 결정적, 읽기 전용 |
 
 서버는 패키지에 번들된 카탈로그 스냅샷만 읽습니다. 어디로도 전송하지 않으며, 같은 입력은 항상 같은 계약을 냅니다.
+
+## 카탈로그 원본 동기화
+
+카탈로그 원본은
+[`web-stylebook`](https://github.com/seungdori/web-stylebook) 저장소에서 작성합니다. 그 저장소에서
+로컬 MCP 전달용 스냅샷을 생성한 뒤, 이 패키지를 릴리스하기 전에 바이트 단위 일치를 확인하세요.
+
+```bash
+npm run catalog:check-canonical -- /absolute/path/to/web-stylebook/packages/mcp/generated
+```
+
+인자를 생략하면 `WEB_STYLEBOOK_CANONICAL_CATALOG_DIR` 또는 로컬 형제 경로
+`../showcase/packages/mcp/generated`를 사용합니다. 일반 테스트는 번들 아티팩트 내부의 해시,
+enum, 개수, 런타임 계약을 검증하고, 이 명령은 두 저장소 사이의 원본 일치를 명시적으로 검증합니다.
 
 ## 호환성
 
@@ -271,3 +299,11 @@ web-stylebook-mcp --validate-catalog
 [MIT](./LICENSE) — 코드 **및** 번들된 카탈로그 스냅샷에 적용 (상업적 사용 자유).
 
 > [webstylebook.com](https://webstylebook.com) 웹사이트는 CC BY-NC로 배포됩니다. 동일한 저작권자가 이 패키지에 번들된 카탈로그 스냅샷에 대해 MIT를 부여합니다.
+>
+> UX 원칙 항목은 독자적으로 작성한 적용·검증 가이드입니다. [Laws of UX](https://lawsofux.com)
+> (CC BY-NC-ND 4.0)와 보조 근거를 출처로 표시하고 링크하지만, Laws of UX의 문구·삽화·페이지
+> 레이아웃은 번들하지 않습니다.
+>
+> 시각 디자인 원칙은 현대 인터페이스를 위한 과업 중심 검토 체계로 독자 작성했습니다.
+> 의미 구조·반응형 재배치·현지화·토큰과 테마·다중 입력 방식·전체 상태 모델·복구·동작 선호를
+> 함께 다룹니다.

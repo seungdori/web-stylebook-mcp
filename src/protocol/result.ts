@@ -7,15 +7,23 @@ import type { ToolError, ToolErrorPayload } from './errors.js';
 
 export type ToolResult = CallToolResult;
 
-export function ok(structured: Record<string, unknown>, text: string, resourceUris: string[] = []): CallToolResult {
-  const content: CallToolResult['content'] = [{ type: 'text', text: appendUris(text, resourceUris) }];
+export function ok(
+  structured: Record<string, unknown>,
+  text: string,
+  resourceUris: string[] = [],
+  resourcesLabel = 'Resources',
+): CallToolResult {
+  const content: CallToolResult['content'] = [{
+    type: 'text',
+    text: appendUris(text, resourceUris, resourcesLabel),
+  }];
   for (const uri of resourceUris) content.push({ type: 'resource_link', uri, name: uri });
   return { content, structuredContent: structured };
 }
 
-function appendUris(text: string, uris: string[]): string {
+function appendUris(text: string, uris: string[], resourcesLabel: string): string {
   if (!uris.length) return text;
-  return `${text}\n\nResources:\n${uris.map((u) => `- ${u}`).join('\n')}`;
+  return `${text}\n\n${resourcesLabel}:\n${uris.map((u) => `- ${u}`).join('\n')}`;
 }
 
 export function errorResult(err: ToolError): CallToolResult {

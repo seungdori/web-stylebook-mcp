@@ -29,17 +29,24 @@ export function registerResources(server: McpServer, repo: CatalogRepository): v
       styles: repo.allStyles().length,
       motion: repo.data.motionPatterns.length,
       components: repo.data.components.length,
+      principles: repo.data.uxPrinciples.length,
+      designPrinciples: repo.data.designPrinciples.length,
       surfaces: repo.data.stateSurfaces.length,
       stateRecipes: repo.data.stateRecipes.length,
       products: repo.data.productArchetypes.length,
     },
-    domains: ['styles', 'motion', 'components', 'states', 'products', 'policies'],
+    domains: [
+      'styles', 'motion', 'components', 'design-principles',
+      'principles', 'states', 'products', 'policies',
+    ],
     tools: TOOL_NAMES,
     errorCodes: ERROR_CODES,
     resourceUriTemplates: [
       'webstylebook://styles/{id}',
       'webstylebook://motion/{id}',
       'webstylebook://components/{id}',
+      'webstylebook://design-principles/{id}',
+      'webstylebook://principles/{id}',
       'webstylebook://states/{surface}',
       'webstylebook://states/{surface}/{state}',
       'webstylebook://products/{id}',
@@ -49,6 +56,20 @@ export function registerResources(server: McpServer, repo: CatalogRepository): v
   fixed('styles', 'webstylebook://styles', 'Compact list of visual directions', () => repo.listStyles());
   fixed('motion', 'webstylebook://motion', 'Compact list of motion patterns', () => repo.listMotion());
   fixed('components', 'webstylebook://components', 'Component vocabulary', () => repo.listComponents());
+  fixed(
+    'design-principles',
+    'webstylebook://design-principles',
+    'Practical visual-design principles with placement and verification guidance',
+    () => ({
+      categories: repo.data.designPrincipleCategories,
+      principles: repo.listDesignPrinciples(),
+    }),
+  );
+  fixed('principles', 'webstylebook://principles', 'Curated UX principles with attribution and evidence labels', () => ({
+    attribution: repo.uxPrincipleAttribution,
+    categories: repo.data.uxPrincipleCategories,
+    principles: repo.listPrinciples(),
+  }));
   fixed('state-surfaces', 'webstylebook://states/surfaces', 'UI state surfaces', () => repo.listSurfaces());
   fixed('products', 'webstylebook://products', 'Product archetypes', () => repo.listProducts());
   fixed('anti-patterns', 'webstylebook://policies/anti-patterns', 'Common anti-patterns', () => repo.policies.antiPatterns);
@@ -71,6 +92,45 @@ export function registerResources(server: McpServer, repo: CatalogRepository): v
     list: async () => ({ resources: repo.data.components.map((c) => ({ uri: `webstylebook://components/${c.id}`, name: c.id, mimeType: JSON_MIME })) }),
   }), { title: 'Component detail', description: 'Full detail for one component term', mimeType: JSON_MIME }, async (u, v) => {
     const c = repo.getComponent(String(v.componentId)); return c ? json(u.href, c) : notFound(u.href, 'component', String(v.componentId));
+  });
+
+  server.registerResource(
+    'design-principle-detail',
+    new ResourceTemplate('webstylebook://design-principles/{designPrincipleId}', {
+      list: async () => ({
+        resources: repo.data.designPrinciples.map((principle) => ({
+          uri: `webstylebook://design-principles/${principle.id}`,
+          name: principle.id,
+          mimeType: JSON_MIME,
+        })),
+      }),
+    }),
+    {
+      title: 'Design principle detail',
+      description: 'Placement, application, verification, caution, and relationships for one design principle',
+      mimeType: JSON_MIME,
+    },
+    async (u, v) => {
+      const principle = repo.getDesignPrinciple(String(v.designPrincipleId));
+      return principle
+        ? json(u.href, principle)
+        : notFound(u.href, 'design principle', String(v.designPrincipleId));
+    },
+  );
+
+  server.registerResource('principle-detail', new ResourceTemplate('webstylebook://principles/{principleId}', {
+    list: async () => ({
+      resources: repo.data.uxPrinciples.map((principle) => ({
+        uri: `webstylebook://principles/${principle.id}`,
+        name: principle.id,
+        mimeType: JSON_MIME,
+      })),
+    }),
+  }), { title: 'UX principle detail', description: 'Application, verification, caution, and evidence for one UX principle', mimeType: JSON_MIME }, async (u, v) => {
+    const principle = repo.getPrinciple(String(v.principleId));
+    return principle
+      ? json(u.href, { ...principle, attribution: repo.uxPrincipleAttribution })
+      : notFound(u.href, 'UX principle', String(v.principleId));
   });
 
   server.registerResource('product-detail', new ResourceTemplate('webstylebook://products/{productId}', {

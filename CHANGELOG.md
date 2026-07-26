@@ -6,7 +6,27 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-07-26
+
 ### Added
+- A separate visual-design-principles domain with 21 independently authored placement,
+  application, verification, and misuse guides across intent and iteration, semantic hierarchy,
+  adaptive layout and density, localization, tokens and themes, accessible interaction, and
+  complete states and recovery.
+- `get_design_principle_plan`, `webstylebook://design-principles`,
+  `webstylebook://design-principles/{id}`, and the `audit-design-principles` prompt. Visual craft
+  guidance stays separate from evidence-labeled behavioral UX principles.
+- A modernized, task-oriented taxonomy with first-class responsive reflow, localization,
+  multi-input operability, semantic tokens, recovery, and motion-preference guidance.
+- A first-class UX-principles catalog with 23 independently written application guides,
+  explicit evidence confidence, cautions, source attribution, and English/Korean/Japanese
+  output. The catalog links to Laws of UX and primary or authoritative references without
+  copying the source site's prose, illustrations, or layout.
+- `get_ux_principle_plan`, a deterministic selector that turns outcomes, surface, design
+  phase, or explicit principle ids into a small apply-and-verify plan. Principles are treated
+  as contextual decision prompts; accessibility, safety, consent, and truthful feedback win.
+- `webstylebook://principles` and `webstylebook://principles/{id}` resources, plus the
+  `audit-ux-principles` workflow prompt.
 - **Anti-formulaic-opening guidance with teeth.** A new "The opening — the one thing, not a hero"
   section in the skill replaces the buried "don't default to the formulaic hero" one-liner with a
   forcing function (derive the centerpiece from the product; enumerate three structurally-different
@@ -45,7 +65,7 @@ All notable changes to this project are documented here. The format follows
 - `publish.yml` GitHub Actions workflow: build + test + publish to npm on a `v*` tag (with provenance).
 
 ### Fixed
-- Runtime and package-lock metadata now match the published package name and `0.1.1` version.
+- Runtime and package-lock metadata now match the published package name and `0.3.0` version.
 
 ## [0.1.1] — 2026-06-23
 
@@ -81,6 +101,7 @@ All notable changes to this project are documented here. The format follows
 - Output localization in English, Korean, and Japanese.
 - Fully offline at runtime: no API key, no model call, no network, no filesystem access.
 
-[Unreleased]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.1.1...v0.3.0
 [0.1.1]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/seungdori/web-stylebook-mcp/releases/tag/v0.1.0

@@ -73,7 +73,7 @@ describe('audit M7 — unknown secondaryStyleId is rejected, not silently ignore
   });
 });
 
-describe('audit L12 — all five workflow prompts render a non-empty user message', () => {
+describe('audit L12 — all seven workflow prompts render a non-empty user message', () => {
   let client: Client;
   const args: Record<string, Record<string, string>> = {
     'design-product': { product: 'a billing dashboard' },
@@ -81,6 +81,8 @@ describe('audit L12 — all five workflow prompts render a non-empty user messag
     'complete-ui-states': { surfaceId: 'form' },
     'redesign-with-style': { current: 'a cluttered form', goal: 'calmer' },
     'audit-design-direction': { styleId: 'platform-core', summary: 'a settings page' },
+    'audit-design-principles': { summary: 'a settings page', surface: 'settings' },
+    'audit-ux-principles': { summary: 'a settings page', surface: 'settings' },
   };
   beforeAll(async () => {
     const server = createWebStylebookServer();
@@ -93,7 +95,28 @@ describe('audit L12 — all five workflow prompts render a non-empty user messag
       const res = await client.getPrompt({ name, arguments: a });
       const text = (res.messages[0]?.content as { text?: string }).text ?? '';
       expect(text.length, name).toBeGreaterThan(40);
-      expect(text, name).toMatch(/webstylebook:\/\/|recommend_design_direction|get_ui_state_plan|compare_design_directions|compose_design_tokens|anti-patterns/);
+      expect(text, name).toMatch(/webstylebook:\/\/|recommend_design_direction|get_design_principle_plan|get_ux_principle_plan|get_ui_state_plan|compare_design_directions|compose_design_tokens|anti-patterns/);
+    }
+  });
+});
+
+describe('UX-principle guidance is wired through server, skill, and agent fragments', () => {
+  it('on-init instructions frame principles as contextual evidence and name the planner', () => {
+    expect(SERVER_INSTRUCTIONS).toContain('get_ux_principle_plan');
+    expect(SERVER_INSTRUCTIONS).toMatch(/decision prompts, not universal laws/i);
+    expect(SERVER_INSTRUCTIONS).toMatch(/accessibility.*safety.*informed consent.*truthful feedback/i);
+  });
+
+  it('the skill and both fragments carry the same safety boundary', () => {
+    for (const rel of [
+      'skill/web-stylebook-design/SKILL.md',
+      'skill/CLAUDE.md',
+      'skill/AGENTS.md',
+    ]) {
+      const content = read(rel);
+      expect(content, rel).toContain('get_ux_principle_plan');
+      expect(content, rel).toMatch(/contextual\s+(?:decision\s+)?prompts, not universal laws/i);
+      expect(content, rel).toMatch(/Accessibility, safety, informed consent, and truthful feedback/i);
     }
   });
 });

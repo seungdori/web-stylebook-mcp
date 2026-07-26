@@ -1,19 +1,22 @@
 {
-  "catalogVersion": "0.1.0",
-  "contentHash": "sha256:6d68185f71bccd1b34601dfc435222c59f6c75b7f9d8d2bc356e4afb80284d62",
+  "catalogVersion": "0.3.0",
+  "contentHash": "sha256:d255bb57b374f07c3c83c5deb8f553e2c2cacc22782d9133d736fda442c90d1f",
   "counts": {
     "components": 20,
-    "fusions": 16,
+    "designPrinciples": 21,
     "motionPatterns": 29,
+    "principles": 23,
     "productArchetypes": 14,
     "stateRecipes": 57,
     "stateSurfaces": 5,
-    "styles": 32
+    "styles": 48
   },
   "domains": [
     "styles",
     "motion",
     "components",
+    "principles",
+    "design-principles",
     "states",
     "products",
     "policies"

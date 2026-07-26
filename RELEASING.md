@@ -6,8 +6,16 @@ users. A release is deliberate: regenerate the snapshot, bump the version, tag �
 
 ## One-time setup
 
-Add an **`NPM_TOKEN`** repository secret (npm → Access Tokens → a Granular/Automation token with
-publish rights for `web-stylebook-mcp`). The `Publish` workflow uses it — no interactive `npm login`.
+In the npm package settings, add a **Trusted Publisher** for GitHub Actions:
+
+- Organization or user: `seungdori`
+- Repository: `web-stylebook-mcp`
+- Workflow filename: `publish.yml`
+- Allowed action: `npm publish`
+
+The `Publish` workflow uses short-lived OIDC credentials, so no long-lived `NPM_TOKEN` or
+interactive `npm login` is required. After one successful release, consider setting publishing
+access to require 2FA and disallow traditional tokens.
 
 ## Cut a release
 
@@ -19,13 +27,13 @@ publish rights for `web-stylebook-mcp`). The `Publish` workflow uses it — no i
    Then copy the regenerated `generated/catalog.v1.json` + `generated/manifest.v1.json` into this
    repo's `generated/`.
 2. **Bump** the version in `package.json` and move CHANGELOG `[Unreleased]` → the new version.
-3. **Tag and push** — the tag triggers the publish:
+3. **Tag and push** — the version tag triggers the publish and must match `package.json`:
    ```bash
-   git commit -am "Release 0.1.2"
-   git tag v0.1.2
-   git push origin master --follow-tags
+   git tag -a v0.3.0 -m "Release v0.3.0"
+   git push origin v0.3.0
    ```
-4. The **`Publish`** workflow runs `build` + `test` + `npm publish --provenance`. Verify with
+4. The **`Publish`** workflow runs `build` + `test` + package smoke tests + `npm publish`.
+   npm automatically attaches provenance for trusted publishing. Verify with
    `npm view web-stylebook-mcp version`.
 
 > The runtime stays offline/deterministic by design; "freshness" means a fast, automated

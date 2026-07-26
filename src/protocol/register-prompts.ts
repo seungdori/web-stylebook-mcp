@@ -23,11 +23,13 @@ export function registerPrompts(server: McpServer): void {
     'Use the Web Stylebook MCP in this order:',
     '1. recommend_design_direction (treat candidates as scored evidence; pick using product context)',
     '2. read the chosen webstylebook://styles/{id} resources',
-    '3. write design.md from the full brief skeleton (intent → verification checklist; never leave a section empty)',
-    '4. plan each screen (hierarchy by user task, not a generic Hero+Features template)',
-    '5. get_ui_state_plan for each surface (cover the non-happy-path states)',
-    '6. compose_design_tokens for a starting token set; heed contrast warnings',
-    '7. implement, then self-audit against webstylebook://policies/verification',
+    '3. plan each screen around its primary user task; name its surface, intended outcomes, and current design phase',
+    '4. get_design_principle_plan for the layout concerns/surface/phase; use its placement, application, and verification guidance',
+    '5. get_ux_principle_plan for those outcomes/surface/phase; use the design questions and cautions, not the names as decoration',
+    '6. get_ui_state_plan for each surface (cover the non-happy-path states)',
+    '7. compose_design_tokens for a starting token set; heed contrast warnings',
+    '8. write design.md from the full brief skeleton, incorporating the returned design principles, UX principles, cautions, states, and tokens; never leave a section empty',
+    '9. implement, then self-audit against webstylebook://policies/verification',
     '',
     `Product: ${product}`,
     `Audience: ${audience ?? 'infer conservatively and record the assumption'}`,
@@ -43,6 +45,8 @@ export function registerPrompts(server: McpServer): void {
     `Design a ${screenType} screen. Goal: ${goal}.`,
     styleId ? `Use style ${styleId} (read webstylebook://styles/${styleId}).` : 'If no style is chosen yet, call recommend_design_direction first.',
     'Organize hierarchy by the primary user task. Look up relevant components in webstylebook://components.',
+    'Call get_design_principle_plan with the layout concerns, matching surface, and current design phase. Use its placement and verification guidance.',
+    'Call get_ux_principle_plan with the intended outcomes, matching surface, and current design phase. Apply only the principles whose cautions fit this task.',
     'Call get_ui_state_plan for the matching surface and cover required + recommended states.',
     'State responsive and motion rules (use AND avoid). Do not default to Hero + Features + Testimonial + CTA.',
   ].join('\n')));
@@ -79,5 +83,45 @@ export function registerPrompts(server: McpServer): void {
     `Implementation summary: ${summary}.`,
     'Check: style fidelity, anti-patterns (webstylebook://policies/anti-patterns), UI state coverage, accessibility, motion restraint.',
     'Return a verdict per item: PASS / FIX-NOW / RISK, with a concrete fix for each FIX-NOW.',
+  ].join('\n')));
+
+  server.registerPrompt('audit-design-principles', {
+    title: 'Audit design principle application',
+    description: 'Check whether layout and visual-design principles were applied, verified, or turned into rigid recipes.',
+    argsSchema: {
+      summary: z.string(),
+      surface: z.string().optional(),
+      concerns: z.string().optional(),
+      principleIds: z.string().optional(),
+    },
+  }, ({ summary, surface, concerns, principleIds }) => userMessage([
+    'Audit this implementation using the Web Stylebook design principle catalog.',
+    `Implementation summary: ${summary}.`,
+    `Surface: ${surface ?? 'infer the closest supported surface and state the assumption'}.`,
+    `Design concerns: ${concerns ?? 'infer from hierarchy, layout, typography, color, depth, imagery, and UI states'}.`,
+    `Explicit principles: ${principleIds ?? 'none — select a small relevant set'}.`,
+    'Call get_design_principle_plan with phase: validation, then read webstylebook://design-principles/{id} only for the selected principles.',
+    'For each selected principle, check the returned design question, placement guidance, apply steps, verification checks, caution, and related UX principles.',
+    'Return PASS / FIX-NOW / RISK. Flag semantic-order damage, inaccessible visual hierarchy, brittle responsive placement, decorative excess, or guidance used as a rigid recipe.',
+  ].join('\n')));
+
+  server.registerPrompt('audit-ux-principles', {
+    title: 'Audit UX principle application',
+    description: 'Check whether relevant UX principles were applied, verified, or overgeneralized.',
+    argsSchema: {
+      summary: z.string(),
+      surface: z.string().optional(),
+      outcomes: z.string().optional(),
+      principleIds: z.string().optional(),
+    },
+  }, ({ summary, surface, outcomes, principleIds }) => userMessage([
+    'Audit this implementation using the Web Stylebook UX principle catalog.',
+    `Implementation summary: ${summary}.`,
+    `Surface: ${surface ?? 'infer the closest supported surface and state the assumption'}.`,
+    `Intended outcomes: ${outcomes ?? 'infer from the primary user task and state the assumption'}.`,
+    `Explicit principles: ${principleIds ?? 'none — select a small relevant set'}.`,
+    'Call get_ux_principle_plan with phase: validation, then read webstylebook://principles/{id} only for the selected principles.',
+    'For each selected principle, check the returned design question, apply steps, verification checks, caution, and evidence confidence.',
+    'Return PASS / FIX-NOW / RISK. Flag dark patterns, inaccessible simplification, misleading feedback, or claims that exceed contextual/contested evidence.',
   ].join('\n')));
 }

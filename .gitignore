@@ -6,3 +6,6 @@ dist/
 # local agent/codex test artifacts (machine-specific)
 .agents/
 .codex/
+.playwright-mcp/
+qa-top.png
+qa-top.jpeg

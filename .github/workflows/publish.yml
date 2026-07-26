@@ -1,6 +1,6 @@
 name: Publish
 
-# Push a tag like v0.1.2 → build, test, and publish to npm (no interactive login).
+# Push a release tag like v0.3.0 → build, test, and publish to npm with OIDC.
 on:
   push:
     tags: ['v*']
@@ -10,17 +10,41 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write # npm provenance
+      id-token: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: '24'
           registry-url: 'https://registry.npmjs.org'
-          cache: npm
+          package-manager-cache: false
+      - name: Verify tag matches package version
+        run: |
+          node -e "const version=require('./package.json').version; const tag=process.env.GITHUB_REF_NAME; if (tag !== 'v' + version) { console.error('Tag ' + tag + ' does not match package version ' + version); process.exit(1); }"
       - run: npm ci
       - run: npm run build
       - run: npm test
-      - run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Check out canonical catalog source
+        uses: actions/checkout@v6
+        with:
+          repository: seungdori/web-stylebook
+          path: _canonical
+      - name: Generate and validate canonical catalog
+        working-directory: _canonical
+        run: |
+          npm ci
+          npm run mcp:catalog
+          npm run mcp:catalog:validate
+      - name: Verify canonical catalog byte parity
+        run: npm run catalog:check-canonical -- "$GITHUB_WORKSPACE/_canonical/packages/mcp/generated"
+      - name: Package smoke
+        run: |
+          npm pack
+          TARBALL=$(ls -t web-stylebook-mcp-*.tgz | head -1)
+          mkdir -p "$RUNNER_TEMP/web-stylebook-smoke"
+          cd "$RUNNER_TEMP/web-stylebook-smoke"
+          npm init -y >/dev/null
+          npm install "$GITHUB_WORKSPACE/$TARBALL"
+          npx web-stylebook-mcp --version
+          npx web-stylebook-mcp --validate-catalog
+      - run: npm publish --access public

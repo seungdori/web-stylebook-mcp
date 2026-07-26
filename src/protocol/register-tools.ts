@@ -1,16 +1,28 @@
-// The four v0.1 compute tools (ADR-011): recommend / compare / get_ui_state_plan
-// / compose_design_tokens. All read-only, deterministic. Input validated by zod.
+// Read-only deterministic compute tools. Input is validated by zod at the
+// protocol boundary; the pure engines remain SDK-free.
 
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { CatalogRepository } from '../catalog/repository.js';
 import {
+  DESIGN_CONCERNS,
   PRODUCT_TYPES, TONES, DENSITY_LEVELS, USAGE_FREQUENCIES, TRUST_LEVELS, STATE_CATEGORIES,
+  UX_OUTCOMES, UX_SURFACES, UX_PHASES,
 } from '../types.js';
+import type { Lang } from '../types.js';
 import { recommendDesignDirection } from '../recommendation/index.js';
 import type { ProductContext, EvidenceResult } from '../recommendation/types.js';
 import { compareDirections, CompareError, type CompareResult } from '../recommendation/compare.js';
 import { planUiStates, StatePlanError, type UiStatePlan } from '../state-atlas/planner.js';
+import {
+  planUxPrinciples, PrinciplePlanError, type UxPrinciplePlan, type UxPrinciplePlanInput,
+} from '../principles/planner.js';
+import {
+  DesignPrinciplePlanError,
+  planDesignPrinciples,
+  type DesignPrinciplePlan,
+  type DesignPrinciplePlanInput,
+} from '../design-principles/planner.js';
 import { composeDesignTokens, TokenError, type ComposeDesignTokensResult } from '../tokens/compile.js';
 import { ok, errorResult, type ToolResult } from './result.js';
 import { ToolError, nearestIds } from './errors.js';
@@ -42,6 +54,29 @@ function toToolError(e: unknown, repo: CatalogRepository): ToolError {
   if (e instanceof ToolError) return e;
   if (e instanceof StatePlanError) {
     return new ToolError('STATE_SURFACE_NOT_FOUND', e.message, repo.listSurfaces().map((s) => s.id));
+  }
+  if (e instanceof DesignPrinciplePlanError) {
+    if (e.kind === 'DESIGN_PRINCIPLE_NOT_FOUND' && e.unknownId) {
+      return new ToolError(
+        'DESIGN_PRINCIPLE_NOT_FOUND',
+        e.message,
+        nearestIds(
+          e.unknownId,
+          repo.data.designPrinciples.map((principle) => principle.id),
+        ),
+      );
+    }
+    return new ToolError('INVALID_INPUT', e.message);
+  }
+  if (e instanceof PrinciplePlanError) {
+    if (e.kind === 'UX_PRINCIPLE_NOT_FOUND' && e.unknownId) {
+      return new ToolError(
+        'UX_PRINCIPLE_NOT_FOUND',
+        e.message,
+        nearestIds(e.unknownId, repo.data.uxPrinciples.map((principle) => principle.id)),
+      );
+    }
+    return new ToolError('INVALID_INPUT', e.message);
   }
   if (e instanceof TokenError) {
     const m = /unknown (?:secondary )?style '([^']+)'/.exec(e.message);
@@ -94,6 +129,56 @@ export function registerTools(server: McpServer, repo: CatalogRepository): void 
       const result = compareDirections(args as Parameters<typeof compareDirections>[0], repo);
       return ok(result as unknown as Record<string, unknown>, renderCompare(result),
         result.directions.map((d) => `webstylebook://styles/${d.primaryStyleId}`));
+    } catch (e) { return errorResult(toToolError(e, repo)); }
+  });
+
+  // ------------------------------------------------------ design principles
+  server.registerTool('get_design_principle_plan', {
+    title: 'Plan relevant design principles',
+    description: 'Select a small set of practical visual-design principles for intent and iteration, semantic hierarchy, adaptive layout and density, typography and localization, tokens and themes, accessible interaction, and complete states and recovery. Filter by design concerns, surface, phase, or explicit ids. Returns placement guidance, application steps, verification checks, cautions, related principles, and deterministic relevance scores.',
+    inputSchema: {
+      principleIds: z.array(z.string().min(1).max(100)).max(12).optional(),
+      concerns: z.array(z.enum(DESIGN_CONCERNS)).max(10).optional(),
+      surface: z.enum(UX_SURFACES).optional(),
+      phase: z.enum(UX_PHASES).optional(),
+      limit: z.number().int().min(1).max(12).optional(),
+      locale: LOCALE.optional(),
+    },
+    annotations: READ_ONLY,
+  }, async (args): Promise<ToolResult> => {
+    try {
+      const plan = planDesignPrinciples(args as DesignPrinciplePlanInput, repo);
+      return ok(
+        plan as unknown as Record<string, unknown>,
+        renderDesignPrinciplePlan(plan),
+        plan.principles.map((principle) => principle.resourceUri),
+        designPrincipleFallbackLabels[plan.query.locale].resources,
+      );
+    } catch (e) { return errorResult(toToolError(e, repo)); }
+  });
+
+  // --------------------------------------------------------- UX principles
+  server.registerTool('get_ux_principle_plan', {
+    title: 'Plan relevant UX principles',
+    description: 'Select a small, evidence-labeled set of UX principles for a target outcome, surface, design phase, or explicit principle ids. Returns design questions, application steps, verification checks, cautions, references, and relevance scores. Treat the result as decision prompts rather than universal laws.',
+    inputSchema: {
+      principleIds: z.array(z.string().min(1).max(100)).max(12).optional(),
+      outcomes: z.array(z.enum(UX_OUTCOMES)).max(8).optional(),
+      surface: z.enum(UX_SURFACES).optional(),
+      phase: z.enum(UX_PHASES).optional(),
+      limit: z.number().int().min(1).max(12).optional(),
+      locale: LOCALE.optional(),
+    },
+    annotations: READ_ONLY,
+  }, async (args): Promise<ToolResult> => {
+    try {
+      const plan = planUxPrinciples(args as UxPrinciplePlanInput, repo);
+      return ok(
+        plan as unknown as Record<string, unknown>,
+        renderPrinciplePlan(plan),
+        plan.principles.map((principle) => principle.resourceUri),
+        principleFallbackLabels[plan.query.locale].resources,
+      );
     } catch (e) { return errorResult(toToolError(e, repo)); }
   });
 
@@ -180,6 +265,165 @@ function renderStatePlan(p: UiStatePlan): string {
   if (p.styleNote) lines.push('', p.styleNote);
   if (p.unresolvedQuestions.length) lines.push('', `Unresolved: ${p.unresolvedQuestions.join(' ')}`);
   return lines.filter(Boolean).join('\n');
+}
+
+const designPrincipleFallbackLabels: Record<Lang, {
+  title: string;
+  relevance: string;
+  designQuestion: string;
+  placement: string;
+  apply: string;
+  verify: string;
+  caution: string;
+  relatedUx: string;
+  noMatches: string;
+  resources: string;
+}> = {
+  en: {
+    title: 'Design principle plan',
+    relevance: 'Relevance',
+    designQuestion: 'Design question',
+    placement: 'Placement',
+    apply: 'Apply',
+    verify: 'Verify',
+    caution: 'Caution',
+    relatedUx: 'Related UX principles',
+    noMatches: 'No catalog design principles matched the supplied selectors.',
+    resources: 'Resources',
+  },
+  ko: {
+    title: '디자인 원칙 계획',
+    relevance: '관련성',
+    designQuestion: '설계 질문',
+    placement: '배치',
+    apply: '적용',
+    verify: '검증',
+    caution: '주의',
+    relatedUx: '연결된 UX 원칙',
+    noMatches: '입력한 조건에 맞는 디자인 원칙이 없습니다.',
+    resources: '리소스',
+  },
+  ja: {
+    title: 'デザイン原則プラン',
+    relevance: '関連性',
+    designQuestion: '設計上の問い',
+    placement: '配置',
+    apply: '適用',
+    verify: '確認',
+    caution: '注意',
+    relatedUx: '関連するUX原則',
+    noMatches: '指定した条件に一致するデザイン原則はありません。',
+    resources: 'リソース',
+  },
+};
+
+function renderDesignPrinciplePlan(p: DesignPrinciplePlan): string {
+  const labels = designPrincipleFallbackLabels[p.query.locale];
+  const lines = [`# ${labels.title}`];
+  for (const principle of p.principles) {
+    lines.push(
+      '',
+      `## ${principle.name} (${principle.id})`,
+      `- ${labels.relevance}: ${principle.whyRelevant.join(' · ')}`,
+      `- ${labels.designQuestion}: ${principle.designQuestion}`,
+      `- ${labels.placement}: ${principle.placement.join(' · ')}`,
+      `- ${labels.apply}: ${principle.apply.join(' · ')}`,
+      `- ${labels.verify}: ${principle.verify.join(' · ')}`,
+      `- ${labels.caution}: ${principle.caution}`,
+    );
+    if (principle.relatedUxPrincipleIds.length) {
+      lines.push(`- ${labels.relatedUx}: ${principle.relatedUxPrincipleIds.join(', ')}`);
+    }
+  }
+  if (!p.principles.length) lines.push('', labels.noMatches);
+  lines.push('', ...p.guidance.map((item) => `- ${item}`));
+  return lines.join('\n');
+}
+
+const principleFallbackLabels: Record<Lang, {
+  title: string;
+  relevance: string;
+  designQuestion: string;
+  apply: string;
+  verify: string;
+  caution: string;
+  evidence: string;
+  noMatches: string;
+  resources: string;
+  evidenceKind: Record<string, string>;
+  evidenceConfidence: Record<string, string>;
+}> = {
+  en: {
+    title: 'UX principle plan',
+    relevance: 'Relevance',
+    designQuestion: 'Design question',
+    apply: 'Apply',
+    verify: 'Verify',
+    caution: 'Caution',
+    evidence: 'Evidence',
+    noMatches: 'No catalog principles matched the supplied selectors.',
+    resources: 'Resources',
+    evidenceKind: {
+      empirical: 'empirical', gestalt: 'Gestalt', heuristic: 'heuristic', 'systems-maxim': 'systems maxim',
+    },
+    evidenceConfidence: {
+      strong: 'strong', contextual: 'contextual', contested: 'contested',
+    },
+  },
+  ko: {
+    title: 'UX 원칙 계획',
+    relevance: '관련성',
+    designQuestion: '설계 질문',
+    apply: '적용',
+    verify: '검증',
+    caution: '주의',
+    evidence: '근거',
+    noMatches: '입력한 조건에 맞는 카탈로그 원칙이 없습니다.',
+    resources: '리소스',
+    evidenceKind: {
+      empirical: '실증 연구', gestalt: '게슈탈트', heuristic: '휴리스틱', 'systems-maxim': '시스템 격언',
+    },
+    evidenceConfidence: {
+      strong: '강함', contextual: '맥락 의존', contested: '논쟁적',
+    },
+  },
+  ja: {
+    title: 'UX原則プラン',
+    relevance: '関連性',
+    designQuestion: '設計上の問い',
+    apply: '適用',
+    verify: '確認',
+    caution: '注意',
+    evidence: 'エビデンス',
+    noMatches: '指定した条件に一致するカタログ原則はありません。',
+    resources: 'リソース',
+    evidenceKind: {
+      empirical: '実証研究', gestalt: 'ゲシュタルト', heuristic: 'ヒューリスティック', 'systems-maxim': 'システム格言',
+    },
+    evidenceConfidence: {
+      strong: '強い', contextual: '文脈依存', contested: '議論あり',
+    },
+  },
+};
+
+function renderPrinciplePlan(p: UxPrinciplePlan): string {
+  const labels = principleFallbackLabels[p.query.locale];
+  const lines = [`# ${labels.title}`];
+  for (const principle of p.principles) {
+    lines.push(
+      '',
+      `## ${principle.name} (${principle.id})`,
+      `- ${labels.relevance}: ${principle.whyRelevant.join(' · ')}`,
+      `- ${labels.designQuestion}: ${principle.designQuestion}`,
+      `- ${labels.apply}: ${principle.apply.join(' · ')}`,
+      `- ${labels.verify}: ${principle.verify.join(' · ')}`,
+      `- ${labels.caution}: ${principle.caution}`,
+      `- ${labels.evidence}: ${labels.evidenceKind[principle.evidence.kind]} / ${labels.evidenceConfidence[principle.evidence.confidence]}`,
+    );
+  }
+  if (!p.principles.length) lines.push('', labels.noMatches);
+  lines.push('', ...p.guidance.map((item) => `- ${item}`));
+  return lines.join('\n');
 }
 
 function renderTokens(r: ComposeDesignTokensResult): string {

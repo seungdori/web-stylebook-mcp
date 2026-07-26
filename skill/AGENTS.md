@@ -10,9 +10,8 @@ dashboard, form, checkout, chat, developer console), call the **`web-stylebook`*
    usageFrequency, trustSensitivity, constraints, avoid). Use the scored `candidates` as
    evidence and pick with product context; don't blindly take `candidates[0]`. Note the
    `rejected` styles and their reasons.
-2. Read `webstylebook://styles/{id}` for your picks; write a `design.md` brief (intent, color
-   *roles*, type roles, layout, motion use/avoid, UI-state coverage, a11y, anti-patterns,
-   assumptions, verification) with no empty sections.
+2. Read `webstylebook://styles/{id}` for your picks and record concise candidate-direction notes.
+   Do not finalize `design.md` before the visual-design, UX-principle, and UI-state contracts are available.
 3. Before composing previews, run a short intake: (a) assets - do they have images/brand assets
    (which), should you source **license-free** samples (e.g. Unsplash, free for commercial use), or
    is none needed; (b) anything to emphasize / any must-haves. Then, for open-ended UI requests, show
@@ -24,10 +23,18 @@ dashboard, form, checkout, chat, developer console), call the **`web-stylebook`*
    reuse; real brand/copy/data and must-have features (and what to leave out); target devices,
    light/dark, locales, a11y. Turn assumptions into confirmed facts; build only after the user
    answers or says to use your judgment. Don't silently assume.
-5. `get_ui_state_plan` for each surface and implement required + recommended states (respect
+5. `get_design_principle_plan` with the layout concerns, matching surface, and design phase. Use
+   its placement, apply, verify, and caution guidance as a practical craft review, not a fixed recipe.
+6. `get_ux_principle_plan` with intended outcomes, matching surface, and design phase. Use its
+   questions, apply/verify checks, cautions, and evidence confidence; treat principles as contextual
+   prompts, not universal laws. Accessibility, safety, informed consent, and truthful feedback win.
+7. `get_ui_state_plan` for each surface and implement required + recommended states (respect
    every `mustNot`).
-6. `compose_design_tokens` for a starting token set; obey the contrast warnings.
-7. Self-audit against `webstylebook://policies/verification`.
+8. `compose_design_tokens` for a starting token set; obey the contrast warnings.
+9. Write `design.md` using the confirmed decisions and returned design/UX/state/token contracts
+   (intent, color *roles*, type roles, layout, motion use/avoid, UI-state coverage, a11y,
+   anti-patterns, assumptions, verification), with no empty sections; then implement.
+10. Self-audit against `webstylebook://policies/verification`.
 
 **Compose, don't recolor.** Tokens are scalars, not a design. Swapping a token block over one
 layout is a reskin and is not acceptable. The chosen style is a starting tone, not a layout mold:

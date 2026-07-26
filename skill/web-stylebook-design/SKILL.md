@@ -1,12 +1,13 @@
 ---
 name: web-stylebook-design
-description: Use BEFORE building or redesigning any frontend UI (a page, screen, component, dashboard, form, checkout, chat, or developer console). Calls the Web Stylebook MCP to choose a product-fit visual direction, cover real (non-happy-path) UI states, and compose design tokens — so the result doesn't look like a generic AI template. Trigger whenever the user asks to build/design/redesign a UI, "make a page/screen/app", "style this", or wants a design direction, even if they don't say "Web Stylebook".
+description: Use BEFORE building or redesigning any frontend UI (a page, screen, component, dashboard, form, checkout, chat, or developer console). Calls the Web Stylebook MCP to choose a product-fit visual direction, apply visual-design and UX principles, cover real (non-happy-path) UI states, and compose design tokens — so the result doesn't look like a generic AI template. Trigger whenever the user asks to build/design/redesign a UI, "make a page/screen/app", "style this", or wants a design direction, even if they don't say "Web Stylebook".
 ---
 
 # Web Stylebook — design before you build
 
 You have the **Web Stylebook MCP** server (`web-stylebook`) connected. It returns design
-*contracts* (scored directions, UI-state plans, tokens), not code. You still write the code.
+*contracts* (scored directions, visual-design plans, UX-principle plans, UI-state plans, tokens),
+not code. You still write the code.
 Calling it before writing UI produces far better, less generic results.
 
 ## When to fire
@@ -48,25 +49,37 @@ to scaffold a page from memory, stop and run step 1 first.
      numbers or omit them — never invent metrics to fill space.)
    - **Audience & environment** — primary devices/breakpoints, light/dark/both, locales, accessibility
      level, any performance budget.
-   Turn the `design.md` assumptions into **confirmed facts** here. Build only after the user answers —
+   Turn the working assumptions into **confirmed facts** here. Build only after the user answers —
    or explicitly says "use your judgment," in which case record the assumption and proceed. Keep it to
    3–6 high-leverage questions; don't interrogate.
-5. **Write `design.md`** — a brief with: intent, audience/tasks, chosen direction + why, rejected
-   directions, tone, color *roles* (not a raw palette), type roles, spacing/density, layout rules,
-   surface hierarchy, component behavior, motion (use AND avoid), UI-state coverage, responsive,
-   accessibility, anti-patterns, confirmed decisions (from step 4), verification checklist. Never
-   leave a section empty.
-6. **Plan each screen around *the one thing*** — drop the word "hero"; it summons the SaaS template.
+5. **Plan each screen around *the one thing*** — drop the word "hero"; it summons the SaaS template.
    Name the single most important thing the user is there for, build the screen around it, and make
    everything else earn its place or cut it. Run the furniture-check (see *The opening* below)
    on **each** screen, not just the first. Do **not** default to Hero + Features + Testimonial + CTA.
-   Look up component vocabulary in `webstylebook://components`.
-7. **`get_ui_state_plan`** — for each surface (data-table, form, checkout, chat, developer-console).
+   Look up component vocabulary in `webstylebook://components`, then name the intended outcomes,
+   matching surface, and current design phase for the next step.
+6. **`get_design_principle_plan`** — pass the current layout concerns, matching surface, and design
+   phase (or a small explicit id set). Use the returned placement guidance, application steps,
+   verification checks, and cautions. Read `webstylebook://design-principles/{id}` only for selected
+   entries. These are independently authored, testable craft prompts—not empirical laws or a fixed
+   recipe. Accessibility and truthful behavior override visual polish.
+7. **`get_ux_principle_plan`** — pass the intended outcomes, matching surface, and current design
+   phase (or a small explicit id set). Use the returned design questions, apply steps, verification
+   checks, cautions, and evidence confidence. Read `webstylebook://principles/{id}` only for the
+   selected entries. These are contextual decision prompts, not universal laws or a substitute for
+   user research; accessibility, safety, informed consent, and truthful feedback override them.
+8. **`get_ui_state_plan`** — for each surface (data-table, form, checkout, chat, developer-console).
    Implement the required + recommended states, honoring `mustNot` (e.g. no silent auto-retry, don't
    lose user input, don't imply a charge that didn't happen).
-8. **`compose_design_tokens`** — emit a starting token set (css-variables / tailwind / typescript).
+9. **`compose_design_tokens`** — emit a starting token set (css-variables / tailwind / typescript).
    Heed the contrast warnings; don't ship 8–12% ghost borders.
-9. **Implement, then self-audit** against `webstylebook://policies/verification` and
+10. **Write `design.md`** — a brief with: intent, audience/tasks, chosen direction + why, rejected
+   directions, tone, color *roles* (not a raw palette), type roles, spacing/density, layout rules,
+   surface hierarchy, component behavior, motion (use AND avoid), selected visual-design principles
+   + placement checks, selected UX principles + cautions, returned UI-state coverage, responsive,
+   accessibility, anti-patterns, confirmed
+   decisions (from step 4), and verification checklist. Never leave a section empty.
+11. **Implement, then self-audit** against `webstylebook://policies/verification` and
    `…/anti-patterns` — including the opening's **furniture-check** (below): if the visual is generic
    furniture (a stock photo, an abstract shape, or a card you could paste onto another product)
    rather than a bespoke product demonstration, or the copy column is the full quartet, recompose.
@@ -126,7 +139,7 @@ reflex with a method plus a gate that targets genericness, not column count.
    - **ambient / broken-grid** — off-axis, asymmetric; mood through space + one focal element.
    - **full-bleed single element** — one number / word / image fills the frame; all else tucked small.
    - **horizon / architectural** — a structural line or grid organizes above/below, not copy-vs-visual.
-3. **Furniture-check: does the visual earn its half?** (mandatory; gate at step 9). A two-column
+3. **Furniture-check: does the visual earn its half?** (mandatory; gate at step 11). A two-column
    "copy + visual" opening is fine — *only* when the visual earns it. It **FAILS** if the other side
    is **generic furniture**: a stock photo, an abstract blob / gradient / 3D shape, generic app
    chrome, or a card / panel you could paste onto a *different* product by swapping the logo. It
@@ -186,6 +199,22 @@ When the user is torn between looks, pass 2–4 directions. It returns each one'
 conditions and likely failure mode — there is deliberately no single winner; choose by product fit.
 Each direction may carry an optional `secondaryStyleId` to model a primary+secondary pairing; the
 comparison reflects the merged pairing in its axes (e.g. a louder secondary raises distinctiveness).
+
+## `get_design_principle_plan`
+
+Select by what must be visually resolved (`concerns`), where (`surface`), and when in the design
+process (`phase`). Keep the set small. For each selected principle, answer its design question,
+place the elements as directed, apply only the relevant craft move, and keep its observable
+verification check in `design.md`. Use this catalog for composition and visual review; use
+`get_ux_principle_plan` separately for behavioral and cognitive evidence.
+
+## `get_ux_principle_plan`
+
+Select by what the user must accomplish (`outcomes`), where (`surface`), and when in the design
+process (`phase`). Keep the returned set small. Apply the checks, not the label: for each selected
+principle, answer its design question, implement only the relevant steps, and define how its
+verification will be observed. Preserve `contextual` and `contested` confidence labels in audits;
+do not turn a mnemonic or systems maxim into a scientific claim.
 
 ## Rules
 
