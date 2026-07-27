@@ -35,9 +35,10 @@ export function registerResources(server: McpServer, repo: CatalogRepository): v
       stateRecipes: repo.data.stateRecipes.length,
       products: repo.data.productArchetypes.length,
     },
+    // must stay in the canonical CATALOG_DOMAINS order used by generated/manifest.v1.json
     domains: [
-      'styles', 'motion', 'components', 'design-principles',
-      'principles', 'states', 'products', 'policies',
+      'styles', 'motion', 'components', 'principles', 'design-principles',
+      'states', 'products', 'policies',
     ],
     tools: TOOL_NAMES,
     errorCodes: ERROR_CODES,

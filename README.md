@@ -26,6 +26,8 @@ No API key. No model call. No network. No project filesystem access. **Determini
 | | Without `web-stylebook-mcp` | With `web-stylebook-mcp` |
 |---|---|---|
 | **Direction** | Guesses one look, commits to it | Scored candidates + reason codes + what it *rejected* and why |
+| **Craft** | Principle names dropped into a doc, nothing verified | Placement guidance + an observable check per principle, cautions attached |
+| **UX evidence** | "Hick's Law says…" as a conversation-ender | Evidence-labeled prompts (`strong` / `contextual` / `contested`) you can't restate as law |
 | **UI states** | Happy path only; empty / error / loading bolted on later | Required / recommended / domain states up front, per surface |
 | **Tokens** | Hand-picked hexes, contrast rarely checked | Role-based tokens with WCAG contrast warnings |
 | **Result** | Generic AI UI | A defensible design contract the agent builds from |
@@ -109,10 +111,12 @@ flowchart LR
     B --> C{Bundled catalog<br/>read-only · offline}
     C --> D[recommend_design_direction]
     C --> E[compare_design_directions]
-    C --> F[get_ui_state_plan]
-    C --> G[compose_design_tokens]
-    D & E & F & G -->|design contracts<br/>scores · reason codes · tokens| A
-    A -->|writes code<br/>from evidence| H[Your UI]
+    C --> F[get_design_principle_plan]
+    C --> G[get_ux_principle_plan]
+    C --> H[get_ui_state_plan]
+    C --> I[compose_design_tokens]
+    D & E & F & G & H & I -->|design contracts<br/>scores · reason codes<br/>placement · verify checks · tokens| A
+    A -->|writes code<br/>from evidence| Z[Your UI]
 ```
 
 The agent describes the product; the server scores its curated catalog and returns structured evidence. No code is generated and nothing leaves your machine.
@@ -203,7 +207,7 @@ Add the same block to your `claude_desktop_config.json`, then restart:
 | **`get_ui_state_plan`** | Required / recommended / domain UI states for a surface (data-table, form, checkout, chat, developer-console) — triggers, must-show, must-not, a11y, motion | Covers the states agents forget: empty, error, loading, edge |
 | **`compose_design_tokens`** | Role-based tokens (color, type, spacing, radius, motion, density) as `json` / `css-variables` / `tailwind` / `typescript`, light / dark / both | Emits WCAG contrast warnings instead of hiding them |
 
-**Catalog:** 48 styles · 21 visual design principles · 23 UX principles · 20 components · 5 surfaces · 57 UI-state recipes · 29 motion profiles · 14 product archetypes.
+**Catalog:** 48 styles · 22 visual design principles · 23 UX principles · 20 components · 5 surfaces · 57 UI-state recipes · 29 motion profiles · 14 product archetypes.
 
 ## Localized output
 

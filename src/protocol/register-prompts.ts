@@ -28,8 +28,8 @@ export function registerPrompts(server: McpServer): void {
     '5. get_ux_principle_plan for those outcomes/surface/phase; use the design questions and cautions, not the names as decoration',
     '6. get_ui_state_plan for each surface (cover the non-happy-path states)',
     '7. compose_design_tokens for a starting token set; heed contrast warnings',
-    '8. write design.md from the full brief skeleton, incorporating the returned design principles, UX principles, cautions, states, and tokens; never leave a section empty',
-    '9. implement, then self-audit against webstylebook://policies/verification',
+    '8. write design.md with every one of these sections filled — leave none empty: intent; audience and tasks; chosen direction and why; rejected directions; tone; color ROLES (not a raw palette); type roles; spacing and density; layout rules; surface hierarchy; component behavior; motion (use AND avoid); selected visual-design principles, each with the placement decision it produced and its observable verification check; selected UX principles, each with its caution and evidence confidence label; UI-state coverage; responsive; accessibility; anti-patterns avoided; assumptions; verification checklist',
+    '9. implement, then self-audit against webstylebook://policies/verification (including its "principles" group: run each recorded principle check against the built UI and write down the outcome) and webstylebook://policies/anti-patterns',
     '',
     `Product: ${product}`,
     `Audience: ${audience ?? 'infer conservatively and record the assumption'}`,
@@ -82,6 +82,7 @@ export function registerPrompts(server: McpServer): void {
     `Audit this implementation against the ${styleId} direction.`,
     `Implementation summary: ${summary}.`,
     'Check: style fidelity, anti-patterns (webstylebook://policies/anti-patterns), UI state coverage, accessibility, motion restraint.',
+    'Walk every group of webstylebook://policies/verification, including "principles": a principle named in design.md without a placement decision and an observed check is the principle-as-decoration anti-pattern. For a deeper pass, run the audit-design-principles and audit-ux-principles prompts.',
     'Return a verdict per item: PASS / FIX-NOW / RISK, with a concrete fix for each FIX-NOW.',
   ].join('\n')));
 

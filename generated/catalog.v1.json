@@ -1,6 +1,6 @@
 {
   "catalogVersion": "0.3.0",
-  "contentHash": "sha256:d255bb57b374f07c3c83c5deb8f553e2c2cacc22782d9133d736fda442c90d1f",
+  "contentHash": "sha256:c20eab85984adc1e72230fc36dffe24568eb4c0aca7ed356df4437851821f447",
   "data": {
     "componentCategories": [
       {
@@ -1015,13 +1015,89 @@
           "ko": "사용자가 끝낼 수 있는 가장 작은 핵심 과업에서 시작하고, 그 주변에 내비게이션과 화면 영역을 만듭니다."
         },
         "surfaceTags": [
-          "global"
+          "global",
+          "landing-page"
         ],
         "verify": [
           {
             "en": "A first-time user can complete the primary task without scanning unrelated regions.",
             "ja": "初回利用者が無関係な領域を探さず中心タスクを完了できるか確認します。",
             "ko": "처음 온 사용자가 무관한 영역을 훑지 않고 핵심 과업을 완료할 수 있는지 확인하세요."
+          }
+        ]
+      },
+      {
+        "aliases": [
+          "furniture check",
+          "centerpiece composition",
+          "anti-template opening"
+        ],
+        "apply": [
+          {
+            "en": "Name the centerpiece, then write down three structurally different openings — organizing device, what owns more than half the frame, where the eye lands first — with at least one carrying no running-text column, and compose the one the content justifies.",
+            "ja": "中心を決めたうえで、構造の異なるオープニングを三つ書き出します。それぞれ構成の軸、画面の半分以上を占める要素、視線が最初に落ちる場所を記し、うち一つは本文の列を持たない形にします。そのうえで内容が支持できる案を作ります。",
+            "ko": "중심을 먼저 정한 뒤 구조가 다른 오프닝 세 가지를 적으세요. 각각 구성 장치, 화면 절반 이상을 차지하는 요소, 시선이 처음 닿는 지점을 쓰고, 그중 하나는 본문 컬럼 없이 구성합니다. 그다음 콘텐츠가 뒷받침하는 안을 만드세요."
+          }
+        ],
+        "category": "intent-iteration",
+        "caution": {
+          "en": "Distinctiveness never outranks legibility, accessible contrast, or truthful claims; an original composition still owes the visitor an obvious first action.",
+          "ja": "独自性が可読性、アクセシブルな対比、正確な主張に優先することはありません。新しい構成でも、訪問者に最初の行動は明確に示す必要があります。",
+          "ko": "독창성이 가독성·접근 가능한 대비·사실에 맞는 주장보다 앞설 수는 없습니다. 새로운 구성이어도 방문자에게 첫 행동은 분명히 보여야 합니다."
+        },
+        "concernTags": [
+          "focus",
+          "balance",
+          "restraint"
+        ],
+        "designQuestion": {
+          "en": "Could this opening be pasted onto a competitor by swapping the logo and one noun?",
+          "ja": "ロゴと名詞ひとつを替えるだけで競合製品に貼れるオープニングになっていませんか。",
+          "ko": "로고와 명사 하나만 바꿔서 경쟁 제품에 그대로 옮길 수 있는 오프닝인가요?"
+        },
+        "id": "opening-earns-its-frame",
+        "name": {
+          "en": "Make the opening specific to this product",
+          "ja": "オープニングをこの製品固有のものにする",
+          "ko": "오프닝을 이 제품만의 것으로 만들기"
+        },
+        "phaseTags": [
+          "discover",
+          "structure",
+          "validation"
+        ],
+        "placement": [
+          {
+            "en": "Give the frame to what the product actually does; keep copy and controls subordinate to it rather than standing beside it as an equal column.",
+            "ja": "製品が実際に行うことに画面を与え、コピーや操作は対等な列として横に並べず従属させます。",
+            "ko": "제품이 실제로 하는 일에 화면을 내주고, 카피와 컨트롤은 그 옆에 대등한 컬럼으로 세우지 말고 아래에 두세요."
+          }
+        ],
+        "relatedDesignPrincipleIds": [
+          "core-task-first",
+          "attention-budget",
+          "resilient-imagery"
+        ],
+        "relatedUxPrincipleIds": [
+          "aesthetic-usability-effect",
+          "selective-attention",
+          "von-restorff-effect"
+        ],
+        "summary": {
+          "en": "Build the first screen around the product’s single most important object, action, or feeling, and make every region that owns real space demonstrate it.",
+          "ja": "最初の画面を、この製品で最も重要な対象・行動・感情ひとつを中心に構成し、広い面積を占める領域それぞれにそれを示させます。",
+          "ko": "첫 화면을 이 제품에서 가장 중요한 대상·행동·감정 하나를 중심으로 구성하고, 넓은 자리를 차지하는 영역마다 그것을 보여주게 만듭니다."
+        },
+        "surfaceTags": [
+          "landing-page",
+          "onboarding",
+          "content"
+        ],
+        "verify": [
+          {
+            "en": "Moving the opening onto a different product makes it nonsensical: the visual shows this product’s real input and output with realistic domain content, and the opening carries at most a headline, one short line, and one action.",
+            "ja": "オープニングを別の製品に移すと意味をなさないか確認します。ビジュアルがこの製品の実際の入力と結果を現実的なデータで示し、コピーは見出し一つ、短い一行、アクション一つを超えないことを確かめます。",
+            "ko": "오프닝을 다른 제품으로 옮기면 말이 되지 않는지 확인하세요. 비주얼이 이 제품의 실제 입력과 결과를 현실적인 도메인 데이터로 보여주고, 오프닝 카피는 헤드라인 하나, 짧은 한 줄, 액션 하나를 넘지 않아야 합니다."
           }
         ]
       },
@@ -1225,7 +1301,8 @@
           "ko": "강조를 한정된 예산처럼 다루고, 핵심이 앞서도록 보조 요소를 차분하게 만듭니다."
         },
         "surfaceTags": [
-          "global"
+          "global",
+          "landing-page"
         ],
         "verify": [
           {
@@ -1295,7 +1372,8 @@
           "ko": "중요한 것을 모두 키우기 전에 굵기·색·주변의 여백으로 위계를 만듭니다."
         },
         "surfaceTags": [
-          "global"
+          "global",
+          "landing-page"
         ],
         "verify": [
           {
@@ -1508,6 +1586,7 @@
           "ko": "제한된 간격 척도를 쓰고, 간격 크기로 요소가 같은 그룹인지 표현합니다."
         },
         "surfaceTags": [
+          "landing-page",
           "form",
           "data-table",
           "checkout",
@@ -1656,7 +1735,8 @@
           "ko": "짧고 이름 붙인 크기·굵기 세트로 화면마다 텍스트 역할을 예측 가능하게 반복합니다."
         },
         "surfaceTags": [
-          "global"
+          "global",
+          "landing-page"
         ],
         "verify": [
           {
@@ -2464,7 +2544,8 @@
           "ko": "출발·도착·진행·위계·상태 변화를 설명할 때만 동작을 쓰고 동등한 동작 축소 경로를 제공합니다."
         },
         "surfaceTags": [
-          "global"
+          "global",
+          "landing-page"
         ],
         "verify": [
           {
@@ -5620,6 +5701,24 @@
         },
         {
           "fix": {
+            "en": "For each selected principle, write down the placement decision it produced, the caution it carries, and how its check will be observed — then run that check on the built UI and record the outcome. Keep the evidence confidence label attached. A principle that produced no visible decision belongs out of the brief, not in a list.",
+            "ja": "選んだ原則ごとに、その原則が生んだ配置の判断、伴う注意点、検証をどう観察するかを書き、実装した画面で実際に検証して結果を残してください。エビデンス信頼度のラベルは付けたままにします。目に見える判断を生まなかった原則は、並べずにブリーフから外します。",
+            "ko": "고른 원칙마다 그 원칙이 만든 배치 결정, 함께 오는 주의점, 검증을 어떻게 관찰할지를 적고, 구현한 화면에서 그 검증을 실제로 돌린 뒤 결과를 남기세요. 근거 신뢰도 라벨은 붙인 채로 둡니다. 눈에 보이는 결정을 만들지 못한 원칙은 나열하지 말고 브리프에서 빼세요."
+          },
+          "id": "principle-as-decoration",
+          "pattern": {
+            "en": "Principles as decoration — named in the brief, never verified",
+            "ja": "飾りになった原則 — ブリーフに名前だけ書いて検証しない",
+            "ko": "장식이 된 원칙 — 브리프에 이름만 적고 검증하지 않음"
+          },
+          "why": {
+            "en": "Listing principle names in design.md looks rigorous while changing nothing: what actually alters the UI is the placement decision a principle produced, the caution it carries, and its observable check. The mirror failure is overclaiming — restating a contextual or contested principle as a law and using the label to end a design argument that real content, real tasks, and non-happy-path states should settle.",
+            "ja": "design.mdに原則名を並べるだけでは、丁寧に見えても画面は何も変わりません。UIを実際に変えるのは、その原則が生んだ配置の判断、伴う注意点、観察可能な検証基準です。逆方向の失敗は過剰な主張です。文脈依存や議論のある原則を法則のように断定し、実際の内容・タスク・非正常系で判断すべき議論を原則名で打ち切ることです。",
+            "ko": "design.md에 원칙 이름만 나열하면 꼼꼼해 보이지만 화면은 하나도 바뀌지 않습니다. UI를 실제로 바꾸는 것은 그 원칙이 만든 배치 결정, 함께 오는 주의점, 관찰 가능한 검증 기준입니다. 반대쪽 실패는 과잉 주장입니다. 맥락 의존이나 논쟁적인 원칙을 법칙처럼 단정하고, 실제 콘텐츠·과업·비정상 상태로 판단해야 할 논의를 원칙 이름으로 끝내 버리는 것입니다."
+          }
+        },
+        {
+          "fix": {
             "en": "End every implementation with a verification summary: commands run, viewports inspected, fonts loaded, console state, and remaining risks. Use the self-audit prompt on this page.",
             "ja": "すべての実装は検証要約で終えます: 実行コマンド、確認ビューポート、フォント読み込み、コンソール状態、残リスク。このページのself-auditプロンプトを使います。",
             "ko": "모든 구현은 검증 요약으로 마무리합니다: 실행 명령, 확인한 뷰포트, 폰트 로딩, 콘솔 상태, 남은 리스크. 이 페이지의 self-audit 프롬프트를 사용합니다."
@@ -6078,6 +6177,36 @@
             "en": "Behavioral checks",
             "ja": "動作検証",
             "ko": "동작 검증"
+          }
+        },
+        {
+          "id": "principles",
+          "items": [
+            {
+              "en": "every design principle selected by get_design_principle_plan appears in design.md with the placement decision it produced and its observable verification check — not just its name",
+              "ja": "get_design_principle_planで選んだ視覚デザイン原則が、名前だけでなくその原則が生んだ配置の判断と観察可能な検証基準までdesign.mdに残っている",
+              "ko": "get_design_principle_plan으로 고른 시각 디자인 원칙이 이름만이 아니라 그 원칙이 만든 배치 결정과 관찰 가능한 검증 기준까지 design.md에 남아 있음"
+            },
+            {
+              "en": "every UX principle selected by get_ux_principle_plan keeps its caution and its evidence confidence label (strong / contextual / contested); no contextual or contested principle is restated as a law",
+              "ja": "get_ux_principle_planで選んだUX原則ごとに注意点とエビデンス信頼度(strong・contextual・contested)が保たれ、文脈依存や議論のある原則を法則のように断定していない",
+              "ko": "get_ux_principle_plan으로 고른 UX 원칙마다 주의점과 근거 신뢰도(strong·contextual·contested)가 그대로 남아 있고, 맥락 의존·논쟁적 원칙을 법칙처럼 단정하지 않음"
+            },
+            {
+              "en": "each recorded verification check was actually run against the built UI, with the outcome written down (pass, fail, or not applicable and why)",
+              "ja": "記録した検証基準を実際の画面で確認し、結果(合格・不合格・非該当とその理由)を書き残している",
+              "ko": "기록한 검증 기준을 실제 구현 화면에서 확인했고, 결과(통과·실패·해당 없음과 그 이유)를 적어 둠"
+            },
+            {
+              "en": "no principle was applied at the cost of accessibility, safety, informed consent, or truthful feedback",
+              "ja": "アクセシビリティ、安全性、十分な同意、正確なフィードバックを犠牲にして適用した原則がない",
+              "ko": "접근성·안전·충분한 동의·사실에 맞는 피드백을 희생하면서 적용한 원칙이 없음"
+            }
+          ],
+          "title": {
+            "en": "Design & UX principle checks",
+            "ja": "デザイン・UX原則の検証",
+            "ko": "디자인·UX 원칙 검증"
           }
         },
         {
@@ -20594,6 +20723,7 @@
         },
         "surfaceTags": [
           "global",
+          "landing-page",
           "navigation",
           "form",
           "data-table"
@@ -20842,6 +20972,7 @@
         },
         "surfaceTags": [
           "global",
+          "landing-page",
           "navigation",
           "data-table",
           "checkout",
@@ -20926,6 +21057,7 @@
         },
         "surfaceTags": [
           "global",
+          "landing-page",
           "navigation",
           "form",
           "checkout"
@@ -21007,6 +21139,7 @@
           "ko": "의미 있는 그룹은 복잡한 정보를 더 적은 단위로 훑고 처리하게 해줍니다."
         },
         "surfaceTags": [
+          "landing-page",
           "content",
           "form",
           "data-table",
@@ -21092,6 +21225,7 @@
         },
         "surfaceTags": [
           "global",
+          "landing-page",
           "form",
           "onboarding",
           "developer-console"
@@ -21177,6 +21311,7 @@
         },
         "surfaceTags": [
           "global",
+          "landing-page",
           "navigation",
           "form",
           "settings",
@@ -21428,6 +21563,7 @@
           "ko": "그럴듯한 선택지가 너무 많으면 비교가 어려워지고 행동이 늦어지며 확신도 낮아집니다."
         },
         "surfaceTags": [
+          "landing-page",
           "navigation",
           "search",
           "form",
@@ -21510,6 +21646,7 @@
           "ko": "보이는 선택지의 수와 복잡성이 커질수록 결정 시간도 대체로 길어집니다."
         },
         "surfaceTags": [
+          "landing-page",
           "navigation",
           "search",
           "form",
@@ -21762,6 +21899,7 @@
         },
         "surfaceTags": [
           "global",
+          "landing-page",
           "navigation",
           "form",
           "checkout"
@@ -22257,6 +22395,7 @@
           "ko": "순서의 시작과 끝에 가까운 항목은 중간 항목보다 기억되기 쉬운 경우가 많습니다."
         },
         "surfaceTags": [
+          "landing-page",
           "navigation",
           "content",
           "checkout",

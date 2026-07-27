@@ -1,9 +1,9 @@
 {
   "catalogVersion": "0.3.0",
-  "contentHash": "sha256:d255bb57b374f07c3c83c5deb8f553e2c2cacc22782d9133d736fda442c90d1f",
+  "contentHash": "sha256:c20eab85984adc1e72230fc36dffe24568eb4c0aca7ed356df4437851821f447",
   "counts": {
     "components": 20,
-    "designPrinciples": 21,
+    "designPrinciples": 22,
     "motionPatterns": 29,
     "principles": 23,
     "productArchetypes": 14,

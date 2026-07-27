@@ -12,6 +12,8 @@ import { recommendDesignDirection } from '../src/recommendation/index.js';
 import { composeDesignTokens } from '../src/tokens/compile.js';
 import { compareDirections } from '../src/recommendation/compare.js';
 import { contrastRatio } from '../src/tokens/contrast.js';
+import { planUxPrinciples } from '../src/principles/planner.js';
+import { planDesignPrinciples } from '../src/design-principles/planner.js';
 import { SERVER_INSTRUCTIONS } from '../src/server-info.js';
 
 const repo = CatalogRepository.load();
@@ -98,6 +100,29 @@ describe('audit L12 — all seven workflow prompts render a non-empty user messa
       expect(text, name).toMatch(/webstylebook:\/\/|recommend_design_direction|get_design_principle_plan|get_ux_principle_plan|get_ui_state_plan|compare_design_directions|compose_design_tokens|anti-patterns/);
     }
   });
+
+  it('design-product spells the brief out — there is no "brief skeleton" resource to point at', async () => {
+    const res = await client.getPrompt({ name: 'design-product', arguments: args['design-product']! });
+    const text = (res.messages[0]?.content as { text?: string }).text ?? '';
+    expect(text).not.toMatch(/the full brief skeleton/);
+    for (const section of [
+      'intent', 'rejected directions', 'color ROLES', 'motion', 'UI-state coverage',
+      'accessibility', 'assumptions', 'verification checklist',
+    ]) {
+      expect(text, section).toContain(section);
+    }
+    expect(text).toMatch(/selected visual-design principles/);
+    expect(text).toMatch(/selected UX principles/);
+  });
+
+  it('the served manifest keeps the canonical CATALOG_DOMAINS order', async () => {
+    const res = await client.readResource({ uri: 'webstylebook://manifest' });
+    const served = JSON.parse((res.contents[0] as { text: string }).text);
+    const generated = JSON.parse(read('generated/manifest.v1.json'));
+    expect(served.domains).toEqual(generated.domains);
+    expect(served.counts.designPrinciples).toBe(generated.counts.designPrinciples);
+    expect(served.counts.principles).toBe(generated.counts.principles);
+  });
 });
 
 describe('UX-principle guidance is wired through server, skill, and agent fragments', () => {
@@ -118,6 +143,173 @@ describe('UX-principle guidance is wired through server, skill, and agent fragme
       expect(content, rel).toMatch(/contextual\s+(?:decision\s+)?prompts, not universal laws/i);
       expect(content, rel).toMatch(/Accessibility, safety, informed consent, and truthful feedback/i);
     }
+  });
+});
+
+describe('design-principle guidance is wired through server, skill, and agent fragments', () => {
+  it('on-init instructions name the planner and frame it as craft guidance, not a fixed recipe', () => {
+    expect(SERVER_INSTRUCTIONS).toContain('get_design_principle_plan');
+    expect(SERVER_INSTRUCTIONS).toMatch(/rather than a fixed recipe/i);
+  });
+
+  it('the skill and both fragments name the planner and its placement/verification output', () => {
+    for (const rel of [
+      'skill/web-stylebook-design/SKILL.md',
+      'skill/CLAUDE.md',
+      'skill/AGENTS.md',
+    ]) {
+      const content = read(rel);
+      expect(content, rel).toContain('get_design_principle_plan');
+      expect(content, rel).toMatch(/placement/i);
+      expect(content, rel).toMatch(/webstylebook:\/\/design-principles/);
+    }
+  });
+
+  it('the design.md brief in every layer carries the selected principles, not just the tool call', () => {
+    for (const rel of [
+      'skill/web-stylebook-design/SKILL.md',
+      'skill/CLAUDE.md',
+      'skill/AGENTS.md',
+    ]) {
+      const content = read(rel);
+      expect(content, rel).toMatch(/selected (visual-)?design principles/i);
+      expect(content, rel).toMatch(/selected UX principles/i);
+    }
+  });
+});
+
+describe('the closing gate checks that principles were applied, not just selected', () => {
+  it('the verification checklist carries a principles group with observable checks', () => {
+    const group = repo.policies.verification.find((g) => g.id === 'principles');
+    expect(group, 'policies/verification is missing the "principles" group').toBeDefined();
+    const items = JSON.stringify(group);
+    expect(items).toContain('get_design_principle_plan');
+    expect(items).toContain('get_ux_principle_plan');
+    expect(items).toMatch(/contested/);
+  });
+
+  it('every localized principles-group item is present in all three languages', () => {
+    const group = repo.policies.verification.find((g) => g.id === 'principles');
+    for (const item of group?.items ?? []) {
+      for (const lang of ['en', 'ko', 'ja'] as const) {
+        expect((item as Record<string, string>)[lang]?.length, lang).toBeGreaterThan(10);
+      }
+    }
+  });
+
+  it('the catalog carries the principle-as-decoration anti-pattern', () => {
+    const entry = repo.policies.antiPatterns.find((a) => a.id === 'principle-as-decoration');
+    expect(entry, 'policies/anti-patterns is missing principle-as-decoration').toBeDefined();
+    expect(JSON.stringify(entry)).toMatch(/never verified|검증하지 않음/);
+  });
+
+  it('the skill and both fragments route the self-audit through the principles group', () => {
+    for (const rel of [
+      'skill/web-stylebook-design/SKILL.md',
+      'skill/CLAUDE.md',
+      'skill/AGENTS.md',
+    ]) {
+      const content = read(rel);
+      expect(content, rel).toContain('webstylebook://policies/verification');
+      expect(content, rel).toMatch(/`principles` group/);
+    }
+  });
+});
+
+describe('the principle selectors are honestly represented', () => {
+  it('the compact list resources expose phaseTags — `phase` is a first-class tool selector', () => {
+    for (const entry of repo.listPrinciples()) {
+      expect(Array.isArray(entry.phaseTags), entry.id).toBe(true);
+      expect(entry.phaseTags.length, entry.id).toBeGreaterThan(0);
+    }
+    for (const entry of repo.listDesignPrinciples()) {
+      expect(Array.isArray(entry.phaseTags), entry.id).toBe(true);
+      expect(entry.phaseTags.length, entry.id).toBeGreaterThan(0);
+    }
+  });
+
+  it('a near-universal selector says so instead of reading as a targeted filter', () => {
+    // every UX principle carries the `validation` phase, so this filter narrows nothing
+    const ux = planUxPrinciples({ phase: 'validation' }, repo);
+    expect(ux.coverage.matching).toBe(ux.coverage.catalogTotal);
+    expect(ux.guidance[0]).toMatch(/did not narrow the catalog/);
+
+    const design = planDesignPrinciples({ phase: 'validation' }, repo);
+    expect(design.coverage.matching / design.coverage.catalogTotal).toBeGreaterThan(0.8);
+    expect(design.guidance[0]).toMatch(/did not narrow the catalog/);
+  });
+
+  it('a genuinely narrow selector carries no weak-selector warning', () => {
+    const narrow = planDesignPrinciples({ concerns: ['grouping'] }, repo);
+    expect(narrow.coverage.matching).toBeLessThan(narrow.coverage.catalogTotal * 0.9);
+    expect(narrow.guidance.join(' ')).not.toMatch(/did not narrow the catalog/);
+  });
+
+  it('stays quiet for a broad-but-ranked query — the warning means "no-op selector", not "many matches"', () => {
+    // `decision` is carried by 2 principles while `checkout` is carried by 12, so the match set is
+    // wide, but the ranking genuinely separates them. Warning at that point would be noise.
+    const ranked = planUxPrinciples({ outcomes: ['decision'], surface: 'checkout' }, repo);
+    expect(ranked.coverage.matching).toBeGreaterThan(ranked.coverage.catalogTotal * 0.8);
+    expect(ranked.coverage.matching).toBeLessThan(ranked.coverage.catalogTotal * 0.9);
+    expect(ranked.guidance.join(' ')).not.toMatch(/did not narrow the catalog/);
+    expect(ranked.principles[0]!.score).toBeGreaterThan(ranked.principles.at(-1)!.score);
+  });
+
+  it('explicit principleIds never trigger the weak-selector warning', () => {
+    const byId = planUxPrinciples({ principleIds: ['hicks-law'], phase: 'validation' }, repo);
+    expect(byId.guidance.join(' ')).not.toMatch(/did not narrow the catalog/);
+  });
+
+  it('the weak-selector warning is localized, not English leaking into ko/ja', () => {
+    expect(planUxPrinciples({ phase: 'validation', locale: 'ko' }, repo).guidance[0])
+      .toMatch(/좁히지 못했습니다/);
+    expect(planDesignPrinciples({ phase: 'validation', locale: 'ja' }, repo).guidance[0])
+      .toMatch(/絞り込めていません/);
+  });
+});
+
+describe('landing-page — the skill\'s lead surface — is actually covered by both catalogs', () => {
+  it('surface scoping does real work on a landing page instead of falling back to global', () => {
+    const ux = repo.listPrinciples().filter((p) => p.surfaceTags.includes('landing-page'));
+    const design = repo.listDesignPrinciples().filter((p) => p.surfaceTags.includes('landing-page'));
+    // it used to be 1 of 23 and 3 of 21 — the surface signal was effectively dead here
+    expect(ux.length).toBeGreaterThanOrEqual(8);
+    expect(design.length).toBeGreaterThanOrEqual(8);
+  });
+
+  it('a landing-page query surfaces landing-tagged principles above merely-global ones', () => {
+    const plan = planDesignPrinciples({ surface: 'landing-page', phase: 'structure' }, repo);
+    const top = plan.principles[0];
+    expect(top, 'expected at least one match').toBeDefined();
+    const detail = repo.getDesignPrinciple(top!.id);
+    expect(detail?.surfaceTags).toContain('landing-page');
+  });
+});
+
+describe('the opening furniture-check is queryable, not only prose in the skill', () => {
+  it('the catalog carries a design principle for composing the opening', () => {
+    const entry = repo.getDesignPrinciple('opening-earns-its-frame');
+    expect(entry, 'designPrinciples is missing opening-earns-its-frame').toBeDefined();
+    expect(entry?.surfaceTags).toContain('landing-page');
+    const text = JSON.stringify(entry);
+    expect(text).toMatch(/swapping the logo and one noun|명사 하나만 바꿔/);
+    expect(text).toMatch(/three structurally different openings|구조가 다른 오프닝 세 가지/);
+  });
+
+  it('it cross-links to the UX principles that explain why the default fails', () => {
+    const entry = repo.getDesignPrinciple('opening-earns-its-frame');
+    expect(entry?.relatedUxPrincipleIds.length).toBeGreaterThan(0);
+    for (const id of entry?.relatedUxPrincipleIds ?? []) {
+      expect(repo.getPrinciple(id), `dangling relatedUxPrincipleId ${id}`).toBeDefined();
+    }
+  });
+
+  it('get_design_principle_plan can actually reach it from a landing-page query', () => {
+    const plan = planDesignPrinciples(
+      { concerns: ['focus', 'balance', 'restraint'], surface: 'landing-page', phase: 'discover' },
+      repo,
+    );
+    expect(plan.principles.map((p) => p.id)).toContain('opening-earns-its-frame');
   });
 });
 

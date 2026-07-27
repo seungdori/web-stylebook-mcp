@@ -22,13 +22,17 @@ export interface MotionSummary {
 export interface ComponentSummary {
   id: string; category: string; name: string; resourceUri: string;
 }
+// phaseTags are carried on the compact lists too: `phase` is a first-class selector on
+// get_ux_principle_plan / get_design_principle_plan, so an agent browsing the list resource
+// must be able to pre-filter by it without fetching every detail resource.
 export interface PrincipleSummary {
   id: string; category: string; name: string; summary: string;
-  outcomeTags: string[]; surfaceTags: string[]; confidence: string; resourceUri: string;
+  outcomeTags: string[]; surfaceTags: string[]; phaseTags: string[];
+  confidence: string; resourceUri: string;
 }
 export interface DesignPrincipleSummary {
   id: string; category: string; name: string; summary: string;
-  concernTags: string[]; surfaceTags: string[]; resourceUri: string;
+  concernTags: string[]; surfaceTags: string[]; phaseTags: string[]; resourceUri: string;
 }
 export interface SurfaceSummary {
   id: string; name: string; requiredStateIds: string[]; recommendedStateIds: string[]; resourceUri: string;
@@ -144,6 +148,7 @@ export class CatalogRepository {
       summary: text(p.summary, locale),
       outcomeTags: p.outcomeTags,
       surfaceTags: p.surfaceTags,
+      phaseTags: p.phaseTags,
       confidence: p.evidence.confidence,
       resourceUri: `webstylebook://principles/${p.id}`,
     }));
@@ -156,6 +161,7 @@ export class CatalogRepository {
       summary: text(p.summary, locale),
       concernTags: p.concernTags,
       surfaceTags: p.surfaceTags,
+      phaseTags: p.phaseTags,
       resourceUri: `webstylebook://design-principles/${p.id}`,
     }));
   }

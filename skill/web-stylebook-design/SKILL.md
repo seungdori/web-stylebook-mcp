@@ -83,6 +83,15 @@ to scaffold a page from memory, stop and run step 1 first.
    `…/anti-patterns` — including the opening's **furniture-check** (below): if the visual is generic
    furniture (a stock photo, an abstract shape, or a card you could paste onto another product)
    rather than a bespoke product demonstration, or the copy column is the full quartet, recompose.
+   Do not skip the checklist's **`principles` group**: run each principle's recorded verification
+   check against the built UI and write down the outcome (pass / fail / n-a + why). A principle name
+   in `design.md` with no placement decision and no observed check is the `principle-as-decoration`
+   anti-pattern — verify it or drop it. Keep `contextual` / `contested` labels intact; never let a
+   principle override accessibility, safety, informed consent, or truthful feedback.
+   *This inline pass is your job on every build.* The server also ships three deeper audits as MCP
+   **prompts** — `audit-design-direction`, `audit-design-principles`, `audit-ux-principles`. Those
+   are slash commands the **user** invokes, not tools you can call, so don't wait on them: do the
+   inline audit yourself, and mention the prompts when a review deeper than your own is warranted.
 
 ## Active design — compose, don't recolor
 

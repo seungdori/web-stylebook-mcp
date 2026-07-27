@@ -25,16 +25,26 @@ dashboard, form, checkout, chat, developer console), call the **`web-stylebook`*
    answers or says to use your judgment. Don't silently assume.
 5. `get_design_principle_plan` with the layout concerns, matching surface, and design phase. Use
    its placement, apply, verify, and caution guidance as a practical craft review, not a fixed recipe.
+   Read `webstylebook://design-principles/{id}` only for the entries it selected.
 6. `get_ux_principle_plan` with intended outcomes, matching surface, and design phase. Use its
    questions, apply/verify checks, cautions, and evidence confidence; treat principles as contextual
    prompts, not universal laws. Accessibility, safety, informed consent, and truthful feedback win.
+   Read `webstylebook://principles/{id}` only for the entries it selected.
 7. `get_ui_state_plan` for each surface and implement required + recommended states (respect
    every `mustNot`).
 8. `compose_design_tokens` for a starting token set; obey the contrast warnings.
 9. Write `design.md` using the confirmed decisions and returned design/UX/state/token contracts
    (intent, color *roles*, type roles, layout, motion use/avoid, UI-state coverage, a11y,
-   anti-patterns, assumptions, verification), with no empty sections; then implement.
-10. Self-audit against `webstylebook://policies/verification`.
+   anti-patterns, assumptions, verification) - plus **selected visual-design principles**, each with
+   the placement decision it produced and its observable verification check, and
+   **selected UX principles**, each with its caution and evidence confidence label.
+   No empty sections; then implement.
+10. Self-audit against `webstylebook://policies/verification` - including its `principles` group:
+   run each recorded principle check against the built UI and write down the outcome. A principle
+   name listed without a placement decision and an observed check is decoration; drop it or verify
+   it. Never restate a `contextual` or `contested` principle as a law. Do this inline yourself -
+   the `audit-design-direction`, `audit-design-principles`, and `audit-ux-principles` prompts are
+   deeper audits the *user* invokes, not tools you can call.
 
 **Compose, don't recolor.** Tokens are scalars, not a design. Swapping a token block over one
 layout is a reskin and is not acceptable. The chosen style is a starting tone, not a layout mold:

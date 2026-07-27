@@ -6,10 +6,41 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
-## [0.3.0] — 2026-07-26
+## [0.3.0] — 2026-07-28
 
 ### Added
-- A separate visual-design-principles domain with 21 independently authored placement,
+
+- **A closing gate for the principle catalogs.** `get_design_principle_plan` and
+  `get_ux_principle_plan` are only half the story if nothing checks that their output was used, so
+  `webstylebook://policies/verification` carries a `principles` group (4 items, en/ko/ja) the
+  end-of-workflow self-audit walks. Each selected design principle must
+  appear in `design.md` with the placement decision it produced *and* its observable verification
+  check; each selected UX principle must keep its caution and its `strong` / `contextual` /
+  `contested` label, with no contextual or contested principle restated as a law; each recorded
+  check must actually have been run against the built UI with the outcome written down; and no
+  principle may be applied at the cost of accessibility, safety, informed consent, or truthful
+  feedback.
+- **`principle-as-decoration` anti-pattern.** Names the two mirror failures — listing principle
+  names in the brief without the placement decision, caution, or observed check, and overclaiming by
+  restating a contextual/contested principle as a law to end a design argument that real content,
+  real tasks, and non-happy-path states should settle.
+- **`opening-earns-its-frame` design principle** (22nd entry). The project's most opinionated
+  guidance — derive the centerpiece, enumerate three structurally-different openings, run the
+  furniture-check — existed only as prose in the skill and policies, so `get_design_principle_plan`
+  could never surface it. It is now a first-class catalog entry with placement, apply, verify, and
+  caution guidance, cross-linked to `aesthetic-usability-effect`, `selective-attention`, and
+  `von-restorff-effect`.
+- **Weak-selector guidance on both principle plans.** `phase: validation` is carried by every UX
+  principle and all but one design principle, so a query built from it matched almost the whole
+  catalog while reading like a targeted filter. When a selection covers ≥90% of the catalog, the
+  plan now leads its `guidance` with a localized note saying the selectors did not narrow anything
+  and the result is relevance ranking — narrow by concerns/outcomes or pass explicit `principleIds`.
+  The threshold deliberately flags no-op selectors only: a broad-but-ranked query (a rare outcome
+  paired with a common surface) stays quiet because its ranking does real work.
+- `phaseTags` on the compact `webstylebook://principles` and `webstylebook://design-principles` list
+  resources. `phase` is a first-class tool selector, so browsing the list without it forced a detail
+  fetch per entry just to pre-filter.
+- A separate visual-design-principles domain with 22 independently authored placement,
   application, verification, and misuse guides across intent and iteration, semantic hierarchy,
   adaptive layout and density, localization, tokens and themes, accessible interaction, and
   complete states and recovery.
@@ -64,7 +95,43 @@ All notable changes to this project are documented here. The format follows
   compose the components the brief needs and adapt the style to fit, never a generic "page in style X."
 - `publish.yml` GitHub Actions workflow: build + test + publish to npm on a `v*` tag (with provenance).
 
+### Changed
+
+- The skill and both agent fragments route the self-audit through the new `principles` group, and
+  the `design.md` skeleton in `skill/CLAUDE.md` / `skill/AGENTS.md` now names the selected
+  visual-design principles (with placement + verification) and UX principles (with cautions +
+  evidence confidence) explicitly, matching `SKILL.md`. Both fragments also point at
+  `webstylebook://design-principles/{id}` and `webstylebook://principles/{id}` for selected entries.
+- **`landing-page` is a first-class surface in both catalogs.** The skill leads with the landing
+  surface, so `surface: 'landing-page'` has to do real work rather than collapsing to the `global`
+  fallback: 11 of 23 UX principles (`von-restorff-effect`, `selective-attention`, `hicks-law`,
+  `choice-overload`, `jakobs-law`, `mental-model`, `serial-position-effect`, `chunking`,
+  `cognitive-load`, `law-of-proximity`, `aesthetic-usability-effect`) and 10 of 22 design principles
+  are tagged for it — chosen where a landing page is a genuine headline use case, not blanket-tagged.
+- The `design-product` prompt enumerates every `design.md` section instead of pointing at a "full
+  brief skeleton" that exists nowhere in the catalog — prompt-only clients are now self-contained.
+  `audit-design-direction` walks the verification groups including `principles`, and names the two
+  dedicated principle audits.
+- The skill and both fragments state plainly that the three audit prompts are **user-invoked slash
+  commands, not callable tools**, so the agent runs the inline audit itself rather than deferring to
+  a prompt it can never reach.
+- `webstylebook://manifest` now lists domains in the canonical `CATALOG_DOMAINS` order, matching
+  `generated/manifest.v1.json` (previously `design-principles` and `principles` were swapped).
+- Both README diagrams show all six tools, and the without/with table gains craft and
+  UX-evidence rows.
+- Bundled catalog snapshot: `sha256:c20eab85…`.
+
 ### Fixed
+
+- Design-principle wiring had no regression test, unlike UX principles — `get_design_principle_plan`
+  could have been dropped from `SKILL.md`, `CLAUDE.md`, and `AGENTS.md` with the whole suite still
+  green. Added the mirror-image coverage plus locks on the new verification group and anti-pattern.
+- Neither fragment pointed at `webstylebook://design-principles/{id}` or `webstylebook://principles/{id}`,
+  so a skill-less host had no instruction to read the selected entries at all.
+- Test coverage 144 → 164, locking every fix above: phaseTags on both list resources, the
+  weak-selector note (including its ko/ja wording and the cases that must *not* trigger it),
+  landing-page coverage floors, the opening principle's reachability from a real query and its
+  cross-link integrity, the enumerated brief in `design-product`, and manifest domain parity.
 - Runtime and package-lock metadata now match the published package name and `0.3.0` version.
 
 ## [0.1.1] — 2026-06-23

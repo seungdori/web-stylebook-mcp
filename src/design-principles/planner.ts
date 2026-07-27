@@ -64,6 +64,10 @@ export class DesignPrinciplePlanError extends Error {
 const DEFAULT_LIMIT = 6;
 const MAX_LIMIT = 12;
 
+// Mirrors the UX planner: a query built only from near-universal tags (e.g. the `validation` phase)
+// matches almost the whole catalog, so ranking — not filtering — produced the result. Say so.
+const WEAK_SELECTOR_RATIO = 0.9;
+
 const labels: Record<Lang, {
   requested: string;
   concern: string;
@@ -71,6 +75,7 @@ const labels: Record<Lang, {
   globalSurface: string;
   phase: string;
   guidance: string[];
+  weakSelectors: (matching: number, total: number) => string;
 }> = {
   en: {
     requested: 'requested directly',
@@ -83,6 +88,7 @@ const labels: Record<Lang, {
       'Preserve semantic order, accessibility, responsive behavior, and truthful state communication when applying visual guidance.',
       'Verify placement with real content, edge cases, and target viewport sizes before treating the composition as complete.',
     ],
+    weakSelectors: (matching, total) => `These selectors matched ${matching} of ${total} principles, so they did not narrow the catalog — the returned set reflects relevance ranking, not a targeted filter. Add more specific concerns, or pass explicit principleIds, when you need a precise set.`,
   },
   ko: {
     requested: '직접 지정됨',
@@ -95,6 +101,7 @@ const labels: Record<Lang, {
       '시각 지침을 적용할 때 의미 구조, 접근성, 반응형 동작, 상태의 정확한 전달을 보존하세요.',
       '구성이 완성되었다고 판단하기 전에 실제 콘텐츠, 경계 사례, 목표 화면 크기에서 배치를 검증하세요.',
     ],
+    weakSelectors: (matching, total) => `이 조건은 원칙 ${total}개 중 ${matching}개와 일치해서 카탈로그를 거의 좁히지 못했습니다. 결과는 필터링이 아니라 관련성 순위에 따른 것입니다. 정확한 집합이 필요하면 더 구체적인 concerns를 넣거나 principleIds를 직접 지정하세요.`,
   },
   ja: {
     requested: '直接指定',
@@ -107,6 +114,7 @@ const labels: Record<Lang, {
       '視覚的な指針を適用するときも、意味の順序、アクセシビリティ、レスポンシブ動作、正確な状態伝達を保ってください。',
       '構成を完成とする前に、実際のコンテンツ、境界ケース、対象画面サイズで配置を検証してください。',
     ],
+    weakSelectors: (matching, total) => `この条件は原則${total}件のうち${matching}件に一致し、カタログをほとんど絞り込めていません。返る集合はフィルタではなく関連度の順位によるものです。厳密な集合が必要なら、より具体的なconcernsを加えるか、principleIdsを直接指定してください。`,
   },
 };
 
@@ -243,6 +251,12 @@ export function planDesignPrinciples(
       ));
   }
 
+  const catalogTotal = repo.data.designPrinciples.length;
+  const guidance = [...labels[locale].guidance];
+  if (!principleIds.length && matching.length >= Math.ceil(catalogTotal * WEAK_SELECTOR_RATIO)) {
+    guidance.unshift(labels[locale].weakSelectors(matching.length, catalogTotal));
+  }
+
   return {
     query: {
       principleIds,
@@ -256,8 +270,8 @@ export function planDesignPrinciples(
     coverage: {
       selected: Math.min(matching.length, limit),
       matching: matching.length,
-      catalogTotal: repo.data.designPrinciples.length,
+      catalogTotal,
     },
-    guidance: labels[locale].guidance,
+    guidance,
   };
 }
