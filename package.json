@@ -6,7 +6,7 @@
   "license": "MIT",
   "author": { "name": "Web Stylebook", "url": "https://webstylebook.com" },
   "bin": {
-    "web-stylebook-mcp": "./dist/cli.js"
+    "web-stylebook-mcp": "dist/cli.js"
   },
   "main": "./dist/server.js",
   "types": "./dist/server.d.ts",
