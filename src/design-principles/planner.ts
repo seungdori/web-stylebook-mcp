@@ -31,6 +31,7 @@ export interface PlannedDesignPrinciple {
   caution: string;
   relatedDesignPrincipleIds: string[];
   relatedUxPrincipleIds: string[];
+  references: DesignPrinciple['references'];
   resourceUri: string;
 }
 
@@ -205,6 +206,7 @@ function materialize(
     caution: text(principle.caution, locale),
     relatedDesignPrincipleIds: principle.relatedDesignPrincipleIds,
     relatedUxPrincipleIds: principle.relatedUxPrincipleIds,
+    references: principle.references,
     resourceUri: `webstylebook://design-principles/${principle.id}`,
   };
 }

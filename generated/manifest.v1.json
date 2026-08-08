@@ -1,10 +1,10 @@
 {
-  "catalogVersion": "0.4.0",
-  "contentHash": "sha256:ec0bd5ebd98fac99b5508bd8057d20b8f118c17c9fc1a7dc4a6bdf73c973ad51",
+  "catalogVersion": "0.5.0",
+  "contentHash": "sha256:5e8683ef698ef3e8cb1f49d56f9112feac4c790cdf925e276be543f2cad957da",
   "counts": {
-    "auditChecks": 38,
+    "auditChecks": 41,
     "components": 20,
-    "designPrinciples": 22,
+    "designPrinciples": 25,
     "motionPatterns": 29,
     "principles": 23,
     "productArchetypes": 14,

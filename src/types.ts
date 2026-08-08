@@ -312,6 +312,12 @@ export interface DesignPrincipleCategoryDef {
   description: LocalizedText;
 }
 
+export interface DesignPrincipleReference {
+  title: string;
+  publisher: string;
+  url: string;
+}
+
 export interface DesignPrinciple {
   id: string;
   name: LocalizedText;
@@ -328,6 +334,7 @@ export interface DesignPrinciple {
   phaseTags: UxPhase[];
   relatedDesignPrincipleIds: string[];
   relatedUxPrincipleIds: string[];
+  references: DesignPrincipleReference[];
 }
 
 export interface ProductArchetype {

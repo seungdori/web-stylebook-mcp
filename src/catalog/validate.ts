@@ -322,6 +322,18 @@ export function validateLoaded(repo: CatalogRepository): ValidateReport {
       `design principle ${principle.id} relatedUxPrincipleIds`,
       errors,
     );
+    if (!Array.isArray(principle.references)) {
+      errors.push(`design principle ${principle.id} missing references array`);
+    } else {
+      for (const reference of principle.references) {
+        if (!reference.title?.trim() || !reference.publisher?.trim()) {
+          errors.push(`design principle ${principle.id} has incomplete reference metadata`);
+        }
+        if (!reference.url?.startsWith('https://')) {
+          errors.push(`design principle ${principle.id} reference must use HTTPS`);
+        }
+      }
+    }
   }
 
   const auditIds = new Set<string>();

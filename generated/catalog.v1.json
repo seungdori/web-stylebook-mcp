@@ -1,6 +1,6 @@
 {
-  "catalogVersion": "0.4.0",
-  "contentHash": "sha256:ec0bd5ebd98fac99b5508bd8057d20b8f118c17c9fc1a7dc4a6bdf73c973ad51",
+  "catalogVersion": "0.5.0",
+  "contentHash": "sha256:5e8683ef698ef3e8cb1f49d56f9112feac4c790cdf925e276be543f2cad957da",
   "data": {
     "componentCategories": [
       {
@@ -1001,6 +1001,7 @@
             "ko": "전역 장식을 더하기 전에 핵심 입력·대상·결과를 끊김 없는 한 경로에 배치하세요."
           }
         ],
+        "references": [],
         "relatedDesignPrincipleIds": [
           "task-sized-composition",
           "attention-budget"
@@ -1073,6 +1074,13 @@
             "ko": "제품이 실제로 하는 일에 화면을 내주고, 카피와 컨트롤은 그 옆에 대등한 컬럼으로 세우지 말고 아래에 두세요."
           }
         ],
+        "references": [
+          {
+            "publisher": "The Crit",
+            "title": "Does your AI-built app look vibe-coded?",
+            "url": "https://thecrit.co/resources/does-your-ai-built-app-look-vibe-coded"
+          }
+        ],
         "relatedDesignPrincipleIds": [
           "core-task-first",
           "attention-budget",
@@ -1103,14 +1111,94 @@
       },
       {
         "aliases": [
+          "proof near promise",
+          "claim evidence",
+          "credible product proof"
+        ],
+        "apply": [
+          {
+            "en": "Inventory promises, metrics, comparisons, and superlatives; connect each to real evidence, qualify its boundary, or remove it when no support exists.",
+            "ja": "約束、数値、比較、最上級表現を棚卸しし、それぞれを実際の根拠に結び、範囲を示すか、支えられなければ削除します。",
+            "ko": "약속·수치·비교·최상급 표현을 목록화하고, 각각을 실제 근거와 연결해 한계를 밝히거나 뒷받침할 수 없으면 제거하세요."
+          }
+        ],
+        "category": "intent-iteration",
+        "caution": {
+          "en": "Evidence should answer the claim, not merely add logos, decorative dashboards, or unrelated numbers that imitate authority.",
+          "ja": "根拠は主張に答える必要があります。権威を装うロゴ、装飾用ダッシュボード、無関係な数値を足してはいけません。",
+          "ko": "근거는 주장을 실제로 설명해야 합니다. 권위 있어 보이기 위한 로고·장식용 대시보드·무관한 수치를 덧붙이지 마세요."
+        },
+        "concernTags": [
+          "focus",
+          "scanability",
+          "resilience"
+        ],
+        "designQuestion": {
+          "en": "What can a person inspect here to decide whether this promise is true for their situation?",
+          "ja": "この約束が自分の状況でも正しいか判断するために、ここで何を確認できますか。",
+          "ko": "이 약속이 자신의 상황에도 사실인지 판단하려면 여기서 무엇을 직접 확인할 수 있나요?"
+        },
+        "id": "evidence-near-claim",
+        "name": {
+          "en": "Put evidence beside the claim",
+          "ja": "主張のそばに根拠を置く",
+          "ko": "주장 곁에 근거 두기"
+        },
+        "phaseTags": [
+          "content",
+          "validation"
+        ],
+        "placement": [
+          {
+            "en": "Place the strongest relevant artifact, example, method, source, or constraint in the same scan group as the claim it supports.",
+            "ja": "最も関連する成果物、例、方法、出典、制約を、それが支える主張と同じ走査範囲に置きます。",
+            "ko": "가장 관련 있는 결과물·예시·방법·출처·제약을 그것이 뒷받침하는 주장과 같은 훑기 영역에 배치하세요."
+          }
+        ],
+        "references": [
+          {
+            "publisher": "The Crit",
+            "title": "Does your AI-built app look vibe-coded?",
+            "url": "https://thecrit.co/resources/does-your-ai-built-app-look-vibe-coded"
+          }
+        ],
+        "relatedDesignPrincipleIds": [
+          "opening-earns-its-frame",
+          "explicit-labels-and-semantics",
+          "complete-state-model"
+        ],
+        "relatedUxPrincipleIds": [
+          "aesthetic-usability-effect",
+          "mental-model"
+        ],
+        "summary": {
+          "en": "Pair important promises with nearby, inspectable evidence so visual polish does not have to carry credibility by itself.",
+          "ja": "重要な約束の近くに確認できる根拠を置き、見た目の完成度だけに信頼を担わせないようにします。",
+          "ko": "중요한 약속 곁에 직접 확인할 수 있는 근거를 두어 시각적 완성도가 혼자 신뢰를 떠맡지 않게 합니다."
+        },
+        "surfaceTags": [
+          "landing-page",
+          "onboarding",
+          "content"
+        ],
+        "verify": [
+          {
+            "en": "Every material claim has adjacent evidence or an explicit qualification; links resolve, examples are real, limits stay visible, and no metric, customer quote, or outcome was invented.",
+            "ja": "重要な主張ごとに近接する根拠または明示的な限定があり、リンクと例が実在し、制約が見え、数値、顧客の声、成果を捏造していないか確認します。",
+            "ko": "중요한 주장마다 가까운 근거 또는 명시적인 한계 설명이 있고, 링크와 예시가 실제로 열리며, 제약이 보이고, 수치·고객 인용·성과를 만들어내지 않았는지 확인하세요."
+          }
+        ]
+      },
+      {
+        "aliases": [
           "progressive fidelity",
           "detail follows certainty"
         ],
         "apply": [
           {
-            "en": "Review in passes: structure, hierarchy, spacing, type, color, depth, then finishing detail.",
-            "ja": "構造、階層、余白、文字、色、奥行き、仕上げの順に分けて確認します。",
-            "ko": "구조→위계→간격→글자→색→깊이→마감 순서로 나누어 검토하세요."
+            "en": "Review in passes—structure, hierarchy, spacing, type, color, depth, then finish—and keep a reversible before/after comparison while decisions are still moving.",
+            "ja": "構造、階層、余白、文字、色、奥行き、仕上げの順に確認し、判断が動く間は前後を戻して比較できる状態を保ちます。",
+            "ko": "구조→위계→간격→글자→색→깊이→마감 순서로 나누어 검토하고, 결정이 바뀌는 동안에는 이전·이후 화면을 되돌려 비교할 수 있게 유지하세요."
           }
         ],
         "category": "intent-iteration",
@@ -1147,6 +1235,13 @@
             "ko": "불확실한 영역은 개략적으로 두고, 과업과 콘텐츠가 안정된 곳에만 완성된 디테일을 배치하세요."
           }
         ],
+        "references": [
+          {
+            "publisher": "Linear",
+            "title": "Behind the latest design refresh",
+            "url": "https://linear.app/now/behind-the-latest-design-refresh"
+          }
+        ],
         "relatedDesignPrincipleIds": [
           "core-task-first",
           "bounded-choice-system"
@@ -1165,9 +1260,9 @@
         ],
         "verify": [
           {
-            "en": "Removing color and decoration still leaves the intended order and task understandable.",
-            "ja": "色と装飾を外しても、読む順序とタスクが理解できるか確認します。",
-            "ko": "색과 장식을 제거해도 읽는 순서와 과업이 이해되는지 확인하세요."
+            "en": "Side-by-side views still show the intended order without decoration, and stress views—long text, dense data, empty and error states, narrow widths—do not reverse the decision.",
+            "ja": "前後を並べ、装飾を外しても読順が明確で、長文、高密度データ、空、エラー、狭幅でも判断が崩れないか確認します。",
+            "ko": "이전·이후 화면을 나란히 놓고 장식을 제거해도 읽는 순서가 분명하며, 긴 문구·고밀도 데이터·빈 상태·오류·좁은 화면에서도 그 결정이 무너지지 않는지 확인하세요."
           }
         ]
       },
@@ -1217,6 +1312,7 @@
             "ko": "의미 토큰을 제어 대상 역할 가까이에 두고 테마·밀도·접근성 모드를 명시하세요."
           }
         ],
+        "references": [],
         "relatedDesignPrincipleIds": [
           "fidelity-follows-certainty",
           "relational-spacing",
@@ -1249,9 +1345,9 @@
         ],
         "apply": [
           {
-            "en": "Rank every visible region as primary, supporting, or contextual and assign contrast accordingly.",
-            "ja": "見える領域を主要・補助・文脈に分類し、それに応じた対比を与えます。",
-            "ko": "보이는 모든 영역을 핵심·보조·맥락으로 등급화하고 그에 맞는 대비를 부여하세요."
+            "en": "Rank every visible region as primary, supporting, or contextual and assign contrast accordingly; once navigation has established location, let it recede behind the work area.",
+            "ja": "見える領域を主要・補助・文脈に分類して対比を割り当て、ナビゲーションが現在地を示した後は作業領域より静かに退かせます。",
+            "ko": "보이는 모든 영역을 핵심·보조·맥락으로 등급화해 대비를 부여하고, 내비게이션이 현재 위치를 알려준 뒤에는 작업 영역보다 차분하게 물러나게 하세요."
           }
         ],
         "category": "hierarchy-semantics",
@@ -1287,6 +1383,13 @@
             "ko": "핵심 행동이나 정보를 가장 강한 읽기 경로에 두고, 맥락 정보는 옆이나 뒤에 배치하세요."
           }
         ],
+        "references": [
+          {
+            "publisher": "Linear",
+            "title": "Behind the latest design refresh",
+            "url": "https://linear.app/now/behind-the-latest-design-refresh"
+          }
+        ],
         "relatedDesignPrincipleIds": [
           "contrast-before-scale",
           "explicit-labels-and-semantics"
@@ -1306,9 +1409,9 @@
         ],
         "verify": [
           {
-            "en": "A five-second glance and a grayscale view produce the same top three reading targets.",
-            "ja": "5秒の一瞥とグレースケール表示で、上位三つの注視対象が一致するか確認します。",
-            "ko": "5초 훑어보기와 회색조 화면에서 상위 세 읽기 대상이 같은지 확인하세요."
+            "en": "A five-second glance and grayscale view produce the same top three reading targets, with the work area leading after orientation and repeated chrome never competing with the current task.",
+            "ja": "5秒の一瞥とグレースケールで上位三つの対象が一致し、現在地を把握した後は作業領域が先に立ち、反復するクロームが現在のタスクと競合しないか確認します。",
+            "ko": "5초 훑어보기와 회색조 화면에서 상위 세 읽기 대상이 같고, 위치를 파악한 뒤에는 작업 영역이 앞서며 반복되는 크롬이 현재 과업과 경쟁하지 않는지 확인하세요."
           }
         ]
       },
@@ -1358,6 +1461,7 @@
             "ko": "관련 텍스트의 크기는 가깝게 유지하고 굵기·톤·간격으로 역할을 구분하세요."
           }
         ],
+        "references": [],
         "relatedDesignPrincipleIds": [
           "attention-budget",
           "redundant-state-signals"
@@ -1429,6 +1533,7 @@
             "ko": "라벨은 식별 대상 값이나 컨트롤 옆에, 설명은 결정 전에, 오류는 해당 필드 옆에 배치하세요."
           }
         ],
+        "references": [],
         "relatedDesignPrincipleIds": [
           "attention-budget",
           "align-for-reading"
@@ -1454,6 +1559,182 @@
             "en": "New users and assistive technology identify the same control, state, unit, consequence, and group relationship without guessing.",
             "ja": "新規利用者と支援技術が、同じ操作、状態、単位、結果、グループ関係を推測なく識別できるか確認します。",
             "ko": "새 사용자와 보조 기술이 같은 컨트롤·상태·단위·결과·그룹 관계를 추측 없이 식별하는지 확인하세요."
+          }
+        ]
+      },
+      {
+        "aliases": [
+          "navigation contract",
+          "orientation and destination",
+          "route versus panel"
+        ],
+        "apply": [
+          {
+            "en": "Use route-changing controls when URL, history, refresh, or deep-link behavior matters; use local controls for in-place changes, and preserve the same labels, destinations, order, and focus logic when navigation collapses on narrow screens.",
+            "ja": "URL、履歴、再読込、深いリンクが重要なら経路を変える操作を、同じ場所での変化にはローカル操作を使います。狭幅で折り畳んでもラベル、移動先、順序、focusの論理を保ちます。",
+            "ko": "URL·기록·새로고침·딥링크가 중요하면 경로를 바꾸는 컨트롤을, 제자리 변화에는 로컬 컨트롤을 사용하세요. 좁은 화면에서 내비게이션이 접혀도 라벨·목적지·순서·포커스 논리는 유지하세요."
+          }
+        ],
+        "category": "hierarchy-semantics",
+        "caution": {
+          "en": "Do not make unrelated mechanisms look identical: a route, an expandable hierarchy, an in-page panel, and a filter can share styling only when their behavior remains unmistakable.",
+          "ja": "経路移動、階層展開、ページ内パネル、フィルターの異なる動作を見分けにくくしてはいけません。見た目を共有しても挙動の差は明確にします。",
+          "ko": "경로 이동·계층 펼치기·페이지 안 패널·필터처럼 다른 동작을 구분할 수 없게 만들지 마세요. 스타일을 공유해도 행동 차이는 분명해야 합니다."
+        },
+        "concernTags": [
+          "scanability",
+          "consistency",
+          "responsiveness",
+          "accessibility"
+        ],
+        "designQuestion": {
+          "en": "Before activating an item, can a person predict the destination, scope of change, and way back?",
+          "ja": "項目を実行する前に、移動先、変化の範囲、戻り方を予測できますか。",
+          "ko": "항목을 실행하기 전에 이동할 곳·바뀌는 범위·돌아오는 방법을 예측할 수 있나요?"
+        },
+        "id": "navigation-preserves-context",
+        "name": {
+          "en": "Make navigation reveal place and consequence",
+          "ja": "ナビゲーションで現在地と結果を示す",
+          "ko": "내비게이션이 위치와 결과를 드러내게 하기"
+        },
+        "phaseTags": [
+          "structure",
+          "interaction",
+          "validation"
+        ],
+        "placement": [
+          {
+            "en": "Keep the current location and sibling destinations together, place local view controls beside the content they switch, and keep filters beside the results they constrain.",
+            "ja": "現在地と同階層の移動先をまとめ、ローカル表示の切替は変わる内容の近くに、フィルターは絞り込む結果の近くに置きます。",
+            "ko": "현재 위치와 같은 단계의 목적지를 함께 두고, 로컬 보기 전환은 바뀌는 콘텐츠 가까이에, 필터는 제한하는 결과 가까이에 배치하세요."
+          }
+        ],
+        "references": [
+          {
+            "publisher": "Primer",
+            "title": "Navigation UI patterns",
+            "url": "https://primer.style/product/ui-patterns/navigation/"
+          }
+        ],
+        "relatedDesignPrincipleIds": [
+          "explicit-labels-and-semantics",
+          "task-sized-composition",
+          "multi-input-operability",
+          "attention-budget"
+        ],
+        "relatedUxPrincipleIds": [
+          "mental-model",
+          "jakobs-law",
+          "cognitive-load"
+        ],
+        "summary": {
+          "en": "Navigation should show where people are, where they can go, and whether activation changes location, a local view, or a filter.",
+          "ja": "ナビゲーションは現在地、行ける場所、操作で変わる範囲が新しい場所かローカル表示かフィルターかを示します。",
+          "ko": "내비게이션은 현재 위치·갈 수 있는 곳·실행 시 바뀌는 범위가 새 위치인지 로컬 보기인지 필터인지를 보여줘야 합니다."
+        },
+        "surfaceTags": [
+          "navigation",
+          "settings",
+          "content",
+          "data-table"
+        ],
+        "verify": [
+          {
+            "en": "Current location is explicit, keyboard order is logical, browser back and refresh preserve truth, deep links restore the same place, and mobile transformations keep every destination reachable without changing its meaning.",
+            "ja": "現在地が明示され、キーボード順が論理的で、戻る、再読込、深いリンクが同じ場所を復元し、モバイル変換後も全移動先の意味と到達性が保たれるか確認します。",
+            "ko": "현재 위치가 명시되고 키보드 순서가 논리적이며 뒤로 가기·새로고침·딥링크가 같은 상태를 복원하고, 모바일 변환 뒤에도 모든 목적지의 의미와 접근성이 유지되는지 확인하세요."
+          }
+        ]
+      },
+      {
+        "aliases": [
+          "purposeful iconography",
+          "icon inventory",
+          "decorative icon removal"
+        ],
+        "apply": [
+          {
+            "en": "Classify the icon inventory as action, status, identity, or decoration; delete decoration, label ambiguous actions, normalize repeated symbols, and reserve colored backplates for real state or selection meaning.",
+            "ja": "アイコンを操作、状態、対象、装飾に分類し、装飾を削除し、曖昧な操作にラベルを付け、反復記号を統一し、色付き背景は実際の状態や選択の意味に限定します。",
+            "ko": "아이콘 목록을 행동·상태·대상·장식으로 분류해 장식은 지우고, 모호한 행동에는 라벨을 붙이며, 반복 기호를 통일하고, 색 배경은 실제 상태나 선택 의미에만 사용하세요."
+          }
+        ],
+        "category": "hierarchy-semantics",
+        "caution": {
+          "en": "Text-only is not automatically clearer: keep symbols that measurably improve repeated scanning, spatial orientation, or language-independent recognition.",
+          "ja": "文字だけが常に明確とは限りません。反復走査、空間把握、言語に依存しない認識を実際に改善する記号は残します。",
+          "ko": "텍스트만 쓴다고 항상 더 명확한 것은 아닙니다. 반복 훑기·공간 파악·언어와 무관한 식별을 실제로 개선하는 기호는 유지하세요."
+        },
+        "concernTags": [
+          "scanability",
+          "consistency",
+          "restraint",
+          "accessibility"
+        ],
+        "designQuestion": {
+          "en": "What becomes slower, less clear, or less accessible if this icon is removed?",
+          "ja": "このアイコンを外すと、何が遅く、不明確、またはアクセシブルでなくなりますか。",
+          "ko": "이 아이콘을 제거하면 무엇이 더 느려지거나 불분명하거나 접근하기 어려워지나요?"
+        },
+        "id": "iconography-has-a-job",
+        "name": {
+          "en": "Make every icon earn its place",
+          "ja": "すべてのアイコンに役割を持たせる",
+          "ko": "모든 아이콘이 역할을 갖게 하기"
+        },
+        "phaseTags": [
+          "structure",
+          "content",
+          "validation"
+        ],
+        "placement": [
+          {
+            "en": "Keep useful icons next to the label, action, or state they reinforce; remove decorative icon tiles from headings and explanatory blocks that already name themselves.",
+            "ja": "有用なアイコンは補強するラベル、操作、状態の隣に置き、既に名前がある見出しや説明ブロックから装飾用アイコンタイルを外します。",
+            "ko": "유용한 아이콘은 보강하는 라벨·행동·상태 곁에 두고, 이미 이름이 적힌 제목과 설명 블록에서는 장식용 아이콘 타일을 제거하세요."
+          }
+        ],
+        "references": [
+          {
+            "publisher": "The Crit",
+            "title": "Does your AI-built app look vibe-coded?",
+            "url": "https://thecrit.co/resources/does-your-ai-built-app-look-vibe-coded"
+          },
+          {
+            "publisher": "Linear",
+            "title": "Behind the latest design refresh",
+            "url": "https://linear.app/now/behind-the-latest-design-refresh"
+          }
+        ],
+        "relatedDesignPrincipleIds": [
+          "explicit-labels-and-semantics",
+          "redundant-state-signals",
+          "attention-budget",
+          "depth-explains-structure"
+        ],
+        "relatedUxPrincipleIds": [
+          "law-of-similarity",
+          "mental-model",
+          "selective-attention"
+        ],
+        "summary": {
+          "en": "Use icons to accelerate recognition of a repeated action, status, or identity—not to fill empty space or make generic content feel designed.",
+          "ja": "アイコンは空白を埋めたり一般的な内容を飾ったりせず、反復する操作、状態、対象の認識を速めるために使います。",
+          "ko": "아이콘은 빈 공간을 채우거나 일반적인 콘텐츠를 꾸미는 대신 반복 행동·상태·대상을 더 빨리 식별하게 할 때 사용합니다."
+        },
+        "surfaceTags": [
+          "global",
+          "navigation",
+          "settings",
+          "data-table",
+          "content"
+        ],
+        "verify": [
+          {
+            "en": "Removing decorative icons changes no task meaning; remaining icons have accessible names, familiar or taught meaning, visible focus when interactive, and redundant text or shape for critical status.",
+            "ja": "装飾アイコンを外してもタスクの意味が変わらず、残るアイコンにアクセシブル名、既知または説明された意味、操作時の見えるfocusがあり、重要状態は文字や形でも伝わるか確認します。",
+            "ko": "장식 아이콘을 제거해도 과업 의미가 바뀌지 않고, 남은 아이콘에는 접근 가능한 이름·익숙하거나 설명된 의미·인터랙션 시 보이는 포커스가 있으며 중요 상태는 텍스트나 형태로도 전달되는지 확인하세요."
           }
         ]
       },
@@ -1501,6 +1782,13 @@
             "en": "Keep frequent comparison data compact, occasional decisions calmer, and touch targets roomy without breaking relationship spacing.",
             "ja": "頻繁な比較データは密に、時折の判断は落ち着かせ、関係余白を壊さずタッチ対象を広くします。",
             "ko": "자주 비교하는 데이터는 조밀하게, 가끔 하는 결정은 차분하게, 터치 대상은 관계 간격을 깨지 않으면서 넉넉하게 배치하세요."
+          }
+        ],
+        "references": [
+          {
+            "publisher": "The Crit",
+            "title": "Does your AI-built app look vibe-coded?",
+            "url": "https://thecrit.co/resources/does-your-ai-built-app-look-vibe-coded"
           }
         ],
         "relatedDesignPrincipleIds": [
@@ -1572,6 +1860,7 @@
             "ko": "라벨은 이웃 컨트롤보다 해당 컨트롤에, 검증 메시지는 다음 필드보다 해당 필드에 더 가깝게 두세요."
           }
         ],
+        "references": [],
         "relatedDesignPrincipleIds": [
           "task-aware-density",
           "bounded-choice-system"
@@ -1647,6 +1936,7 @@
             "ko": "읽기와 폼 열은 유용한 폭으로 제한하고, 비교·캔버스·고밀도 데이터에만 넓은 폭을 쓰세요."
           }
         ],
+        "references": [],
         "relatedDesignPrincipleIds": [
           "core-task-first",
           "task-aware-density"
@@ -1721,6 +2011,13 @@
             "ko": "디스플레이·제목·본문·라벨·메타데이터 역할을 안정적인 내림차순으로 배치하세요."
           }
         ],
+        "references": [
+          {
+            "publisher": "The Crit",
+            "title": "Does your AI-built app look vibe-coded?",
+            "url": "https://thecrit.co/resources/does-your-ai-built-app-look-vibe-coded"
+          }
+        ],
         "relatedDesignPrincipleIds": [
           "bounded-choice-system",
           "measure-and-leading"
@@ -1792,6 +2089,7 @@
             "ko": "장문은 제한된 읽기 열에 두고, 짧은 라벨과 데이터에는 다른 폭을 허용하세요."
           }
         ],
+        "references": [],
         "relatedDesignPrincipleIds": [
           "deliberate-type-scale",
           "align-for-reading"
@@ -1865,6 +2163,7 @@
             "ko": "논리적 시작/끝 정렬을 쓰고 라벨을 컨트롤 가까이에 두며 소스 순서를 바꾸지 않고 혼합 방향 사용자 콘텐츠를 분리하세요."
           }
         ],
+        "references": [],
         "relatedDesignPrincipleIds": [
           "measure-and-leading",
           "explicit-labels-and-semantics"
@@ -1932,6 +2231,13 @@
             "en": "Keep action and status colors nearest the controls or messages they qualify; keep decorative color outside semantic channels.",
             "ja": "操作・状態色は対象の操作や文の近くに置き、装飾色は意味の経路から分けます。",
             "ko": "행동·상태 색은 해당 컨트롤이나 메시지 가까이에 두고, 장식 색은 의미 채널과 분리하세요."
+          }
+        ],
+        "references": [
+          {
+            "publisher": "The Crit",
+            "title": "Does your AI-built app look vibe-coded?",
+            "url": "https://thecrit.co/resources/does-your-ai-built-app-look-vibe-coded"
           }
         ],
         "relatedDesignPrincipleIds": [
@@ -2004,6 +2310,7 @@
             "ko": "밝은 단계는 면, 중간 단계는 경계·보조 상태, 어두운 단계는 대비 검증 뒤 텍스트·강한 행동에 배치하세요."
           }
         ],
+        "references": [],
         "relatedDesignPrincipleIds": [
           "role-based-color",
           "contrast-before-scale"
@@ -2074,6 +2381,7 @@
             "ko": "비색상 단서는 먼 범례가 아니라 상태 요소 안이나 바로 옆에 배치하세요."
           }
         ],
+        "references": [],
         "relatedDesignPrincipleIds": [
           "role-based-color",
           "contrast-before-scale"
@@ -2149,6 +2457,7 @@
             "ko": "제스처 전용 컨트롤 옆에 대안을 두고 논리적 포커스 순서를 지키며 가려지지 않는 곳에 보이는 포커스를 배치하세요."
           }
         ],
+        "references": [],
         "relatedDesignPrincipleIds": [
           "redundant-state-signals",
           "complete-state-model"
@@ -2187,9 +2496,9 @@
         ],
         "apply": [
           {
-            "en": "Choose space, background, border, overlap, or elevation by the relationship it explains; define a small layer scale and stacking contract.",
-            "ja": "余白、背景、境界、重なり、奥行きを説明する関係で選び、小さなレイヤー尺度と重なり契約を定義します。",
-            "ko": "간격·배경·경계·겹침·높이를 설명할 관계에 따라 고르고 작은 레이어 척도와 쌓임 계약을 정의하세요."
+            "en": "Choose space, background, border, overlap, or elevation by the relationship it explains; inventory separators and icon backplates, then remove every one that repeats information already carried by spacing or type.",
+            "ja": "余白、背景、境界、重なり、奥行きを説明する関係で選びます。区切り線とアイコン背景を棚卸しし、余白や文字が既に伝える情報を反復するものは外します。",
+            "ko": "간격·배경·경계·겹침·높이를 설명할 관계에 따라 고르세요. 구분선과 아이콘 배경을 목록으로 만든 뒤, 간격이나 글자가 이미 전달하는 정보를 반복하는 것은 제거하세요."
           }
         ],
         "category": "hierarchy-semantics",
@@ -2226,6 +2535,18 @@
             "ko": "임시·이동 레이어는 출발 요소 위에 두고, 지속 콘텐츠는 기본 평면에 유지하세요."
           }
         ],
+        "references": [
+          {
+            "publisher": "Linear",
+            "title": "Behind the latest design refresh",
+            "url": "https://linear.app/now/behind-the-latest-design-refresh"
+          },
+          {
+            "publisher": "The Crit",
+            "title": "Does your AI-built app look vibe-coded?",
+            "url": "https://thecrit.co/resources/does-your-ai-built-app-look-vibe-coded"
+          }
+        ],
         "relatedDesignPrincipleIds": [
           "relational-spacing",
           "attention-budget"
@@ -2249,9 +2570,9 @@
         ],
         "verify": [
           {
-            "en": "Dialogs, popovers, sticky regions, portals, and overlapping media keep correct containment, reading order, focus, clipping, and stacking at every breakpoint.",
-            "ja": "ダイアログ、popover、固定領域、portal、重なるmediaが全画面で包含、読順、focus、切抜き、重なりを保つか確認します。",
-            "ko": "대화상자·팝오버·고정 영역·포털·겹치는 미디어가 모든 화면에서 포함 관계·읽기 순서·포커스·잘림·쌓임을 지키는지 확인하세요."
+            "en": "Removing each separator or surface one at a time either preserves clarity or reveals the exact relationship it owns; dialogs, popovers, sticky regions, portals, and overlapping media still keep containment, reading order, focus, clipping, and stacking.",
+            "ja": "区切りや面を一つずつ外したとき、明瞭さが保たれるか、その要素が担う正確な関係が明らかになるか確認します。ダイアログ、popover、固定領域、portal、重なるmediaも包含、読順、focus、切抜き、重なりを保つ必要があります。",
+            "ko": "구분선과 표면을 하나씩 지웠을 때 명료함이 유지되거나, 그 요소가 담당한 정확한 관계가 드러나는지 확인하세요. 대화상자·팝오버·고정 영역·포털·겹치는 미디어도 포함 관계·읽기 순서·포커스·잘림·쌓임을 지켜야 합니다."
           }
         ]
       },
@@ -2300,6 +2621,7 @@
             "ko": "필수 텍스트는 예측 불가능한 이미지 밖에 두거나, 콘텐츠와 무관하게 대비가 보장되는 면 위에 배치하세요."
           }
         ],
+        "references": [],
         "relatedDesignPrincipleIds": [
           "task-sized-composition",
           "redundant-state-signals"
@@ -2372,6 +2694,13 @@
             "en": "Keep state feedback in the affected region, preserve stable context around it, and place the safest relevant action beside the explanation.",
             "ja": "状態feedbackを影響領域に置き、周囲の文脈を安定させ、安全で関連する操作を説明の隣に置きます。",
             "ko": "상태 피드백을 영향받는 영역에 두고 주변 맥락을 안정적으로 유지하며 가장 안전하고 관련 있는 행동을 설명 옆에 배치하세요."
+          }
+        ],
+        "references": [
+          {
+            "publisher": "The Crit",
+            "title": "Does your AI-built app look vibe-coded?",
+            "url": "https://thecrit.co/resources/does-your-ai-built-app-look-vibe-coded"
           }
         ],
         "relatedDesignPrincipleIds": [
@@ -2453,6 +2782,7 @@
             "ko": "진행 중에는 취소를, 확정 결과 옆에는 실행 취소를, 실패 옆에는 재시도를, 영향받은 객체 옆에는 충돌 해결을 배치하세요."
           }
         ],
+        "references": [],
         "relatedDesignPrincipleIds": [
           "complete-state-model",
           "redundant-state-signals"
@@ -2530,6 +2860,7 @@
             "ko": "동작을 변화하는 객체 가까이에 두고 포커스와 공간적 출발점을 유지하며 시간이 불확실하면 지속적인 진행 상태를 보여주세요."
           }
         ],
+        "references": [],
         "relatedDesignPrincipleIds": [
           "complete-state-model",
           "attention-budget"
@@ -5689,6 +6020,24 @@
         },
         {
           "fix": {
+            "en": "Place the most relevant real artifact, example, method, source, or constraint beside each material claim. Qualify or remove claims that cannot be supported, and never invent metrics, testimonials, or outcomes.",
+            "ja": "重要な主張ごとに、最も関連する実物、例、方法、出典、制約を近くに置きます。支えられない主張は限定するか削除し、数値、声、成果を作ってはいけません。",
+            "ko": "중요한 주장마다 가장 관련 있는 실제 결과물·예시·방법·출처·제약을 가까이 두세요. 뒷받침할 수 없는 주장은 한계를 밝히거나 제거하고, 수치·후기·성과를 만들어내지 마세요."
+          },
+          "id": "proof-free-polish",
+          "pattern": {
+            "en": "Polished claims without inspectable proof",
+            "ja": "確認できる根拠のない磨かれた主張",
+            "ko": "확인 가능한 근거 없이 매끈한 주장"
+          },
+          "why": {
+            "en": "Strong typography, gradients, logos, and dashboard fragments can make a promise feel credible while giving people nothing relevant to inspect. The result looks finished but cannot support a decision.",
+            "ja": "強い文字、グラデーション、ロゴ、ダッシュボード断片は約束を信頼できるように見せても、利用者が確認できる関連根拠を与えない場合があります。完成して見えても判断を支えられません。",
+            "ko": "강한 타이포·그라데이션·로고·대시보드 조각은 약속을 믿을 만하게 보이게 하지만 사용자가 직접 확인할 관련 근거를 주지 못할 수 있습니다. 화면은 완성돼 보여도 결정을 뒷받침하지 못합니다."
+          }
+        },
+        {
+          "fix": {
             "en": "Use one surface level per section. Group with spacing, dividers, or typography — not by wrapping more cards.",
             "ja": "セクションごとに面1段階だけ使います。カードを増やすのではなく、余白、区切り線、タイポでグループ化します。",
             "ko": "섹션당 표면 한 단계만 씁니다. 카드를 더 두르는 대신 간격, 디바이더, 타이포로 그룹화합니다."
@@ -5721,6 +6070,24 @@
             "en": "Generic chips like \"AI-powered\", \"Modern UI\", \"Fast\", or empty status pills add no information and signal templated work.",
             "ja": "\"AI-powered\", \"Modern UI\", \"Fast\"のような一般チップや空のステータスピルは情報がなく、テンプレ作業に見えます。",
             "ko": "\"AI-powered\", \"Modern UI\", \"Fast\" 같은 일반 칩이나 빈 상태 알약은 정보가 없고 템플릿 작업처럼 보입니다."
+          }
+        },
+        {
+          "fix": {
+            "en": "Keep an icon only when it speeds recognition of a repeated action, status, or identity. Pair ambiguous icons with labels, give interactive icons accessible names and focus, and remove the rest.",
+            "ja": "反復する操作、状態、対象の認識を速める場合だけアイコンを残します。曖昧なアイコンにはラベルを付け、操作可能なものにはアクセシブル名とfocusを与え、残りは削除します。",
+            "ko": "반복 행동·상태·대상을 더 빨리 식별하게 할 때만 아이콘을 유지하세요. 모호한 아이콘에는 라벨을 붙이고, 인터랙티브 아이콘에는 접근 가능한 이름과 포커스를 제공하며, 나머지는 제거하세요."
+          },
+          "id": "decorative-iconography",
+          "pattern": {
+            "en": "Icons used as generic decoration",
+            "ja": "汎用装飾として使うアイコン",
+            "ko": "범용 장식으로 쓰는 아이콘"
+          },
+          "why": {
+            "en": "Putting a colorful icon tile on every heading adds visual weight without adding meaning, makes unrelated sections look equivalent, and competes with actions and states that actually need symbols.",
+            "ja": "すべての見出しに色付きアイコンタイルを置くと、意味なく視覚的な重さだけが増え、無関係な節が同等に見え、実際に記号が必要な操作や状態と競合します。",
+            "ko": "모든 제목에 색 아이콘 타일을 붙이면 의미 없이 시각적 무게만 늘고, 무관한 섹션이 같은 중요도로 보이며, 실제로 기호가 필요한 행동·상태와 경쟁합니다."
           }
         },
         {
@@ -6176,6 +6543,28 @@
           ]
         },
         {
+          "applicability": "when-present",
+          "automation": "assisted",
+          "evidenceTypes": [
+            "interaction",
+            "dom",
+            "screenshot"
+          ],
+          "id": "navigation-semantics-match-behavior",
+          "severity": "major",
+          "source": {
+            "groupId": "behavior",
+            "itemIndex": 4,
+            "kind": "verification"
+          },
+          "surfaceTags": [
+            "navigation",
+            "settings",
+            "content",
+            "data-table"
+          ]
+        },
+        {
           "applicability": "workflow-only",
           "automation": "assisted",
           "evidenceTypes": [
@@ -6372,6 +6761,26 @@
           ]
         },
         {
+          "applicability": "when-present",
+          "automation": "manual",
+          "evidenceTypes": [
+            "document",
+            "screenshot",
+            "manual"
+          ],
+          "id": "avoid-proof-free-polish",
+          "severity": "major",
+          "source": {
+            "antiPatternId": "proof-free-polish",
+            "kind": "anti-pattern"
+          },
+          "surfaceTags": [
+            "landing-page",
+            "onboarding",
+            "content"
+          ]
+        },
+        {
           "applicability": "always",
           "automation": "manual",
           "evidenceTypes": [
@@ -6403,6 +6812,27 @@
           },
           "surfaceTags": [
             "global"
+          ]
+        },
+        {
+          "applicability": "when-present",
+          "automation": "manual",
+          "evidenceTypes": [
+            "screenshot",
+            "manual"
+          ],
+          "id": "avoid-decorative-iconography",
+          "severity": "minor",
+          "source": {
+            "antiPatternId": "decorative-iconography",
+            "kind": "anti-pattern"
+          },
+          "surfaceTags": [
+            "global",
+            "navigation",
+            "settings",
+            "data-table",
+            "content"
           ]
         },
         {
@@ -6873,6 +7303,11 @@
               "en": "copy buttons, navigation, and route preservation work",
               "ja": "コピーボタン、ナビゲーション、ルート保持が動作",
               "ko": "복사 버튼, 내비게이션, 라우트 보존이 동작"
+            },
+            {
+              "en": "navigation semantics match their consequence: current location, URL/history behavior, local panels, filters, keyboard order, and narrow-screen transformations stay aligned",
+              "ja": "ナビゲーションの意味と結果が一致する: 現在地、URL/履歴、ローカルパネル、フィルター、キーボード順、狭幅変換が揃っている",
+              "ko": "내비게이션의 의미와 결과가 일치함: 현재 위치·URL/기록 동작·로컬 패널·필터·키보드 순서·좁은 화면 변환이 서로 어긋나지 않음"
             }
           ],
           "title": {

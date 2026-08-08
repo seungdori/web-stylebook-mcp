@@ -6,6 +6,24 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.5.0] — 2026-08-08
+
+### Added
+
+- Three independently authored visual-design principles for claim-adjacent evidence,
+  navigation semantics, and purposeful iconography, with source references to The Crit,
+  Primer, and Linear.
+- Source metadata in the visual-design-principle contract, planner structured output,
+  localized text fallback, and the website field guide.
+- Three structured audit checks for navigation semantic drift, proof-free polish, and
+  decorative iconography.
+
+### Changed
+
+- Strengthened attention, depth, and progressive-fidelity guidance with reversible
+  before/after comparison, chrome hierarchy, separator inventories, and stress views.
+- Expanded the canonical catalog to 25 visual design principles and 41 audit checks.
+
 ## [0.4.0] — 2026-08-08
 
 ### Added
@@ -193,7 +211,8 @@ All notable changes to this project are documented here. The format follows
 - Output localization in English, Korean, and Japanese.
 - Fully offline at runtime: no API key, no model call, no network, no filesystem access.
 
-[Unreleased]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.1.1...v0.3.0
 [0.1.1]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.1.0...v0.1.1

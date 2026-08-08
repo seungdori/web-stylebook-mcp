@@ -41,6 +41,11 @@ const principles: DesignPrinciple[] = [
     phaseTags: ['structure'],
     relatedDesignPrincipleIds: ['global-layout'],
     relatedUxPrincipleIds: ['proximity'],
+    references: [{
+      title: 'Example layout reference',
+      publisher: 'Example publisher',
+      url: 'https://example.com/layout',
+    }],
   },
   {
     id: 'global-layout',
@@ -64,6 +69,7 @@ const principles: DesignPrinciple[] = [
     phaseTags: ['structure'],
     relatedDesignPrincipleIds: ['exact-layout'],
     relatedUxPrincipleIds: [],
+    references: [],
   },
   {
     id: 'form-only',
@@ -87,6 +93,7 @@ const principles: DesignPrinciple[] = [
     phaseTags: ['validation'],
     relatedDesignPrincipleIds: [],
     relatedUxPrincipleIds: [],
+    references: [],
   },
 ];
 
@@ -130,6 +137,7 @@ describe('design principle planner', () => {
     expect(plan.principles[1]?.placement[0]).toMatch(/[가-힣]/);
     expect(plan.principles[1]?.relatedDesignPrincipleIds).toEqual(['global-layout']);
     expect(plan.principles[1]?.relatedUxPrincipleIds).toEqual(['proximity']);
+    expect(plan.principles[1]?.references[0]?.publisher).toBe('Example publisher');
   });
 
   it('supports strict intersection matching for audits without changing ranked-union default', () => {

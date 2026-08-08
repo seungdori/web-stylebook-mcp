@@ -394,6 +394,7 @@ const designPrincipleFallbackLabels: Record<Lang, {
   verify: string;
   caution: string;
   relatedUx: string;
+  references: string;
   noMatches: string;
   resources: string;
 }> = {
@@ -406,6 +407,7 @@ const designPrincipleFallbackLabels: Record<Lang, {
     verify: 'Verify',
     caution: 'Caution',
     relatedUx: 'Related UX principles',
+    references: 'Further reading',
     noMatches: 'No catalog design principles matched the supplied selectors.',
     resources: 'Resources',
   },
@@ -418,6 +420,7 @@ const designPrincipleFallbackLabels: Record<Lang, {
     verify: '검증',
     caution: '주의',
     relatedUx: '연결된 UX 원칙',
+    references: '참고 자료',
     noMatches: '입력한 조건에 맞는 디자인 원칙이 없습니다.',
     resources: '리소스',
   },
@@ -430,6 +433,7 @@ const designPrincipleFallbackLabels: Record<Lang, {
     verify: '確認',
     caution: '注意',
     relatedUx: '関連するUX原則',
+    references: '参考資料',
     noMatches: '指定した条件に一致するデザイン原則はありません。',
     resources: 'リソース',
   },
@@ -451,6 +455,9 @@ function renderDesignPrinciplePlan(p: DesignPrinciplePlan): string {
     );
     if (principle.relatedUxPrincipleIds.length) {
       lines.push(`- ${labels.relatedUx}: ${principle.relatedUxPrincipleIds.join(', ')}`);
+    }
+    if (principle.references.length) {
+      lines.push(`- ${labels.references}: ${principle.references.map((reference) => `${reference.title} — ${reference.publisher} (${reference.url})`).join(' · ')}`);
     }
   }
   if (!p.principles.length) lines.push('', labels.noMatches);

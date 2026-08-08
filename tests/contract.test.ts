@@ -16,7 +16,7 @@ beforeAll(async () => {
 
 describe('MCP contract', () => {
   it('advertises server instructions and the packaged server version', () => {
-    expect(client.getServerVersion()).toEqual({ name: 'web-stylebook', version: '0.4.0' });
+    expect(client.getServerVersion()).toEqual({ name: 'web-stylebook', version: '0.5.0' });
     const instructions = client.getInstructions() ?? '';
     expect(instructions).toContain('recommend_design_direction');
     expect(instructions).toContain('get_design_principle_plan');
@@ -56,7 +56,7 @@ describe('MCP contract', () => {
     expect(body.counts.styles).toBe(48);
     expect(body.counts.principles).toBe(23);
     expect(body.counts.designPrinciples).toBeGreaterThan(0);
-    expect(body.counts.auditChecks).toBe(38);
+    expect(body.counts.auditChecks).toBe(41);
     expect(body.domains).toContain('design-principles');
     expect(body.domains).toContain('principles');
     expect(body.tools).toHaveLength(7);
@@ -154,7 +154,7 @@ describe('MCP contract', () => {
 
   it('get_design_principle_plan: returns placement and verification guidance with resource links', async () => {
     const repo = CatalogRepository.load();
-    const principle = repo.data.designPrinciples[0]!;
+    const principle = repo.data.designPrinciples.find((item) => item.references.length > 0)!;
     const r = await client.callTool({
       name: 'get_design_principle_plan',
       arguments: {
@@ -171,10 +171,13 @@ describe('MCP contract', () => {
     expect(sc.principles[0].verify.length).toBeGreaterThan(0);
     expect(sc.principles[0].relatedDesignPrincipleIds).toBeDefined();
     expect(sc.principles[0].relatedUxPrincipleIds).toBeDefined();
+    expect(sc.principles[0].references).toEqual(principle.references);
     expect(sc).not.toHaveProperty('attribution');
     const fallback = (r.content as any[]).find((item) => item.type === 'text')?.text ?? '';
     expect(fallback).toContain('# 디자인 원칙 계획');
     expect(fallback).toContain('- 배치:');
+    expect(fallback).toContain('- 참고 자료:');
+    expect(fallback).toContain(principle.references[0]!.publisher);
     expect(fallback).toContain('리소스:');
     expect((r.content as any[]).filter((item) => item.type === 'resource_link')).toHaveLength(1);
   });

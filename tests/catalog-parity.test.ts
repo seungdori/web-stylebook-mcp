@@ -100,6 +100,13 @@ describe('bundled catalog integrity', () => {
     ['unknown related UX principle', (envelope: any) => {
       envelope.data.designPrinciples[0].relatedUxPrincipleIds = ['not-a-ux-principle'];
     }],
+    ['missing design principle references', (envelope: any) => {
+      delete envelope.data.designPrinciples[0].references;
+    }],
+    ['insecure design principle reference', (envelope: any) => {
+      const principle = envelope.data.designPrinciples.find((item: any) => item.references.length > 0);
+      principle.references[0].url = 'http://example.com/reference';
+    }],
     ['unknown audit source', (envelope: any) => {
       envelope.data.policies.auditChecks[0].source = {
         kind: 'anti-pattern', antiPatternId: 'not-an-anti-pattern',
