@@ -3,7 +3,7 @@
 # web-stylebook-mcp
 
 **Design intelligence for AI coding agents.** Stop shipping the same hero-plus-three-cards.
-Your agent gets scored design *contracts* — directions, visual-design plans, UX-principle plans, UI-state plans, tokens, evidence-backed audit plans — then writes and verifies the code from evidence.
+Your agent gets scored design *contracts* — directions, interface-design plans, UX-principle plans, UI-state plans, tokens, evidence-backed audit plans — then writes and verifies the code from evidence.
 
 [![npm version](https://img.shields.io/npm/v/web-stylebook-mcp?logo=npm&color=cb3837)](https://www.npmjs.com/package/web-stylebook-mcp)
 [![downloads](https://img.shields.io/npm/dm/web-stylebook-mcp?color=cb3837)](https://www.npmjs.com/package/web-stylebook-mcp)
@@ -17,7 +17,7 @@ Your agent gets scored design *contracts* — directions, visual-design plans, U
 
 ---
 
-Coding agents default to the same generic UI because they can't *decide* what it should look like — so they fall back to hero + 3 cards + a gradient. `web-stylebook-mcp` is a Model Context Protocol server that hands the agent **design contracts** — scored visual directions, placement-aware visual-design plans, evidence-labeled UX-principle plans, UI-state plans, and design tokens — drawn from the same curated catalog as [webstylebook.com](https://webstylebook.com). It returns **evidence, not code**. Your agent still writes the code — now it knows what to build and what to verify.
+Coding agents default to the same generic UI because they can't *decide* what it should look like — so they fall back to hero + 3 cards + a gradient. `web-stylebook-mcp` is a Model Context Protocol server that hands the agent **design contracts** — scored visual directions, placement-aware interface-design plans, evidence-labeled UX-principle plans, UI-state plans, and design tokens — drawn from the same curated catalog as [webstylebook.com](https://webstylebook.com). It returns **evidence, not code**. Your agent still writes the code — now it knows what to build and what to verify.
 
 No API key. No model call. No network. No project filesystem access. **Deterministic, read-only, fully local.**
 
@@ -210,7 +210,7 @@ Add the same block to your `claude_desktop_config.json`, then restart:
 | **`compose_design_tokens`** | Role-based tokens (color, type, spacing, radius, motion, density) as `json` / `css-variables` / `tailwind` / `typescript`, light / dark / both | Emits WCAG contrast warnings instead of hiding them |
 | **`get_design_audit_plan`** | Localized, surface-aware checks with stable ids, severity, applicability, required evidence, remediation, selected principle checks, and UI-state coverage | The tool plans the audit but never pretends it inspected your project; missing evidence is `NOT_VERIFIED`, not `PASS` |
 
-**Catalog:** 48 styles · 25 visual design principles · 23 UX principles · 41 structured audit checks · 20 components · 5 surfaces · 57 UI-state recipes · 29 motion profiles · 14 product archetypes.
+**Catalog:** 48 styles · 25 interface design principles · 23 UX principles · 41 structured audit checks · 20 components · 5 surfaces · 57 UI-state recipes · 29 motion profiles · 14 product archetypes.
 
 ## Localized output
 
@@ -310,6 +310,6 @@ source check.
 > attribute and link to [Laws of UX](https://lawsofux.com) (CC BY-NC-ND 4.0) and supporting
 > references; Laws of UX prose, illustrations, and page layouts are not bundled.
 >
-> Visual-design-principle entries form an independently authored, task-oriented review system for
+> Interface-design-principle entries form an independently authored, task-oriented review system for
 > contemporary interfaces. They cover semantic structure, responsive reflow, localization, tokens
 > and themes, multiple input modes, complete state models, recovery, and motion preferences.

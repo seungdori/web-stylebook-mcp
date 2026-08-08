@@ -1,5 +1,5 @@
 export const SERVER_NAME = 'web-stylebook';
-export const SERVER_VERSION = '0.5.0';
+export const SERVER_VERSION = '0.5.1';
 
 export const SERVER_INSTRUCTIONS = [
   'Use Web Stylebook before implementing or redesigning UI. Start with recommend_design_direction using product context, then read webstylebook://styles/{id}, call get_design_principle_plan for the layout concerns/surface/phase, call get_ux_principle_plan for the task outcomes/surface/phase, call get_ui_state_plan for each surface, and compose_design_tokens for tokens. After implementation call get_design_audit_plan and inspect the actual rendered/code/interaction evidence for every included check; missing evidence is NOT_VERIFIED, never PASS. Use design principles as practical placement and visual-review guidance rather than a fixed recipe. Treat UX principles as evidence-labeled decision prompts, not universal laws; accessibility, safety, informed consent, and truthful feedback take priority.',

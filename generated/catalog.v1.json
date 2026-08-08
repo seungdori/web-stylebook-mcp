@@ -1,6 +1,6 @@
 {
-  "catalogVersion": "0.5.0",
-  "contentHash": "sha256:5e8683ef698ef3e8cb1f49d56f9112feac4c790cdf925e276be543f2cad957da",
+  "catalogVersion": "0.5.1",
+  "contentHash": "sha256:da77be7ea9b3a6a3df9d8c9ff33736ba8f6ff44bae01a6c66c41f6c1ebf7fdcd",
   "data": {
     "componentCategories": [
       {
@@ -2821,16 +2821,16 @@
         ],
         "apply": [
           {
-            "en": "Use short interruptible transitions, respect system preference, replace spatial travel with fades or instant updates, and never make motion the only feedback.",
-            "ja": "短く中断可能な遷移を使い、system設定を尊重し、空間移動はfadeや即時更新に替え、動きだけでfeedbackしないでください。",
-            "ko": "짧고 중단 가능한 전환을 쓰고 시스템 선호를 존중하며 공간 이동은 페이드나 즉시 갱신으로 대체하고 동작만으로 피드백하지 마세요."
+            "en": "Acknowledge the action immediately, reveal the changed object where it now belongs, keep transitions brief and interruptible, and show the same text or state cue when reduced motion is preferred.",
+            "ja": "操作をすぐに受け付け、変わった対象を実際の位置に示します。遷移は短く中断可能にし、動きを減らす設定では同じ文字や状態表示とともに即時更新します。",
+            "ko": "행동을 즉시 확인해 주고 바뀐 대상을 실제 위치에 보여주세요. 전환은 짧고 중단 가능하게 하며, 동작 축소 설정에서는 같은 텍스트나 상태 표시와 함께 즉시 갱신하세요."
           }
         ],
         "category": "states-feedback-recovery",
         "caution": {
-          "en": "Decorative motion must not delay action, compete with status, trigger discomfort, or make a broken transition feel polished.",
-          "ja": "装飾的動きで操作を遅らせ、状態と競合し、不快感を生み、壊れた遷移をごまかしてはいけません。",
-          "ko": "장식 동작이 행동을 늦추거나 상태와 경쟁하거나 불편을 유발하거나 깨진 전환을 그럴듯하게 가리게 하지 마세요."
+          "en": "Do not use decorative motion to delay action, replace status text, pull attention away from the result, or disguise a broken transition.",
+          "ja": "装飾的な動きで操作を遅らせ、状態文を置き換え、結果から注意をそらし、壊れた遷移をごまかしてはいけません。",
+          "ko": "장식 움직임으로 행동을 늦추거나 상태 문구를 대신하거나 결과에서 주의를 빼앗거나 깨진 전환을 그럴듯하게 가리지 마세요."
         },
         "concernTags": [
           "focus",
@@ -2839,15 +2839,15 @@
           "restraint"
         ],
         "designQuestion": {
-          "en": "What relationship becomes clearer because this element moves, and how is the same change understood without motion?",
-          "ja": "この要素が動くことで何が明確になり、動きなしで同じ変化をどう理解できますか。",
-          "ko": "이 요소가 움직여 어떤 관계가 더 분명해지며 동작 없이 같은 변화를 어떻게 이해하나요?"
+          "en": "After something is pressed, what changed, where did it change, and can that be understood without motion?",
+          "ja": "何を押して何が変わったのか、動きがなくても理解できますか。",
+          "ko": "무엇을 눌러 무엇이 바뀌었는지, 움직임이 없어도 알 수 있나요?"
         },
         "id": "motion-and-preference",
         "name": {
-          "en": "Use motion for cause and effect",
-          "ja": "原因と結果のために動きを使う",
-          "ko": "원인과 결과를 위해 동작 사용하기"
+          "en": "Use motion to explain what changed",
+          "ja": "動きで何が変わったかを説明する",
+          "ko": "움직임으로 무엇이 바뀌었는지 설명하기"
         },
         "phaseTags": [
           "interaction",
@@ -2855,9 +2855,9 @@
         ],
         "placement": [
           {
-            "en": "Keep motion near the changing object, preserve its focus and spatial origin, and show persistent progress when duration is uncertain.",
-            "ja": "動きを変化対象の近くに置き、focusと空間的起点を保ち、時間が不確かなら持続する進行状態を示します。",
-            "ko": "동작을 변화하는 객체 가까이에 두고 포커스와 공간적 출발점을 유지하며 시간이 불확실하면 지속적인 진행 상태를 보여주세요."
+            "en": "Keep the control and the affected result in the same visual context so the eye can follow action to outcome.",
+            "ja": "押したコントロールと影響を受けた結果を同じ視覚文脈に置き、操作から結果まで視線が続くようにします。",
+            "ko": "누른 컨트롤과 영향을 받은 결과를 같은 시각 맥락에 두어 행동에서 결과까지 시선이 이어지게 하세요."
           }
         ],
         "references": [],
@@ -2870,9 +2870,9 @@
           "mental-model"
         ],
         "summary": {
-          "en": "Use motion only to explain origin, destination, progress, hierarchy, or state change, with an equivalent reduced-motion path.",
-          "ja": "起点、到達、進行、階層、状態変化を説明するときだけ動きを使い、同等の動き削減経路を用意します。",
-          "ko": "출발·도착·진행·위계·상태 변화를 설명할 때만 동작을 쓰고 동등한 동작 축소 경로를 제공합니다."
+          "en": "Connect the action a person took to the result that changed on screen.",
+          "ja": "利用者が行った操作と、画面で変わった結果を自然につなぎます。",
+          "ko": "사용자가 누른 행동과 화면에서 바뀐 결과를 자연스럽게 연결합니다."
         },
         "surfaceTags": [
           "global",
@@ -2880,9 +2880,9 @@
         ],
         "verify": [
           {
-            "en": "Default and reduced-motion modes preserve state comprehension, focus, reading position, cancellation, performance, and no unexpected autoplay.",
-            "ja": "既定・動き削減で状態理解、focus、読位置、取消、性能を保ち、予期しない自動再生がないか確認します。",
-            "ko": "기본·동작 축소 모드가 상태 이해·포커스·읽기 위치·취소·성능을 지키고 예기치 않은 자동 재생이 없는지 확인하세요."
+            "en": "With animation disabled, the control label, changed object, status text, focus, and reading position still communicate the same cause and result.",
+            "ja": "アニメーションを無効にしても、コントロールのラベル、変化した対象、状態文、フォーカス、読書位置だけで同じ原因と結果が伝わるか確認します。",
+            "ko": "애니메이션을 꺼도 컨트롤 라벨·바뀐 대상·상태 문구·포커스·읽기 위치만으로 같은 원인과 결과를 이해할 수 있는지 확인하세요."
           }
         ]
       }
@@ -7320,9 +7320,9 @@
           "id": "principles",
           "items": [
             {
-              "en": "every design principle selected by get_design_principle_plan appears in design.md with the placement decision it produced and its observable verification check — not just its name",
-              "ja": "get_design_principle_planで選んだ視覚デザイン原則が、名前だけでなくその原則が生んだ配置の判断と観察可能な検証基準までdesign.mdに残っている",
-              "ko": "get_design_principle_plan으로 고른 시각 디자인 원칙이 이름만이 아니라 그 원칙이 만든 배치 결정과 관찰 가능한 검증 기준까지 design.md에 남아 있음"
+              "en": "every interface design principle selected by get_design_principle_plan appears in design.md with the placement decision it produced and its observable verification check — not just its name",
+              "ja": "get_design_principle_planで選んだインターフェースデザイン原則が、名前だけでなくその原則が生んだ配置の判断と観察可能な検証基準までdesign.mdに残っている",
+              "ko": "get_design_principle_plan으로 고른 인터페이스 디자인 원칙이 이름만이 아니라 그 원칙이 만든 배치 결정과 관찰 가능한 검증 기준까지 design.md에 남아 있음"
             },
             {
               "en": "every UX principle selected by get_ux_principle_plan keeps its caution and its evidence confidence label (strong / contextual / contested); no contextual or contested principle is restated as a law",
