@@ -1,6 +1,6 @@
 {
-  "catalogVersion": "0.3.0",
-  "contentHash": "sha256:c20eab85984adc1e72230fc36dffe24568eb4c0aca7ed356df4437851821f447",
+  "catalogVersion": "0.4.0",
+  "contentHash": "sha256:ec0bd5ebd98fac99b5508bd8057d20b8f118c17c9fc1a7dc4a6bdf73c973ad51",
   "data": {
     "componentCategories": [
       {
@@ -5445,6 +5445,30 @@
       ]
     },
     "ontologyEnums": {
+      "auditApplicability": [
+        "always",
+        "when-present",
+        "workflow-only"
+      ],
+      "auditAutomationLevels": [
+        "automated",
+        "assisted",
+        "manual"
+      ],
+      "auditEvidenceTypes": [
+        "command",
+        "dom",
+        "computed-style",
+        "screenshot",
+        "interaction",
+        "document",
+        "manual"
+      ],
+      "auditSeverities": [
+        "blocker",
+        "major",
+        "minor"
+      ],
       "densityLevels": [
         "low",
         "medium",
@@ -5752,6 +5776,684 @@
             "ja": "エージェントがこのスタイルカタログを作る製品と誤認すると、結果が人の依頼と無関係になります。",
             "ko": "에이전트가 이 스타일 카탈로그를 만들 제품으로 착각하면, 결과물이 사람의 요청과 무관해집니다."
           }
+        }
+      ],
+      "auditChecks": [
+        {
+          "applicability": "always",
+          "automation": "automated",
+          "evidenceTypes": [
+            "command"
+          ],
+          "id": "lint-passes",
+          "severity": "blocker",
+          "source": {
+            "groupId": "build",
+            "itemIndex": 0,
+            "kind": "verification"
+          },
+          "surfaceTags": [
+            "global"
+          ]
+        },
+        {
+          "applicability": "always",
+          "automation": "automated",
+          "evidenceTypes": [
+            "command"
+          ],
+          "id": "typecheck-passes",
+          "severity": "blocker",
+          "source": {
+            "groupId": "build",
+            "itemIndex": 1,
+            "kind": "verification"
+          },
+          "surfaceTags": [
+            "global"
+          ]
+        },
+        {
+          "applicability": "always",
+          "automation": "automated",
+          "evidenceTypes": [
+            "command"
+          ],
+          "id": "build-succeeds",
+          "severity": "blocker",
+          "source": {
+            "groupId": "build",
+            "itemIndex": 2,
+            "kind": "verification"
+          },
+          "surfaceTags": [
+            "global"
+          ]
+        },
+        {
+          "applicability": "always",
+          "automation": "assisted",
+          "evidenceTypes": [
+            "command",
+            "interaction"
+          ],
+          "id": "runtime-console-clean",
+          "severity": "major",
+          "source": {
+            "groupId": "build",
+            "itemIndex": 3,
+            "kind": "verification"
+          },
+          "surfaceTags": [
+            "global"
+          ]
+        },
+        {
+          "applicability": "always",
+          "automation": "assisted",
+          "evidenceTypes": [
+            "command",
+            "interaction"
+          ],
+          "id": "hydration-clean",
+          "severity": "major",
+          "source": {
+            "groupId": "build",
+            "itemIndex": 4,
+            "kind": "verification"
+          },
+          "surfaceTags": [
+            "global"
+          ]
+        },
+        {
+          "applicability": "always",
+          "automation": "assisted",
+          "evidenceTypes": [
+            "dom",
+            "screenshot"
+          ],
+          "id": "no-horizontal-scroll",
+          "severity": "major",
+          "source": {
+            "groupId": "layout",
+            "itemIndex": 0,
+            "kind": "verification"
+          },
+          "surfaceTags": [
+            "global"
+          ]
+        },
+        {
+          "applicability": "always",
+          "automation": "assisted",
+          "evidenceTypes": [
+            "dom",
+            "screenshot"
+          ],
+          "id": "no-meaningful-text-clipping",
+          "severity": "major",
+          "source": {
+            "groupId": "layout",
+            "itemIndex": 1,
+            "kind": "verification"
+          },
+          "surfaceTags": [
+            "global"
+          ]
+        },
+        {
+          "applicability": "always",
+          "automation": "assisted",
+          "evidenceTypes": [
+            "screenshot",
+            "interaction"
+          ],
+          "id": "mobile-renders-cleanly",
+          "severity": "major",
+          "source": {
+            "groupId": "layout",
+            "itemIndex": 2,
+            "kind": "verification"
+          },
+          "surfaceTags": [
+            "global"
+          ]
+        },
+        {
+          "applicability": "always",
+          "automation": "manual",
+          "evidenceTypes": [
+            "screenshot",
+            "manual"
+          ],
+          "id": "desktop-composition-holds",
+          "severity": "major",
+          "source": {
+            "groupId": "layout",
+            "itemIndex": 3,
+            "kind": "verification"
+          },
+          "surfaceTags": [
+            "global"
+          ]
+        },
+        {
+          "applicability": "always",
+          "automation": "manual",
+          "evidenceTypes": [
+            "screenshot",
+            "manual"
+          ],
+          "id": "no-purpose-free-nested-surfaces",
+          "severity": "minor",
+          "source": {
+            "groupId": "layout",
+            "itemIndex": 4,
+            "kind": "verification"
+          },
+          "surfaceTags": [
+            "global"
+          ]
+        },
+        {
+          "applicability": "always",
+          "automation": "assisted",
+          "evidenceTypes": [
+            "computed-style",
+            "screenshot"
+          ],
+          "id": "borders-remain-legible",
+          "severity": "minor",
+          "source": {
+            "groupId": "layout",
+            "itemIndex": 5,
+            "kind": "verification"
+          },
+          "surfaceTags": [
+            "global"
+          ]
+        },
+        {
+          "applicability": "when-present",
+          "automation": "manual",
+          "evidenceTypes": [
+            "screenshot",
+            "manual"
+          ],
+          "id": "opening-demonstrates-product",
+          "severity": "major",
+          "source": {
+            "groupId": "layout",
+            "itemIndex": 6,
+            "kind": "verification"
+          },
+          "surfaceTags": [
+            "landing-page"
+          ]
+        },
+        {
+          "applicability": "always",
+          "automation": "manual",
+          "evidenceTypes": [
+            "screenshot",
+            "manual"
+          ],
+          "id": "style-direction-is-visible",
+          "severity": "major",
+          "source": {
+            "groupId": "fidelity",
+            "itemIndex": 0,
+            "kind": "verification"
+          },
+          "surfaceTags": [
+            "global"
+          ]
+        },
+        {
+          "applicability": "always",
+          "automation": "assisted",
+          "evidenceTypes": [
+            "document",
+            "computed-style"
+          ],
+          "id": "design-tokens-are-used",
+          "severity": "major",
+          "source": {
+            "groupId": "fidelity",
+            "itemIndex": 1,
+            "kind": "verification"
+          },
+          "surfaceTags": [
+            "global"
+          ]
+        },
+        {
+          "applicability": "always",
+          "automation": "assisted",
+          "evidenceTypes": [
+            "computed-style",
+            "screenshot"
+          ],
+          "id": "typography-hierarchy-is-legible",
+          "severity": "major",
+          "source": {
+            "groupId": "fidelity",
+            "itemIndex": 2,
+            "kind": "verification"
+          },
+          "surfaceTags": [
+            "global"
+          ]
+        },
+        {
+          "applicability": "always",
+          "automation": "automated",
+          "evidenceTypes": [
+            "computed-style"
+          ],
+          "id": "body-text-meets-contrast",
+          "severity": "blocker",
+          "source": {
+            "groupId": "fidelity",
+            "itemIndex": 3,
+            "kind": "verification"
+          },
+          "surfaceTags": [
+            "global"
+          ]
+        },
+        {
+          "applicability": "when-present",
+          "automation": "manual",
+          "evidenceTypes": [
+            "screenshot",
+            "manual"
+          ],
+          "id": "decoration-carries-information",
+          "severity": "minor",
+          "source": {
+            "groupId": "fidelity",
+            "itemIndex": 4,
+            "kind": "verification"
+          },
+          "surfaceTags": [
+            "global"
+          ]
+        },
+        {
+          "applicability": "when-present",
+          "automation": "manual",
+          "evidenceTypes": [
+            "document",
+            "screenshot",
+            "manual"
+          ],
+          "id": "headline-is-product-specific",
+          "severity": "major",
+          "source": {
+            "groupId": "fidelity",
+            "itemIndex": 5,
+            "kind": "verification"
+          },
+          "surfaceTags": [
+            "landing-page",
+            "content"
+          ]
+        },
+        {
+          "applicability": "always",
+          "automation": "assisted",
+          "evidenceTypes": [
+            "interaction",
+            "screenshot"
+          ],
+          "id": "keyboard-focus-is-visible",
+          "severity": "blocker",
+          "source": {
+            "groupId": "behavior",
+            "itemIndex": 0,
+            "kind": "verification"
+          },
+          "surfaceTags": [
+            "global"
+          ]
+        },
+        {
+          "applicability": "always",
+          "automation": "assisted",
+          "evidenceTypes": [
+            "interaction",
+            "computed-style"
+          ],
+          "id": "reduced-motion-is-honored",
+          "severity": "major",
+          "source": {
+            "groupId": "behavior",
+            "itemIndex": 1,
+            "kind": "verification"
+          },
+          "surfaceTags": [
+            "global"
+          ]
+        },
+        {
+          "applicability": "when-present",
+          "automation": "assisted",
+          "evidenceTypes": [
+            "interaction",
+            "screenshot"
+          ],
+          "id": "form-errors-are-visible",
+          "severity": "blocker",
+          "source": {
+            "groupId": "behavior",
+            "itemIndex": 2,
+            "kind": "verification"
+          },
+          "surfaceTags": [
+            "form",
+            "checkout",
+            "onboarding",
+            "settings"
+          ]
+        },
+        {
+          "applicability": "when-present",
+          "automation": "assisted",
+          "evidenceTypes": [
+            "interaction"
+          ],
+          "id": "navigation-and-route-behavior-works",
+          "severity": "major",
+          "source": {
+            "groupId": "behavior",
+            "itemIndex": 3,
+            "kind": "verification"
+          },
+          "surfaceTags": [
+            "global"
+          ]
+        },
+        {
+          "applicability": "workflow-only",
+          "automation": "assisted",
+          "evidenceTypes": [
+            "document",
+            "screenshot"
+          ],
+          "id": "design-principles-produce-decisions",
+          "severity": "major",
+          "source": {
+            "groupId": "principles",
+            "itemIndex": 0,
+            "kind": "verification"
+          },
+          "surfaceTags": [
+            "global"
+          ]
+        },
+        {
+          "applicability": "workflow-only",
+          "automation": "assisted",
+          "evidenceTypes": [
+            "document"
+          ],
+          "id": "ux-principles-keep-evidence-labels",
+          "severity": "major",
+          "source": {
+            "groupId": "principles",
+            "itemIndex": 1,
+            "kind": "verification"
+          },
+          "surfaceTags": [
+            "global"
+          ]
+        },
+        {
+          "applicability": "workflow-only",
+          "automation": "assisted",
+          "evidenceTypes": [
+            "document",
+            "screenshot",
+            "interaction"
+          ],
+          "id": "principle-checks-are-observed",
+          "severity": "major",
+          "source": {
+            "groupId": "principles",
+            "itemIndex": 2,
+            "kind": "verification"
+          },
+          "surfaceTags": [
+            "global"
+          ]
+        },
+        {
+          "applicability": "always",
+          "automation": "manual",
+          "evidenceTypes": [
+            "interaction",
+            "screenshot",
+            "manual"
+          ],
+          "id": "principles-respect-safety-boundaries",
+          "severity": "blocker",
+          "source": {
+            "groupId": "principles",
+            "itemIndex": 3,
+            "kind": "verification"
+          },
+          "surfaceTags": [
+            "global"
+          ]
+        },
+        {
+          "applicability": "workflow-only",
+          "automation": "assisted",
+          "evidenceTypes": [
+            "document",
+            "screenshot"
+          ],
+          "id": "design-doc-matches-output",
+          "severity": "major",
+          "source": {
+            "groupId": "docs",
+            "itemIndex": 0,
+            "kind": "verification"
+          },
+          "surfaceTags": [
+            "global"
+          ]
+        },
+        {
+          "applicability": "workflow-only",
+          "automation": "assisted",
+          "evidenceTypes": [
+            "document"
+          ],
+          "id": "assumptions-are-recorded",
+          "severity": "minor",
+          "source": {
+            "groupId": "docs",
+            "itemIndex": 1,
+            "kind": "verification"
+          },
+          "surfaceTags": [
+            "global"
+          ]
+        },
+        {
+          "applicability": "workflow-only",
+          "automation": "assisted",
+          "evidenceTypes": [
+            "document",
+            "command"
+          ],
+          "id": "verification-summary-is-complete",
+          "severity": "major",
+          "source": {
+            "groupId": "docs",
+            "itemIndex": 2,
+            "kind": "verification"
+          },
+          "surfaceTags": [
+            "global"
+          ]
+        },
+        {
+          "applicability": "always",
+          "automation": "manual",
+          "evidenceTypes": [
+            "screenshot",
+            "manual"
+          ],
+          "id": "avoid-generic-saas",
+          "severity": "major",
+          "source": {
+            "antiPatternId": "generic-saas",
+            "kind": "anti-pattern"
+          },
+          "surfaceTags": [
+            "landing-page"
+          ]
+        },
+        {
+          "applicability": "when-present",
+          "automation": "manual",
+          "evidenceTypes": [
+            "screenshot",
+            "manual"
+          ],
+          "id": "avoid-formulaic-opening",
+          "severity": "major",
+          "source": {
+            "antiPatternId": "formulaic-opening",
+            "kind": "anti-pattern"
+          },
+          "surfaceTags": [
+            "landing-page"
+          ]
+        },
+        {
+          "applicability": "when-present",
+          "automation": "manual",
+          "evidenceTypes": [
+            "document",
+            "screenshot",
+            "manual"
+          ],
+          "id": "avoid-ai-headline-cadence",
+          "severity": "major",
+          "source": {
+            "antiPatternId": "ai-headline-cadence",
+            "kind": "anti-pattern"
+          },
+          "surfaceTags": [
+            "landing-page",
+            "content"
+          ]
+        },
+        {
+          "applicability": "always",
+          "automation": "manual",
+          "evidenceTypes": [
+            "document",
+            "manual"
+          ],
+          "id": "avoid-fake-content",
+          "severity": "major",
+          "source": {
+            "antiPatternId": "fake-content",
+            "kind": "anti-pattern"
+          },
+          "surfaceTags": [
+            "global"
+          ]
+        },
+        {
+          "applicability": "always",
+          "automation": "manual",
+          "evidenceTypes": [
+            "screenshot",
+            "manual"
+          ],
+          "id": "avoid-nested-cards",
+          "severity": "minor",
+          "source": {
+            "antiPatternId": "nested-cards",
+            "kind": "anti-pattern"
+          },
+          "surfaceTags": [
+            "global"
+          ]
+        },
+        {
+          "applicability": "when-present",
+          "automation": "manual",
+          "evidenceTypes": [
+            "screenshot",
+            "manual"
+          ],
+          "id": "avoid-decorative-chips",
+          "severity": "minor",
+          "source": {
+            "antiPatternId": "decorative-chips",
+            "kind": "anti-pattern"
+          },
+          "surfaceTags": [
+            "global"
+          ]
+        },
+        {
+          "applicability": "workflow-only",
+          "automation": "assisted",
+          "evidenceTypes": [
+            "document"
+          ],
+          "id": "avoid-principle-as-decoration",
+          "severity": "major",
+          "source": {
+            "antiPatternId": "principle-as-decoration",
+            "kind": "anti-pattern"
+          },
+          "surfaceTags": [
+            "global"
+          ]
+        },
+        {
+          "applicability": "workflow-only",
+          "automation": "assisted",
+          "evidenceTypes": [
+            "document",
+            "command"
+          ],
+          "id": "avoid-unverified-completion",
+          "severity": "major",
+          "source": {
+            "antiPatternId": "unverified-completion",
+            "kind": "anti-pattern"
+          },
+          "surfaceTags": [
+            "global"
+          ]
+        },
+        {
+          "applicability": "always",
+          "automation": "manual",
+          "evidenceTypes": [
+            "document",
+            "manual"
+          ],
+          "id": "avoid-wsb-as-product",
+          "severity": "blocker",
+          "source": {
+            "antiPatternId": "wsb-as-product",
+            "kind": "anti-pattern"
+          },
+          "surfaceTags": [
+            "global"
+          ]
         }
       ],
       "decisionExamples": [

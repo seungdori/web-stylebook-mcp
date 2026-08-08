@@ -1,6 +1,6 @@
 name: Publish
 
-# Push a release tag like v0.3.0 → build, test, and publish to npm with OIDC.
+# Push a release tag like v0.4.0 → build, test, and publish to npm with OIDC.
 on:
   push:
     tags: ['v*']

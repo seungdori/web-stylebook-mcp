@@ -79,8 +79,14 @@ to scaffold a page from memory, stop and run step 1 first.
    + placement checks, selected UX principles + cautions, returned UI-state coverage, responsive,
    accessibility, anti-patterns, confirmed
    decisions (from step 4), and verification checklist. Never leave a section empty.
-11. **Implement, then self-audit** against `webstylebook://policies/verification` and
-   `…/anti-patterns` — including the opening's **furniture-check** (below): if the visual is generic
+11. **Implement, then call `get_design_audit_plan`** with `styleId`, `surfaces`,
+   `designPrincipleIds`, `uxPrincipleIds`, matching `stateSurfaceIds`, and `locale`. This returns a localized,
+   surface-aware checklist with stable ids, severity, applicability, and required evidence without
+   loading the full three-language policy resources. Inspect the actual rendered UI, source,
+   interactions, console, and commands for every returned check. Use `PASS` / `FIX_NOW` / `RISK` /
+   `NOT_APPLICABLE` / `NOT_VERIFIED`; every `PASS` needs observed evidence, and missing evidence is
+   `NOT_VERIFIED`, never an inferred pass. Include the opening's **furniture-check** when applicable:
+   if the visual is generic
    furniture (a stock photo, an abstract shape, or a card you could paste onto another product)
    rather than a bespoke product demonstration, or the copy column is the full quartet, recompose.
    Do not skip the checklist's **`principles` group**: run each principle's recorded verification

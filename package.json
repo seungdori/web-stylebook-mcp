@@ -1,6 +1,6 @@
 {
   "name": "web-stylebook-mcp",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Design intelligence for coding agents — choose a direction, apply visual and UX principles, cover real UI states, and compose design tokens.",
   "type": "module",
   "license": "MIT",
@@ -38,7 +38,7 @@
   },
   "keywords": ["mcp", "model-context-protocol", "design", "ui", "design-system", "coding-agent"],
   "dependencies": {
-    "@modelcontextprotocol/sdk": "1.29.0",
+    "@modelcontextprotocol/sdk": "1.30.0",
     "zod": "4.4.3"
   },
   "devDependencies": {

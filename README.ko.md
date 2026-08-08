@@ -3,7 +3,7 @@
 # web-stylebook-mcp
 
 **AI 코딩 에이전트를 위한 디자인 인텔리전스.** 매번 똑같은 히어로 + 카드 3개는 그만.
-에이전트가 점수화된 디자인 *계약*(방향·시각 디자인 계획·UX 원칙 계획·UI 상태 계획·토큰)을 받아, 근거를 바탕으로 코드를 씁니다.
+에이전트가 점수화된 디자인 *계약*(방향·시각 디자인 계획·UX 원칙 계획·UI 상태 계획·토큰·근거 기반 감사 계획)을 받아, 근거를 바탕으로 코드를 쓰고 검증합니다.
 
 [![npm version](https://img.shields.io/npm/v/web-stylebook-mcp?logo=npm&color=cb3837)](https://www.npmjs.com/package/web-stylebook-mcp)
 [![downloads](https://img.shields.io/npm/dm/web-stylebook-mcp?color=cb3837)](https://www.npmjs.com/package/web-stylebook-mcp)
@@ -30,6 +30,7 @@ API 키 없음. 모델 호출 없음. 네트워크 없음. 프로젝트 파일�
 | **UX 근거** | "힉의 법칙에 따르면…"으로 논의 종료 | 근거 신뢰도(strong·contextual·contested)가 붙어 법칙으로 단정할 수 없는 점검 질문 |
 | **UI 상태** | 해피패스만, 빈/에러/로딩은 나중에 덧붙임 | 표면별 필수/권장/도메인 상태를 처음부터 |
 | **토큰** | 손으로 고른 hex, 대비는 거의 미확인 | 역할 기반 토큰 + WCAG 대비 경고 |
+| **감사** | 요약만 보고 "좋아 보임" 판정 | 안정적인 검사 ID·심각도·필요 증거·미검증 상태를 갖춘 화면별 감사 계획 |
 | **결과** | 천편일률 AI UI | 에이전트가 근거로 삼아 구현하는 디자인 계약 |
 
 ## 직접 판단하는 걸 보세요
@@ -117,7 +118,8 @@ flowchart LR
     C --> G[get_ux_principle_plan]
     C --> H[get_ui_state_plan]
     C --> I[compose_design_tokens]
-    D & E & F & G & H & I -->|디자인 계약<br/>점수 · 사유 코드<br/>배치 · 검증 기준 · 토큰| A
+    C --> J[get_design_audit_plan]
+    D & E & F & G & H & I & J -->|디자인 계약<br/>점수 · 사유 코드<br/>배치 · 증거 · 토큰| A
     A -->|근거로<br/>코드 작성| Z[당신의 UI]
 ```
 
@@ -208,8 +210,9 @@ MCP 설정에 추가:
 | **`get_ux_principle_plan`** | 결과 목표·화면·설계 단계·원칙 ID로 고른 적용/검증 계획 — 질문·주의점·근거 신뢰도·참고 링크 포함 | 원칙은 보편 법칙이나 사용자 조사의 대체물이 아니라 맥락별 점검 질문입니다 |
 | **`get_ui_state_plan`** | 표면(데이터 테이블·폼·체크아웃·채팅·개발자 콘솔)의 필수/권장/도메인 UI 상태 — 트리거·표시 필수·금지·접근성·모션 | 에이전트가 잊는 상태까지: 빈·에러·로딩·엣지 |
 | **`compose_design_tokens`** | 역할 기반 토큰(색·타이포·간격·radius·모션·밀도)을 `json` / `css-variables` / `tailwind` / `typescript`, light / dark / both | WCAG 대비 경고를 숨기지 않고 내보냅니다 |
+| **`get_design_audit_plan`** | 안정적인 검사 ID·심각도·적용 조건·필요 증거·수정 방향·선택 원칙 검사·UI 상태 범위를 담은 다국어 감사 계획 | 프로젝트를 실제로 봤다고 가장하지 않으며, 증거가 없으면 `PASS`가 아니라 `NOT_VERIFIED`입니다 |
 
-**카탈로그:** 스타일 48 · 시각 디자인 원칙 22 · UX 원칙 23 · 컴포넌트 20 · 표면 5 · UI 상태 레시피 57 · 모션 프로파일 29 · 제품 아키타입 14.
+**카탈로그:** 스타일 48 · 시각 디자인 원칙 22 · UX 원칙 23 · 구조화 감사 검사 38 · 컴포넌트 20 · 표면 5 · UI 상태 레시피 57 · 모션 프로파일 29 · 제품 아키타입 14.
 
 ## 다국어 출력
 
@@ -232,7 +235,7 @@ webstylebook://principles · /principles/{id}
 webstylebook://design-principles · /design-principles/{id}
 webstylebook://states/surfaces · /states/{surface} · /states/{surface}/{state}
 webstylebook://products · /products/{id}
-webstylebook://policies/anti-patterns · /policies/verification
+webstylebook://policies/anti-patterns · /policies/verification · /policies/audit-checks
 ```
 
 ## 프롬프트

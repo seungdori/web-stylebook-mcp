@@ -81,6 +81,20 @@ export const UX_PHASES = [
 ] as const;
 export type UxPhase = (typeof UX_PHASES)[number];
 
+export const AUDIT_SEVERITIES = ['blocker', 'major', 'minor'] as const;
+export type AuditSeverity = (typeof AUDIT_SEVERITIES)[number];
+
+export const AUDIT_EVIDENCE_TYPES = [
+  'command', 'dom', 'computed-style', 'screenshot', 'interaction', 'document', 'manual',
+] as const;
+export type AuditEvidenceType = (typeof AUDIT_EVIDENCE_TYPES)[number];
+
+export const AUDIT_AUTOMATION_LEVELS = ['automated', 'assisted', 'manual'] as const;
+export type AuditAutomationLevel = (typeof AUDIT_AUTOMATION_LEVELS)[number];
+
+export const AUDIT_APPLICABILITY = ['always', 'when-present', 'workflow-only'] as const;
+export type AuditApplicability = (typeof AUDIT_APPLICABILITY)[number];
+
 export const UX_EVIDENCE_KINDS = [
   'empirical', 'gestalt', 'heuristic', 'systems-maxim',
 ] as const;
@@ -103,6 +117,9 @@ export const DESIGN_CONCERNS = [
   'consistency', 'responsiveness', 'accessibility', 'restraint', 'resilience',
 ] as const;
 export type DesignConcern = (typeof DESIGN_CONCERNS)[number];
+
+export const PRINCIPLE_MATCH_MODES = ['ranked-union', 'all-selectors'] as const;
+export type PrincipleMatchMode = (typeof PRINCIPLE_MATCH_MODES)[number];
 
 export interface OntologyTerm {
   value: string;
@@ -373,6 +390,18 @@ export interface StateRecipe {
 export interface PreflightCheck { id: string; label: LocalizedText; detail: LocalizedText; }
 export interface VerificationGroup { id: string; title: LocalizedText; items: LocalizedText[]; }
 export interface AntiPattern { id: string; pattern: LocalizedText; why: LocalizedText; fix: LocalizedText; }
+export type AuditCheckSource =
+  | { kind: 'verification'; groupId: string; itemIndex: number }
+  | { kind: 'anti-pattern'; antiPatternId: string };
+export interface AuditCheckDefinition {
+  id: string;
+  source: AuditCheckSource;
+  severity: AuditSeverity;
+  evidenceTypes: AuditEvidenceType[];
+  automation: AuditAutomationLevel;
+  applicability: AuditApplicability;
+  surfaceTags: UxSurface[];
+}
 export interface DecisionExample {
   id: string;
   product: LocalizedText;
@@ -386,6 +415,7 @@ export interface Policies {
   preflight: PreflightCheck[];
   verification: VerificationGroup[];
   antiPatterns: AntiPattern[];
+  auditChecks: AuditCheckDefinition[];
   decisionExamples: DecisionExample[];
 }
 
@@ -405,6 +435,10 @@ export interface CatalogOntologyEnums {
   uxEvidenceConfidence: string[];
   designPrincipleCategories: string[];
   designConcerns: string[];
+  auditSeverities: string[];
+  auditEvidenceTypes: string[];
+  auditAutomationLevels: string[];
+  auditApplicability: string[];
 }
 
 export interface WebStylebookCatalogV1 {

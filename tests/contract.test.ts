@@ -16,19 +16,21 @@ beforeAll(async () => {
 
 describe('MCP contract', () => {
   it('advertises server instructions and the packaged server version', () => {
-    expect(client.getServerVersion()).toEqual({ name: 'web-stylebook', version: '0.3.0' });
+    expect(client.getServerVersion()).toEqual({ name: 'web-stylebook', version: '0.4.0' });
     const instructions = client.getInstructions() ?? '';
     expect(instructions).toContain('recommend_design_direction');
     expect(instructions).toContain('get_design_principle_plan');
     expect(instructions).toContain('get_ux_principle_plan');
+    expect(instructions).toContain('get_design_audit_plan');
     expect(instructions).toContain('read-only');
   });
 
-  it('exposes exactly the 6 compute tools, all read-only', async () => {
+  it('exposes exactly the 7 compute tools, all read-only', async () => {
     const { tools } = await client.listTools();
     expect(tools.map((t) => t.name).sort()).toEqual([
-      'compare_design_directions', 'compose_design_tokens', 'get_design_principle_plan',
-      'get_ui_state_plan', 'get_ux_principle_plan', 'recommend_design_direction',
+      'compare_design_directions', 'compose_design_tokens', 'get_design_audit_plan',
+      'get_design_principle_plan', 'get_ui_state_plan', 'get_ux_principle_plan',
+      'recommend_design_direction',
     ]);
     for (const t of tools) expect(t.annotations?.readOnlyHint).toBe(true);
   });
@@ -40,6 +42,7 @@ describe('MCP contract', () => {
     expect(uris).toContain('webstylebook://styles');
     expect(uris).toContain('webstylebook://design-principles');
     expect(uris).toContain('webstylebook://principles');
+    expect(uris).toContain('webstylebook://policies/audit-checks');
     const { resourceTemplates } = await client.listResourceTemplates();
     expect(resourceTemplates.map((t) => t.uriTemplate)).toContain('webstylebook://styles/{styleId}');
     expect(resourceTemplates.map((t) => t.uriTemplate))
@@ -53,9 +56,10 @@ describe('MCP contract', () => {
     expect(body.counts.styles).toBe(48);
     expect(body.counts.principles).toBe(23);
     expect(body.counts.designPrinciples).toBeGreaterThan(0);
+    expect(body.counts.auditChecks).toBe(38);
     expect(body.domains).toContain('design-principles');
     expect(body.domains).toContain('principles');
-    expect(body.tools).toHaveLength(6);
+    expect(body.tools).toHaveLength(7);
     expect(body.resourceUriTemplates).toContain('webstylebook://design-principles/{id}');
     expect(body.resourceUriTemplates).toContain('webstylebook://principles/{id}');
     expect(body.contentHash).toMatch(/^sha256:[0-9a-f]{64}$/);
@@ -212,6 +216,38 @@ describe('MCP contract', () => {
     const fallback = (r.content as any[]).find((item) => item.type === 'text')?.text ?? '';
     expect(fallback).toContain('webstylebook://principles/doherty-threshold');
     expect((r.content as any[]).filter((item) => item.type === 'resource_link')).toHaveLength(2);
+  });
+
+  it('get_design_audit_plan: returns localized evidence contracts without multilingual policy payloads', async () => {
+    const r = await client.callTool({
+      name: 'get_design_audit_plan',
+      arguments: {
+        styleId: 'platform-core',
+        surfaces: ['settings'],
+        designPrincipleIds: ['explicit-labels-and-semantics'],
+        uxPrincipleIds: ['mental-model'],
+        includeDocumentation: false,
+        locale: 'ko',
+      },
+    });
+    expect(r.isError).toBeFalsy();
+    const sc = r.structuredContent as any;
+    expect(sc.verdicts.map((verdict: any) => verdict.id)).toContain('NOT_VERIFIED');
+    expect(sc.evidenceRule).toMatch(/증거/);
+    expect(sc.evidenceLegend.screenshot).toMatch(/스크린샷/);
+    expect(sc.applicabilityLegend.always).toMatch(/검사/);
+    expect(sc.checks.some((check: any) => check.id === 'opening-demonstrates-product')).toBe(false);
+    expect(sc.checks.some((check: any) => check.applicability === 'workflow-only')).toBe(false);
+    expect(sc.principles.design[0].id).toBe('explicit-labels-and-semantics');
+    expect(sc.principles.ux[0].evidenceConfidence).toBeTruthy();
+    expect(JSON.stringify(sc)).not.toContain('"ja":');
+    const fallback = (r.content as any[]).find((item) => item.type === 'text')?.text ?? '';
+    expect(fallback).toContain('# 디자인 감사 계획');
+    expect(fallback).toContain('판정:');
+    expect(fallback).toContain('NOT_VERIFIED');
+    expect(fallback).toContain('keyboard-focus-is-visible');
+    expect((r.content as any[]).some((item) => item.type === 'resource_link'
+      && item.uri === 'webstylebook://styles/platform-core')).toBe(true);
   });
 
   it.each([

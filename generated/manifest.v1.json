@@ -1,7 +1,8 @@
 {
-  "catalogVersion": "0.3.0",
-  "contentHash": "sha256:c20eab85984adc1e72230fc36dffe24568eb4c0aca7ed356df4437851821f447",
+  "catalogVersion": "0.4.0",
+  "contentHash": "sha256:ec0bd5ebd98fac99b5508bd8057d20b8f118c17c9fc1a7dc4a6bdf73c973ad51",
   "counts": {
+    "auditChecks": 38,
     "components": 20,
     "designPrinciples": 22,
     "motionPatterns": 29,

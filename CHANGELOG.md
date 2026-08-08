@@ -6,6 +6,31 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.4.0] — 2026-08-08
+
+### Added
+
+- `get_design_audit_plan`, a deterministic, localized audit planner that returns stable check ids,
+  severity, applicability, automation level, required evidence, remediation, selected-principle
+  checks, state coverage, and a five-state verdict contract including `NOT_APPLICABLE` and
+  `NOT_VERIFIED`.
+- 38 structured audit definitions in the canonical catalog, covering every existing verification
+  item and anti-pattern exactly once without changing the website handoff's legacy text shape.
+- `webstylebook://policies/audit-checks` for clients that need the language-neutral audit metadata.
+
+### Changed
+
+- The companion skill and audit prompts now use the compact audit planner instead of loading both
+  full three-language policy resources. They require actual rendered/code/interaction evidence and
+  prohibit inferring `PASS` from an implementation summary.
+- Design and UX principle planners accept `matchMode: "all-selectors"` for strict intersection
+  filtering. Audit prompts use it so the near-universal `validation` phase no longer widens a
+  targeted concern/outcome + surface query to almost the whole catalog.
+- Audit prompt inputs are bounded and structured, and no longer re-fetch principle detail resources
+  already present in planner output.
+- Updated `@modelcontextprotocol/sdk` to 1.30.0 and refreshed its dependency tree; the release now
+  passes `npm audit` with no findings.
+
 ## [0.3.0] — 2026-07-28
 
 ### Added
@@ -168,7 +193,8 @@ All notable changes to this project are documented here. The format follows
 - Output localization in English, Korean, and Japanese.
 - Fully offline at runtime: no API key, no model call, no network, no filesystem access.
 
-[Unreleased]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.1.1...v0.3.0
 [0.1.1]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/seungdori/web-stylebook-mcp/releases/tag/v0.1.0

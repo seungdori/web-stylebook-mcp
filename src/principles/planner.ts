@@ -2,7 +2,7 @@ import { text, texts } from '../localization.js';
 import type { CatalogRepository } from '../catalog/repository.js';
 import { UX_OUTCOMES } from '../types.js';
 import type {
-  Lang, UxOutcome, UxPhase, UxPrinciple, UxSurface,
+  Lang, PrincipleMatchMode, UxOutcome, UxPhase, UxPrinciple, UxSurface,
 } from '../types.js';
 
 export interface UxPrinciplePlanInput {
@@ -10,6 +10,7 @@ export interface UxPrinciplePlanInput {
   outcomes?: UxOutcome[];
   surface?: UxSurface;
   phase?: UxPhase;
+  matchMode?: PrincipleMatchMode;
   limit?: number;
   locale?: Lang;
 }
@@ -37,6 +38,7 @@ export interface UxPrinciplePlan {
     outcomes: UxOutcome[];
     surface?: UxSurface;
     phase?: UxPhase;
+    matchMode: PrincipleMatchMode;
     limit: number;
     locale: Lang;
   };
@@ -90,6 +92,7 @@ const labels: Record<Lang, {
   phase: string;
   guidance: string[];
   weakSelectors: (matching: number, total: number) => string;
+  strictNoMatches: string;
 }> = {
   en: {
     requested: 'requested directly',
@@ -103,6 +106,7 @@ const labels: Record<Lang, {
       'Verify each selected principle against the actual task, content, and non-happy-path states.',
     ],
     weakSelectors: (matching, total) => `These selectors matched ${matching} of ${total} principles, so they did not narrow the catalog — the returned set reflects relevance ranking, not a targeted filter. Add more specific outcomes, or pass explicit principleIds, when you need a precise set.`,
+    strictNoMatches: 'No UX principle matched every selector dimension. Keep strict matching and remove only the least relevant selector, or pass explicit principleIds; do not silently treat a ranked union as an exact match.',
   },
   ko: {
     requested: '직접 지정됨',
@@ -116,6 +120,7 @@ const labels: Record<Lang, {
       '선택한 원칙마다 실제 과업·콘텐츠·비정상 상태에서 효과가 있는지 검증하세요.',
     ],
     weakSelectors: (matching, total) => `이 조건은 원칙 ${total}개 중 ${matching}개와 일치해서 카탈로그를 거의 좁히지 못했습니다. 결과는 필터링이 아니라 관련성 순위에 따른 것입니다. 정확한 집합이 필요하면 더 구체적인 outcomes를 넣거나 principleIds를 직접 지정하세요.`,
+    strictNoMatches: '모든 조건 차원에 동시에 맞는 UX 원칙이 없습니다. 엄격 일치를 유지한 채 가장 덜 중요한 조건 하나만 빼거나 principleIds를 직접 지정하세요. 순위 합집합을 정확한 일치처럼 조용히 사용하면 안 됩니다.',
   },
   ja: {
     requested: '直接指定',
@@ -129,6 +134,7 @@ const labels: Record<Lang, {
       '各原則を実際のタスク、コンテンツ、非正常系の状態で検証してください。',
     ],
     weakSelectors: (matching, total) => `この条件は原則${total}件のうち${matching}件に一致し、カタログをほとんど絞り込めていません。返る集合はフィルタではなく関連度の順位によるものです。厳密な集合が必要なら、より具体的なoutcomesを加えるか、principleIdsを直接指定してください。`,
+    strictNoMatches: 'すべての条件軸に一致するUX原則はありません。厳密一致を保ったまま重要度の最も低い条件だけを外すか、principleIdsを明示してください。順位付き和集合を完全一致として黙って扱わないでください。',
   },
 };
 
@@ -171,6 +177,23 @@ function scorePrinciple(
   return { principle, score, whyRelevant, catalogIndex };
 }
 
+function matchesAllSelectors(
+  principle: UxPrinciple,
+  input: UxPrinciplePlanInput,
+  outcomes: UxOutcome[],
+): boolean {
+  if (outcomes.length && !outcomes.some((outcome) => principle.outcomeTags.includes(outcome))) {
+    return false;
+  }
+  if (input.surface
+    && !principle.surfaceTags.includes(input.surface)
+    && !principle.surfaceTags.includes('global')) {
+    return false;
+  }
+  if (input.phase && !principle.phaseTags.includes(input.phase)) return false;
+  return true;
+}
+
 function materialize(
   scored: ScoredPrinciple,
   locale: Lang,
@@ -204,6 +227,7 @@ export function planUxPrinciples(
   const requestedOutcomes = new Set(input.outcomes ?? []);
   const outcomes = UX_OUTCOMES.filter((outcome) => requestedOutcomes.has(outcome));
   const locale = input.locale ?? 'en';
+  const matchMode = input.matchMode ?? 'ranked-union';
   if (principleIds.length > MAX_LIMIT) {
     throw new PrinciplePlanError(`principleIds supports at most ${MAX_LIMIT} unique ids`);
   }
@@ -246,7 +270,9 @@ export function planUxPrinciples(
         locale,
         catalogIndex,
       ))
-      .filter((item) => item.score > 0)
+      .filter((item) => item.score > 0 && (
+        matchMode === 'ranked-union' || matchesAllSelectors(item.principle, input, outcomes)
+      ))
       .sort((a, b) => b.score - a.score || (
         a.principle.id < b.principle.id ? -1 : a.principle.id > b.principle.id ? 1 : 0
       ));
@@ -258,12 +284,16 @@ export function planUxPrinciples(
   if (!principleIds.length && matching.length >= Math.ceil(catalogTotal * WEAK_SELECTOR_RATIO)) {
     guidance.unshift(labels[locale].weakSelectors(matching.length, catalogTotal));
   }
+  if (!principleIds.length && matchMode === 'all-selectors' && matching.length === 0) {
+    guidance.unshift(labels[locale].strictNoMatches);
+  }
   return {
     query: {
       principleIds,
       outcomes,
       surface: input.surface,
       phase: input.phase,
+      matchMode,
       limit,
       locale,
     },

@@ -39,8 +39,12 @@ dashboard, form, checkout, chat, developer console), call the **`web-stylebook`*
    the placement decision it produced and its observable verification check, and
    **selected UX principles**, each with its caution and evidence confidence label.
    No empty sections; then implement.
-10. Self-audit against `webstylebook://policies/verification` — including its `principles` group:
-   run each recorded principle check against the built UI and write down the outcome. A principle
+10. Call `get_design_audit_plan` with `styleId`, `surfaces`, `designPrincipleIds`, `uxPrincipleIds`,
+   matching `stateSurfaceIds`, and `locale`. Inspect the actual rendered UI, source, interactions,
+   console, and commands for every returned stable check id. Use `PASS` / `FIX_NOW` / `RISK` /
+   `NOT_APPLICABLE` / `NOT_VERIFIED`; every PASS needs observed evidence, and missing evidence is
+   NOT_VERIFIED. Do not skip its `principles` group: run each recorded principle check against the
+   built UI and write down the outcome. A principle
    name listed without a placement decision and an observed check is decoration; drop it or verify
    it. Never restate a `contextual` or `contested` principle as a law. Do this inline yourself —
    the `audit-design-direction`, `audit-design-principles`, and `audit-ux-principles` prompts are

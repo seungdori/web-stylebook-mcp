@@ -40,6 +40,20 @@ describe('UX principle planner', () => {
     expect(reversed).toEqual(normal);
   });
 
+  it('strict matching intersects outcomes, surface, and phase for audit selection', () => {
+    const union = planUxPrinciples({
+      outcomes: ['decision'], surface: 'settings', phase: 'validation', limit: 12,
+    }, repo);
+    const strict = planUxPrinciples({
+      outcomes: ['decision'], surface: 'settings', phase: 'validation',
+      matchMode: 'all-selectors', limit: 12,
+    }, repo);
+
+    expect(strict.coverage.matching).toBeLessThan(union.coverage.matching);
+    expect(strict.principles.every((principle) => principle.score >= 7)).toBe(true);
+    expect(strict.query.matchMode).toBe('all-selectors');
+  });
+
   it('returns every explicitly requested id by default, preserves order, and keeps real relevance scores', () => {
     const principleIds = [
       'postels-law',

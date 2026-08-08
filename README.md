@@ -3,7 +3,7 @@
 # web-stylebook-mcp
 
 **Design intelligence for AI coding agents.** Stop shipping the same hero-plus-three-cards.
-Your agent gets scored design *contracts* — directions, visual-design plans, UX-principle plans, UI-state plans, tokens — then writes the code from evidence.
+Your agent gets scored design *contracts* — directions, visual-design plans, UX-principle plans, UI-state plans, tokens, evidence-backed audit plans — then writes and verifies the code from evidence.
 
 [![npm version](https://img.shields.io/npm/v/web-stylebook-mcp?logo=npm&color=cb3837)](https://www.npmjs.com/package/web-stylebook-mcp)
 [![downloads](https://img.shields.io/npm/dm/web-stylebook-mcp?color=cb3837)](https://www.npmjs.com/package/web-stylebook-mcp)
@@ -30,6 +30,7 @@ No API key. No model call. No network. No project filesystem access. **Determini
 | **UX evidence** | "Hick's Law says…" as a conversation-ender | Evidence-labeled prompts (`strong` / `contextual` / `contested`) you can't restate as law |
 | **UI states** | Happy path only; empty / error / loading bolted on later | Required / recommended / domain states up front, per surface |
 | **Tokens** | Hand-picked hexes, contrast rarely checked | Role-based tokens with WCAG contrast warnings |
+| **Audit** | "Looks good" from a summary | Surface-aware checks with stable ids, severity, required evidence, and explicit unverified states |
 | **Result** | Generic AI UI | A defensible design contract the agent builds from |
 
 ## Watch it decide
@@ -115,7 +116,8 @@ flowchart LR
     C --> G[get_ux_principle_plan]
     C --> H[get_ui_state_plan]
     C --> I[compose_design_tokens]
-    D & E & F & G & H & I -->|design contracts<br/>scores · reason codes<br/>placement · verify checks · tokens| A
+    C --> J[get_design_audit_plan]
+    D & E & F & G & H & I & J -->|design contracts<br/>scores · reason codes<br/>placement · evidence · tokens| A
     A -->|writes code<br/>from evidence| Z[Your UI]
 ```
 
@@ -206,8 +208,9 @@ Add the same block to your `claude_desktop_config.json`, then restart:
 | **`get_ux_principle_plan`** | A focused apply-and-verify plan selected by outcomes, surface, phase, or principle ids — with questions, cautions, confidence, and references | Principles are contextual prompts, not universal laws or a substitute for research |
 | **`get_ui_state_plan`** | Required / recommended / domain UI states for a surface (data-table, form, checkout, chat, developer-console) — triggers, must-show, must-not, a11y, motion | Covers the states agents forget: empty, error, loading, edge |
 | **`compose_design_tokens`** | Role-based tokens (color, type, spacing, radius, motion, density) as `json` / `css-variables` / `tailwind` / `typescript`, light / dark / both | Emits WCAG contrast warnings instead of hiding them |
+| **`get_design_audit_plan`** | Localized, surface-aware checks with stable ids, severity, applicability, required evidence, remediation, selected principle checks, and UI-state coverage | The tool plans the audit but never pretends it inspected your project; missing evidence is `NOT_VERIFIED`, not `PASS` |
 
-**Catalog:** 48 styles · 22 visual design principles · 23 UX principles · 20 components · 5 surfaces · 57 UI-state recipes · 29 motion profiles · 14 product archetypes.
+**Catalog:** 48 styles · 22 visual design principles · 23 UX principles · 38 structured audit checks · 20 components · 5 surfaces · 57 UI-state recipes · 29 motion profiles · 14 product archetypes.
 
 ## Localized output
 
@@ -230,7 +233,7 @@ webstylebook://principles · /principles/{id}
 webstylebook://design-principles · /design-principles/{id}
 webstylebook://states/surfaces · /states/{surface} · /states/{surface}/{state}
 webstylebook://products · /products/{id}
-webstylebook://policies/anti-patterns · /policies/verification
+webstylebook://policies/anti-patterns · /policies/verification · /policies/audit-checks
 ```
 
 ## Prompts

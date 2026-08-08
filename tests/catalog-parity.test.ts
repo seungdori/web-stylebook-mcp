@@ -9,6 +9,10 @@ import { SERVER_VERSION } from '../src/server-info.js';
 import {
   DESIGN_CONCERNS,
   DESIGN_PRINCIPLE_CATEGORIES,
+  AUDIT_APPLICABILITY,
+  AUDIT_AUTOMATION_LEVELS,
+  AUDIT_EVIDENCE_TYPES,
+  AUDIT_SEVERITIES,
   UX_EVIDENCE_CONFIDENCE,
   UX_EVIDENCE_KINDS,
   UX_OUTCOMES,
@@ -46,6 +50,7 @@ describe('bundled catalog integrity', () => {
       motionPatterns: repo.data.motionPatterns.length,
       components: repo.data.components.length,
       designPrinciples: repo.data.designPrinciples.length,
+      auditChecks: repo.data.policies.auditChecks.length,
       principles: repo.data.uxPrinciples.length,
       productArchetypes: repo.data.productArchetypes.length,
       stateSurfaces: repo.data.stateSurfaces.length,
@@ -74,6 +79,10 @@ describe('bundled catalog integrity', () => {
     expect(repo.data.ontologyEnums.designPrincipleCategories)
       .toEqual([...DESIGN_PRINCIPLE_CATEGORIES]);
     expect(repo.data.ontologyEnums.designConcerns).toEqual([...DESIGN_CONCERNS]);
+    expect(repo.data.ontologyEnums.auditSeverities).toEqual([...AUDIT_SEVERITIES]);
+    expect(repo.data.ontologyEnums.auditEvidenceTypes).toEqual([...AUDIT_EVIDENCE_TYPES]);
+    expect(repo.data.ontologyEnums.auditAutomationLevels).toEqual([...AUDIT_AUTOMATION_LEVELS]);
+    expect(repo.data.ontologyEnums.auditApplicability).toEqual([...AUDIT_APPLICABILITY]);
   });
 
   it.each([
@@ -90,6 +99,11 @@ describe('bundled catalog integrity', () => {
     }],
     ['unknown related UX principle', (envelope: any) => {
       envelope.data.designPrinciples[0].relatedUxPrincipleIds = ['not-a-ux-principle'];
+    }],
+    ['unknown audit source', (envelope: any) => {
+      envelope.data.policies.auditChecks[0].source = {
+        kind: 'anti-pattern', antiPatternId: 'not-an-anti-pattern',
+      };
     }],
   ])('rejects a rehashed catalog with %s', (_label, mutate) => {
     const report = reportAfter(mutate);

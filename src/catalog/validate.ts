@@ -6,6 +6,10 @@ import type { CatalogRepository } from './repository.js';
 import {
   DESIGN_CONCERNS,
   DESIGN_PRINCIPLE_CATEGORIES,
+  AUDIT_APPLICABILITY,
+  AUDIT_AUTOMATION_LEVELS,
+  AUDIT_EVIDENCE_TYPES,
+  AUDIT_SEVERITIES,
   LANGS,
   UX_EVIDENCE_CONFIDENCE,
   UX_EVIDENCE_KINDS,
@@ -163,6 +167,10 @@ export function validateLoaded(repo: CatalogRepository): ValidateReport {
       errors,
     );
     exactEnum(enums.designConcerns, DESIGN_CONCERNS, 'ontologyEnums.designConcerns', errors);
+    exactEnum(enums.auditSeverities, AUDIT_SEVERITIES, 'ontologyEnums.auditSeverities', errors);
+    exactEnum(enums.auditEvidenceTypes, AUDIT_EVIDENCE_TYPES, 'ontologyEnums.auditEvidenceTypes', errors);
+    exactEnum(enums.auditAutomationLevels, AUDIT_AUTOMATION_LEVELS, 'ontologyEnums.auditAutomationLevels', errors);
+    exactEnum(enums.auditApplicability, AUDIT_APPLICABILITY, 'ontologyEnums.auditApplicability', errors);
   }
 
   const principleIds = new Set<string>();
@@ -315,6 +323,40 @@ export function validateLoaded(repo: CatalogRepository): ValidateReport {
       errors,
     );
   }
+
+  const auditIds = new Set<string>();
+  const expectedAuditSources = new Set<string>();
+  for (const group of data.policies.verification) {
+    group.items.forEach((_item, itemIndex) => expectedAuditSources.add(`verification:${group.id}:${itemIndex}`));
+  }
+  for (const antiPattern of data.policies.antiPatterns) {
+    expectedAuditSources.add(`anti-pattern:${antiPattern.id}`);
+  }
+  const seenAuditSources = new Set<string>();
+  for (const check of data.policies.auditChecks) {
+    if (auditIds.has(check.id)) errors.push(`duplicate audit check id ${check.id}`);
+    auditIds.add(check.id);
+    validEnumArray(check.surfaceTags, UX_SURFACES, `audit check ${check.id} surfaceTags`, errors);
+    if (!AUDIT_SEVERITIES.includes(check.severity)) {
+      errors.push(`audit check ${check.id} has unknown severity ${check.severity}`);
+    }
+    if (!AUDIT_AUTOMATION_LEVELS.includes(check.automation)) {
+      errors.push(`audit check ${check.id} has unknown automation ${check.automation}`);
+    }
+    if (!AUDIT_APPLICABILITY.includes(check.applicability)) {
+      errors.push(`audit check ${check.id} has unknown applicability ${check.applicability}`);
+    }
+    validEnumArray(check.evidenceTypes, AUDIT_EVIDENCE_TYPES, `audit check ${check.id} evidenceTypes`, errors);
+    const sourceKey = check.source.kind === 'verification'
+      ? `verification:${check.source.groupId}:${check.source.itemIndex}`
+      : `anti-pattern:${check.source.antiPatternId}`;
+    if (!expectedAuditSources.has(sourceKey)) errors.push(`audit check ${check.id} -> unknown source ${sourceKey}`);
+    if (seenAuditSources.has(sourceKey)) errors.push(`duplicate audit check source ${sourceKey}`);
+    seenAuditSources.add(sourceKey);
+  }
+  for (const sourceKey of expectedAuditSources) {
+    if (!seenAuditSources.has(sourceKey)) errors.push(`audit source ${sourceKey} has no check definition`);
+  }
   for (const category of DESIGN_PRINCIPLE_CATEGORIES) {
     if (!representedDesignCategories.has(category)) {
       errors.push(`design principle category ${category} has no entries`);
@@ -359,6 +401,7 @@ export function validateLoaded(repo: CatalogRepository): ValidateReport {
       components: data.components.length,
       principles: data.uxPrinciples.length,
       designPrinciples: data.designPrinciples.length,
+      auditChecks: data.policies.auditChecks.length,
       surfaces: data.stateSurfaces.length,
       recipes: data.stateRecipes.length,
       products: data.productArchetypes.length,

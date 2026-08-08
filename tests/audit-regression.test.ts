@@ -97,7 +97,7 @@ describe('audit L12 — all seven workflow prompts render a non-empty user messa
       const res = await client.getPrompt({ name, arguments: a });
       const text = (res.messages[0]?.content as { text?: string }).text ?? '';
       expect(text.length, name).toBeGreaterThan(40);
-      expect(text, name).toMatch(/webstylebook:\/\/|recommend_design_direction|get_design_principle_plan|get_ux_principle_plan|get_ui_state_plan|compare_design_directions|compose_design_tokens|anti-patterns/);
+      expect(text, name).toMatch(/webstylebook:\/\/|recommend_design_direction|get_design_principle_plan|get_ux_principle_plan|get_ui_state_plan|get_design_audit_plan|compare_design_directions|compose_design_tokens|anti-patterns/);
     }
   });
 
@@ -122,6 +122,24 @@ describe('audit L12 — all seven workflow prompts render a non-empty user messa
     expect(served.domains).toEqual(generated.domains);
     expect(served.counts.designPrinciples).toBe(generated.counts.designPrinciples);
     expect(served.counts.principles).toBe(generated.counts.principles);
+    expect(served.counts.auditChecks).toBe(generated.counts.auditChecks);
+  });
+
+  it('audit prompts require actual evidence and use strict principle matching without per-item refetches', async () => {
+    for (const name of ['audit-design-direction', 'audit-design-principles', 'audit-ux-principles']) {
+      const res = await client.getPrompt({ name, arguments: args[name]! });
+      const text = (res.messages[0]?.content as { text?: string }).text ?? '';
+      expect(text, name).toContain('get_design_audit_plan');
+      expect(text, name).toContain('NOT_VERIFIED');
+      expect(text, name).toMatch(/evidence/i);
+      expect(text, name).not.toMatch(/read webstylebook:\/\/(?:design-)?principles\/\{id\}/i);
+    }
+
+    for (const name of ['audit-design-principles', 'audit-ux-principles']) {
+      const res = await client.getPrompt({ name, arguments: args[name]! });
+      const text = (res.messages[0]?.content as { text?: string }).text ?? '';
+      expect(text, name).toContain('all-selectors');
+    }
   });
 });
 
@@ -203,15 +221,17 @@ describe('the closing gate checks that principles were applied, not just selecte
     expect(JSON.stringify(entry)).toMatch(/never verified|검증하지 않음/);
   });
 
-  it('the skill and both fragments route the self-audit through the principles group', () => {
+  it('the skill and both fragments route the self-audit through the structured principles checks', () => {
     for (const rel of [
       'skill/web-stylebook-design/SKILL.md',
       'skill/CLAUDE.md',
       'skill/AGENTS.md',
     ]) {
       const content = read(rel);
-      expect(content, rel).toContain('webstylebook://policies/verification');
+      expect(content, rel).toContain('get_design_audit_plan');
       expect(content, rel).toMatch(/`principles` group/);
+      expect(content, rel).toContain('NOT_VERIFIED');
+      expect(content, rel).toMatch(/evidence/i);
     }
   });
 });

@@ -6,6 +6,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { CatalogRepository } from '../catalog/repository.js';
 import {
   DESIGN_CONCERNS,
+  PRINCIPLE_MATCH_MODES,
   PRODUCT_TYPES, TONES, DENSITY_LEVELS, USAGE_FREQUENCIES, TRUST_LEVELS, STATE_CATEGORIES,
   UX_OUTCOMES, UX_SURFACES, UX_PHASES,
 } from '../types.js';
@@ -23,6 +24,13 @@ import {
   type DesignPrinciplePlan,
   type DesignPrinciplePlanInput,
 } from '../design-principles/planner.js';
+import {
+  AUDIT_GROUP_IDS,
+  AuditPlanError,
+  planDesignAudit,
+  type DesignAuditPlan,
+  type DesignAuditPlanInput,
+} from '../audit/planner.js';
 import { composeDesignTokens, TokenError, type ComposeDesignTokensResult } from '../tokens/compile.js';
 import { ok, errorResult, type ToolResult } from './result.js';
 import { ToolError, nearestIds } from './errors.js';
@@ -75,6 +83,27 @@ function toToolError(e: unknown, repo: CatalogRepository): ToolError {
         e.message,
         nearestIds(e.unknownId, repo.data.uxPrinciples.map((principle) => principle.id)),
       );
+    }
+    return new ToolError('INVALID_INPUT', e.message);
+  }
+  if (e instanceof AuditPlanError) {
+    if (e.kind === 'STYLE_NOT_FOUND' && e.unknownId) {
+      return new ToolError('STYLE_NOT_FOUND', e.message, nearestIds(e.unknownId, repo.allStyles().map((s) => s.id)));
+    }
+    if (e.kind === 'DESIGN_PRINCIPLE_NOT_FOUND' && e.unknownId) {
+      return new ToolError(
+        'DESIGN_PRINCIPLE_NOT_FOUND', e.message,
+        nearestIds(e.unknownId, repo.data.designPrinciples.map((principle) => principle.id)),
+      );
+    }
+    if (e.kind === 'UX_PRINCIPLE_NOT_FOUND' && e.unknownId) {
+      return new ToolError(
+        'UX_PRINCIPLE_NOT_FOUND', e.message,
+        nearestIds(e.unknownId, repo.data.uxPrinciples.map((principle) => principle.id)),
+      );
+    }
+    if (e.kind === 'STATE_SURFACE_NOT_FOUND' && e.unknownId) {
+      return new ToolError('STATE_SURFACE_NOT_FOUND', e.message, repo.listSurfaces().map((surface) => surface.id));
     }
     return new ToolError('INVALID_INPUT', e.message);
   }
@@ -141,6 +170,9 @@ export function registerTools(server: McpServer, repo: CatalogRepository): void 
       concerns: z.array(z.enum(DESIGN_CONCERNS)).max(10).optional(),
       surface: z.enum(UX_SURFACES).optional(),
       phase: z.enum(UX_PHASES).optional(),
+      matchMode: z.enum(PRINCIPLE_MATCH_MODES)
+        .describe('ranked-union scores any matched selector dimension; all-selectors requires every supplied dimension and may return no matches')
+        .optional(),
       limit: z.number().int().min(1).max(12).optional(),
       locale: LOCALE.optional(),
     },
@@ -166,6 +198,9 @@ export function registerTools(server: McpServer, repo: CatalogRepository): void 
       outcomes: z.array(z.enum(UX_OUTCOMES)).max(8).optional(),
       surface: z.enum(UX_SURFACES).optional(),
       phase: z.enum(UX_PHASES).optional(),
+      matchMode: z.enum(PRINCIPLE_MATCH_MODES)
+        .describe('ranked-union scores any matched selector dimension; all-selectors requires every supplied dimension and may return no matches')
+        .optional(),
       limit: z.number().int().min(1).max(12).optional(),
       locale: LOCALE.optional(),
     },
@@ -178,6 +213,34 @@ export function registerTools(server: McpServer, repo: CatalogRepository): void 
         renderPrinciplePlan(plan),
         plan.principles.map((principle) => principle.resourceUri),
         principleFallbackLabels[plan.query.locale].resources,
+      );
+    } catch (e) { return errorResult(toToolError(e, repo)); }
+  });
+
+  // ----------------------------------------------------------- design audit plan
+  server.registerTool('get_design_audit_plan', {
+    title: 'Build an evidence-backed design audit plan',
+    description: 'Return a localized, surface-aware audit checklist with stable check ids, severity, applicability, required evidence, remediation, verdict definitions, selected principle checks, and UI-state coverage. This tool does not inspect a project: the host must collect actual rendered/code/interaction evidence, and missing evidence is NOT_VERIFIED rather than PASS.',
+    inputSchema: {
+      styleId: z.string().min(1).max(100).optional(),
+      surfaces: z.array(z.enum(UX_SURFACES)).min(1).max(12).optional(),
+      designPrincipleIds: z.array(z.string().min(1).max(100)).max(12).optional(),
+      uxPrincipleIds: z.array(z.string().min(1).max(100)).max(12).optional(),
+      stateSurfaceIds: z.array(z.string().min(1).max(100)).max(5).optional(),
+      domainSignals: z.array(z.string().max(200)).max(20).optional(),
+      includeGroups: z.array(z.enum(AUDIT_GROUP_IDS)).min(1).max(AUDIT_GROUP_IDS.length).optional(),
+      includeDocumentation: z.boolean().optional(),
+      locale: LOCALE.optional(),
+    },
+    annotations: READ_ONLY,
+  }, async (args): Promise<ToolResult> => {
+    try {
+      const plan = planDesignAudit(args as DesignAuditPlanInput, repo);
+      return ok(
+        plan as unknown as Record<string, unknown>,
+        renderAuditPlan(plan),
+        plan.resourceUris,
+        auditFallbackLabels[plan.query.locale].resources,
       );
     } catch (e) { return errorResult(toToolError(e, repo)); }
   });
@@ -265,6 +328,61 @@ function renderStatePlan(p: UiStatePlan): string {
   if (p.styleNote) lines.push('', p.styleNote);
   if (p.unresolvedQuestions.length) lines.push('', `Unresolved: ${p.unresolvedQuestions.join(' ')}`);
   return lines.filter(Boolean).join('\n');
+}
+
+const auditFallbackLabels: Record<Lang, {
+  title: string;
+  checks: string;
+  surfaces: string;
+  evidence: string;
+  verdicts: string;
+  stateCoverage: string;
+  required: string;
+  recommended: string;
+  none: string;
+  resources: string;
+}> = {
+  en: {
+    title: 'Design audit plan', checks: 'Checks', surfaces: 'Surfaces', evidence: 'evidence',
+    verdicts: 'Verdicts', stateCoverage: 'State coverage', required: 'required',
+    recommended: 'recommended', none: 'none', resources: 'Resources',
+  },
+  ko: {
+    title: '디자인 감사 계획', checks: '검사', surfaces: '화면', evidence: '증거',
+    verdicts: '판정', stateCoverage: '상태 범위', required: '필수',
+    recommended: '권장', none: '없음', resources: '리소스',
+  },
+  ja: {
+    title: 'デザイン監査プラン', checks: '検査', surfaces: '画面', evidence: '証拠',
+    verdicts: '判定', stateCoverage: '状態カバレッジ', required: '必須',
+    recommended: '推奨', none: 'なし', resources: 'リソース',
+  },
+};
+
+function renderAuditPlan(plan: DesignAuditPlan): string {
+  const labels = auditFallbackLabels[plan.query.locale];
+  const lines = [
+    `# ${labels.title}`,
+    `${labels.checks}: ${plan.coverage.includedChecks}/${plan.coverage.catalogChecks}`,
+    `${labels.surfaces}: ${plan.query.surfaces.join(', ')}`,
+    '',
+    plan.evidenceRule,
+    `${labels.verdicts}: ${plan.verdicts.map((verdict) => verdict.id).join(' / ')}`,
+  ];
+  for (const check of plan.checks) {
+    lines.push(
+      `- [${check.severity}] ${check.id} — ${check.criterion}`
+      + ` (${labels.evidence}: ${check.evidenceTypes.join(', ')}; ${check.applicability})`,
+    );
+  }
+  if (plan.stateCoverage.length) {
+    lines.push('', `${labels.stateCoverage}:`);
+    for (const surface of plan.stateCoverage) {
+      lines.push(`- ${surface.surfaceId}: ${labels.required} ${surface.required.map((state) => state.id).join(', ') || labels.none}; ${labels.recommended} ${surface.recommended.map((state) => state.id).join(', ') || labels.none}`);
+    }
+  }
+  lines.push('', ...plan.guidance);
+  return lines.join('\n');
 }
 
 const designPrincipleFallbackLabels: Record<Lang, {

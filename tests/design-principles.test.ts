@@ -132,6 +132,23 @@ describe('design principle planner', () => {
     expect(plan.principles[1]?.relatedUxPrincipleIds).toEqual(['proximity']);
   });
 
+  it('supports strict intersection matching for audits without changing ranked-union default', () => {
+    const input = {
+      concerns: ['focus', 'grouping'] as const,
+      surface: 'form' as const,
+      phase: 'structure' as const,
+      limit: 3,
+    };
+    const rankedUnion = planDesignPrinciples(input, repo);
+    const strict = planDesignPrinciples({ ...input, matchMode: 'all-selectors' }, repo);
+
+    expect(rankedUnion.principles.map((principle) => principle.id))
+      .toEqual(['exact-layout', 'global-layout', 'form-only']);
+    expect(strict.principles.map((principle) => principle.id))
+      .toEqual(['exact-layout', 'global-layout']);
+    expect(strict.query.matchMode).toBe('all-selectors');
+  });
+
   it('requires a selector and reports invalid limits and unknown ids distinctly', () => {
     expect(() => planDesignPrinciples({}, repo)).toThrow(DesignPrinciplePlanError);
     expect(() => planDesignPrinciples({ concerns: ['focus'], limit: 0 }, repo))

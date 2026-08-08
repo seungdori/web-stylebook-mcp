@@ -31,6 +31,7 @@ export function registerResources(server: McpServer, repo: CatalogRepository): v
       components: repo.data.components.length,
       principles: repo.data.uxPrinciples.length,
       designPrinciples: repo.data.designPrinciples.length,
+      auditChecks: repo.policies.auditChecks.length,
       surfaces: repo.data.stateSurfaces.length,
       stateRecipes: repo.data.stateRecipes.length,
       products: repo.data.productArchetypes.length,
@@ -75,6 +76,7 @@ export function registerResources(server: McpServer, repo: CatalogRepository): v
   fixed('products', 'webstylebook://products', 'Product archetypes', () => repo.listProducts());
   fixed('anti-patterns', 'webstylebook://policies/anti-patterns', 'Common anti-patterns', () => repo.policies.antiPatterns);
   fixed('verification', 'webstylebook://policies/verification', 'Verification checklist', () => repo.policies.verification);
+  fixed('audit-checks', 'webstylebook://policies/audit-checks', 'Stable audit ids, applicability, severity and evidence metadata', () => repo.policies.auditChecks);
 
   // -------- templates --------
   server.registerResource('style', new ResourceTemplate('webstylebook://styles/{styleId}', {

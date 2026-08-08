@@ -29,8 +29,8 @@ access to require 2FA and disallow traditional tokens.
 2. **Bump** the version in `package.json` and move CHANGELOG `[Unreleased]` → the new version.
 3. **Tag and push** — the version tag triggers the publish and must match `package.json`:
    ```bash
-   git tag -a v0.3.0 -m "Release v0.3.0"
-   git push origin v0.3.0
+   git tag -a v0.4.0 -m "Release v0.4.0"
+   git push origin v0.4.0
    ```
 4. The **`Publish`** workflow runs `build` + `test` + package smoke tests + `npm publish`.
    npm automatically attaches provenance for trusted publishing. Verify with
