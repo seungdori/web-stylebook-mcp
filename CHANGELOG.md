@@ -6,6 +6,23 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.6.0] — 2026-08-12
+
+### Added
+
+- A four-check `content` audit group for audience-language copy, meaning-before-method hierarchy,
+  pseudo-precision, and task-relevant prominence. The checks are contextual: cards, statistics,
+  navigation, and disclosures remain when they support the primary user task.
+- Audit-scope and change-depth inputs for the `audit-design-direction` prompt. When omitted, the
+  workflow asks the user before inspecting or modifying an implementation.
+
+### Changed
+
+- The companion skill and fallback agent fragments now inspect actual visible strings, preserve
+  factual caveats, and provide before/after rewrites when content is in scope.
+- Commit, push, release, and deployment are explicitly kept outside inferred audit or implementation
+  scope.
+
 ## [0.5.1] — 2026-08-08
 
 ### Changed
@@ -220,7 +237,8 @@ All notable changes to this project are documented here. The format follows
 - Output localization in English, Korean, and Japanese.
 - Fully offline at runtime: no API key, no model call, no network, no filesystem access.
 
-[Unreleased]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.5.1...HEAD
+[Unreleased]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.5.1...v0.6.0
 [0.5.1]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.3.0...v0.4.0

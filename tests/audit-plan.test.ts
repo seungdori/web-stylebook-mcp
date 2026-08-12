@@ -65,6 +65,26 @@ describe('design audit planner', () => {
     ]));
   });
 
+  it('can isolate the user-facing content audit with localized, context-sensitive criteria', () => {
+    const plan = planDesignAudit({
+      surfaces: ['content'],
+      includeGroups: ['content'],
+      includeDocumentation: false,
+      locale: 'ko',
+    }, repo);
+
+    expect(plan.query.includeGroups).toEqual(['content']);
+    expect(plan.checks.map((check) => check.id)).toEqual([
+      'copy-uses-audience-language',
+      'meaning-precedes-method',
+      'copy-avoids-pseudo-precision',
+      'prominent-content-supports-task',
+    ]);
+    expect(plan.checks[0]?.criterion).toMatch(/내부 분류.*선택적 상세/);
+    expect(plan.checks[2]?.criterion).toMatch(/분모.*불확실성.*의사결정 가치/);
+    expect(plan.checks[3]?.criterion).toMatch(/맥락상 유용한 것은 유지/);
+  });
+
   it('keeps every canonical check source resolvable and represented once', () => {
     const expected = repo.policies.verification.reduce((sum, group) => sum + group.items.length, 0)
       + repo.policies.antiPatterns.length;

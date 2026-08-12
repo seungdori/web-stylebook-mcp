@@ -220,7 +220,7 @@ export function registerTools(server: McpServer, repo: CatalogRepository): void 
   // ----------------------------------------------------------- design audit plan
   server.registerTool('get_design_audit_plan', {
     title: 'Build an evidence-backed design audit plan',
-    description: 'Return a localized, surface-aware audit checklist with stable check ids, severity, applicability, required evidence, remediation, verdict definitions, selected principle checks, and UI-state coverage. This tool does not inspect a project: the host must collect actual rendered/code/interaction evidence, and missing evidence is NOT_VERIFIED rather than PASS.',
+    description: 'Return a localized, surface-aware audit checklist with stable check ids, severity, applicability, required evidence, remediation, verdict definitions, user-facing content checks, selected principle checks, and UI-state coverage. The host should confirm audit coverage and change depth with the user before choosing includeGroups. This tool does not inspect a project: the host must collect actual rendered/code/interaction evidence, and missing evidence is NOT_VERIFIED rather than PASS.',
     inputSchema: {
       styleId: z.string().min(1).max(100).optional(),
       surfaces: z.array(z.enum(UX_SURFACES)).min(1).max(12).optional(),

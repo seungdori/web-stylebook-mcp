@@ -208,9 +208,9 @@ Add the same block to your `claude_desktop_config.json`, then restart:
 | **`get_ux_principle_plan`** | A focused apply-and-verify plan selected by outcomes, surface, phase, or principle ids — with questions, cautions, confidence, and references | Principles are contextual prompts, not universal laws or a substitute for research |
 | **`get_ui_state_plan`** | Required / recommended / domain UI states for a surface (data-table, form, checkout, chat, developer-console) — triggers, must-show, must-not, a11y, motion | Covers the states agents forget: empty, error, loading, edge |
 | **`compose_design_tokens`** | Role-based tokens (color, type, spacing, radius, motion, density) as `json` / `css-variables` / `tailwind` / `typescript`, light / dark / both | Emits WCAG contrast warnings instead of hiding them |
-| **`get_design_audit_plan`** | Localized, surface-aware checks with stable ids, severity, applicability, required evidence, remediation, selected principle checks, and UI-state coverage | The tool plans the audit but never pretends it inspected your project; missing evidence is `NOT_VERIFIED`, not `PASS` |
+| **`get_design_audit_plan`** | Localized, surface-aware checks with stable ids, severity, applicability, required evidence, remediation, user-facing content checks, selected principle checks, and UI-state coverage | The tool plans the audit but never pretends it inspected your project; missing evidence is `NOT_VERIFIED`, not `PASS` |
 
-**Catalog:** 48 styles · 25 interface design principles · 23 UX principles · 41 structured audit checks · 20 components · 5 surfaces · 57 UI-state recipes · 29 motion profiles · 14 product archetypes.
+**Catalog:** 48 styles · 25 interface design principles · 23 UX principles · 45 structured audit checks · 20 components · 5 surfaces · 57 UI-state recipes · 29 motion profiles · 14 product archetypes.
 
 ## Localized output
 
@@ -241,6 +241,11 @@ webstylebook://policies/anti-patterns · /policies/verification · /policies/aud
 Ready-made MCP prompts for common workflows:
 
 `design-product` · `design-screen` · `complete-ui-states` · `redesign-with-style` · `audit-design-direction` · `audit-design-principles` · `audit-ux-principles`
+
+When `audit-design-direction` is invoked without an explicit scope, it asks two short questions
+before inspection: audit coverage (visual / visual + copy and information structure / full
+experience) and change depth (findings / proposals / implement and verify). File edits, commits,
+releases, and deployment are never inferred from an audit request.
 
 ## CLI
 

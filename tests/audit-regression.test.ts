@@ -141,6 +141,45 @@ describe('audit L12 — all seven workflow prompts render a non-empty user messa
       expect(text, name).toContain('all-selectors');
     }
   });
+
+  it('the general design audit asks for coverage and change depth before inspection when omitted', async () => {
+    const res = await client.getPrompt({
+      name: 'audit-design-direction',
+      arguments: args['audit-design-direction']!,
+    });
+    const text = (res.messages[0]?.content as { text?: string }).text ?? '';
+    expect(text).toContain('Before inspecting or changing the implementation');
+    expect(text).toContain('Audit coverage: visual only');
+    expect(text).toContain('Change depth: findings only');
+    expect(text).toContain('stop until they answer');
+    expect(text).toContain('separate authorizations');
+
+    const koRes = await client.getPrompt({
+      name: 'audit-design-direction',
+      arguments: { ...args['audit-design-direction']!, locale: 'ko' },
+    });
+    const koText = (koRes.messages[0]?.content as { text?: string }).text ?? '';
+    expect(koText).toContain('감사 범위: 시각만');
+    expect(koText).toContain('변경 깊이: 결과만');
+    expect(koText).toContain('커밋·푸시·릴리스·배포는 별도 권한');
+  });
+
+  it('the general design audit maps confirmed content scope to content checks and safe action depth', async () => {
+    const res = await client.getPrompt({
+      name: 'audit-design-direction',
+      arguments: {
+        ...args['audit-design-direction']!,
+        auditScope: 'visual-and-content',
+        changeScope: 'recommend-changes',
+      },
+    });
+    const text = (res.messages[0]?.content as { text?: string }).text ?? '';
+    expect(text).toContain('["layout", "fidelity", "content", "behavior", "anti-patterns"]');
+    expect(text).toContain('concrete before/after copy');
+    expect(text).toContain('do not modify files');
+    expect(text).toMatch(/no content type is banned/i);
+    expect(text).toMatch(/method, denominator, uncertainty, and decision value/i);
+  });
 });
 
 describe('UX-principle guidance is wired through server, skill, and agent fragments', () => {

@@ -14,7 +14,7 @@ import type {
 } from '../types.js';
 
 export const AUDIT_GROUP_IDS = [
-  'build', 'layout', 'fidelity', 'behavior', 'principles', 'docs', 'anti-patterns',
+  'build', 'layout', 'fidelity', 'content', 'behavior', 'principles', 'docs', 'anti-patterns',
 ] as const;
 export type AuditGroupId = (typeof AUDIT_GROUP_IDS)[number];
 

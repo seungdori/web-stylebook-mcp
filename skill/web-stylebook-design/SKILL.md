@@ -1,6 +1,6 @@
 ---
 name: web-stylebook-design
-description: Use BEFORE building or redesigning any frontend UI (a page, screen, component, dashboard, form, checkout, chat, or developer console). Calls the Web Stylebook MCP to choose a product-fit visual direction, apply visual-design and UX principles, cover real (non-happy-path) UI states, and compose design tokens — so the result doesn't look like a generic AI template. Trigger whenever the user asks to build/design/redesign a UI, "make a page/screen/app", "style this", or wants a design direction, even if they don't say "Web Stylebook".
+description: Use BEFORE building, auditing, improving, or redesigning any frontend UI (a page, screen, component, dashboard, form, checkout, chat, or developer console). Confirms audit coverage and change depth, then calls the Web Stylebook MCP to evaluate visual design, user-facing copy and information structure, behavior, accessibility, UI states, and product-fit direction as requested. Trigger whenever the user asks to build/design/redesign/audit/review/critique/improve a UI or its copy, "make a page/screen/app", "style this", or wants a design direction, even if they don't say "Web Stylebook".
 ---
 
 # Web Stylebook — design before you build
@@ -14,6 +14,31 @@ Calling it before writing UI produces far better, less generic results.
 
 Before writing JSX/HTML/CSS for any new or redesigned UI surface. If you catch yourself about
 to scaffold a page from memory, stop and run step 1 first.
+
+## Scope gate for audits and redesigns
+
+When the user asks to audit, review, critique, or improve an existing UI and has not already defined
+the scope, ask these **two short questions before inspecting or changing it**, then stop until they
+answer:
+
+1. **Audit coverage** — visual only; visual + user-facing copy and information structure; or full
+   experience including interaction, accessibility, UI states, and build/performance evidence?
+2. **Change depth** — findings only; prioritized change and rewrite proposals; or implement the
+   approved fixes and verify them?
+
+Do not ask again when the request already answers both dimensions (for example, “copy only, report
+only” or “review everything and fix it”). If the user says to use your judgment, state the selected
+scope and proceed. Commit, push, release, and deployment remain separate authorizations even when
+implementation is selected. For a new build, fold these decisions into workflow step 4 instead of
+asking a duplicate gate.
+
+Map the answer to `get_design_audit_plan.includeGroups`:
+
+- **Visual only:** `layout`, `fidelity`, `anti-patterns`.
+- **Visual + content/structure:** add `content` and `behavior` so labels, navigation, and information
+  relationships are inspected with the visuals.
+- **Full experience:** use every matching group, selected-principle checks, documentation, and UI-state
+  coverage.
 
 ## Workflow
 
@@ -94,6 +119,8 @@ to scaffold a page from memory, stop and run step 1 first.
    in `design.md` with no placement decision and no observed check is the `principle-as-decoration`
    anti-pattern — verify it or drop it. Keep `contextual` / `contested` labels intact; never let a
    principle override accessibility, safety, informed consent, or truthful feedback.
+   When the confirmed scope includes content, do not skip the checklist's **`content` group**. Inspect
+   the actual visible strings and their hierarchy, not just component names or localization keys.
    *This inline pass is your job on every build.* The server also ships three deeper audits as MCP
    **prompts** — `audit-design-direction`, `audit-design-principles`, `audit-ux-principles`. Those
    are slash commands the **user** invokes, not tools you can call, so don't wait on them: do the
@@ -207,6 +234,29 @@ The fastest "AI smell" is filler content dressed as substance. Hold the line:
   line + one action.
 - **Intentional typography.** Generic system-sans (especially for Korean/CJK) reads as default —
   pick a real display face.
+
+## User-facing copy — meaning before machinery
+
+Apply this section when the confirmed scope includes user-facing copy or the full experience:
+
+- **Use the audience's language.** Translate, define, or demote internal taxonomies, workflow labels,
+  implementation terms, unexplained abbreviations, and method names unless understanding them is the
+  user's actual task. Expert terminology is fine for an expert audience when it helps them act.
+- **Lead with meaning.** Prominent headings and summaries state the conclusion, consequence, or next
+  action first. Methodology, provenance, and internal reasoning follow as supporting evidence or
+  optional detail; they do not become the headline merely because the system worked hard to produce
+  them.
+- **Reject pseudo-precision.** Counts, scores, agreement labels, confidence badges, and status
+  language need a clear method, denominator, uncertainty, and decision value. Otherwise remove the
+  number or rewrite it as a qualified statement; never use it to perform certainty or authority.
+- **Make every block earn attention.** Review prominent cards, statistics, navigation links,
+  sections, and disclosures against the primary user task. Keep them when useful. Remove, merge, or
+  demote them only when the observed context shows they are irrelevant — no content type is banned by
+  default.
+- **Rewrite without inventing.** Preserve factual meaning, material caveats, and domain nuance. For
+  findings/proposal scope, show the smallest useful before → after rewrite and why. For implementation
+  scope, edit the real strings, re-check wrapping and hierarchy at target locales/viewports, and
+  collect fresh evidence.
 
 ## `compare_design_directions`
 

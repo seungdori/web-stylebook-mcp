@@ -6,6 +6,15 @@
 Before writing JSX/HTML/CSS for any new or redesigned UI surface (page, screen, component,
 dashboard, form, checkout, chat, developer console), call the **`web-stylebook`** MCP server:
 
+For an audit or redesign, if the user has not already set the scope, first ask two short questions
+and wait: (1) audit coverage - visual only; visual + user-facing copy/information structure; or full
+experience including interaction, accessibility, states, and build/performance evidence; (2) change
+depth - findings only; prioritized proposals; or implement and verify. Do not ask again when both are
+already explicit. Commit, push, release, and deployment remain separate authorizations. Map the
+coverage to `get_design_audit_plan.includeGroups`: visual = `layout`, `fidelity`, `anti-patterns`;
+visual + content = add `content`, `behavior`; full = every matching group plus principle, docs, and
+state coverage.
+
 1. `recommend_design_direction` with the product context (productType, tone, density,
    usageFrequency, trustSensitivity, constraints, avoid). Use the scored `candidates` as
    evidence and pick with product context; don't blindly take `candidates[0]`. Note the
@@ -44,7 +53,8 @@ dashboard, form, checkout, chat, developer console), call the **`web-stylebook`*
    console, and commands for every returned stable check id. Use `PASS` / `FIX_NOW` / `RISK` /
    `NOT_APPLICABLE` / `NOT_VERIFIED`; every PASS needs observed evidence, and missing evidence is
    NOT_VERIFIED. Do not skip its `principles` group: run each recorded principle check against the
-   built UI and write down the outcome. A principle
+   built UI and write down the outcome. When content is in scope, do not skip its `content` group or
+   substitute component names for inspecting the visible strings. A principle
    name listed without a placement decision and an observed check is decoration; drop it or verify
    it. Never restate a `contextual` or `contested` principle as a law. Do this inline yourself -
    the `audit-design-direction`, `audit-design-principles`, and `audit-ux-principles` prompts are
@@ -64,6 +74,16 @@ contracts), not a one-off HTML file.
 trust signals (TLS, AES-256, ISO 27001). Choose signals by what the real user weighs (for a patient:
 doctors, departments, hours, location, insurance, emergency care). Back every claim with browsable
 content (don't say "214 doctors" then show three).
+
+**User-facing copy puts meaning before machinery.** When content is in scope, inspect the actual
+visible strings. Use the intended audience's vocabulary; translate, define, or move internal
+taxonomies, workflow labels, implementation terms, unexplained abbreviations, and optional method
+details out of the primary path. Lead with the user-relevant conclusion, consequence, or next action.
+Counts, scores, agreement labels, confidence badges, and status language need a clear method,
+denominator, uncertainty, and decision value; otherwise remove or qualify them. Make every prominent
+card, statistic, navigation link, section, and disclosure earn attention through the primary task.
+Keep useful instances - no content type is banned by default. Rewrite without inventing claims or
+dropping material caveats, then re-check wrapping and hierarchy in target locales and viewports.
 
 **No formulaic opening.** The disease was never *two columns* — strong products (Linear, Stripe) put
 copy beside a visual. The disease is **generic furniture**: a copy stack
