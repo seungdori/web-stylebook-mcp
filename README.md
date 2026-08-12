@@ -247,10 +247,11 @@ before inspection: audit coverage (visual / visual + copy and information struct
 experience) and change depth (findings / proposals / implement and verify). File edits, commits,
 releases, and deployment are never inferred from an audit request.
 
-Content coverage checks more than jargon: it tests whether personalization and advice are grounded,
-whether prominent copy says something concrete and product-specific, and whether its visual emphasis
-is proportional to the evidence behind it. Cards, statistics, and Sitemap links are still judged by
-their actual user-task value rather than banned as types.
+Content coverage checks more than jargon: it tests whether material claims, conclusions, and
+recommendations match their support and expressed certainty, whether prominent copy conveys concrete
+context-specific information, and whether its visual emphasis matches information value, task
+relevance, and support. Cards, statistics, and Sitemap links are still judged by their actual
+user-task value rather than banned as types.
 
 ## CLI
 

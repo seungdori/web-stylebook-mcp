@@ -180,12 +180,12 @@ describe('audit L12 — all seven workflow prompts render a non-empty user messa
     expect(text).toContain('do not modify files');
     expect(text).toMatch(/no content type is banned/i);
     expect(text).toMatch(/method, denominator, uncertainty, and decision value/i);
-    expect(text).toMatch(/grounding.*substitution.*specificity.*authority/i);
-    expect(text).toMatch(/visual prominence with evidential substance/i);
+    expect(text).toMatch(/what it actually says.*what available content.*wording and certainty.*unrelated product or page/i);
+    expect(text).toMatch(/visual prominence with information value, task relevance, and support/i);
   });
 });
 
-describe('content audits reject unsupported personalization and abstract consultancy filler', () => {
+describe('content audits reject unsupported claims and abstract consultancy filler', () => {
   it('the canonical catalog exposes stable checks and detailed remediations', () => {
     const plan = planDesignAudit({
       surfaces: ['content'],
@@ -195,32 +195,33 @@ describe('content audits reject unsupported personalization and abstract consult
     }, repo);
     const byId = new Map(plan.checks.map((check) => [check.id, check]));
 
-    expect(byId.get('copy-grounds-personalization-and-advice')?.criterion)
-      .toMatch(/사용자 제공 사실.*구체적으로 아는 것처럼/);
+    expect(byId.get('copy-matches-claims-to-support')?.criterion)
+      .toMatch(/주장·결론·권고.*문구의 강도와 확신 수준.*근거/);
     expect(byId.get('copy-is-concrete-and-specific')?.criterion)
-      .toMatch(/사용자나 제품을 바꿔도/);
+      .toMatch(/구체적이고 맥락에 맞는 정보.*무관한 제품이나 페이지/);
     expect(byId.get('copy-prominence-matches-substance')?.criterion)
-      .toMatch(/거대한 제목.*카드.*뱃지.*통계/);
-    expect(byId.get('avoid-unsupported-personalization')?.remediation)
-      .toMatch(/관찰 사실.*출처의 해석.*에이전트 추론.*조언/);
+      .toMatch(/정보 가치·과업 관련성·근거 수준.*거대한 제목.*카드.*뱃지.*통계/);
+    expect(byId.get('avoid-unsupported-claim-as-established')?.remediation)
+      .toMatch(/문구의 강도·확신 수준·배치.*출처나 한계.*근거·사실·다음 행동/);
     expect(byId.get('avoid-abstract-consultancy-copy')?.remediation)
-      .toMatch(/치환 테스트.*구체성 테스트/);
+      .toMatch(/현재 페이지와 과업.*사실을 만들지 않고/);
     expect(byId.get('avoid-empty-claim-as-centerpiece')?.remediation)
-      .toMatch(/보조 문구.*선택적 상세/);
+      .toMatch(/정보 가치·과업 관련성·근거.*보조 상세.*시각적 크기/);
   });
 
-  it('server instructions, the skill, and both fallback fragments carry the four copy tests', () => {
-    expect(SERVER_INSTRUCTIONS).toMatch(/personalized claims and advice are grounded/i);
-    expect(SERVER_INSTRUCTIONS).toMatch(/visual prominence matches evidential substance/i);
+  it('server instructions, the skill, and both fallback fragments carry the general copy tests', () => {
+    expect(SERVER_INSTRUCTIONS).toMatch(/material claims, conclusions, and recommendations match their support/i);
+    expect(SERVER_INSTRUCTIONS).toMatch(/visual prominence matches information value, task relevance, and support/i);
     for (const rel of [
       'skill/web-stylebook-design/SKILL.md',
       'skill/CLAUDE.md',
       'skill/AGENTS.md',
     ]) {
       const content = read(rel);
-      expect(content, rel).toMatch(/grounding.*substitution.*specificity.*authority/is);
+      expect(content, rel).toMatch(/claims?,\s+conclusions?,\s+or\s+recommendations?.*what.*supports it/is);
+      expect(content, rel).toMatch(/unrelated product or\s+page/is);
       expect(content, rel).toMatch(/absence of internal jargon.*pass/is);
-      expect(content, rel).toMatch(/(?:prominence.*(?:evidence|evidential substance)|emphasis.*substance)/is);
+      expect(content, rel).toMatch(/information value.*task relevance.*support/is);
     }
   });
 });
