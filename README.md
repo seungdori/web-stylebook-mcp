@@ -210,7 +210,7 @@ Add the same block to your `claude_desktop_config.json`, then restart:
 | **`compose_design_tokens`** | Role-based tokens (color, type, spacing, radius, motion, density) as `json` / `css-variables` / `tailwind` / `typescript`, light / dark / both | Emits WCAG contrast warnings instead of hiding them |
 | **`get_design_audit_plan`** | Localized, surface-aware checks with stable ids, severity, applicability, required evidence, remediation, user-facing content checks, selected principle checks, and UI-state coverage | The tool plans the audit but never pretends it inspected your project; missing evidence is `NOT_VERIFIED`, not `PASS` |
 
-**Catalog:** 48 styles · 25 interface design principles · 23 UX principles · 45 structured audit checks · 20 components · 5 surfaces · 57 UI-state recipes · 29 motion profiles · 14 product archetypes.
+**Catalog:** 48 styles · 25 interface design principles · 23 UX principles · 51 structured audit checks · 20 components · 5 surfaces · 57 UI-state recipes · 29 motion profiles · 14 product archetypes.
 
 ## Localized output
 
@@ -246,6 +246,11 @@ When `audit-design-direction` is invoked without an explicit scope, it asks two 
 before inspection: audit coverage (visual / visual + copy and information structure / full
 experience) and change depth (findings / proposals / implement and verify). File edits, commits,
 releases, and deployment are never inferred from an audit request.
+
+Content coverage checks more than jargon: it tests whether personalization and advice are grounded,
+whether prominent copy says something concrete and product-specific, and whether its visual emphasis
+is proportional to the evidence behind it. Cards, statistics, and Sitemap links are still judged by
+their actual user-task value rather than banned as types.
 
 ## CLI
 

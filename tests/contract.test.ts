@@ -16,7 +16,7 @@ beforeAll(async () => {
 
 describe('MCP contract', () => {
   it('advertises server instructions and the packaged server version', () => {
-    expect(client.getServerVersion()).toEqual({ name: 'web-stylebook', version: '0.6.0' });
+    expect(client.getServerVersion()).toEqual({ name: 'web-stylebook', version: '0.7.0' });
     const instructions = client.getInstructions() ?? '';
     expect(instructions).toContain('recommend_design_direction');
     expect(instructions).toContain('get_design_principle_plan');
@@ -56,7 +56,7 @@ describe('MCP contract', () => {
     expect(body.counts.styles).toBe(48);
     expect(body.counts.principles).toBe(23);
     expect(body.counts.designPrinciples).toBeGreaterThan(0);
-    expect(body.counts.auditChecks).toBe(45);
+    expect(body.counts.auditChecks).toBe(51);
     expect(body.domains).toContain('design-principles');
     expect(body.domains).toContain('principles');
     expect(body.tools).toHaveLength(7);
@@ -243,6 +243,9 @@ describe('MCP contract', () => {
     expect(sc.checks.some((check: any) => check.applicability === 'workflow-only')).toBe(false);
     expect(sc.checks.some((check: any) => check.id === 'copy-uses-audience-language')).toBe(true);
     expect(sc.checks.some((check: any) => check.id === 'copy-avoids-pseudo-precision')).toBe(true);
+    expect(sc.checks.some((check: any) => check.id === 'copy-grounds-personalization-and-advice')).toBe(true);
+    expect(sc.checks.some((check: any) => check.id === 'copy-is-concrete-and-specific')).toBe(true);
+    expect(sc.checks.some((check: any) => check.id === 'copy-prominence-matches-substance')).toBe(true);
     expect(sc.principles.design[0].id).toBe('explicit-labels-and-semantics');
     expect(sc.principles.ux[0].evidenceConfidence).toBeTruthy();
     expect(JSON.stringify(sc)).not.toContain('"ja":');

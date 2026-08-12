@@ -121,6 +121,8 @@ Map the answer to `get_design_audit_plan.includeGroups`:
    principle override accessibility, safety, informed consent, or truthful feedback.
    When the confirmed scope includes content, do not skip the checklist's **`content` group**. Inspect
    the actual visible strings and their hierarchy, not just component names or localization keys.
+   The absence of internal jargon is not a pass: run the grounding, substitution, specificity, and
+   authority checks below, and compare each claim's visual prominence with its evidence and usefulness.
    *This inline pass is your job on every build.* The server also ships three deeper audits as MCP
    **prompts** — `audit-design-direction`, `audit-design-principles`, `audit-ux-principles`. Those
    are slash commands the **user** invokes, not tools you can call, so don't wait on them: do the
@@ -253,6 +255,21 @@ Apply this section when the confirmed scope includes user-facing copy or the ful
   sections, and disclosures against the primary user task. Keep them when useful. Remove, merge, or
   demote them only when the observed context shows they are irrelevant — no content type is banned by
   default.
+- **Ground personalization and advice.** Separate user-provided facts, cited source interpretations,
+  your own inference, and recommendations. Do not turn sparse inputs, segment-level data, symbolic
+  material, or broad source text into confident claims about this person's traits, motives, future,
+  or correct next step. If the source does not support a personal claim or action plan, remove it or
+  frame it narrowly as a source-scoped possibility or general guidance.
+- **Reject abstract consultancy filler.** A string can fail even when it contains no internal jargon.
+  Run four checks on every prominent sentence: (1) **grounding** — what exact input or source supports
+  it? (2) **substitution** — would it still fit almost anyone or any product after swapping a name or
+  noun? (3) **specificity** — does it name a real actor, object, event, offer, decision, or observable
+  change? (4) **authority** — did the user, product, or cited domain source actually justify the
+  advice, or did the agent invent it to sound useful? Judge the proposition, not a blacklist of words.
+- **Match emphasis to substance.** Do not turn broad advice, generic interpretation, methodology, or
+  a caveat into an oversized headline, isolated card, badge, or statistic. Replace the centerpiece
+  with a product- or document-specific fact, result, object, offer, or action; otherwise source-frame
+  and demote it, and reduce its scale to match the evidence.
 - **Rewrite without inventing.** Preserve factual meaning, material caveats, and domain nuance. For
   findings/proposal scope, show the smallest useful before → after rewrite and why. For implementation
   scope, edit the real strings, re-check wrapping and hierarchy at target locales/viewports, and

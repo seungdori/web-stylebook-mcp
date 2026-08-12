@@ -79,10 +79,16 @@ describe('design audit planner', () => {
       'meaning-precedes-method',
       'copy-avoids-pseudo-precision',
       'prominent-content-supports-task',
+      'copy-grounds-personalization-and-advice',
+      'copy-is-concrete-and-specific',
+      'copy-prominence-matches-substance',
     ]);
     expect(plan.checks[0]?.criterion).toMatch(/내부 분류.*선택적 상세/);
     expect(plan.checks[2]?.criterion).toMatch(/분모.*불확실성.*의사결정 가치/);
     expect(plan.checks[3]?.criterion).toMatch(/맥락상 유용한 것은 유지/);
+    expect(plan.checks[4]?.criterion).toMatch(/개인의 성향.*사용자 제공 사실.*구체적으로 아는 것처럼/);
+    expect(plan.checks[5]?.criterion).toMatch(/구체적인 주체.*사용자나 제품을 바꿔도/);
+    expect(plan.checks[6]?.criterion).toMatch(/강조.*내용의 실질과 근거에 비례/);
   });
 
   it('keeps every canonical check source resolvable and represented once', () => {

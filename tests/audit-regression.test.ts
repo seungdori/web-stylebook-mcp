@@ -14,6 +14,7 @@ import { compareDirections } from '../src/recommendation/compare.js';
 import { contrastRatio } from '../src/tokens/contrast.js';
 import { planUxPrinciples } from '../src/principles/planner.js';
 import { planDesignPrinciples } from '../src/design-principles/planner.js';
+import { planDesignAudit } from '../src/audit/planner.js';
 import { SERVER_INSTRUCTIONS } from '../src/server-info.js';
 
 const repo = CatalogRepository.load();
@@ -179,6 +180,48 @@ describe('audit L12 — all seven workflow prompts render a non-empty user messa
     expect(text).toContain('do not modify files');
     expect(text).toMatch(/no content type is banned/i);
     expect(text).toMatch(/method, denominator, uncertainty, and decision value/i);
+    expect(text).toMatch(/grounding.*substitution.*specificity.*authority/i);
+    expect(text).toMatch(/visual prominence with evidential substance/i);
+  });
+});
+
+describe('content audits reject unsupported personalization and abstract consultancy filler', () => {
+  it('the canonical catalog exposes stable checks and detailed remediations', () => {
+    const plan = planDesignAudit({
+      surfaces: ['content'],
+      includeGroups: ['content', 'anti-patterns'],
+      includeDocumentation: false,
+      locale: 'ko',
+    }, repo);
+    const byId = new Map(plan.checks.map((check) => [check.id, check]));
+
+    expect(byId.get('copy-grounds-personalization-and-advice')?.criterion)
+      .toMatch(/사용자 제공 사실.*구체적으로 아는 것처럼/);
+    expect(byId.get('copy-is-concrete-and-specific')?.criterion)
+      .toMatch(/사용자나 제품을 바꿔도/);
+    expect(byId.get('copy-prominence-matches-substance')?.criterion)
+      .toMatch(/거대한 제목.*카드.*뱃지.*통계/);
+    expect(byId.get('avoid-unsupported-personalization')?.remediation)
+      .toMatch(/관찰 사실.*출처의 해석.*에이전트 추론.*조언/);
+    expect(byId.get('avoid-abstract-consultancy-copy')?.remediation)
+      .toMatch(/치환 테스트.*구체성 테스트/);
+    expect(byId.get('avoid-empty-claim-as-centerpiece')?.remediation)
+      .toMatch(/보조 문구.*선택적 상세/);
+  });
+
+  it('server instructions, the skill, and both fallback fragments carry the four copy tests', () => {
+    expect(SERVER_INSTRUCTIONS).toMatch(/personalized claims and advice are grounded/i);
+    expect(SERVER_INSTRUCTIONS).toMatch(/visual prominence matches evidential substance/i);
+    for (const rel of [
+      'skill/web-stylebook-design/SKILL.md',
+      'skill/CLAUDE.md',
+      'skill/AGENTS.md',
+    ]) {
+      const content = read(rel);
+      expect(content, rel).toMatch(/grounding.*substitution.*specificity.*authority/is);
+      expect(content, rel).toMatch(/absence of internal jargon.*pass/is);
+      expect(content, rel).toMatch(/(?:prominence.*(?:evidence|evidential substance)|emphasis.*substance)/is);
+    }
   });
 });
 

@@ -6,6 +6,23 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.7.0] — 2026-08-12
+
+### Added
+
+- Three content-audit checks for grounded personalization and advice, concrete and specific copy,
+  and visual prominence proportional to evidential substance.
+- Anti-pattern contracts for unsupported personalization, abstract consultancy filler, and vague or
+  weakly supported claims used as oversized visual centerpieces, with localized remediation.
+
+### Changed
+
+- The general design-audit prompt, server instructions, and companion skill now run grounding,
+  substitution, specificity, and authority tests on prominent user-facing strings. A lack of internal
+  jargon no longer counts as sufficient evidence of good copy.
+- Copy rewrites keep observed facts, source interpretations, agent inferences, and recommendations
+  distinct and must not invent action plans merely to sound useful.
+
 ## [0.6.0] — 2026-08-12
 
 ### Added
@@ -237,7 +254,8 @@ All notable changes to this project are documented here. The format follows
 - Output localization in English, Korean, and Japanese.
 - Fully offline at runtime: no API key, no model call, no network, no filesystem access.
 
-[Unreleased]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.5.1...v0.6.0
 [0.5.1]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.4.0...v0.5.0

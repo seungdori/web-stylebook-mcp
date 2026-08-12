@@ -84,6 +84,14 @@ denominator, uncertainty, and decision value; otherwise remove or qualify them. 
 card, statistic, navigation link, section, and disclosure earn attention through the primary task.
 Keep useful instances - no content type is banned by default. Rewrite without inventing claims or
 dropping material caveats, then re-check wrapping and hierarchy in target locales and viewports.
+Do not treat the absence of internal jargon as a pass. Ground every personalized claim and next-step
+recommendation in user-provided facts or identified domain evidence; keep facts, source interpretation,
+agent inference, and advice distinct. Run grounding, substitution, specificity, and authority tests on
+prominent copy: what supports it, would it fit almost anyone/product, does it name a concrete
+actor/object/event/change, and did a real source justify the advice? Reject abstract consultancy filler
+that merely sounds actionable. Match typographic and structural prominence to evidential substance;
+demote generic advice, broad interpretation, methodology, and caveats instead of making them giant
+headlines, cards, badges, or statistics.
 
 **No formulaic opening.** The disease was never *two columns* — strong products (Linear, Stripe) put
 copy beside a visual. The disease is **generic furniture**: a copy stack
