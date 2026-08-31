@@ -119,7 +119,9 @@ flowchart LR
     C --> H[get_ui_state_plan]
     C --> I[compose_design_tokens]
     C --> J[get_design_audit_plan]
-    D & E & F & G & H & I & J -->|디자인 계약<br/>점수 · 사유 코드<br/>배치 · 증거 · 토큰| A
+    C --> K[search_design_references]
+    C --> L[get_design_reference]
+    D & E & F & G & H & I & J & K & L -->|디자인 계약<br/>관찰 · 점수 · 사유<br/>배치 · 증거 · 토큰| A
     A -->|근거로<br/>코드 작성| Z[당신의 UI]
 ```
 
@@ -206,13 +208,17 @@ MCP 설정에 추가:
 |------|--------------|-----------------|
 | **`recommend_design_direction`** | 사유 코드가 붙은 점수화 스타일 후보, *이유*가 붙은 **탈락** 스타일, 보조 페어링, 신뢰도 | 최종 선택은 모델이 — 이건 근거 제공자입니다 |
 | **`compare_design_directions`** | 2~4개 방향을 제품 적합성·반복 사용·밀도·신뢰·차별성·접근성 리스크·모션·유지보수로 비교 | 정답 하나를 선언하지 않습니다 |
+| **`search_design_references`** | 실제 디자인 레퍼런스를 텍스트·카테고리·태그로 제한 검색하고 간결한 다국어 관찰 결과 제공 | 스크린샷이나 브랜드 자산 복제가 아니라 출처가 붙은 연구 요약을 반환합니다 |
+| **`get_design_reference`** | 팔레트·레이아웃·인터랙션·모션 관찰, 정규화 토큰, 원본 리비전, 출처와 권리 고지를 포함한 레퍼런스 1건 | 원 사이트 카피·서체·스크린샷·시각 정체성의 권리는 각 권리자에게 있습니다 |
 | **`get_design_principle_plan`** | 시각적 관심사·화면·설계 단계·원칙 ID로 고른 배치/적용/검증 계획 — 가능한 경우 출처 링크 포함 | 제작 원칙은 경험 법칙이나 고정 레시피가 아니라 검증 가능한 점검 질문입니다 |
 | **`get_ux_principle_plan`** | 결과 목표·화면·설계 단계·원칙 ID로 고른 적용/검증 계획 — 질문·주의점·근거 신뢰도·참고 링크 포함 | 원칙은 보편 법칙이나 사용자 조사의 대체물이 아니라 맥락별 점검 질문입니다 |
 | **`get_ui_state_plan`** | 표면(데이터 테이블·폼·체크아웃·채팅·개발자 콘솔)의 필수/권장/도메인 UI 상태 — 트리거·표시 필수·금지·접근성·모션 | 에이전트가 잊는 상태까지: 빈·에러·로딩·엣지 |
 | **`compose_design_tokens`** | 역할 기반 토큰(색·타이포·간격·radius·모션·밀도)을 `json` / `css-variables` / `tailwind` / `typescript`, light / dark / both | WCAG 대비 경고를 숨기지 않고 내보냅니다 |
 | **`get_design_audit_plan`** | 안정적인 검사 ID·심각도·적용 조건·필요 증거·수정 방향·사용자용 콘텐츠 검사·선택 원칙 검사·UI 상태 범위를 담은 다국어 감사 계획 | 프로젝트를 실제로 봤다고 가장하지 않으며, 증거가 없으면 `PASS`가 아니라 `NOT_VERIFIED`입니다 |
 
-**카탈로그:** 스타일 48 · 인터페이스 디자인 원칙 25 · UX 원칙 23 · 구조화 감사 검사 51 · 컴포넌트 20 · 표면 5 · UI 상태 레시피 57 · 모션 프로파일 29 · 제품 아키타입 14.
+**카탈로그:** 실제 디자인 레퍼런스 520 · 스타일 48 · 인터페이스 디자인 원칙 25 · UX 원칙 23 · 구조화 감사 검사 51 · 컴포넌트 20 · 표면 5 · UI 상태 레시피 57 · 모션 프로파일 29 · 제품 아키타입 14.
+
+레퍼런스 라이브러리는 [OpenDesign](https://opendesign.cc)의 완성도 높은 항목을 선별·수정한 데이터이며, 구조화 스펙은 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)으로 제공됩니다. Web Stylebook은 원본 스크린샷과 브랜드 자산을 포함하지 않습니다. 원 사이트·브랜드·카피·서체·시각 정체성의 권리는 각 권리자에게 있으므로 사용 전 상세 항목의 출처와 권리 고지를 확인하세요.
 
 ## 다국어 출력
 
@@ -235,6 +241,7 @@ webstylebook://principles · /principles/{id}
 webstylebook://design-principles · /design-principles/{id}
 webstylebook://states/surfaces · /states/{surface} · /states/{surface}/{state}
 webstylebook://products · /products/{id}
+webstylebook://references · /references/{id}
 webstylebook://policies/anti-patterns · /policies/verification · /policies/audit-checks
 ```
 

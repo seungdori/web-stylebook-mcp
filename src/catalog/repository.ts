@@ -9,6 +9,7 @@ import type {
   CatalogEnvelope, WebStylebookCatalogV1, CatalogStyle, MotionPattern, ComponentTerm,
   ProductArchetype, StateSurface, StateRecipe, StyleFamily, Ontology, NotIdealMap,
   Policies, Lang, UxPrinciple, UxPrincipleAttribution, DesignPrinciple,
+  DesignReference, DesignReferenceLibrary, ReferenceCategory,
 } from '../types.js';
 import { text } from '../localization.js';
 
@@ -40,6 +41,10 @@ export interface SurfaceSummary {
 export interface ProductSummary {
   id: string; name: string; resourceUri: string;
 }
+export interface ReferenceSummary {
+  id: string; title: string; url: string; category: ReferenceCategory; tags: string[];
+  summary: string; observedAt: string; specCompleteness: number; resourceUri: string;
+}
 
 export const SCHEMA_ID = 'webstylebook.catalog.v1';
 
@@ -62,6 +67,10 @@ export class CatalogRepository {
   private readonly recipeById = new Map<string, StateRecipe>();
   private readonly familyById = new Map<string, StyleFamily>();
   private readonly recipesBySurface = new Map<string, StateRecipe[]>();
+  private readonly referenceById = new Map<string, DesignReference>();
+  private readonly referencesByCategory = new Map<ReferenceCategory, DesignReference[]>();
+  private readonly referencesByTag = new Map<string, DesignReference[]>();
+  private readonly referenceTagLabels = new Map<string, string>();
 
   constructor(envelope: CatalogEnvelope) {
     if (envelope.schema !== SCHEMA_ID) {
@@ -87,6 +96,21 @@ export class CatalogRepository {
         if (list) list.push(r);
       }
     }
+    for (const reference of this.data.referenceLibrary.references) {
+      this.referenceById.set(reference.id, reference);
+      const categoryEntries = this.referencesByCategory.get(reference.category) ?? [];
+      categoryEntries.push(reference);
+      this.referencesByCategory.set(reference.category, categoryEntries);
+      for (const tag of reference.tags) {
+        const normalizedTag = normalizeReferenceTag(tag);
+        const tagEntries = this.referencesByTag.get(normalizedTag) ?? [];
+        tagEntries.push(reference);
+        this.referencesByTag.set(normalizedTag, tagEntries);
+        if (!this.referenceTagLabels.has(normalizedTag)) {
+          this.referenceTagLabels.set(normalizedTag, tag);
+        }
+      }
+    }
   }
 
   static load(path: string = locateCatalog()): CatalogRepository {
@@ -104,12 +128,14 @@ export class CatalogRepository {
   get notIdealMap(): NotIdealMap { return this.data.notIdealMap; }
   get policies(): Policies { return this.data.policies; }
   get uxPrincipleAttribution(): UxPrincipleAttribution { return this.data.uxPrincipleAttribution; }
+  get referenceLibrary(): DesignReferenceLibrary { return this.data.referenceLibrary; }
   get styleFamilies(): StyleFamily[] { return this.data.styleFamilies; }
   get catalogVersion(): string { return this.envelope.catalogVersion; }
   get contentHash(): string { return this.envelope.contentHash; }
 
   allStyles(): CatalogStyle[] { return this.data.styles; }
   allDesignPrinciples(): DesignPrinciple[] { return this.data.designPrinciples; }
+  allReferences(): DesignReference[] { return this.data.referenceLibrary.references; }
   getStyle(id: string): CatalogStyle | undefined { return this.styleById.get(id); }
   getFamily(id: string): StyleFamily | undefined { return this.familyById.get(id); }
   getMotion(id: string): MotionPattern | undefined { return this.motionById.get(id); }
@@ -119,6 +145,16 @@ export class CatalogRepository {
   getProduct(id: string): ProductArchetype | undefined { return this.productById.get(id); }
   getSurface(id: string): StateSurface | undefined { return this.surfaceById.get(id); }
   getRecipe(id: string): StateRecipe | undefined { return this.recipeById.get(id); }
+  getReference(id: string): DesignReference | undefined { return this.referenceById.get(id); }
+  referencesForCategory(category: ReferenceCategory): readonly DesignReference[] {
+    return this.referencesByCategory.get(category) ?? [];
+  }
+  referencesForTag(tag: string): readonly DesignReference[] {
+    return this.referencesByTag.get(normalizeReferenceTag(tag)) ?? [];
+  }
+  listReferenceTags(): string[] {
+    return [...this.referenceTagLabels.values()].sort((a, b) => a.localeCompare(b, 'en'));
+  }
   recipesForSurface(surfaceId: string): StateRecipe[] { return this.recipesBySurface.get(surfaceId) ?? []; }
 
   listStyles(locale: Lang = 'en'): StyleSummary[] {
@@ -177,4 +213,21 @@ export class CatalogRepository {
       id: p.id, name: text(p.name, locale), resourceUri: `webstylebook://products/${p.id}`,
     }));
   }
+  listReferences(locale: Lang = 'en'): ReferenceSummary[] {
+    return this.data.referenceLibrary.references.map((reference) => ({
+      id: reference.id,
+      title: reference.title,
+      url: reference.url,
+      category: reference.category,
+      tags: reference.tags,
+      summary: text(reference.analysis.notes, locale),
+      observedAt: reference.observedAt,
+      specCompleteness: reference.specCompleteness,
+      resourceUri: `webstylebook://references/${reference.id}`,
+    }));
+  }
+}
+
+export function normalizeReferenceTag(value: string): string {
+  return value.normalize('NFKC').trim().toLocaleLowerCase('en-US');
 }

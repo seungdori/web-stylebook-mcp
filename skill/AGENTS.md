@@ -20,6 +20,10 @@ state coverage.
    evidence and pick with product context; don't blindly take `candidates[0]`. Note the
    `rejected` styles and their reasons.
 2. Read `webstylebook://styles/{id}` for your picks and record concise candidate-direction notes.
+   Use `search_design_references` with a narrow product/category/tag query, then
+   `get_design_reference` for only a few selected examples. Record observedAt, attribution, and
+   rights; borrow transferable structure and measured tokens, never upstream screenshots, brand
+   assets, copy, typefaces, or visual identity.
    Do not finalize `design.md` before the visual-design, UX-principle, and UI-state contracts are available.
 3. Before composing previews, run a short intake: (a) assets - do they have images/brand assets
    (which), should you source **license-free** samples (e.g. Unsplash, free for commercial use), or

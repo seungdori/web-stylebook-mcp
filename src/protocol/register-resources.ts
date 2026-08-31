@@ -3,6 +3,7 @@
 
 import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { CatalogRepository } from '../catalog/repository.js';
+import { REFERENCE_CATEGORIES } from '../types.js';
 import { TOOL_NAMES, SERVER_NAME, SERVER_VERSION } from '../server-info.js';
 import { ERROR_CODES } from './errors.js';
 
@@ -35,11 +36,12 @@ export function registerResources(server: McpServer, repo: CatalogRepository): v
       surfaces: repo.data.stateSurfaces.length,
       stateRecipes: repo.data.stateRecipes.length,
       products: repo.data.productArchetypes.length,
+      designReferences: repo.allReferences().length,
     },
     // must stay in the canonical CATALOG_DOMAINS order used by generated/manifest.v1.json
     domains: [
       'styles', 'motion', 'components', 'principles', 'design-principles',
-      'states', 'products', 'policies',
+      'states', 'products', 'references', 'policies',
     ],
     tools: TOOL_NAMES,
     errorCodes: ERROR_CODES,
@@ -52,6 +54,7 @@ export function registerResources(server: McpServer, repo: CatalogRepository): v
       'webstylebook://states/{surface}',
       'webstylebook://states/{surface}/{state}',
       'webstylebook://products/{id}',
+      'webstylebook://references/{id}',
     ],
   }));
 
@@ -74,6 +77,17 @@ export function registerResources(server: McpServer, repo: CatalogRepository): v
   }));
   fixed('state-surfaces', 'webstylebook://states/surfaces', 'UI state surfaces', () => repo.listSurfaces());
   fixed('products', 'webstylebook://products', 'Product archetypes', () => repo.listProducts());
+  fixed('references', 'webstylebook://references', 'Compact real-world design reference library with source and rights metadata', () => ({
+    schema: repo.referenceLibrary.schema,
+    generatedAt: repo.referenceLibrary.generatedAt,
+    sourceRevision: repo.referenceLibrary.sourceRevision,
+    sourceFiles: repo.referenceLibrary.sourceFiles,
+    count: repo.allReferences().length,
+    categories: REFERENCE_CATEGORIES,
+    tags: repo.listReferenceTags(),
+    attribution: repo.referenceLibrary.attribution,
+    references: repo.listReferences(),
+  }));
   fixed('anti-patterns', 'webstylebook://policies/anti-patterns', 'Common anti-patterns', () => repo.policies.antiPatterns);
   fixed('verification', 'webstylebook://policies/verification', 'Verification checklist', () => repo.policies.verification);
   fixed('audit-checks', 'webstylebook://policies/audit-checks', 'Stable audit ids, applicability, severity and evidence metadata', () => repo.policies.auditChecks);
@@ -140,6 +154,33 @@ export function registerResources(server: McpServer, repo: CatalogRepository): v
     list: async () => ({ resources: repo.data.productArchetypes.map((p) => ({ uri: `webstylebook://products/${p.id}`, name: p.id, mimeType: JSON_MIME })) }),
   }), { title: 'Product archetype detail', description: 'Full detail for one product archetype', mimeType: JSON_MIME }, async (u, v) => {
     const p = repo.getProduct(String(v.productId)); return p ? json(u.href, p) : notFound(u.href, 'product', String(v.productId));
+  });
+
+  server.registerResource('reference-detail', new ResourceTemplate('webstylebook://references/{referenceId}', {
+    list: async () => ({
+      resources: repo.allReferences().map((reference) => ({
+        uri: `webstylebook://references/${reference.id}`,
+        name: reference.title,
+        mimeType: JSON_MIME,
+      })),
+    }),
+  }), {
+    title: 'Design reference detail',
+    description: 'Full observed design reference with tokens, attribution, adaptation notice, and rights notice',
+    mimeType: JSON_MIME,
+  }, async (u, v) => {
+    const reference = repo.getReference(String(v.referenceId));
+    return reference
+      ? json(u.href, {
+        ...reference,
+        library: {
+          schema: repo.referenceLibrary.schema,
+          generatedAt: repo.referenceLibrary.generatedAt,
+          sourceRevision: repo.referenceLibrary.sourceRevision,
+        },
+        attribution: repo.referenceLibrary.attribution,
+      })
+      : notFound(u.href, 'design reference', String(v.referenceId));
   });
 
   server.registerResource('surface-detail', new ResourceTemplate('webstylebook://states/{surfaceId}', {

@@ -6,6 +6,26 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.9.0] — 2026-08-31
+
+### Added
+
+- A bundled, attributed library of 520 high-completeness real-world design references, with
+  normalized palette, typography, spacing, surface, layout, and motion observations. Upstream
+  screenshots and brand assets remain excluded.
+- `search_design_references`, a deterministic and bounded text/category/tag search that returns
+  concise English, Korean, or Japanese observations and reference resource links.
+- `get_design_reference`, returning one localized full reference with tokens, source revision,
+  CC BY 4.0 attribution, adaptation notice, and original-site rights notice.
+- `webstylebook://references` and `webstylebook://references/{id}` read-only resources.
+
+### Changed
+
+- Extended the design workflows to consult a small set of attributed real-world examples without
+  treating their screenshots, copy, typefaces, brand assets, or visual identity as reusable assets.
+- Updated the canonical catalog snapshot, runtime validation, manifest counts, and package version
+  to 0.9.0.
+
 ## [0.8.0] — 2026-08-12
 
 ### Changed
@@ -264,7 +284,8 @@ All notable changes to this project are documented here. The format follows
 - Output localization in English, Korean, and Japanese.
 - Fully offline at runtime: no API key, no model call, no network, no filesystem access.
 
-[Unreleased]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.5.1...v0.6.0

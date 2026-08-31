@@ -118,6 +118,12 @@ export const DESIGN_CONCERNS = [
 ] as const;
 export type DesignConcern = (typeof DESIGN_CONCERNS)[number];
 
+export const REFERENCE_CATEGORIES = [
+  'product', 'technology', 'editorial', 'commerce',
+  'portfolio', 'studio', 'culture', 'experimental',
+] as const;
+export type ReferenceCategory = (typeof REFERENCE_CATEGORIES)[number];
+
 export const PRINCIPLE_MATCH_MODES = ['ranked-union', 'all-selectors'] as const;
 export type PrincipleMatchMode = (typeof PRINCIPLE_MATCH_MODES)[number];
 
@@ -353,6 +359,91 @@ export interface ProductArchetype {
   stateSurfaceIds: string[];
 }
 
+export interface DesignReferenceAnalysis {
+  palette: LocalizedText;
+  layout: LocalizedText;
+  interaction: LocalizedText;
+  motion: LocalizedText;
+  notes: LocalizedText;
+}
+
+export interface DesignReferenceTokens {
+  colors: {
+    background: string | null;
+    backgroundSoft: string | null;
+    ink: string | null;
+    inkSoft: string | null;
+    muted: string | null;
+    accent: string | null;
+    line: string | null;
+    principle: string | null;
+  };
+  typography: {
+    display: string | null;
+    body: string | null;
+    mono: string | null;
+    displaySize: number | null;
+    bodySize: number | null;
+  };
+  spacing: {
+    base: number | null;
+    scale: number[];
+    rhythm: string | null;
+  };
+  surfaces: {
+    radiusSmall: number | null;
+    radiusMedium: number | null;
+    radiusLarge: number | null;
+    border: string | null;
+  };
+  layout: {
+    container: number | null;
+    paragraph: number | null;
+    columns: number | null;
+    gutter: number | null;
+    skeleton: string | null;
+  };
+  motion: {
+    micro: number | null;
+    small: number | null;
+    medium: number | null;
+    easing: string | null;
+  };
+}
+
+export interface DesignReference {
+  id: string;
+  title: string;
+  url: string;
+  category: ReferenceCategory;
+  tags: string[];
+  analysis: DesignReferenceAnalysis;
+  tokens: DesignReferenceTokens;
+  specCompleteness: number;
+  tokenCoverage: Record<string, number>;
+  observedAt: string;
+  sourceSpecUrl: string;
+  sourceMarkdownUrl: string;
+}
+
+export interface DesignReferenceAttribution {
+  sourceName: string;
+  sourceUrl: string;
+  repositoryUrl: string;
+  sourceLicense: { name: string; url: string };
+  adaptationNotice: LocalizedText;
+  rightsNotice: LocalizedText;
+}
+
+export interface DesignReferenceLibrary {
+  schema: 'webstylebook.reference-library.v1';
+  generatedAt: string;
+  sourceRevision: string;
+  sourceFiles: Record<string, string>;
+  attribution: DesignReferenceAttribution;
+  references: DesignReference[];
+}
+
 export interface StateSurface {
   id: string;
   name: LocalizedText;
@@ -464,6 +555,7 @@ export interface WebStylebookCatalogV1 {
   designPrincipleCategories: DesignPrincipleCategoryDef[];
   designPrinciples: DesignPrinciple[];
   productArchetypes: ProductArchetype[];
+  referenceLibrary: DesignReferenceLibrary;
   stateSurfaces: StateSurface[];
   stateRecipes: StateRecipe[];
   policies: Policies;

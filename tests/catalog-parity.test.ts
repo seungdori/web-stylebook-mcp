@@ -53,12 +53,13 @@ describe('bundled catalog integrity', () => {
       auditChecks: repo.data.policies.auditChecks.length,
       principles: repo.data.uxPrinciples.length,
       productArchetypes: repo.data.productArchetypes.length,
+      designReferences: repo.data.referenceLibrary.references.length,
       stateSurfaces: repo.data.stateSurfaces.length,
       stateRecipes: repo.data.stateRecipes.length,
     });
     expect(manifest.domains).toEqual([
       'styles', 'motion', 'components', 'principles',
-      'design-principles', 'states', 'products', 'policies',
+      'design-principles', 'states', 'products', 'references', 'policies',
     ]);
   });
 
@@ -67,6 +68,7 @@ describe('bundled catalog integrity', () => {
     expect(report.errors, report.errors.join('\n')).toEqual([]);
     expect(report.summary.principles).toBe(23);
     expect(report.summary.designPrinciples).toBe(repo.data.designPrinciples.length);
+    expect(report.summary.designReferences).toBe(repo.data.referenceLibrary.references.length);
   });
 
   it('keeps self-described UX enums aligned with the runtime contract', () => {
@@ -111,6 +113,15 @@ describe('bundled catalog integrity', () => {
       envelope.data.policies.auditChecks[0].source = {
         kind: 'anti-pattern', antiPatternId: 'not-an-anti-pattern',
       };
+    }],
+    ['unknown reference category', (envelope: any) => {
+      envelope.data.referenceLibrary.references[0].category = 'not-a-reference-category';
+    }],
+    ['insecure reference source', (envelope: any) => {
+      envelope.data.referenceLibrary.references[0].sourceSpecUrl = 'http://example.com/spec.json';
+    }],
+    ['incomplete localized reference analysis', (envelope: any) => {
+      envelope.data.referenceLibrary.references[0].analysis.notes.ko = '';
     }],
   ])('rejects a rehashed catalog with %s', (_label, mutate) => {
     const report = reportAfter(mutate);

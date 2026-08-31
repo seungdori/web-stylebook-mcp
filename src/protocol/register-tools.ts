@@ -7,6 +7,7 @@ import type { CatalogRepository } from '../catalog/repository.js';
 import {
   DESIGN_CONCERNS,
   PRINCIPLE_MATCH_MODES,
+  REFERENCE_CATEGORIES,
   PRODUCT_TYPES, TONES, DENSITY_LEVELS, USAGE_FREQUENCIES, TRUST_LEVELS, STATE_CATEGORIES,
   UX_OUTCOMES, UX_SURFACES, UX_PHASES,
 } from '../types.js';
@@ -32,6 +33,12 @@ import {
   type DesignAuditPlanInput,
 } from '../audit/planner.js';
 import { composeDesignTokens, TokenError, type ComposeDesignTokensResult } from '../tokens/compile.js';
+import {
+  getDesignReferenceDetail,
+  searchDesignReferences,
+  type DesignReferenceDetail,
+  type SearchDesignReferencesResult,
+} from '../references/search.js';
 import { ok, errorResult, type ToolResult } from './result.js';
 import { ToolError, nearestIds } from './errors.js';
 
@@ -158,6 +165,60 @@ export function registerTools(server: McpServer, repo: CatalogRepository): void 
       const result = compareDirections(args as Parameters<typeof compareDirections>[0], repo);
       return ok(result as unknown as Record<string, unknown>, renderCompare(result),
         result.directions.map((d) => `webstylebook://styles/${d.primaryStyleId}`));
+    } catch (e) { return errorResult(toToolError(e, repo)); }
+  });
+
+  // ---------------------------------------------------- real-world references
+  server.registerTool('search_design_references', {
+    title: 'Search real-world design references',
+    description: 'Search the bundled, attributed real-world design reference library. Query text is matched deterministically against titles, ids, categories, tags, and localized analysis. category is an exact filter; every supplied tag must match case-insensitively. Returns concise localized observations and resource links, never screenshots or brand assets.',
+    inputSchema: {
+      query: z.string().trim().min(1).max(200).optional(),
+      category: z.enum(REFERENCE_CATEGORIES).optional(),
+      tags: z.array(z.string().trim().min(1).max(80)).max(8).optional(),
+      limit: z.number().int().min(1).max(20).optional(),
+      locale: LOCALE.optional(),
+    },
+    annotations: READ_ONLY,
+  }, async (args): Promise<ToolResult> => {
+    try {
+      const result = searchDesignReferences(args, repo);
+      const locale = args.locale ?? 'en';
+      return ok(
+        result as unknown as Record<string, unknown>,
+        renderReferenceSearch(result),
+        result.results.map((reference) => reference.resourceUri),
+        referenceLabels[locale].resources,
+      );
+    } catch (e) { return errorResult(toToolError(e, repo)); }
+  });
+
+  server.registerTool('get_design_reference', {
+    title: 'Get one real-world design reference',
+    description: 'Return one complete localized design reference with observed palette, layout, interaction, motion, normalized tokens, source revision, CC BY attribution, adaptation notice, and original-site rights notice. Use it as research evidence; do not copy or redistribute excluded screenshots, brand assets, copy, typefaces, or visual identity.',
+    inputSchema: {
+      referenceId: z.string().trim().min(1).max(100),
+      locale: LOCALE.optional(),
+    },
+    annotations: READ_ONLY,
+  }, async (args): Promise<ToolResult> => {
+    try {
+      const reference = repo.getReference(args.referenceId);
+      if (!reference) {
+        throw new ToolError(
+          'REFERENCE_NOT_FOUND',
+          `unknown design reference '${args.referenceId}'`,
+          nearestIds(args.referenceId, repo.allReferences().map((item) => item.id)),
+        );
+      }
+      const locale = args.locale ?? 'en';
+      const detail = getDesignReferenceDetail(reference, locale, repo);
+      return ok(
+        detail as unknown as Record<string, unknown>,
+        renderReferenceDetail(detail, locale),
+        [`webstylebook://references/${reference.id}`],
+        referenceLabels[locale].resources,
+      );
     } catch (e) { return errorResult(toToolError(e, repo)); }
   });
 
@@ -318,6 +379,76 @@ function renderCompare(r: CompareResult): string {
   }
   lines.push('', r.note);
   return lines.join('\n');
+}
+
+const referenceLabels: Record<Lang, {
+  searchTitle: string;
+  matches: string;
+  showing: string;
+  noMatches: string;
+  tags: string;
+  palette: string;
+  layout: string;
+  interaction: string;
+  motion: string;
+  source: string;
+  rights: string;
+  resources: string;
+}> = {
+  en: {
+    searchTitle: 'Design references', matches: 'Matches', showing: 'showing',
+    noMatches: 'No references matched the supplied filters.', tags: 'Tags', palette: 'Palette',
+    layout: 'Layout', interaction: 'Interaction', motion: 'Motion', source: 'Source',
+    rights: 'Rights', resources: 'Resources',
+  },
+  ko: {
+    searchTitle: '디자인 레퍼런스', matches: '검색 결과', showing: '표시',
+    noMatches: '입력한 조건에 맞는 레퍼런스가 없습니다.', tags: '태그', palette: '팔레트',
+    layout: '레이아웃', interaction: '인터랙션', motion: '모션', source: '출처',
+    rights: '권리', resources: '리소스',
+  },
+  ja: {
+    searchTitle: 'デザインリファレンス', matches: '検索結果', showing: '表示',
+    noMatches: '指定した条件に一致するリファレンスはありません。', tags: 'タグ', palette: 'パレット',
+    layout: 'レイアウト', interaction: 'インタラクション', motion: 'モーション', source: '出典',
+    rights: '権利', resources: 'リソース',
+  },
+};
+
+function renderReferenceSearch(result: SearchDesignReferencesResult): string {
+  const labels = referenceLabels[result.query.locale];
+  const lines = [
+    `# ${labels.searchTitle}`,
+    `${labels.matches}: ${result.totalMatches} (${labels.showing}: ${result.returned})`,
+  ];
+  for (const reference of result.results) {
+    lines.push(
+      '',
+      `- **${reference.title}** (${reference.category}) — ${reference.summary}`,
+      `  ${labels.tags}: ${reference.tags.join(', ')}`,
+    );
+  }
+  if (!result.results.length) lines.push('', labels.noMatches);
+  return lines.join('\n');
+}
+
+function renderReferenceDetail(detail: DesignReferenceDetail, locale: Lang): string {
+  const labels = referenceLabels[locale];
+  const { reference, attribution } = detail;
+  return [
+    `# ${reference.title}`,
+    `${reference.category} · ${labels.tags}: ${reference.tags.join(', ')}`,
+    '',
+    reference.analysis.notes,
+    `- ${labels.palette}: ${reference.analysis.palette}`,
+    `- ${labels.layout}: ${reference.analysis.layout}`,
+    `- ${labels.interaction}: ${reference.analysis.interaction}`,
+    `- ${labels.motion}: ${reference.analysis.motion}`,
+    '',
+    `${labels.source}: ${attribution.sourceName} (${attribution.sourceLicense.name}) — ${reference.sourceSpecUrl}`,
+    attribution.adaptationNotice,
+    `${labels.rights}: ${attribution.rightsNotice}`,
+  ].join('\n');
 }
 
 function renderStatePlan(p: UiStatePlan): string {

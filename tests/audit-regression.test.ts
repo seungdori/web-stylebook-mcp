@@ -315,6 +315,9 @@ describe('the closing gate checks that principles were applied, not just selecte
       expect(content, rel).toMatch(/`principles` group/);
       expect(content, rel).toContain('NOT_VERIFIED');
       expect(content, rel).toMatch(/evidence/i);
+      expect(content, rel).toContain('search_design_references');
+      expect(content, rel).toContain('get_design_reference');
+      expect(content, rel).toMatch(/rights/i);
     }
   });
 });

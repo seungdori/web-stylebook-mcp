@@ -48,6 +48,10 @@ Map the answer to `get_design_audit_plan.includeGroups`:
    confidence. Treat `candidates` as evidence — *you* pick using product context; `candidates[0]`
    is the strongest match, not a mandate.
 2. **Read the chosen styles** — `webstylebook://styles/{id}` for each pick (primary + any pairing).
+   Then call **`search_design_references`** with a narrow product/category/tag query and inspect only
+   a few selected entries with **`get_design_reference`**. Record their observation date,
+   attribution, and rights notice. Borrow transferable structure and measured tokens; never copy or
+   redistribute upstream screenshots, brand assets, copy, typefaces, or visual identity.
 3. **Intake, then get direction approval — before component work.** First run a short intake so the
    previews use the right material (ask, don't assume):
    - **Assets** — do they have images/brand assets to use (and which)? If not, may you pull

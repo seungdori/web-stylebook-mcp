@@ -17,6 +17,7 @@ import {
   UX_PHASES,
   UX_PRINCIPLE_CATEGORIES,
   UX_SURFACES,
+  REFERENCE_CATEGORIES,
 } from '../types.js';
 import type { LocalizedText } from '../types.js';
 import { contentHashOf } from './stable-hash.js';
@@ -390,6 +391,84 @@ export function validateLoaded(repo: CatalogRepository): ValidateReport {
     }
   }
 
+  const library = data.referenceLibrary;
+  if (library.schema !== 'webstylebook.reference-library.v1') {
+    errors.push('reference library schema mismatch');
+  }
+  if (!Number.isFinite(Date.parse(library.generatedAt))) {
+    errors.push('reference library generatedAt is not a valid timestamp');
+  }
+  if (!/^[0-9a-f]{40}$/.test(library.sourceRevision)) {
+    errors.push('reference library sourceRevision must be a full git SHA');
+  }
+  if (!library.sourceFiles || typeof library.sourceFiles !== 'object' || !Object.keys(library.sourceFiles).length) {
+    errors.push('reference library sourceFiles missing');
+  } else {
+    for (const [path, hash] of Object.entries(library.sourceFiles)) {
+      if (!path.trim() || !/^sha256:[0-9a-f]{64}$/.test(hash)) {
+        errors.push(`reference library sourceFiles.${path || '<empty>'} must be a sha256 digest`);
+      }
+    }
+  }
+  const referenceAttribution = library.attribution;
+  for (const [label, value] of [
+    ['sourceUrl', referenceAttribution.sourceUrl],
+    ['repositoryUrl', referenceAttribution.repositoryUrl],
+    ['sourceLicense.url', referenceAttribution.sourceLicense?.url],
+  ] as const) {
+    if (!validHttps(value)) errors.push(`reference attribution ${label} must use HTTPS`);
+  }
+  if (!referenceAttribution.sourceName?.trim()) errors.push('reference attribution sourceName missing');
+  if (!referenceAttribution.sourceLicense?.name?.trim()) {
+    errors.push('reference attribution source license missing');
+  }
+  if (!localeComplete(referenceAttribution.adaptationNotice)) {
+    errors.push('reference attribution adaptationNotice not locale-complete');
+  }
+  if (!localeComplete(referenceAttribution.rightsNotice)) {
+    errors.push('reference attribution rightsNotice not locale-complete');
+  }
+
+  const referenceIds = new Set<string>();
+  for (const reference of library.references) {
+    if (referenceIds.has(reference.id)) errors.push(`duplicate reference id ${reference.id}`);
+    referenceIds.add(reference.id);
+    if (!reference.title?.trim()) errors.push(`reference ${reference.id} title missing`);
+    if (!REFERENCE_CATEGORIES.includes(reference.category)) {
+      errors.push(`reference ${reference.id} has unknown category ${reference.category}`);
+    }
+    validStringArray(reference.tags, `reference ${reference.id} tags`, errors);
+    if (!reference.tags.length) errors.push(`reference ${reference.id} tags must not be empty`);
+    for (const [field, value] of Object.entries(reference.analysis)) {
+      if (!localeComplete(value)) {
+        errors.push(`reference ${reference.id} analysis.${field} not locale-complete`);
+      }
+    }
+    for (const [label, value] of [
+      ['url', reference.url],
+      ['sourceSpecUrl', reference.sourceSpecUrl],
+      ['sourceMarkdownUrl', reference.sourceMarkdownUrl],
+    ] as const) {
+      if (!validHttps(value)) errors.push(`reference ${reference.id} ${label} must use HTTPS`);
+    }
+    if (!Number.isFinite(Date.parse(reference.observedAt))) {
+      errors.push(`reference ${reference.id} observedAt is not a valid timestamp`);
+    }
+    if (!Number.isFinite(reference.specCompleteness)
+      || reference.specCompleteness < 0.9 || reference.specCompleteness > 1) {
+      errors.push(`reference ${reference.id} specCompleteness must be between 0.9 and 1`);
+    }
+    if (!reference.tokenCoverage || typeof reference.tokenCoverage !== 'object') {
+      errors.push(`reference ${reference.id} tokenCoverage missing`);
+    } else {
+      for (const [field, coverage] of Object.entries(reference.tokenCoverage)) {
+        if (!Number.isFinite(coverage) || coverage < 0 || coverage > 1) {
+          errors.push(`reference ${reference.id} tokenCoverage.${field} must be between 0 and 1`);
+        }
+      }
+    }
+  }
+
   const prodIds = new Set<string>();
   for (const p of data.productArchetypes) {
     if (prodIds.has(p.id)) errors.push(`duplicate product id ${p.id}`);
@@ -417,6 +496,7 @@ export function validateLoaded(repo: CatalogRepository): ValidateReport {
       surfaces: data.stateSurfaces.length,
       recipes: data.stateRecipes.length,
       products: data.productArchetypes.length,
+      designReferences: data.referenceLibrary.references.length,
     },
   };
 }

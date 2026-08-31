@@ -10,6 +10,7 @@ export type ErrorCode =
   | 'STATE_SURFACE_NOT_FOUND'
   | 'STATE_RECIPE_NOT_FOUND'
   | 'PRODUCT_NOT_FOUND'
+  | 'REFERENCE_NOT_FOUND'
   | 'NO_COMPATIBLE_STYLE'
   | 'CATALOG_SCHEMA_MISMATCH'
   | 'CATALOG_INTEGRITY_ERROR'
@@ -27,6 +28,7 @@ export const ERROR_CODES: Record<ErrorCode, string> = {
   STATE_SURFACE_NOT_FOUND: 'unknown surface id (suggestions provided)',
   STATE_RECIPE_NOT_FOUND: 'unknown surface/state recipe',
   PRODUCT_NOT_FOUND: 'unknown product archetype id',
+  REFERENCE_NOT_FOUND: 'unknown real-world design reference id (near-miss suggestions provided)',
   NO_COMPATIBLE_STYLE: 'every candidate was hard-rejected — relax constraints/avoid',
   CATALOG_SCHEMA_MISMATCH: 'bundled catalog failed schema validation',
   CATALOG_INTEGRITY_ERROR: 'bundled catalog failed integrity checks',

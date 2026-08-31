@@ -16,21 +16,26 @@ beforeAll(async () => {
 
 describe('MCP contract', () => {
   it('advertises server instructions and the packaged server version', () => {
-    expect(client.getServerVersion()).toEqual({ name: 'web-stylebook', version: '0.8.0' });
+    expect(client.getServerVersion()).toEqual({ name: 'web-stylebook', version: '0.9.0' });
     const instructions = client.getInstructions() ?? '';
     expect(instructions).toContain('recommend_design_direction');
     expect(instructions).toContain('get_design_principle_plan');
     expect(instructions).toContain('get_ux_principle_plan');
     expect(instructions).toContain('get_design_audit_plan');
+    expect(instructions).toContain('search_design_references');
+    expect(instructions).toContain('get_design_reference');
+    expect(instructions).toContain('brand assets');
     expect(instructions).toContain('read-only');
   });
 
-  it('exposes exactly the 7 compute tools, all read-only', async () => {
+  it('exposes exactly the 9 compute tools, all read-only', async () => {
     const { tools } = await client.listTools();
     expect(tools.map((t) => t.name).sort()).toEqual([
       'compare_design_directions', 'compose_design_tokens', 'get_design_audit_plan',
-      'get_design_principle_plan', 'get_ui_state_plan', 'get_ux_principle_plan',
+      'get_design_principle_plan', 'get_design_reference', 'get_ui_state_plan',
+      'get_ux_principle_plan',
       'recommend_design_direction',
+      'search_design_references',
     ]);
     for (const t of tools) expect(t.annotations?.readOnlyHint).toBe(true);
   });
@@ -42,12 +47,14 @@ describe('MCP contract', () => {
     expect(uris).toContain('webstylebook://styles');
     expect(uris).toContain('webstylebook://design-principles');
     expect(uris).toContain('webstylebook://principles');
+    expect(uris).toContain('webstylebook://references');
     expect(uris).toContain('webstylebook://policies/audit-checks');
     const { resourceTemplates } = await client.listResourceTemplates();
     expect(resourceTemplates.map((t) => t.uriTemplate)).toContain('webstylebook://styles/{styleId}');
     expect(resourceTemplates.map((t) => t.uriTemplate))
       .toContain('webstylebook://design-principles/{designPrincipleId}');
     expect(resourceTemplates.map((t) => t.uriTemplate)).toContain('webstylebook://principles/{principleId}');
+    expect(resourceTemplates.map((t) => t.uriTemplate)).toContain('webstylebook://references/{referenceId}');
   });
 
   it('reads the manifest resource', async () => {
@@ -57,11 +64,14 @@ describe('MCP contract', () => {
     expect(body.counts.principles).toBe(23);
     expect(body.counts.designPrinciples).toBeGreaterThan(0);
     expect(body.counts.auditChecks).toBe(51);
+    expect(body.counts.designReferences).toBe(520);
     expect(body.domains).toContain('design-principles');
     expect(body.domains).toContain('principles');
-    expect(body.tools).toHaveLength(7);
+    expect(body.domains).toContain('references');
+    expect(body.tools).toHaveLength(9);
     expect(body.resourceUriTemplates).toContain('webstylebook://design-principles/{id}');
     expect(body.resourceUriTemplates).toContain('webstylebook://principles/{id}');
+    expect(body.resourceUriTemplates).toContain('webstylebook://references/{id}');
     expect(body.contentHash).toMatch(/^sha256:[0-9a-f]{64}$/);
   });
 
@@ -115,6 +125,24 @@ describe('MCP contract', () => {
     expect(detailBody.attribution.sourceName).toBe('Laws of UX');
   });
 
+  it('reads the attributed reference index and one full reference detail', async () => {
+    const index = await client.readResource({ uri: 'webstylebook://references' });
+    const indexBody = JSON.parse(index.contents[0]!.text as string);
+    expect(indexBody.schema).toBe('webstylebook.reference-library.v1');
+    expect(indexBody.count).toBe(520);
+    expect(indexBody.references).toHaveLength(520);
+    expect(indexBody.attribution.sourceLicense.name).toBe('CC BY 4.0');
+    expect(indexBody.tags).toContain('Dark Mode');
+
+    const detail = await client.readResource({ uri: 'webstylebook://references/linear' });
+    const detailBody = JSON.parse(detail.contents[0]!.text as string);
+    expect(detailBody.id).toBe('linear');
+    expect(detailBody.tokens.colors).toBeDefined();
+    expect(detailBody.analysis.notes.ko).toBeTruthy();
+    expect(detailBody.attribution.sourceLicense.name).toBe('CC BY 4.0');
+    expect(detailBody.attribution.rightsNotice.en).toMatch(/property/i);
+  });
+
   it('state-recipe URI validates the surface segment, not just the state id (r3)', async () => {
     // 'populated' is a data-table recipe; requesting it under /chat must NOT succeed
     const wrong = await client.readResource({ uri: 'webstylebook://states/chat/populated' });
@@ -150,6 +178,50 @@ describe('MCP contract', () => {
     const sc = r.structuredContent as any;
     expect(sc.required.map((s: any) => s.id)).toContain('payment-declined');
     expect(sc.implementationOrder.length).toBeGreaterThan(5);
+  });
+
+  it('search_design_references: filters deterministically and localizes concise results', async () => {
+    const r = await client.callTool({
+      name: 'search_design_references',
+      arguments: {
+        query: 'linear',
+        category: 'technology',
+        tags: ['Dark Mode', 'SaaS'],
+        locale: 'ko',
+        limit: 3,
+      },
+    });
+    expect(r.isError).toBeFalsy();
+    const sc = r.structuredContent as any;
+    expect(sc.totalMatches).toBe(1);
+    expect(sc.returned).toBe(1);
+    expect(sc.results[0].id).toBe('linear');
+    expect(sc.results[0].summary).toMatch(/[가-힣]/);
+    expect(typeof sc.results[0].summary).toBe('string');
+    expect(sc.results[0]).not.toHaveProperty('tokens');
+    const fallback = (r.content as any[]).find((item) => item.type === 'text')?.text ?? '';
+    expect(fallback).toContain('# 디자인 레퍼런스');
+    expect(fallback).toContain('Linear');
+    expect(fallback).toContain('리소스:');
+    expect((r.content as any[]).some((item) => item.type === 'resource_link'
+      && item.uri === 'webstylebook://references/linear')).toBe(true);
+  });
+
+  it('get_design_reference: returns one localized full reference with attribution and rights', async () => {
+    const r = await client.callTool({
+      name: 'get_design_reference',
+      arguments: { referenceId: 'linear', locale: 'ja' },
+    });
+    expect(r.isError).toBeFalsy();
+    const sc = r.structuredContent as any;
+    expect(sc.reference.id).toBe('linear');
+    expect(sc.reference.tokens.motion).toBeDefined();
+    expect(sc.reference.analysis.notes).toMatch(/[ぁ-んァ-ヶ一-龠]/);
+    expect(typeof sc.reference.analysis.notes).toBe('string');
+    expect(sc.attribution.sourceLicense.name).toBe('CC BY 4.0');
+    expect(sc.attribution.adaptationNotice).toMatch(/[ぁ-んァ-ヶ一-龠]/);
+    expect(sc.attribution.rightsNotice).toMatch(/[ぁ-んァ-ヶ一-龠]/);
+    expect(sc.library.sourceRevision).toMatch(/^[0-9a-f]{40}$/);
   });
 
   it('get_design_principle_plan: returns placement and verification guidance with resource links', async () => {
@@ -303,6 +375,17 @@ describe('MCP contract', () => {
     const sc = r.structuredContent as any;
     expect(sc.error.code).toBe('STYLE_NOT_FOUND');
     expect(sc.suggestions).toContain('runtime-signal');
+  });
+
+  it('unknown design reference id -> REFERENCE_NOT_FOUND with suggestions', async () => {
+    const r = await client.callTool({
+      name: 'get_design_reference',
+      arguments: { referenceId: 'lineaar' },
+    });
+    expect(r.isError).toBe(true);
+    const sc = r.structuredContent as any;
+    expect(sc.error.code).toBe('REFERENCE_NOT_FOUND');
+    expect(sc.suggestions).toContain('linear');
   });
 
   it('unknown surface -> STATE_SURFACE_NOT_FOUND', async () => {

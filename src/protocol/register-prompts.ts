@@ -101,13 +101,14 @@ export function registerPrompts(server: McpServer): void {
     'Use the Web Stylebook MCP in this order:',
     '1. recommend_design_direction (treat candidates as scored evidence; pick using product context)',
     '2. read the chosen webstylebook://styles/{id} resources',
-    '3. plan each screen around its primary user task; name its surface, intended outcomes, and current design phase',
-    '4. get_design_principle_plan for the layout concerns/surface/phase; use its placement, application, and verification guidance',
-    '5. get_ux_principle_plan for those outcomes/surface/phase; use the design questions and cautions, not the names as decoration',
-    '6. get_ui_state_plan for each surface (cover the non-happy-path states)',
-    '7. compose_design_tokens for a starting token set; heed contrast warnings',
-    '8. write design.md with every one of these sections filled — leave none empty: intent; audience and tasks; chosen direction and why; rejected directions; tone; color ROLES (not a raw palette); type roles; spacing and density; layout rules; surface hierarchy; component behavior; motion (use AND avoid); selected visual-design principles, each with the placement decision it produced and its observable verification check; selected UX principles, each with its caution and evidence confidence label; UI-state coverage; responsive; accessibility; anti-patterns avoided; assumptions; verification checklist',
-    '9. implement, then call get_design_audit_plan with styleId, surfaces: [each actual surface], designPrincipleIds, uxPrincipleIds, matching stateSurfaceIds, and locale. Inspect the actual UI/source/interactions for every returned check; record PASS / FIX_NOW / RISK / NOT_APPLICABLE / NOT_VERIFIED with evidence. Missing evidence is NOT_VERIFIED, never PASS',
+    '3. search_design_references for a small set of product/category/tag-relevant real-world examples, then get_design_reference only for selected entries. Record observedAt, attribution, and rights; borrow principles and measured tokens, never screenshots, brand assets, copy, typefaces, or visual identity',
+    '4. plan each screen around its primary user task; name its surface, intended outcomes, and current design phase',
+    '5. get_design_principle_plan for the layout concerns/surface/phase; use its placement, application, and verification guidance',
+    '6. get_ux_principle_plan for those outcomes/surface/phase; use the design questions and cautions, not the names as decoration',
+    '7. get_ui_state_plan for each surface (cover the non-happy-path states)',
+    '8. compose_design_tokens for a starting token set; heed contrast warnings',
+    '9. write design.md with every one of these sections filled — leave none empty: intent; audience and tasks; chosen direction and why; selected real-world references and transferable principles; rejected directions; tone; color ROLES (not a raw palette); type roles; spacing and density; layout rules; surface hierarchy; component behavior; motion (use AND avoid); selected visual-design principles, each with the placement decision it produced and its observable verification check; selected UX principles, each with its caution and evidence confidence label; UI-state coverage; responsive; accessibility; anti-patterns avoided; assumptions; verification checklist',
+    '10. implement, then call get_design_audit_plan with styleId, surfaces: [each actual surface], designPrincipleIds, uxPrincipleIds, matching stateSurfaceIds, and locale. Inspect the actual UI/source/interactions for every returned check; record PASS / FIX_NOW / RISK / NOT_APPLICABLE / NOT_VERIFIED with evidence. Missing evidence is NOT_VERIFIED, never PASS',
     '',
     `Product: ${product}`,
     `Audience: ${audience ?? 'infer conservatively and record the assumption'}`,
@@ -122,6 +123,7 @@ export function registerPrompts(server: McpServer): void {
   }, ({ screenType, goal, styleId }) => userMessage([
     `Design a ${screenType} screen. Goal: ${goal}.`,
     styleId ? `Use style ${styleId} (read webstylebook://styles/${styleId}).` : 'If no style is chosen yet, call recommend_design_direction first.',
+    'Use search_design_references, then get_design_reference for at most a few relevant examples; extract transferable structure and tokens while respecting attribution and original-site rights.',
     'Organize hierarchy by the primary user task. Look up relevant components in webstylebook://components.',
     'Call get_design_principle_plan with the layout concerns, matching surface, and current design phase. Use its placement and verification guidance.',
     'Call get_ux_principle_plan with the intended outcomes, matching surface, and current design phase. Apply only the principles whose cautions fit this task.',
@@ -148,7 +150,7 @@ export function registerPrompts(server: McpServer): void {
   }, ({ current, goal }) => userMessage([
     `Redesign this screen toward: ${goal}. Keep what works structurally.`,
     `Current state: ${current}.`,
-    'Use compare_design_directions on 2-3 candidate styles, choose primary + secondary roles, then draft the design.md brief notes and call compose_design_tokens.',
+    'Use compare_design_directions on 2-3 candidate styles, then search_design_references and inspect a few selected references before choosing primary + secondary roles. Draft the design.md brief notes and call compose_design_tokens.',
     'Finish with the audit-design-direction checklist.',
   ].join('\n')));
 

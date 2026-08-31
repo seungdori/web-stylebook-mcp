@@ -117,7 +117,9 @@ flowchart LR
     C --> H[get_ui_state_plan]
     C --> I[compose_design_tokens]
     C --> J[get_design_audit_plan]
-    D & E & F & G & H & I & J -->|design contracts<br/>scores · reason codes<br/>placement · evidence · tokens| A
+    C --> K[search_design_references]
+    C --> L[get_design_reference]
+    D & E & F & G & H & I & J & K & L -->|design contracts<br/>observations · scores · reasons<br/>placement · evidence · tokens| A
     A -->|writes code<br/>from evidence| Z[Your UI]
 ```
 
@@ -204,13 +206,17 @@ Add the same block to your `claude_desktop_config.json`, then restart:
 |------|--------------|-----------------|
 | **`recommend_design_direction`** | Scored style candidates with reason codes, **rejected** styles with *why*, secondary pairings, confidence | The model makes the final pick — this is the evidence provider |
 | **`compare_design_directions`** | 2–4 directions compared across product-fit, repeated-use, density, trust, distinctiveness, accessibility-risk, motion, maintenance | No single winner is declared |
+| **`search_design_references`** | Bounded search across real-world references by text, category, and tags, with concise localized observations | Returns attributed research summaries, not copied screenshots or brand assets |
+| **`get_design_reference`** | One complete localized reference with palette/layout/interaction/motion observations, normalized tokens, source revision, attribution, and rights notice | Original-site copy, typefaces, screenshots, and visual identity remain with their owners |
 | **`get_design_principle_plan`** | A focused placement, application, and verification plan selected by visual concerns, surface, phase, or principle ids — with source references where available | Craft prompts are testable guidance, not empirical laws or a fixed recipe |
 | **`get_ux_principle_plan`** | A focused apply-and-verify plan selected by outcomes, surface, phase, or principle ids — with questions, cautions, confidence, and references | Principles are contextual prompts, not universal laws or a substitute for research |
 | **`get_ui_state_plan`** | Required / recommended / domain UI states for a surface (data-table, form, checkout, chat, developer-console) — triggers, must-show, must-not, a11y, motion | Covers the states agents forget: empty, error, loading, edge |
 | **`compose_design_tokens`** | Role-based tokens (color, type, spacing, radius, motion, density) as `json` / `css-variables` / `tailwind` / `typescript`, light / dark / both | Emits WCAG contrast warnings instead of hiding them |
 | **`get_design_audit_plan`** | Localized, surface-aware checks with stable ids, severity, applicability, required evidence, remediation, user-facing content checks, selected principle checks, and UI-state coverage | The tool plans the audit but never pretends it inspected your project; missing evidence is `NOT_VERIFIED`, not `PASS` |
 
-**Catalog:** 48 styles · 25 interface design principles · 23 UX principles · 51 structured audit checks · 20 components · 5 surfaces · 57 UI-state recipes · 29 motion profiles · 14 product archetypes.
+**Catalog:** 520 real-world design references · 48 styles · 25 interface design principles · 23 UX principles · 51 structured audit checks · 20 components · 5 surfaces · 57 UI-state recipes · 29 motion profiles · 14 product archetypes.
+
+The reference library is an adapted, high-completeness subset of [OpenDesign](https://opendesign.cc), whose structured specifications are licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Web Stylebook excludes upstream screenshots and brand assets. Original sites, brands, copy, typefaces, and visual identities remain the property of their respective owners; inspect each detail's attribution and rights notice before use.
 
 ## Localized output
 
@@ -233,6 +239,7 @@ webstylebook://principles · /principles/{id}
 webstylebook://design-principles · /design-principles/{id}
 webstylebook://states/surfaces · /states/{surface} · /states/{surface}/{state}
 webstylebook://products · /products/{id}
+webstylebook://references · /references/{id}
 webstylebook://policies/anti-patterns · /policies/verification · /policies/audit-checks
 ```
 
