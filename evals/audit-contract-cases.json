@@ -1,0 +1,133 @@
+{
+  "schema": "webstylebook.audit-contract-benchmark.v1",
+  "description": "Human-labeled contract cases comparing legacy pass-through verdicts with deterministic audit-result validation.",
+  "cases": [
+    {
+      "id": "complete-pass",
+      "group": "build",
+      "checkId": "lint-passes",
+      "submittedVerdict": "PASS",
+      "expectedVerdict": "PASS",
+      "expectedContractValid": true,
+      "mutation": "none"
+    },
+    {
+      "id": "missing-evidence",
+      "group": "build",
+      "checkId": "runtime-console-clean",
+      "submittedVerdict": "PASS",
+      "expectedVerdict": "NOT_VERIFIED",
+      "expectedContractValid": false,
+      "mutation": "drop-evidence"
+    },
+    {
+      "id": "narrative-only-evidence",
+      "group": "build",
+      "checkId": "lint-passes",
+      "submittedVerdict": "PASS",
+      "expectedVerdict": "NOT_VERIFIED",
+      "expectedContractValid": false,
+      "mutation": "remove-durable-reference"
+    },
+    {
+      "id": "unknown-evidence-reference",
+      "group": "build",
+      "checkId": "typecheck-passes",
+      "submittedVerdict": "PASS",
+      "expectedVerdict": "NOT_VERIFIED",
+      "expectedContractValid": false,
+      "mutation": "unknown-evidence-reference"
+    },
+    {
+      "id": "cross-target-evidence",
+      "group": "build",
+      "checkId": "build-succeeds",
+      "submittedVerdict": "PASS",
+      "expectedVerdict": "NOT_VERIFIED",
+      "expectedContractValid": false,
+      "mutation": "cross-target-evidence"
+    },
+    {
+      "id": "cant-tell-evidence",
+      "group": "build",
+      "checkId": "runtime-console-clean",
+      "submittedVerdict": "PASS",
+      "expectedVerdict": "NOT_VERIFIED",
+      "expectedContractValid": false,
+      "mutation": "cant-tell"
+    },
+    {
+      "id": "interaction-without-phase",
+      "group": "build",
+      "checkId": "runtime-console-clean",
+      "submittedVerdict": "PASS",
+      "expectedVerdict": "NOT_VERIFIED",
+      "expectedContractValid": false,
+      "mutation": "interaction-without-phase"
+    },
+    {
+      "id": "failed-blocker-evidence",
+      "group": "build",
+      "checkId": "build-succeeds",
+      "submittedVerdict": "PASS",
+      "expectedVerdict": "FIX_NOW",
+      "expectedContractValid": false,
+      "mutation": "failed-evidence"
+    },
+    {
+      "id": "failed-major-evidence",
+      "group": "build",
+      "checkId": "runtime-console-clean",
+      "submittedVerdict": "PASS",
+      "expectedVerdict": "FIX_NOW",
+      "expectedContractValid": false,
+      "mutation": "failed-evidence"
+    },
+    {
+      "id": "failed-minor-evidence",
+      "group": "layout",
+      "checkId": "no-purpose-free-nested-surfaces",
+      "submittedVerdict": "PASS",
+      "expectedVerdict": "RISK",
+      "expectedContractValid": false,
+      "mutation": "failed-evidence"
+    },
+    {
+      "id": "invalid-not-applicable",
+      "group": "build",
+      "checkId": "lint-passes",
+      "submittedVerdict": "NOT_APPLICABLE",
+      "expectedVerdict": "NOT_VERIFIED",
+      "expectedContractValid": false,
+      "mutation": "none"
+    },
+    {
+      "id": "honest-not-verified",
+      "group": "build",
+      "checkId": "runtime-console-clean",
+      "submittedVerdict": "NOT_VERIFIED",
+      "expectedVerdict": "NOT_VERIFIED",
+      "expectedContractValid": true,
+      "mutation": "none"
+    },
+    {
+      "id": "evidenced-fix-now",
+      "group": "build",
+      "checkId": "build-succeeds",
+      "submittedVerdict": "FIX_NOW",
+      "expectedVerdict": "FIX_NOW",
+      "expectedContractValid": true,
+      "mutation": "failed-evidence",
+      "remediation": "Fix the build failure and collect a fresh command artifact."
+    },
+    {
+      "id": "honest-not-applicable",
+      "group": "content",
+      "checkId": "meaning-precedes-method",
+      "submittedVerdict": "NOT_APPLICABLE",
+      "expectedVerdict": "NOT_APPLICABLE",
+      "expectedContractValid": true,
+      "mutation": "none"
+    }
+  ]
+}

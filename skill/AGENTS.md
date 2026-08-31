@@ -63,6 +63,10 @@ state coverage.
    it. Never restate a `contextual` or `contested` principle as a law. Do this inline yourself -
    the `audit-design-direction`, `audit-design-principles`, and `audit-ux-principles` prompts are
    deeper audits the *user* invokes, not tools you can call.
+11. Call `validate_design_audit_result` with the same plan query, its `identity.planHash`, a target
+   for each inspected route/screen/state/viewport/theme/locale, durable evidence references, and one
+   result per planned check/target. Fix contract errors or preserve normalized `NOT_VERIFIED`.
+   `valid` describes contract validity, never overall design quality.
 
 **Compose, don't recolor.** Tokens are scalars, not a design. Swapping a token block over one
 layout is a reskin and is not acceptable. The chosen style is a starting tone, not a layout mold:

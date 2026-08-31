@@ -1,5 +1,6 @@
 import { text, texts } from '../localization.js';
 import type { CatalogRepository } from '../catalog/repository.js';
+import { stableHashOf } from '../catalog/stable-hash.js';
 import { planUiStates } from '../state-atlas/planner.js';
 import type {
   AuditApplicability,
@@ -68,6 +69,12 @@ interface CompactState {
 }
 
 export interface DesignAuditPlan {
+  identity: {
+    schema: 'webstylebook.audit-plan.v1';
+    catalogVersion: string;
+    catalogContentHash: string;
+    planHash: string;
+  };
   query: {
     styleId?: string;
     surfaces: UxSurface[];
@@ -284,11 +291,12 @@ export function planDesignAudit(
   const locale = input.locale ?? 'en';
   const surfaces: UxSurface[] = unique(
     input.surfaces?.length ? input.surfaces : ['global' as UxSurface],
-  );
-  const includeGroups = unique(input.includeGroups?.length ? input.includeGroups : [...AUDIT_GROUP_IDS]);
+  ).sort();
+  const requestedGroups = unique(input.includeGroups?.length ? input.includeGroups : [...AUDIT_GROUP_IDS]);
+  const includeGroups = AUDIT_GROUP_IDS.filter((group) => requestedGroups.includes(group));
   const includeDocumentation = input.includeDocumentation ?? true;
-  const designPrincipleIds = unique(input.designPrincipleIds ?? []);
-  const uxPrincipleIds = unique(input.uxPrincipleIds ?? []);
+  const designPrincipleIds = unique(input.designPrincipleIds ?? []).sort();
+  const uxPrincipleIds = unique(input.uxPrincipleIds ?? []).sort();
 
   if (input.styleId && !repo.getStyle(input.styleId)) {
     throw new AuditPlanError(`unknown style '${input.styleId}'`, 'STYLE_NOT_FOUND', input.styleId);
@@ -310,7 +318,7 @@ export function planDesignAudit(
   });
 
   const requestedStateSurfaceIds = unique(input.stateSurfaceIds
-    ?? surfaces.filter((surface) => repo.getSurface(surface)));
+    ?? surfaces.filter((surface) => repo.getSurface(surface))).sort();
   const stateCoverage = requestedStateSurfaceIds.map((surfaceId) => {
     if (!repo.getSurface(surfaceId)) {
       throw new AuditPlanError(`unknown state surface '${surfaceId}'`, 'STATE_SURFACE_NOT_FOUND', surfaceId);
@@ -350,7 +358,7 @@ export function planDesignAudit(
   ]);
   const label = labels[locale];
 
-  return {
+  const plan = {
     query: {
       styleId: input.styleId,
       surfaces,
@@ -380,5 +388,15 @@ export function planDesignAudit(
     },
     resourceUris,
     guidance: label.guidance,
+  } satisfies Omit<DesignAuditPlan, 'identity'>;
+
+  return {
+    identity: {
+      schema: 'webstylebook.audit-plan.v1',
+      catalogVersion: repo.catalogVersion,
+      catalogContentHash: repo.contentHash,
+      planHash: stableHashOf(plan),
+    },
+    ...plan,
   };
 }

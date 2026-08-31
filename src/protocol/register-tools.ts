@@ -9,7 +9,7 @@ import {
   PRINCIPLE_MATCH_MODES,
   REFERENCE_CATEGORIES,
   PRODUCT_TYPES, TONES, DENSITY_LEVELS, USAGE_FREQUENCIES, TRUST_LEVELS, STATE_CATEGORIES,
-  UX_OUTCOMES, UX_SURFACES, UX_PHASES,
+  AUDIT_EVIDENCE_TYPES, UX_OUTCOMES, UX_SURFACES, UX_PHASES,
 } from '../types.js';
 import type { Lang } from '../types.js';
 import { recommendDesignDirection } from '../recommendation/index.js';
@@ -27,11 +27,20 @@ import {
 } from '../design-principles/planner.js';
 import {
   AUDIT_GROUP_IDS,
+  AUDIT_VERDICTS,
   AuditPlanError,
   planDesignAudit,
   type DesignAuditPlan,
   type DesignAuditPlanInput,
 } from '../audit/planner.js';
+import {
+  AUDIT_EVIDENCE_OUTCOMES,
+  AUDIT_EVIDENCE_PHASES,
+  AUDIT_TARGET_THEMES,
+  validateDesignAuditResult,
+  type ValidateDesignAuditResultInput,
+  type ValidatedDesignAuditResult,
+} from '../audit/evaluator.js';
 import { composeDesignTokens, TokenError, type ComposeDesignTokensResult } from '../tokens/compile.js';
 import {
   getDesignReferenceDetail,
@@ -56,6 +65,91 @@ const productContextShape = {
   trustSensitivity: z.enum(TRUST_LEVELS).optional(),
   constraints: z.array(z.string().max(300)).max(20).optional(),
   avoid: z.array(z.string().max(300)).max(20).optional(),
+};
+
+const auditScalar = z.union([
+  z.string().max(2000), z.number().finite(), z.boolean(), z.null(),
+]);
+const auditValue = z.union([
+  auditScalar,
+  z.array(auditScalar).max(50),
+  z.record(z.string().min(1).max(100), auditScalar)
+    .refine((value) => Object.keys(value).length <= 50, 'at most 50 keys'),
+]);
+
+const auditPlanInputShape = {
+  styleId: z.string().min(1).max(100).optional(),
+  surfaces: z.array(z.enum(UX_SURFACES)).min(1).max(12).optional(),
+  designPrincipleIds: z.array(z.string().min(1).max(100)).max(12).optional(),
+  uxPrincipleIds: z.array(z.string().min(1).max(100)).max(12).optional(),
+  stateSurfaceIds: z.array(z.string().min(1).max(100)).max(5).optional(),
+  domainSignals: z.array(z.string().max(200)).max(20).optional(),
+  includeGroups: z.array(z.enum(AUDIT_GROUP_IDS)).min(1).max(AUDIT_GROUP_IDS.length).optional(),
+  includeDocumentation: z.boolean().optional(),
+  locale: LOCALE.optional(),
+};
+
+const auditTargetShape = {
+  id: z.string().trim().min(1).max(160),
+  surface: z.enum(UX_SURFACES),
+  route: z.string().trim().min(1).max(500).optional(),
+  screen: z.string().trim().min(1).max(300).optional(),
+  stateId: z.string().trim().min(1).max(160).optional(),
+  viewport: z.object({
+    width: z.number().int().min(1).max(10000),
+    height: z.number().int().min(1).max(10000),
+    label: z.string().trim().min(1).max(100).optional(),
+  }).optional(),
+  theme: z.enum(AUDIT_TARGET_THEMES).optional(),
+  locale: LOCALE.optional(),
+  userRole: z.string().trim().min(1).max(200).optional(),
+  buildId: z.string().trim().min(1).max(300).optional(),
+};
+
+const auditEvidenceLocationShape = {
+  route: z.string().trim().min(1).max(500).optional(),
+  selector: z.string().trim().min(1).max(1000).optional(),
+  file: z.string().trim().min(1).max(2000).optional(),
+  line: z.number().int().min(1).optional(),
+  region: z.object({
+    x: z.number().finite(),
+    y: z.number().finite(),
+    width: z.number().finite(),
+    height: z.number().finite(),
+    unit: z.enum(['px', 'normalized']),
+  }).optional(),
+};
+
+const auditEvidenceShape = {
+  id: z.string().trim().min(1).max(160),
+  targetId: z.string().trim().min(1).max(160),
+  type: z.enum(AUDIT_EVIDENCE_TYPES),
+  phase: z.enum(AUDIT_EVIDENCE_PHASES).optional(),
+  summary: z.string().trim().min(1).max(2000),
+  outcome: z.enum(AUDIT_EVIDENCE_OUTCOMES).optional(),
+  actual: auditValue.optional(),
+  expected: auditValue.optional(),
+  artifactRef: z.string().trim().min(1).max(2048).optional(),
+  contentHash: z.string().regex(/^sha256:[0-9a-f]{64}$/).optional(),
+  capturedAt: z.string().trim().min(1).max(100).optional(),
+  location: z.object(auditEvidenceLocationShape).optional(),
+  producer: z.object({
+    name: z.string().trim().min(1).max(200),
+    version: z.string().trim().min(1).max(100).optional(),
+    configHash: z.string().regex(/^sha256:[0-9a-f]{64}$/).optional(),
+  }).optional(),
+};
+
+const submittedAuditResultShape = {
+  checkId: z.string().trim().min(1).max(160),
+  targetId: z.string().trim().min(1).max(160),
+  verdict: z.enum(AUDIT_VERDICTS),
+  evidenceRefs: z.array(z.string().trim().min(1).max(160)).max(30).optional(),
+  rationale: z.string().trim().min(1).max(3000),
+  remediation: z.string().trim().min(1).max(3000).optional(),
+  actual: auditValue.optional(),
+  normalizedActual: auditValue.optional(),
+  expected: auditValue.optional(),
 };
 
 // NOTE (audit L4): a tool `outputSchema` was evaluated and deliberately NOT added.
@@ -282,17 +376,7 @@ export function registerTools(server: McpServer, repo: CatalogRepository): void 
   server.registerTool('get_design_audit_plan', {
     title: 'Build an evidence-backed design audit plan',
     description: 'Return a localized, surface-aware audit checklist with stable check ids, severity, applicability, required evidence, remediation, verdict definitions, user-facing content checks, selected principle checks, and UI-state coverage. The host should confirm audit coverage and change depth with the user before choosing includeGroups. This tool does not inspect a project: the host must collect actual rendered/code/interaction evidence, and missing evidence is NOT_VERIFIED rather than PASS.',
-    inputSchema: {
-      styleId: z.string().min(1).max(100).optional(),
-      surfaces: z.array(z.enum(UX_SURFACES)).min(1).max(12).optional(),
-      designPrincipleIds: z.array(z.string().min(1).max(100)).max(12).optional(),
-      uxPrincipleIds: z.array(z.string().min(1).max(100)).max(12).optional(),
-      stateSurfaceIds: z.array(z.string().min(1).max(100)).max(5).optional(),
-      domainSignals: z.array(z.string().max(200)).max(20).optional(),
-      includeGroups: z.array(z.enum(AUDIT_GROUP_IDS)).min(1).max(AUDIT_GROUP_IDS.length).optional(),
-      includeDocumentation: z.boolean().optional(),
-      locale: LOCALE.optional(),
-    },
+    inputSchema: auditPlanInputShape,
     annotations: READ_ONLY,
   }, async (args): Promise<ToolResult> => {
     try {
@@ -302,6 +386,27 @@ export function registerTools(server: McpServer, repo: CatalogRepository): void 
         renderAuditPlan(plan),
         plan.resourceUris,
         auditFallbackLabels[plan.query.locale].resources,
+      );
+    } catch (e) { return errorResult(toToolError(e, repo)); }
+  });
+
+  server.registerTool('validate_design_audit_result', {
+    title: 'Validate a design audit result contract',
+    description: 'Regenerate the requested audit plan, then deterministically validate target coverage, evidence references, required evidence types, verdict applicability, and contradictions. This tool does not inspect artifacts or judge visual quality. It normalizes unsupported PASS/FIX_NOW/RISK claims to NOT_VERIFIED, preserves honest NOT_VERIFIED results, and returns stable plan/evidence/result hashes for comparable rechecks.',
+    inputSchema: {
+      plan: z.object(auditPlanInputShape),
+      expectedPlanHash: z.string().regex(/^sha256:[0-9a-f]{64}$/).optional(),
+      targets: z.array(z.object(auditTargetShape)).min(1).max(20),
+      evidence: z.array(z.object(auditEvidenceShape)).max(500),
+      results: z.array(z.object(submittedAuditResultShape)).max(1200),
+    },
+    annotations: READ_ONLY,
+  }, async (args): Promise<ToolResult> => {
+    try {
+      const result = validateDesignAuditResult(args as ValidateDesignAuditResultInput, repo);
+      return ok(
+        result as unknown as Record<string, unknown>,
+        renderAuditResultValidation(result, args.plan.locale ?? 'en'),
       );
     } catch (e) { return errorResult(toToolError(e, repo)); }
   });
@@ -472,21 +577,26 @@ const auditFallbackLabels: Record<Lang, {
   recommended: string;
   none: string;
   resources: string;
+  planHash: string;
+  catalog: string;
 }> = {
   en: {
     title: 'Design audit plan', checks: 'Checks', surfaces: 'Surfaces', evidence: 'evidence',
     verdicts: 'Verdicts', stateCoverage: 'State coverage', required: 'required',
     recommended: 'recommended', none: 'none', resources: 'Resources',
+    planHash: 'Plan hash', catalog: 'Catalog',
   },
   ko: {
     title: '디자인 감사 계획', checks: '검사', surfaces: '화면', evidence: '증거',
     verdicts: '판정', stateCoverage: '상태 범위', required: '필수',
     recommended: '권장', none: '없음', resources: '리소스',
+    planHash: '계획 해시', catalog: '카탈로그',
   },
   ja: {
     title: 'デザイン監査プラン', checks: '検査', surfaces: '画面', evidence: '証拠',
     verdicts: '判定', stateCoverage: '状態カバレッジ', required: '必須',
     recommended: '推奨', none: 'なし', resources: 'リソース',
+    planHash: 'プランハッシュ', catalog: 'カタログ',
   },
 };
 
@@ -496,6 +606,8 @@ function renderAuditPlan(plan: DesignAuditPlan): string {
     `# ${labels.title}`,
     `${labels.checks}: ${plan.coverage.includedChecks}/${plan.coverage.catalogChecks}`,
     `${labels.surfaces}: ${plan.query.surfaces.join(', ')}`,
+    `${labels.catalog}: ${plan.identity.catalogVersion} (${plan.identity.catalogContentHash})`,
+    `${labels.planHash}: ${plan.identity.planHash}`,
     '',
     plan.evidenceRule,
     `${labels.verdicts}: ${plan.verdicts.map((verdict) => verdict.id).join(' / ')}`,
@@ -513,6 +625,67 @@ function renderAuditPlan(plan: DesignAuditPlan): string {
     }
   }
   lines.push('', ...plan.guidance);
+  return lines.join('\n');
+}
+
+const auditResultLabels: Record<Lang, {
+  title: string;
+  contract: string;
+  valid: string;
+  invalid: string;
+  coverage: string;
+  reported: string;
+  verified: string;
+  missing: string;
+  verdicts: string;
+  issues: string;
+  none: string;
+  planHash: string;
+  evidenceHash: string;
+  resultHash: string;
+}> = {
+  en: {
+    title: 'Design audit result validation', contract: 'Contract', valid: 'valid', invalid: 'invalid',
+    coverage: 'Coverage', reported: 'reported', verified: 'verified', missing: 'missing',
+    verdicts: 'Verdicts', issues: 'Contract issues', none: 'none',
+    planHash: 'Plan hash', evidenceHash: 'Evidence hash', resultHash: 'Result hash',
+  },
+  ko: {
+    title: '디자인 감사 결과 검증', contract: '계약', valid: '유효', invalid: '무효',
+    coverage: '범위', reported: '제출', verified: '검증', missing: '누락',
+    verdicts: '판정', issues: '계약 문제', none: '없음',
+    planHash: '계획 해시', evidenceHash: '증거 해시', resultHash: '결과 해시',
+  },
+  ja: {
+    title: 'デザイン監査結果の検証', contract: '契約', valid: '有効', invalid: '無効',
+    coverage: '範囲', reported: '提出', verified: '検証', missing: '不足',
+    verdicts: '判定', issues: '契約上の問題', none: 'なし',
+    planHash: 'プランハッシュ', evidenceHash: '証拠ハッシュ', resultHash: '結果ハッシュ',
+  },
+};
+
+function renderAuditResultValidation(result: ValidatedDesignAuditResult, locale: Lang): string {
+  const labels = auditResultLabels[locale];
+  const verdicts = Object.entries(result.verdictCounts)
+    .map(([verdict, count]) => `${verdict} ${count}`)
+    .join(' · ');
+  const lines = [
+    `# ${labels.title}`,
+    `${labels.contract}: ${result.valid ? labels.valid : labels.invalid}`,
+    `${labels.coverage}: ${result.coverage.state} — ${labels.reported} ${result.coverage.reportedSlots}/${result.coverage.expectedSlots}; ${labels.verified} ${result.coverage.verifiedSlots}; ${labels.missing} ${result.coverage.missingSlots}`,
+    `${labels.verdicts}: ${verdicts}`,
+    `${labels.planHash}: ${result.identity.planHash}`,
+    `${labels.evidenceHash}: ${result.identity.evidenceBundleHash}`,
+    `${labels.resultHash}: ${result.identity.resultHash}`,
+    '',
+    `${labels.issues}: ${result.issues.length || labels.none}`,
+  ];
+  for (const entry of result.issues.slice(0, 30)) {
+    const scope = [entry.targetId, entry.checkId, entry.evidenceId].filter(Boolean).join(' / ');
+    lines.push(`- [${entry.severity}] ${entry.code}${scope ? ` (${scope})` : ''} — ${entry.message}`);
+  }
+  if (result.issues.length > 30) lines.push(`- … ${result.issues.length - 30} more`);
+  lines.push('', ...result.guidance);
   return lines.join('\n');
 }
 

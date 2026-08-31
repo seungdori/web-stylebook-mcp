@@ -6,6 +6,26 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Deterministic `webstylebook.audit-plan.v1` identities containing the catalog version, catalog
+  content hash, and a stable plan hash.
+- `validate_design_audit_result`, a read-only audit-result contract validator for target coverage,
+  durable evidence references, required evidence types, verdict applicability, and contradictory
+  evidence. It returns normalized verdicts plus content-addressed evidence/result hashes without
+  reading artifacts or judging visual quality.
+- Regression coverage for complete, incomplete, contradictory, stale, and honestly unverified audit
+  result submissions.
+- A reproducible 14-case audit-contract quality benchmark comparing legacy pass-through verdicts
+  with normalized results. The benchmark raises labeled verdict accuracy from 28.57% to 100% and
+  reduces false PASS results from 9 to 0 while explicitly excluding subjective visual-judge claims.
+
+### Changed
+
+- Design workflows now submit one result per planned check/target after inspecting the real UI.
+  Missing result slots are materialized as `NOT_VERIFIED`, and `valid` is explicitly contract
+  validity rather than an overall design-quality score.
+
 ## [0.9.0] — 2026-08-31
 
 ### Added

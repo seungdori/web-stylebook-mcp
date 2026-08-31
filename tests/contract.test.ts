@@ -4,6 +4,7 @@ import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { createWebStylebookServer } from '../src/server.js';
 import { CatalogRepository } from '../src/catalog/repository.js';
 import { recommendDesignDirection } from '../src/recommendation/index.js';
+import { planDesignAudit } from '../src/audit/planner.js';
 
 let client: Client;
 
@@ -22,13 +23,14 @@ describe('MCP contract', () => {
     expect(instructions).toContain('get_design_principle_plan');
     expect(instructions).toContain('get_ux_principle_plan');
     expect(instructions).toContain('get_design_audit_plan');
+    expect(instructions).toContain('validate_design_audit_result');
     expect(instructions).toContain('search_design_references');
     expect(instructions).toContain('get_design_reference');
     expect(instructions).toContain('brand assets');
     expect(instructions).toContain('read-only');
   });
 
-  it('exposes exactly the 9 compute tools, all read-only', async () => {
+  it('exposes exactly the 10 compute tools, all read-only', async () => {
     const { tools } = await client.listTools();
     expect(tools.map((t) => t.name).sort()).toEqual([
       'compare_design_directions', 'compose_design_tokens', 'get_design_audit_plan',
@@ -36,6 +38,7 @@ describe('MCP contract', () => {
       'get_ux_principle_plan',
       'recommend_design_direction',
       'search_design_references',
+      'validate_design_audit_result',
     ]);
     for (const t of tools) expect(t.annotations?.readOnlyHint).toBe(true);
   });
@@ -68,7 +71,7 @@ describe('MCP contract', () => {
     expect(body.domains).toContain('design-principles');
     expect(body.domains).toContain('principles');
     expect(body.domains).toContain('references');
-    expect(body.tools).toHaveLength(9);
+    expect(body.tools).toHaveLength(10);
     expect(body.resourceUriTemplates).toContain('webstylebook://design-principles/{id}');
     expect(body.resourceUriTemplates).toContain('webstylebook://principles/{id}');
     expect(body.resourceUriTemplates).toContain('webstylebook://references/{id}');
@@ -308,6 +311,8 @@ describe('MCP contract', () => {
     expect(r.isError).toBeFalsy();
     const sc = r.structuredContent as any;
     expect(sc.verdicts.map((verdict: any) => verdict.id)).toContain('NOT_VERIFIED');
+    expect(sc.identity.schema).toBe('webstylebook.audit-plan.v1');
+    expect(sc.identity.planHash).toMatch(/^sha256:[0-9a-f]{64}$/);
     expect(sc.evidenceRule).toMatch(/증거/);
     expect(sc.evidenceLegend.screenshot).toMatch(/스크린샷/);
     expect(sc.applicabilityLegend.always).toMatch(/검사/);
@@ -325,9 +330,75 @@ describe('MCP contract', () => {
     expect(fallback).toContain('# 디자인 감사 계획');
     expect(fallback).toContain('판정:');
     expect(fallback).toContain('NOT_VERIFIED');
+    expect(fallback).toContain(`계획 해시: ${sc.identity.planHash}`);
     expect(fallback).toContain('keyboard-focus-is-visible');
     expect((r.content as any[]).some((item) => item.type === 'resource_link'
       && item.uri === 'webstylebook://styles/platform-core')).toBe(true);
+  });
+
+  it('validate_design_audit_result: validates complete evidence and returns stable identities', async () => {
+    const repo = CatalogRepository.load();
+    const planInput = {
+      surfaces: ['global'] as const,
+      includeGroups: ['build'] as const,
+      includeDocumentation: false,
+      locale: 'ko' as const,
+    };
+    const plan = planDesignAudit(planInput, repo);
+    const targetId = 'home-desktop';
+    const evidence: any[] = [];
+    const results: any[] = [];
+    for (const check of plan.checks) {
+      const evidenceRefs = check.evidenceTypes.map((type) => {
+        const id = `${check.id}-${type}`;
+        evidence.push({
+          id,
+          targetId,
+          type,
+          phase: type === 'interaction' ? 'after' : 'static',
+          summary: `${check.id} ${type} evidence`,
+          outcome: 'passed',
+          artifactRef: `artifacts/${id}.json`,
+        });
+        return id;
+      });
+      results.push({
+        checkId: check.id,
+        targetId,
+        verdict: 'PASS',
+        evidenceRefs,
+        rationale: '필요한 증거를 모두 확인했습니다.',
+      });
+    }
+
+    const r = await client.callTool({
+      name: 'validate_design_audit_result',
+      arguments: {
+        plan: planInput,
+        expectedPlanHash: plan.identity.planHash,
+        targets: [{
+          id: targetId,
+          surface: 'global',
+          route: '/',
+          viewport: { width: 1440, height: 900 },
+          theme: 'light',
+        }],
+        evidence,
+        results,
+      },
+    });
+
+    expect(r.isError).toBeFalsy();
+    const sc = r.structuredContent as any;
+    expect(sc.valid).toBe(true);
+    expect(sc.identity.schema).toBe('webstylebook.audit-result.v1');
+    expect(sc.identity.planHash).toBe(plan.identity.planHash);
+    expect(sc.coverage).toMatchObject({ state: 'full', expectedSlots: 5, missingSlots: 0 });
+    expect(sc.verdictCounts.PASS).toBe(5);
+    const fallback = (r.content as any[]).find((item) => item.type === 'text')?.text ?? '';
+    expect(fallback).toContain('# 디자인 감사 결과 검증');
+    expect(fallback).toContain('계약: 유효');
+    expect(fallback).toContain(`결과 해시: ${sc.identity.resultHash}`);
   });
 
   it.each([

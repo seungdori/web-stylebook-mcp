@@ -119,11 +119,14 @@ flowchart LR
     C --> J[get_design_audit_plan]
     C --> K[search_design_references]
     C --> L[get_design_reference]
+    C --> M[validate_design_audit_result]
     D & E & F & G & H & I & J & K & L -->|design contracts<br/>observations · scores · reasons<br/>placement · evidence · tokens| A
+    A -->|target matrix · evidence refs<br/>one verdict per check/target| M
+    M -->|coverage · normalized verdicts<br/>plan/evidence/result hashes| A
     A -->|writes code<br/>from evidence| Z[Your UI]
 ```
 
-The agent describes the product; the server scores its curated catalog and returns structured evidence. No code is generated and nothing leaves your machine.
+The agent describes the product; the server scores its curated catalog and returns structured evidence. After inspection, the validator checks the result contract without opening the referenced artifacts or judging visual quality. No code is generated and nothing leaves your machine.
 
 ## Install
 
@@ -213,6 +216,7 @@ Add the same block to your `claude_desktop_config.json`, then restart:
 | **`get_ui_state_plan`** | Required / recommended / domain UI states for a surface (data-table, form, checkout, chat, developer-console) — triggers, must-show, must-not, a11y, motion | Covers the states agents forget: empty, error, loading, edge |
 | **`compose_design_tokens`** | Role-based tokens (color, type, spacing, radius, motion, density) as `json` / `css-variables` / `tailwind` / `typescript`, light / dark / both | Emits WCAG contrast warnings instead of hiding them |
 | **`get_design_audit_plan`** | Localized, surface-aware checks with stable ids, severity, applicability, required evidence, remediation, user-facing content checks, selected principle checks, and UI-state coverage | The tool plans the audit but never pretends it inspected your project; missing evidence is `NOT_VERIFIED`, not `PASS` |
+| **`validate_design_audit_result`** | Contract validation for the plan query, target matrix, durable evidence references, and one verdict per check/target, with normalized verdicts and stable hashes | It verifies coverage and evidence consistency, not visual quality; `valid: true` is never an overall design pass |
 
 **Catalog:** 520 real-world design references · 48 styles · 25 interface design principles · 23 UX principles · 51 structured audit checks · 20 components · 5 surfaces · 57 UI-state recipes · 29 motion profiles · 14 product archetypes.
 
@@ -259,6 +263,36 @@ recommendations match their support and expressed certainty, whether prominent c
 context-specific information, and whether its visual emphasis matches information value, task
 relevance, and support. Cards, statistics, and Sitemap links are still judged by their actual
 user-task value rather than banned as types.
+
+## Audit result contract
+
+`get_design_audit_plan` now returns an `identity` with the catalog version/hash and a deterministic
+`planHash`. After inspecting the actual implementation, submit the same plan query plus:
+
+- one target per inspected route or screen, state, viewport, theme, locale, and role;
+- evidence with a durable artifact reference, content hash, or exact route/selector/file/region;
+- a before/input/after/recovery phase for interaction evidence; and
+- one result for every planned check/target pair.
+
+`validate_design_audit_result` regenerates the plan and rejects stale plan hashes, missing or duplicate
+result slots, broken evidence references, cross-target evidence, invalid regions, unsupported
+`NOT_APPLICABLE`, and `PASS` that lacks required evidence or contradicts failed evidence. Missing result
+slots are materialized as `NOT_VERIFIED`, never hidden. The result carries content-addressed plan,
+evidence-bundle, and normalized-result hashes for comparable rechecks. The tool never opens the
+artifact references and never turns contract validity into a design-quality score.
+
+The repository includes a reproducible contract-quality benchmark:
+
+```bash
+npm run eval:audit-contract
+```
+
+Across 14 human-labeled normal and adversarial cases, legacy pass-through verdicts score 4/14
+(28.57%) with 9 false `PASS` results. The validator scores 14/14 with 0 false `PASS` results and
+classifies every contract-valid/invalid case correctly. The corpus covers missing, narrative-only,
+unknown, cross-target, indeterminate, phase-less, blocker/major/minor failure, honest
+`NOT_VERIFIED`, and valid/invalid `NOT_APPLICABLE` cases. This demonstrates result-contract
+correctness; it does not claim that subjective visual judgment itself is 100% accurate.
 
 ## CLI
 

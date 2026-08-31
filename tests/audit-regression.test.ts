@@ -318,6 +318,26 @@ describe('the closing gate checks that principles were applied, not just selecte
       expect(content, rel).toContain('search_design_references');
       expect(content, rel).toContain('get_design_reference');
       expect(content, rel).toMatch(/rights/i);
+      expect(content, rel).toContain('validate_design_audit_result');
+      expect(content, rel).toMatch(/planHash/);
+      expect(content, rel).toMatch(/valid.*contract|contract validity/i);
+    }
+  });
+});
+
+describe('audit result contracts cannot be mistaken for visual scoring', () => {
+  it('server instructions require deterministic result validation after evidence collection', () => {
+    expect(SERVER_INSTRUCTIONS).toContain('validate_design_audit_result');
+    expect(SERVER_INSTRUCTIONS).toMatch(/valid field describes contract validity, not visual quality/i);
+  });
+
+  it('README files document normalized verdicts, durable evidence, and the non-scoring boundary', () => {
+    for (const rel of ['README.md', 'README.ko.md']) {
+      const content = read(rel);
+      expect(content, rel).toContain('validate_design_audit_result');
+      expect(content, rel).toContain('planHash');
+      expect(content, rel).toMatch(/artifact reference|artifact를/iu);
+      expect(content, rel).toMatch(/overall design pass|전체 디자인 통과/iu);
     }
   });
 });

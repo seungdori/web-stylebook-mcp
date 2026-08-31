@@ -115,4 +115,24 @@ describe('design audit planner', () => {
       }
     }
   });
+
+  it('canonicalizes set-like selectors so equivalent plans share one identity', () => {
+    const first = planDesignAudit({
+      surfaces: ['settings', 'form'],
+      includeGroups: ['behavior', 'layout'],
+      designPrincipleIds: ['navigation-preserves-context', 'explicit-labels-and-semantics'],
+      uxPrincipleIds: ['mental-model', 'cognitive-load'],
+      stateSurfaceIds: ['form', 'data-table'],
+    }, repo);
+    const second = planDesignAudit({
+      surfaces: ['form', 'settings', 'form'],
+      includeGroups: ['layout', 'behavior', 'layout'],
+      designPrincipleIds: ['explicit-labels-and-semantics', 'navigation-preserves-context'],
+      uxPrincipleIds: ['cognitive-load', 'mental-model'],
+      stateSurfaceIds: ['data-table', 'form'],
+    }, repo);
+
+    expect(first.identity.planHash).toBe(second.identity.planHash);
+    expect(first.query).toEqual(second.query);
+  });
 });

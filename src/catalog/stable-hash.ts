@@ -30,7 +30,12 @@ function stableStringify(value: unknown): string {
   return JSON.stringify(stableNormalize(value), null, 2) + '\n';
 }
 
+/** Stable hash for any JSON-compatible contract or payload. */
+export function stableHashOf(value: unknown): string {
+  return `sha256:${createHash('sha256').update(stableStringify(value), 'utf8').digest('hex')}`;
+}
+
 /** Content hash over the envelope WITHOUT its own contentHash field. */
 export function contentHashOf(envelopeWithoutHash: unknown): string {
-  return `sha256:${createHash('sha256').update(stableStringify(envelopeWithoutHash), 'utf8').digest('hex')}`;
+  return stableHashOf(envelopeWithoutHash);
 }

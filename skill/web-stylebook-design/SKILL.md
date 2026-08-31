@@ -128,6 +128,13 @@ Map the answer to `get_design_audit_plan.includeGroups`:
    The absence of internal jargon is not a pass: ask what each material statement actually says,
    what supports it, whether it is specific to this context, and whether its certainty and prominence
    match that support and its usefulness.
+12. **Validate the audit result contract** — call `validate_design_audit_result` with the exact plan
+   query, `expectedPlanHash` from `get_design_audit_plan.identity.planHash`, and an explicit target for
+   every inspected route/screen/state/viewport/theme/locale. Evidence needs a durable artifact
+   reference, content hash, or exact route/selector/file/region; interaction evidence also identifies
+   its before/input/after/recovery phase. Submit one result for every planned check/target. Resolve
+   contract errors or preserve the validator's normalized `NOT_VERIFIED`; `valid: true` means the
+   result contract is complete and internally consistent, not that the design passed.
    *This inline pass is your job on every build.* The server also ships three deeper audits as MCP
    **prompts** — `audit-design-direction`, `audit-design-principles`, `audit-ux-principles`. Those
    are slash commands the **user** invokes, not tools you can call, so don't wait on them: do the

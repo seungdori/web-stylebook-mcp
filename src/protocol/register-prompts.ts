@@ -109,6 +109,7 @@ export function registerPrompts(server: McpServer): void {
     '8. compose_design_tokens for a starting token set; heed contrast warnings',
     '9. write design.md with every one of these sections filled — leave none empty: intent; audience and tasks; chosen direction and why; selected real-world references and transferable principles; rejected directions; tone; color ROLES (not a raw palette); type roles; spacing and density; layout rules; surface hierarchy; component behavior; motion (use AND avoid); selected visual-design principles, each with the placement decision it produced and its observable verification check; selected UX principles, each with its caution and evidence confidence label; UI-state coverage; responsive; accessibility; anti-patterns avoided; assumptions; verification checklist',
     '10. implement, then call get_design_audit_plan with styleId, surfaces: [each actual surface], designPrincipleIds, uxPrincipleIds, matching stateSurfaceIds, and locale. Inspect the actual UI/source/interactions for every returned check; record PASS / FIX_NOW / RISK / NOT_APPLICABLE / NOT_VERIFIED with evidence. Missing evidence is NOT_VERIFIED, never PASS',
+    '11. call validate_design_audit_result with the same plan query, expectedPlanHash from the audit plan, a target for each inspected route/screen/state/viewport/theme/locale, durable evidence references, and one result per check/target. Resolve contract errors or preserve NOT_VERIFIED; valid means the result contract is complete, not that the design passed',
     '',
     `Product: ${product}`,
     `Audience: ${audience ?? 'infer conservatively and record the assumption'}`,
@@ -178,6 +179,7 @@ export function registerPrompts(server: McpServer): void {
     'Compare visual prominence with information value, task relevance, and support. Vague, generic, redundant, or weakly supported content must not become an oversized headline, isolated card, badge, or statistic. Replace it with content that earns the attention, or demote it and reduce its scale. Do not use a keyword blacklist; judge the statement in context.',
     'No content type is banned by default. Keep cards, statistics, navigation links, and disclosures when they support the primary task; remove, merge, or demote them only when the observed product context shows they do not earn attention.',
     'Return one row per stable check id: verdict, observed evidence with exact location, and remediation. Use PASS / FIX_NOW / RISK / NOT_APPLICABLE / NOT_VERIFIED, then total each verdict. Every FIX_NOW needs the smallest concrete fix.',
+    'Create an explicit target matrix for the inspected route/screen/state/viewport/theme/locale. Give every evidence item an artifact reference, content hash, or exact route/selector/file/region, and give interaction evidence a before/input/after/recovery phase. Call validate_design_audit_result with expectedPlanHash from the plan and use its normalized verdicts. Fix contract errors or report honest NOT_VERIFIED results; do not describe valid=true as a design-quality pass.',
     'For a deeper principle pass, run the audit-design-principles and audit-ux-principles prompts.',
   ].join('\n')));
 
@@ -203,6 +205,7 @@ export function registerPrompts(server: McpServer): void {
     'Then call get_design_audit_plan with includeGroups: ["principles"], the selected designPrincipleIds, surfaces: [surface], and locale to obtain the evidence/verdict contract.',
     'Inspect the actual implementation. For each selected principle, check its design question, placement, apply steps, verification checks, caution, and related UX principles.',
     'Return PASS / FIX_NOW / RISK / NOT_APPLICABLE / NOT_VERIFIED with observed evidence and exact location. Flag semantic-order damage, inaccessible hierarchy, brittle responsive placement, decorative excess, or guidance used as a rigid recipe.',
+    'Submit the principles-group check results, target matrix, and durable evidence references to validate_design_audit_result using the same plan query and expectedPlanHash. Preserve normalized NOT_VERIFIED results.',
   ].join('\n')));
 
   server.registerPrompt('audit-ux-principles', {
@@ -227,5 +230,6 @@ export function registerPrompts(server: McpServer): void {
     'Then call get_design_audit_plan with includeGroups: ["principles"], the selected uxPrincipleIds, surfaces: [surface], and locale to obtain the evidence/verdict contract.',
     'Inspect the actual implementation. For each selected principle, check the returned question, apply steps, verification checks, caution, and evidence confidence.',
     'Return PASS / FIX_NOW / RISK / NOT_APPLICABLE / NOT_VERIFIED with observed evidence and exact location. Flag dark patterns, inaccessible simplification, misleading feedback, or claims beyond contextual/contested evidence.',
+    'Submit the principles-group check results, target matrix, and durable evidence references to validate_design_audit_result using the same plan query and expectedPlanHash. Preserve normalized NOT_VERIFIED results.',
   ].join('\n')));
 }

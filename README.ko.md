@@ -121,11 +121,14 @@ flowchart LR
     C --> J[get_design_audit_plan]
     C --> K[search_design_references]
     C --> L[get_design_reference]
+    C --> M[validate_design_audit_result]
     D & E & F & G & H & I & J & K & L -->|디자인 계약<br/>관찰 · 점수 · 사유<br/>배치 · 증거 · 토큰| A
+    A -->|대상 행렬 · 증거 참조<br/>검사/대상별 판정| M
+    M -->|범위 · 정규화 판정<br/>plan/evidence/result hash| A
     A -->|근거로<br/>코드 작성| Z[당신의 UI]
 ```
 
-에이전트가 제품을 설명하면, 서버가 큐레이션 카탈로그를 점수화해 구조화된 근거를 돌려줍니다. 코드는 생성하지 않고, 어떤 것도 기기를 벗어나지 않습니다.
+에이전트가 제품을 설명하면, 서버가 큐레이션 카탈로그를 점수화해 구조화된 근거를 돌려줍니다. 검사 후 validator는 참조된 artifact를 직접 열거나 시각 품질을 판단하지 않고 결과 계약만 검증합니다. 코드는 생성하지 않고, 어떤 것도 기기를 벗어나지 않습니다.
 
 ## 설치
 
@@ -215,6 +218,7 @@ MCP 설정에 추가:
 | **`get_ui_state_plan`** | 표면(데이터 테이블·폼·체크아웃·채팅·개발자 콘솔)의 필수/권장/도메인 UI 상태 — 트리거·표시 필수·금지·접근성·모션 | 에이전트가 잊는 상태까지: 빈·에러·로딩·엣지 |
 | **`compose_design_tokens`** | 역할 기반 토큰(색·타이포·간격·radius·모션·밀도)을 `json` / `css-variables` / `tailwind` / `typescript`, light / dark / both | WCAG 대비 경고를 숨기지 않고 내보냅니다 |
 | **`get_design_audit_plan`** | 안정적인 검사 ID·심각도·적용 조건·필요 증거·수정 방향·사용자용 콘텐츠 검사·선택 원칙 검사·UI 상태 범위를 담은 다국어 감사 계획 | 프로젝트를 실제로 봤다고 가장하지 않으며, 증거가 없으면 `PASS`가 아니라 `NOT_VERIFIED`입니다 |
+| **`validate_design_audit_result`** | plan query·대상 행렬·지속 가능한 증거 참조·검사/대상별 판정을 검증하고 정규화 판정과 안정 hash를 반환 | 범위와 증거 정합성을 검증할 뿐 시각 품질을 판정하지 않으며, `valid: true`는 전체 디자인 통과가 아닙니다 |
 
 **카탈로그:** 실제 디자인 레퍼런스 520 · 스타일 48 · 인터페이스 디자인 원칙 25 · UX 원칙 23 · 구조화 감사 검사 51 · 컴포넌트 20 · 표면 5 · UI 상태 레시피 57 · 모션 프로파일 29 · 제품 아키타입 14.
 
@@ -259,6 +263,36 @@ webstylebook://policies/anti-patterns · /policies/verification · /policies/aud
 근거에 맞는지, 눈에 띄는 문구가 구체적이고 해당 맥락에 필요한 정보를 전달하는지,
 시각적 강조가 정보 가치·과업 관련성·근거 수준에 맞는지도 검사합니다. 카드·통계·Sitemap
 링크는 유형 자체를 금지하지 않고 실제 사용자 과업에 도움이 되는지로 판단합니다.
+
+## 감사 결과 계약
+
+`get_design_audit_plan`은 이제 catalog version/hash와 결정론적 `planHash`를 담은 `identity`를
+반환합니다. 실제 구현을 검사한 뒤 같은 plan query와 함께 다음을 제출합니다.
+
+- 검사한 route 또는 screen·state·viewport·theme·locale·role별 target;
+- 지속 가능한 artifact reference, content hash 또는 정확한 route/selector/file/region이 있는 evidence;
+- interaction evidence의 before/input/after/recovery phase;
+- 모든 계획된 check/target 쌍에 대한 결과 1건.
+
+`validate_design_audit_result`는 plan을 다시 생성해 오래된 plan hash, 누락·중복 결과,
+끊어진 evidence reference, 다른 target의 evidence, 잘못된 region, 부당한
+`NOT_APPLICABLE`, 필수 증거가 없거나 실패 증거와 모순되는 `PASS`를 거부합니다. 누락된
+결과는 숨기지 않고 `NOT_VERIFIED`로 구체화합니다. 재검증 가능한 비교를 위해 plan,
+evidence bundle, 정규화된 result의 content-addressed hash도 반환합니다. 이 툴은 artifact를
+직접 열지 않으며 계약 유효성을 디자인 품질 점수로 바꾸지 않습니다.
+
+저장소에는 재현 가능한 계약 품질 벤치마크가 포함됩니다.
+
+```bash
+npm run eval:audit-contract
+```
+
+사람이 라벨링한 정상·adversarial 사례 14건에서 기존 pass-through 판정은 4/14(28.57%)와
+잘못된 `PASS` 9건을 기록했습니다. 새 validator는 14/14, 잘못된 `PASS` 0건이며 계약의
+유효/무효도 14건 모두 올바르게 분류했습니다. 증거 누락·서술뿐인 증거·알 수 없는 증거·
+다른 target의 증거·판정 불가·interaction phase 누락·blocker/major/minor 실패·정직한
+`NOT_VERIFIED`·유효/무효 `NOT_APPLICABLE`을 포함합니다. 이는 결과 계약의 정확도 개선을
+증명하며, 주관적 시각 판단 자체가 100% 정확하다고 주장하는 수치는 아닙니다.
 
 ## CLI
 
