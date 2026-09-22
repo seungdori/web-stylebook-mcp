@@ -1,0 +1,16 @@
+{
+  "schema": "webstylebook.visual-source.v1",
+  "source": "https://github.com/seungdori/web-stylebook",
+  "license": "MIT",
+  "policy": "Generated source copy. Edit the website source, regenerate its artifact, then run visual:sync. No site UI, font files, images, or third-party reference content is included.",
+  "files": {
+    "src/visual/types.ts": "sha256:8fd72da17114b73a869aa47190688d8cdd24b997a940cf5f7c121eac8a10f3f4",
+    "src/visual/hash.ts": "sha256:0e3ee195f910e8fc52b3b652d5f763e5eebf3d52e4d9ff7ab64b7c5902beffa0",
+    "src/visual/schema.ts": "sha256:54e1a94165b8f84e5a528c6f6c111bdd56cf460ca276b192072dd95432050141",
+    "src/visual/resolve.ts": "sha256:d0d0feed7ac6d871e7c074a96c4c72c953bcd25fbc7f50e8658a3a16f0bf2657",
+    "src/visual/contrast.ts": "sha256:0666bdab14f57667e5ce26806ef7fb66f25ab2a98e2fc2aee4c1ec63cad60260",
+    "src/visual/export.ts": "sha256:5c8edf771e65b698b76f62c5b7e724f7861b79310098c60c1d95498b89c6ccd0",
+    "src/visual/LICENSE": "sha256:ea2dd4bc356f09d85e1553f6bbf1140acf61db824e256c35f01ee2db6a3858ab"
+  },
+  "artifactHash": "sha256:0561f38c6c8abbf3de98613fba5e4e0565404b72eb93012f396b282696875f58"
+}

@@ -216,13 +216,38 @@ MCP 설정에 추가:
 | **`get_design_principle_plan`** | 시각적 관심사·화면·설계 단계·원칙 ID로 고른 배치/적용/검증 계획 — 가능한 경우 출처 링크 포함 | 제작 원칙은 경험 법칙이나 고정 레시피가 아니라 검증 가능한 점검 질문입니다 |
 | **`get_ux_principle_plan`** | 결과 목표·화면·설계 단계·원칙 ID로 고른 적용/검증 계획 — 질문·주의점·근거 신뢰도·참고 링크 포함 | 원칙은 보편 법칙이나 사용자 조사의 대체물이 아니라 맥락별 점검 질문입니다 |
 | **`get_ui_state_plan`** | 표면(데이터 테이블·폼·체크아웃·채팅·개발자 콘솔)의 필수/권장/도메인 UI 상태 — 트리거·표시 필수·금지·접근성·모션 | 에이전트가 잊는 상태까지: 빈·에러·로딩·엣지 |
-| **`compose_design_tokens`** | 역할 기반 토큰(색·타이포·간격·radius·모션·밀도)을 `json` / `css-variables` / `tailwind` / `typescript`, light / dark / both | WCAG 대비 경고를 숨기지 않고 내보냅니다 |
+| **`compose_design_tokens`** | 역할 기반 토큰을 `json` / `css-variables` / `tailwind` / `typescript`로 출력하며, 공통 시각 명세를 선택하면 스타일 원본과 편집값을 보존 | 명세에 작성된 색상 모드를 사용하며, 명시적으로 수락한 대비 수정만 적용합니다 |
 | **`get_design_audit_plan`** | 안정적인 검사 ID·심각도·적용 조건·필요 증거·수정 방향·사용자용 콘텐츠 검사·선택 원칙 검사·UI 상태 범위를 담은 다국어 감사 계획 | 프로젝트를 실제로 봤다고 가장하지 않으며, 증거가 없으면 `PASS`가 아니라 `NOT_VERIFIED`입니다 |
 | **`validate_design_audit_result`** | plan query·대상 행렬·지속 가능한 증거 참조·검사/대상별 판정을 검증하고 정규화 판정과 안정 hash를 반환 | 범위와 증거 정합성을 검증할 뿐 시각 품질을 판정하지 않으며, `valid: true`는 전체 디자인 통과가 아닙니다 |
 
 **카탈로그:** 실제 디자인 레퍼런스 520 · 스타일 48 · 인터페이스 디자인 원칙 25 · UX 원칙 23 · 구조화 감사 검사 51 · 컴포넌트 20 · 표면 5 · UI 상태 레시피 57 · 모션 프로파일 29 · 제품 아키타입 14.
 
 레퍼런스 라이브러리는 [OpenDesign](https://opendesign.cc)의 완성도 높은 항목을 선별·수정한 데이터이며, 구조화 스펙은 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)으로 제공됩니다. Web Stylebook은 원본 스크린샷과 브랜드 자산을 포함하지 않습니다. 원 사이트·브랜드·카피·서체·시각 정체성의 권리는 각 권리자에게 있으므로 사용 전 상세 항목의 출처와 권리 고지를 확인하세요.
+
+## 웹사이트의 시각 명세 그대로 전달하기
+
+선택한 스타일이나 웹 편집기에서 수정한 값을 토큰으로 옮길 때 공통 명세를 선택합니다.
+
+```json
+{
+  "primaryStyleId": "brutalist-grid",
+  "format": "css-variables",
+  "contract": { "schema": "webstylebook.visual.v1" },
+  "locale": "ko",
+  "overrides": {
+    "colors": { "text": "#111111" },
+    "typography": { "body": { "lineHeight": 1.75 } }
+  }
+}
+```
+
+`webstylebook://manifest`에서 `visualContract.contractSchema`와 번들 명세의 `visualContract.contentHash`를 읽습니다. `webstylebook://styles/brutalist-grid`에서는 선택한 스타일의 기본 명세와 `visualContract.revision`을 읽습니다. 이 값을 각각 `contract.schema`, `contract.contentHash`, `contract.revision`으로 보내면 원본을 고정할 수 있으며, 일치하지 않으면 `INVALID_INPUT`을 반환합니다. `colorMode`를 생략하면 스타일의 원래 모드를 사용합니다. `light`, `dark`, `both`는 필요한 모드가 원본에 작성되어 있을 때만 가능합니다.
+
+`overrides`는 역할별 색상, 타이포그래피, 간격, 밀도, 폰트 정보를 받습니다. 다른 스타일에서 가져온 요소도 이 명시적 값으로 전달합니다. 기존 `secondaryStyleId`는 강조색만 겹치는 옵션이므로 공통 명세와 함께 사용하면 거절합니다. 알 수 없는 필드, `density` 또는 `accentOverride`와 충돌하는 편집값도 거절합니다. `overrides`나 `acceptedRepairs`를 보낼 때는 `contract`가 필요합니다.
+
+응답에는 선택한 `visualContract`, 원본 식별 정보인 `contract`, 대비 수정안인 `repairProposals`가 들어 있습니다. 수정안의 객체를 그대로 `acceptedRepairs`에 담아 다시 보내야 적용되며, 현재 값과 맞지 않는 이전 수정안은 거절합니다. CSS를 전달할 때도 `visualContract`를 함께 보존하세요. 여기에는 컴포넌트별 색상 조합, 폰트 로딩·라이선스 정보, 사용 규칙, 출처, 적용한 수정이 남습니다. 테마 출력은 `roleStyles`와 전체 명세인 `metadata`도 포함합니다. 실제 폰트 로딩과 화면 표현은 적용하는 앱에서 확인해야 합니다.
+
+수정안을 수락할 때는 `light` 또는 `dark`를 각각 요청합니다. `both`는 모드별 제안만 반환하며, 수락한 수정안을 두 모드에 일괄 적용하지 않습니다.
 
 ## 다국어 출력
 
@@ -248,6 +273,8 @@ webstylebook://products · /products/{id}
 webstylebook://references · /references/{id}
 webstylebook://policies/anti-patterns · /policies/verification · /policies/audit-checks
 ```
+
+스타일 상세에는 `locale`, `mode`, 기대하는 `revision`을 쿼리로 지정할 수 있습니다. 예: `webstylebook://styles/brutalist-grid?locale=ko&mode=light`. 선택한 언어와 모드 1개의 명세를 반환하며, 지원하지 않는 값·중복 인자·알 수 없는 쿼리 이름은 명확한 오류로 반환합니다.
 
 ## 프롬프트
 
@@ -350,6 +377,8 @@ enum, 개수, 런타임 계약을 검증하고, 이 명령은 두 저장소 사�
 - **Node:** 20 이상
 - **전송:** stdio (Model Context Protocol)
 - **클라이언트:** Codex CLI / IDE 확장 · Claude Code · Claude Desktop · Cursor · Windsurf, 그리고 모든 MCP 호환 클라이언트
+
+`contract`를 생략한 호출은 기존 토큰 형식과 계열 기본값을 유지합니다. 기존 경로에서도 명시한 밀도가 계열 기본값보다 우선하며, CSS·테마 출력에 줄간격 토큰이 포함됩니다. 공통 명세는 기존 도구에 추가한 옵션이므로 새 도구가 필요하지 않습니다.
 
 ## 라이선스
 

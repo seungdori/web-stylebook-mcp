@@ -42,6 +42,8 @@ import {
   type ValidatedDesignAuditResult,
 } from '../audit/evaluator.js';
 import { composeDesignTokens, TokenError, type ComposeDesignTokensResult } from '../tokens/compile.js';
+import { zVisualOverrides, zVisualRepair } from '../visual-canonical/schema.js';
+import { serializeVisualJson } from '../visual-canonical/export.js';
 import {
   getDesignReferenceDetail,
   searchDesignReferences,
@@ -439,8 +441,8 @@ export function registerTools(server: McpServer, repo: CatalogRepository): void 
   // ----------------------------------------------------------------- tokens
   server.registerTool('compose_design_tokens', {
     title: 'Compose design tokens',
-    description: 'Compile a starting set of role-based design tokens (color, typography, spacing, radius, motion, density) for a style in json / css-variables / tailwind / typescript, with light/dark/both modes, accent override, and WCAG contrast warnings.',
-    inputSchema: {
+    description: 'Compile role-based design tokens in json / css-variables / tailwind / typescript. Existing calls return a starting token set. For the exact authored style and web-editor values, pass contract.schema from manifest.visualContract.contractSchema; optionally pin the manifest visualContract.contentHash and style visualContract.revision. Contract mode defaults to the authored native color mode, preserves explicit overrides, and rejects unsupported modes or a legacy secondaryStyleId overlay. Apply colors, typography, spacing, and fonts selected from another style as explicit overrides. Repairs are proposed separately; only acceptedRepairs are applied. locale controls content typography adaptation. No browser font availability or rendered appearance is claimed as verified.',
+    inputSchema: z.object({
       primaryStyleId: z.string(),
       secondaryStyleId: z.string().optional(),
       accentOverride: z.string().regex(/^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/, 'must be a 3/6/8-digit hex color').optional(),
@@ -448,7 +450,14 @@ export function registerTools(server: McpServer, repo: CatalogRepository): void 
       density: z.enum(['comfortable', 'compact']).optional(),
       colorMode: z.enum(['light', 'dark', 'both']).optional(),
       locale: LOCALE.optional(),
-    },
+      contract: z.object({
+        schema: z.string().min(1).max(100),
+        contentHash: z.string().min(1).max(100).optional(),
+        revision: z.string().min(1).max(100).optional(),
+      }).strict().optional(),
+      overrides: zVisualOverrides.optional(),
+      acceptedRepairs: z.array(zVisualRepair).max(40).optional(),
+    }).strict(),
     annotations: READ_ONLY,
   }, async (args): Promise<ToolResult> => {
     try {
@@ -860,5 +869,16 @@ function renderTokens(r: ComposeDesignTokensResult): string {
   if (r.warnings.length) lines.push('', '⚠ Contrast warnings:', ...r.warnings.map((w) => `- ${w}`));
   if (r.notes.length) lines.push('', 'Notes:', ...r.notes.map((n) => `- ${n}`));
   lines.push('', '```', r.rendered, '```');
+  if (r.contract) {
+    // Text-only clients need the current companion; a style resource links to
+    // native values and cannot recover this request's edits or accepted repairs.
+    const companion = {
+      contract: r.contract,
+      ...(r.format === 'css-variables' ? { visualContract: r.visualContract } : {}),
+      repairProposals: r.repairProposals,
+    };
+    lines.push('', `Visual contract ${r.format === 'css-variables' ? 'companion' : 'metadata'} (JSON)`,
+      '```json', serializeVisualJson(companion, 0), '```');
+  }
   return lines.join('\n');
 }

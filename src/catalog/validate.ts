@@ -97,6 +97,16 @@ export interface ValidateReport { ok: boolean; errors: string[]; summary: Record
 export function validateLoaded(repo: CatalogRepository): ValidateReport {
   const errors: string[] = [];
   const data = repo.data;
+  let visualContracts = 0;
+  try {
+    visualContracts = repo.visualContractMetadata.styleCount;
+    const catalogIds = new Set(data.styles.map((style) => style.id));
+    const visualIds = Object.keys(repo.visualContracts.library.contracts);
+    for (const id of catalogIds) if (!visualIds.includes(id)) errors.push(`missing pinned visual contract ${id}`);
+    for (const id of visualIds) if (!catalogIds.has(id)) errors.push(`visual contract references unknown style ${id}`);
+  } catch (error) {
+    errors.push(error instanceof Error ? error.message : String(error));
+  }
 
   if (!/^sha256:[0-9a-f]{64}$/.test(repo.contentHash)) {
     errors.push('contentHash malformed');
@@ -488,6 +498,7 @@ export function validateLoaded(repo: CatalogRepository): ValidateReport {
     errors,
     summary: {
       styles: data.styles.length,
+      visualContracts,
       motion: data.motionPatterns.length,
       components: data.components.length,
       principles: data.uxPrinciples.length,

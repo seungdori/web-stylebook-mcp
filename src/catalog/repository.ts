@@ -12,6 +12,7 @@ import type {
   DesignReference, DesignReferenceLibrary, ReferenceCategory,
 } from '../types.js';
 import { text } from '../localization.js';
+import { VisualContractRepository, type VisualContractSelection } from './visual.js';
 
 export interface StyleSummary {
   id: string; kind: 'style' | 'fusion'; name: string; summary: string;
@@ -56,6 +57,7 @@ function locateCatalog(): string {
 export class CatalogRepository {
   readonly envelope: CatalogEnvelope;
   readonly data: WebStylebookCatalogV1;
+  private visualRepository?: VisualContractRepository;
 
   private readonly styleById = new Map<string, CatalogStyle>();
   private readonly motionById = new Map<string, MotionPattern>();
@@ -122,6 +124,23 @@ export class CatalogRepository {
     }
     const envelope = JSON.parse(raw) as CatalogEnvelope;
     return new CatalogRepository(envelope);
+  }
+
+  get visualContracts(): VisualContractRepository {
+    if (!this.visualRepository) {
+      const visual = VisualContractRepository.load();
+      if (visual.library.catalogVersion !== this.catalogVersion) throw new Error(`Visual artifact version '${visual.library.catalogVersion}' does not match catalog '${this.catalogVersion}'; synchronize the generated artifacts together`);
+      for (const style of this.data.styles) {
+        const authored = visual.authored(style.id);
+        if (style.visualContract && style.visualContract.revision !== authored.revision) throw new Error(`Visual artifact revision for '${style.id}' does not match the catalog; synchronize the generated artifacts together`);
+      }
+      this.visualRepository = visual;
+    }
+    return this.visualRepository;
+  }
+  get visualContractMetadata() { return this.visualContracts.metadata; }
+  getVisualContract(styleId: string, options: VisualContractSelection = {}) {
+    return this.visualContracts.resolve(styleId, options);
   }
 
   get ontology(): Ontology { return this.data.ontology; }

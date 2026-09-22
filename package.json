@@ -1,6 +1,6 @@
 {
   "name": "web-stylebook-mcp",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "Design intelligence for coding agents — choose a direction, apply interface-design and UX principles, cover real UI states, and compose design tokens.",
   "type": "module",
   "license": "MIT",
@@ -35,7 +35,10 @@
     "start": "node dist/cli.js",
     "dev": "tsx src/cli.ts",
     "catalog:check-canonical": "node scripts/check-canonical-catalog.mjs",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "visual:sync": "node scripts/sync-visual-contract.mjs",
+    "visual:check": "node scripts/sync-visual-contract.mjs --check",
+    "visual:benchmark": "node scripts/benchmark-visual.mjs"
   },
   "keywords": ["mcp", "model-context-protocol", "design", "ui", "design-system", "coding-agent"],
   "dependencies": {

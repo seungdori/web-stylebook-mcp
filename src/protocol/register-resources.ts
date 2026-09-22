@@ -3,6 +3,7 @@
 
 import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { CatalogRepository } from '../catalog/repository.js';
+import type { VisualResolutionOptions } from '../visual-canonical/types.js';
 import { REFERENCE_CATEGORIES } from '../types.js';
 import { TOOL_NAMES, SERVER_NAME, SERVER_VERSION } from '../server-info.js';
 import { ERROR_CODES } from './errors.js';
@@ -25,6 +26,7 @@ export function registerResources(server: McpServer, repo: CatalogRepository): v
     catalogVersion: repo.catalogVersion,
     contentHash: repo.contentHash,
     schema: repo.envelope.schema,
+    visualContract: repo.visualContractMetadata,
     languages: repo.envelope.languages,
     counts: {
       styles: repo.allStyles().length,
@@ -95,8 +97,47 @@ export function registerResources(server: McpServer, repo: CatalogRepository): v
   // -------- templates --------
   server.registerResource('style', new ResourceTemplate('webstylebook://styles/{styleId}', {
     list: async () => ({ resources: repo.allStyles().map((s) => ({ uri: `webstylebook://styles/${s.id}`, name: s.id, mimeType: JSON_MIME })) }),
-  }), { title: 'Style detail', description: 'Full detail for one style', mimeType: JSON_MIME }, async (u, v) => {
-    const s = repo.getStyle(String(v.styleId)); return s ? json(u.href, s) : notFound(u.href, 'style', String(v.styleId));
+  }), {
+    title: 'Style detail',
+    description: 'Full detail for one style, including its resolved native visual contract and source identity. Optional query parameters: locale=en|ko|ja, mode=light|dark, revision=<expected revision>.',
+    mimeType: JSON_MIME,
+  }, async (u, v) => {
+    // The SDK's simple URI-template variable also captures a query suffix.
+    const styleId = String(v.styleId).split('?')[0] ?? '';
+    const s = repo.getStyle(styleId);
+    if (!s) return notFound(u.href, 'style', styleId);
+    try {
+      const options: VisualResolutionOptions & { revision?: string } = {};
+      for (const key of new Set(u.searchParams.keys())) {
+        if (!['locale', 'mode', 'revision'].includes(key)) {
+          throw new Error(`unsupported visual contract query parameter '${key}'`);
+        }
+        if (u.searchParams.getAll(key).length !== 1) {
+          throw new Error(`visual contract query parameter '${key}' must appear once`);
+        }
+      }
+      const locale = u.searchParams.get('locale');
+      const mode = u.searchParams.get('mode');
+      const revision = u.searchParams.get('revision');
+      if (locale !== null) {
+        if (locale !== 'en' && locale !== 'ko' && locale !== 'ja') {
+          throw new Error(`unsupported visual contract locale '${locale}'`);
+        }
+        options.contentLocale = locale;
+      }
+      if (mode !== null) {
+        if (mode !== 'light' && mode !== 'dark') {
+          throw new Error(`unsupported visual contract mode '${mode}'`);
+        }
+        options.mode = mode;
+      }
+      if (revision !== null) options.revision = revision;
+      return json(u.href, { ...s, visualContract: repo.getVisualContract(s.id, options) });
+    } catch (error) {
+      return json(u.href, {
+        error: { code: 'INVALID_INPUT', message: error instanceof Error ? error.message : String(error) },
+      });
+    }
   });
 
   server.registerResource('motion-detail', new ResourceTemplate('webstylebook://motion/{motionId}', {

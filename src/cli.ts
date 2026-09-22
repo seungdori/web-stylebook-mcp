@@ -29,6 +29,7 @@ async function main(): Promise<void> {
     const r = CatalogRepository.load();
     process.stdout.write(`${JSON.stringify({
       server: SERVER_VERSION, catalogVersion: r.catalogVersion, contentHash: r.contentHash,
+      visualContract: r.visualContractMetadata,
       tools: TOOL_NAMES, counts: validateLoaded(r).summary,
     }, null, 2)}\n`);
     return;

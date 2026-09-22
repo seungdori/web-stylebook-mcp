@@ -4,6 +4,8 @@
 
 import type { DesignTokens, DesignTokenColor, Lang } from '../types.js';
 import type { CatalogRepository } from '../catalog/repository.js';
+import { composeContractTokens } from './visual.js';
+import type { ResolvedVisualContract, VisualOverrides, VisualRepair } from '../visual-canonical/types.js';
 import { parseHex, luminanceOf, contrastRatio, checkContrast, type Rgb } from './contrast.js';
 
 export interface ComposeDesignTokensInput {
@@ -14,6 +16,10 @@ export interface ComposeDesignTokensInput {
   density?: 'comfortable' | 'compact';
   colorMode?: 'light' | 'dark' | 'both';
   locale?: Lang;
+  /** Opt in to the pinned website specification; omitted keeps the legacy defaults. */
+  contract?: { schema: string; contentHash?: string; revision?: string };
+  overrides?: VisualOverrides;
+  acceptedRepairs?: VisualRepair[];
 }
 
 export interface ComposeDesignTokensResult {
@@ -25,6 +31,9 @@ export interface ComposeDesignTokensResult {
   rendered: string;
   warnings: string[];
   notes: string[];
+  contract?: { schema: string; contractSchema: string; catalogVersion: string; contentHash: string; styleCount: number; provenance: { source: string; license: 'MIT' } };
+  visualContract?: ResolvedVisualContract | { light: ResolvedVisualContract; dark: ResolvedVisualContract };
+  repairProposals?: VisualRepair[] | { light: VisualRepair[]; dark: VisualRepair[] };
 }
 
 export class TokenError extends Error {}
@@ -140,7 +149,7 @@ function buildColor(palette: string[], accent: string, mode: 'light' | 'dark', s
 }
 
 function buildTokens(
-  repo: CatalogRepository, primaryId: string, mode: 'light' | 'dark', accent: string, density: 'comfortable' | 'compact',
+  repo: CatalogRepository, primaryId: string, mode: 'light' | 'dark', accent: string, density: 'comfortable' | 'compact' | undefined,
   secondaryAccent?: string,
 ): { tokens: DesignTokens; repairs: string[] } {
   const style = repo.getStyle(primaryId);
@@ -169,7 +178,12 @@ function buildTokens(
       lg: '0 12px 32px rgba(0,0,0,0.16)',
     },
     motion: td?.motion ?? { duration: '200ms', easing: 'cubic-bezier(0.4, 0, 0.2, 1)' },
-    density: td?.density ?? (compact ? { row: '32px', gutter: '12px' } : { row: '40px', gutter: '20px' }),
+    density: {
+      ...(td?.density ?? { row: '40px', gutter: '20px' }),
+      // An explicit user choice takes precedence over the family's row/gutter.
+      // Omission preserves the style family's own density and any extra tokens.
+      ...(density === undefined ? {} : compact ? { row: '32px', gutter: '12px' } : { row: '40px', gutter: '20px' }),
+    },
   };
   return { tokens, repairs };
 }
@@ -197,6 +211,8 @@ function warningsFor(t: DesignTokens, mode: string, accentOverridden: boolean): 
 }
 
 export function composeDesignTokens(input: ComposeDesignTokensInput, repo: CatalogRepository): ComposeDesignTokensResult {
+  if (input.contract !== undefined) return composeContractTokens(input, repo);
+  if (input.overrides !== undefined || input.acceptedRepairs !== undefined) throw new TokenError('overrides and acceptedRepairs require contract.schema = webstylebook.visual.v1');
   const style = repo.getStyle(input.primaryStyleId);
   if (!style) throw new TokenError(`unknown style '${input.primaryStyleId}'`);
   if (input.secondaryStyleId && !repo.getStyle(input.secondaryStyleId)) {
@@ -212,7 +228,7 @@ export function composeDesignTokens(input: ComposeDesignTokensInput, repo: Catal
   } else {
     accent = style.accent;
   }
-  const density = input.density ?? 'comfortable';
+  const density = input.density;
   const colorMode = input.colorMode ?? 'light';
 
   // secondary overlay: the secondary style's accent becomes accentSecondary for secondary surfaces
@@ -286,6 +302,7 @@ function flatten(t: DesignTokens): Record<string, string> {
   out['font-body'] = t.typography.bodyFamily;
   out['font-mono'] = t.typography.monoFamily;
   for (const [k, v] of Object.entries(t.typography.scale)) out[`text-${k}`] = v;
+  for (const [k, v] of Object.entries(t.typography.lineHeight)) out[`line-height-${k}`] = String(v);
   for (const [k, v] of Object.entries(t.spacing)) out[`space-${k}`] = v;
   for (const [k, v] of Object.entries(t.radius)) out[`radius-${k}`] = v;
   for (const [k, v] of Object.entries(t.shadow)) out[`shadow-${k}`] = v;
@@ -324,15 +341,23 @@ function render(format: ComposeDesignTokensInput['format'], tokens: ComposeDesig
     colors: t.color,
     fontFamily: { display: [t.typography.displayFamily], body: [t.typography.bodyFamily], mono: [t.typography.monoFamily] },
     fontSize: t.typography.scale,
+    lineHeight: t.typography.lineHeight,
     spacing: t.spacing,
     borderRadius: t.radius,
     boxShadow: t.shadow,
+    transitionDuration: { DEFAULT: t.motion.duration },
+    transitionTimingFunction: { DEFAULT: t.motion.easing },
+    // Retain all source metadata, including fields without native Tailwind utilities.
+    motion: t.motion,
+    density: t.density,
   });
   if (isBoth) {
     const { light, dark } = tokens as { light: DesignTokens; dark: DesignTokens };
-    // both modes preserved — colors split by theme; shared scales hoisted (round 3 #: tailwind+both dropped dark)
+    // Keep the existing theme export for consumers of colors.light/colors.dark.
+    // Full per-mode projections also preserve any mode-specific non-color values.
     const both = { ...themeOf(light), colors: { light: light.color, dark: dark.color } };
-    return `// Tailwind theme.extend — colors.light / colors.dark for both modes\nexport const theme = ${JSON.stringify(both, null, 2)};\n`;
+    const themes = { light: themeOf(light), dark: themeOf(dark) };
+    return `// Tailwind theme.extend — colors.light / colors.dark for both modes\nexport const theme = ${JSON.stringify(both, null, 2)};\n\n// Complete per-mode themes; motion and density retain source metadata.\nexport const themes = ${JSON.stringify(themes, null, 2)};\n`;
   }
   return `// Tailwind theme.extend (framework-version agnostic)\nexport const theme = ${JSON.stringify(themeOf(tokens as DesignTokens), null, 2)};\n`;
 }

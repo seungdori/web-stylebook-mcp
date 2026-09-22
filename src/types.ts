@@ -1,7 +1,7 @@
-// Catalog types for the MCP runtime. Self-contained copy of the canonical
-// src/catalog/types.ts (ADR-003: the package never imports src/ at runtime).
-// The loaded catalog JSON is validated against catalog-schema.ts at load time,
-// and the contract/golden tests guard against drift from the source-of-truth.
+import type { VisualContract } from './visual-canonical/types.js';
+// Catalog types for the independently packaged MCP runtime. The additive visual
+// specification uses the generated portable website types; no runtime website
+// imports are needed. Catalog and shared-source parity tests guard against drift.
 
 export type Lang = 'en' | 'ko' | 'ja';
 export type LocalizedText = Record<Lang, string>;
@@ -168,6 +168,8 @@ export interface RecommendationFacets {
 export type NotIdealMap = Record<string, ProductType[]>;
 
 export interface CatalogStyle {
+  /** Website-authored specification; runtime selected access resolves its native mode. */
+  visualContract?: VisualContract;
   id: string;
   kind: 'style' | 'fusion';
   name: LocalizedText;
