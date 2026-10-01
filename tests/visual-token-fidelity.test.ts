@@ -77,6 +77,41 @@ describe('pinned visual contract fidelity', () => {
     expect(compact.origins['typography.roles.body.letterSpacingEm']).toBe('override');
   });
 
+  it.each(['en', 'ko', 'ja'] as const)('preserves heavy display and ordinary body faces in every %s export', (locale) => {
+    const fallback = { en: '', ko: ", 'Black Han Sans'", ja: ", 'Dela Gothic One'" }[locale];
+    const family = `'Archivo Black'${fallback}, sans-serif`;
+    for (const format of ['json', 'css-variables', 'tailwind', 'typescript'] as const) {
+      const result = compose({ locale, format });
+      const spec = result.visualContract as ResolvedVisualContract;
+      expect(spec.typography.roles.display).toMatchObject({ fontFamily: family, fontWeight: 400 });
+      expect(spec.typography.roles.heading.fontFamily).toBe(family);
+      expect(spec.typography.roles.body.fontFamily).not.toMatch(/Black Han Sans|Dela Gothic One/);
+      if (locale !== 'en') {
+        const face = locale === 'ko' ? 'Black Han Sans' : 'Dela Gothic One';
+        expect(spec.typography.fonts.find((font) => font.family === face)).toMatchObject({ source: 'external', license: 'OFL-1.1', weights: [400], scripts: ['latin', locale === 'ko' ? 'hangul' : 'japanese'], availability: 'requires-load' });
+        expect(spec.origins['typography.roles.display.fontFamily']).toBe('locale');
+        expect(spec.typography.roles.body.fontFamily).toContain(locale === 'ko' ? 'Noto Sans KR' : 'Noto Sans JP');
+      }
+      if (format === 'json') expect(JSON.parse(result.rendered).typography.roles.display.fontFamily).toBe(family);
+      if (format === 'typescript') expect(exportedJson(result.rendered, 'visualContract').typography.roles.display.fontFamily).toBe(family);
+      if (format === 'tailwind') expect(exportedJson(result.rendered, 'theme').roleStyles.display.fontFamily).toBe(family);
+      if (format === 'css-variables') expect(result.rendered).toContain(`--type-display-font-family: ${family};`);
+    }
+  });
+
+  it('keeps regular and serif locale fallbacks and honors explicit display overrides', () => {
+    for (const locale of ['ko', 'ja'] as const) {
+      const ordinary = single({ primaryStyleId: 'quiet-utility', locale });
+      expect(ordinary.typography.roles.display.fontFamily).not.toMatch(/Black Han Sans|Dela Gothic One/);
+      expect(ordinary.typography.fonts.some((font) => /Black Han Sans|Dela Gothic One/.test(font.family))).toBe(false);
+      const editorial = single({ primaryStyleId: 'editorial-silence', locale });
+      expect(editorial.typography.roles.display.fontFamily).toBe(locale === 'ko' ? "'Noto Serif KR', serif" : "'Noto Serif JP', serif");
+      const overridden = single({ locale, overrides: { typography: { display: { fontFamily: 'system-ui', fontWeight: 700 } } } });
+      expect(overridden.typography.roles.display).toMatchObject({ fontFamily: 'system-ui', fontWeight: 700 });
+      expect(overridden.origins['typography.roles.display.fontFamily']).toBe('override');
+    }
+  });
+
   it('all four formats preserve role fields and expose the complete metadata companion', () => {
     for (const format of ['json', 'css-variables', 'tailwind', 'typescript'] as const) {
       const result = compose({ format, locale: 'ko', overrides: { typography: { body: { fontWeight: 550, lineHeight: 1.87, letterSpacingEm: 0, paragraphSpacingEm: 0 } } } });

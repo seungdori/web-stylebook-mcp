@@ -4,6 +4,7 @@ import { COLOR_ROLES, TYPOGRAPHY_ROLES } from './types.js';
 import { zVisualContract, zVisualResolutionOptions, zResolvedVisualContract } from './schema.js';
 import { visualContentHash } from './hash.js';
 import { proposeContrastRepairs } from './contrast.js';
+import { HEAVY_CJK_FALLBACKS, HEAVY_DISPLAY_FACES } from './fontSources.js';
 
 /** Browser/server shared resolver. Authored data is supplied by the catalog, never inferred from palette order. */
 export function resolveContract(input: VisualContract, options: VisualResolutionOptions = {}): ResolvedVisualContract {
@@ -39,9 +40,13 @@ export function resolveContract(input: VisualContract, options: VisualResolution
     if(contentLocale!=='en'){
       const serif=/(?:^|,)\s*(?:ui-)?serif\s*$/.test(role.fontFamily);
       const script=contentLocale==='ko'?'hangul':'japanese';
-      const fallback=contentLocale==='ko'?(serif?'Noto Serif KR':'Noto Sans KR'):(serif?'Noto Serif JP':'Noto Sans JP');
       const parts=role.fontFamily.split(',').map(part=>part.trim());
       const metadataFor=(part:string)=>typography.fonts.find(font=>font.family===part.replace(/^['"]|['"]$/g,''));
+      // A single-weight heavy face carries its weight in the design, not in font-weight.
+      // Pair it with a heavy CJK display face so localized headings keep the same presence.
+      const primary=metadataFor(parts[0]??'');
+      const heavy=primary&&primary.family in HEAVY_DISPLAY_FACES?HEAVY_CJK_FALLBACKS[script]:undefined;
+      const fallback=heavy&&typography.fonts.some(font=>font.family===heavy)?heavy:contentLocale==='ko'?(serif?'Noto Serif KR':'Noto Sans KR'):(serif?'Noto Serif JP':'Noto Sans JP');
       // A Korean font can cover shared Han glyphs before the Japanese fallback.
       // Remove only incompatible CJK faces; preserve the original Latin sequence.
       const localized=parts.filter(part=>{

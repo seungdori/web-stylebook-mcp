@@ -26,6 +26,25 @@ All notable changes to this project are documented here. The format follows
   Missing result slots are materialized as `NOT_VERIFIED`, and `valid` is explicitly contract
   validity rather than an overall design-quality score.
 
+## [0.10.1] — 2026-10-01
+
+### Fixed
+
+- Synchronize the website's Korean/Japanese heavy display font fallback metadata with
+  the portable resolver, preserving Black Han Sans and Dela Gothic One across every
+  token format while keeping ordinary body and English font behavior unchanged.
+- Include `fontSources.ts` in the MIT source allowlist and SHA-256 provenance, and
+  preflight the complete import/license boundary before writing synchronized files.
+- Update the pinned canonical catalog/manifest/visual artifact together and verify
+  website, static handoff and MCP parity for all 48 styles and supported locales/modes.
+
+### Release source
+
+- Website source: `b6771f98480eabbe3dc602ab7c5dfd665d338178`.
+- Package/server and canonical catalog version: `0.10.1`; catalog schema remains v1.
+- No font binaries, browser font loader or website UI are added to the npm package.
+- Live repeated AI-output comparisons remain not run.
+
 ## [0.9.0] — 2026-08-31
 
 ### Added

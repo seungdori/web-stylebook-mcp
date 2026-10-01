@@ -245,6 +245,8 @@ Read `webstylebook://manifest` for `visualContract.contractSchema` and the bundl
 
 The result includes the selected `visualContract`, source identity in `contract`, and `repairProposals`. Repairs stay unapplied until their exact proposal objects are sent back in `acceptedRepairs`; stale proposals are rejected. Apply accepted repairs with a single `light` or `dark` request; `both` requests return separate mode proposals. Keep `visualContract` alongside exported CSS: it carries component color pairs, font loading and license metadata, usage rules, provenance, and accepted repairs. Theme output also includes `roleStyles` and a complete `metadata` companion. Font loading and rendered appearance still require checks in the consuming app.
 
+The shared runtime includes seven portable MIT sources, including `fontSources.ts` metadata for Korean/Japanese heavy display fallbacks. It includes no browser font loader or font binaries. `visual:sync` preflights the source import closure and license declarations before writing, and `visual:check` verifies the source hashes and artifact bytes. When updating the website revision, regenerate and synchronize `catalog.v1.json`, `manifest.v1.json`, and the visual artifact together; update the exact source pin in `.github/workflows/publish.yml` as well.
+
 ## Localized output
 
 Every tool takes an optional `locale`. Reason codes, guidance, and labels come back in the requested language:

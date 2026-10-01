@@ -1,6 +1,6 @@
 {
-  "catalogVersion": "0.10.0",
-  "contentHash": "sha256:c48a939689b40e643c54f320f52bb021c7c8713e8f163a086597d299b2d67a01",
+  "catalogVersion": "0.10.1",
+  "contentHash": "sha256:72bd2fd8e23292df3d1f23b8322fdecfcf0769ef3555abc74b77057858cc1d56",
   "contracts": {
     "aurora-gradient": {
       "borders": {
@@ -1244,7 +1244,7 @@
         "md": 0,
         "sm": 0
       },
-      "revision": "fnv1a:b733ec025ef45f6f",
+      "revision": "fnv1a:229761bcdae6bbf6",
       "schema": "webstylebook.visual.v1",
       "shadows": {
         "lg": "none",
@@ -1368,6 +1368,38 @@
               500,
               600,
               700
+            ]
+          },
+          {
+            "availability": "requires-load",
+            "fallback": "system-ui, sans-serif",
+            "family": "Black Han Sans",
+            "license": "OFL-1.1",
+            "licenseUrl": "https://github.com/google/fonts/blob/main/ofl/blackhansans/OFL.txt",
+            "scripts": [
+              "latin",
+              "hangul"
+            ],
+            "source": "external",
+            "stylesheetUrl": "https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap",
+            "weights": [
+              400
+            ]
+          },
+          {
+            "availability": "requires-load",
+            "fallback": "system-ui, sans-serif",
+            "family": "Dela Gothic One",
+            "license": "OFL-1.1",
+            "licenseUrl": "https://github.com/google/fonts/blob/main/ofl/delagothicone/OFL.txt",
+            "scripts": [
+              "latin",
+              "japanese"
+            ],
+            "source": "external",
+            "stylesheetUrl": "https://fonts.googleapis.com/css2?family=Dela+Gothic+One&display=swap",
+            "weights": [
+              400
             ]
           }
         ],
@@ -8414,7 +8446,7 @@
         "md": 0,
         "sm": 0
       },
-      "revision": "fnv1a:dc0722d938bff9c0",
+      "revision": "fnv1a:8687a3144132031b",
       "schema": "webstylebook.visual.v1",
       "shadows": {
         "lg": "none",
@@ -8560,6 +8592,38 @@
               500,
               600,
               700
+            ]
+          },
+          {
+            "availability": "requires-load",
+            "fallback": "system-ui, sans-serif",
+            "family": "Black Han Sans",
+            "license": "OFL-1.1",
+            "licenseUrl": "https://github.com/google/fonts/blob/main/ofl/blackhansans/OFL.txt",
+            "scripts": [
+              "latin",
+              "hangul"
+            ],
+            "source": "external",
+            "stylesheetUrl": "https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap",
+            "weights": [
+              400
+            ]
+          },
+          {
+            "availability": "requires-load",
+            "fallback": "system-ui, sans-serif",
+            "family": "Dela Gothic One",
+            "license": "OFL-1.1",
+            "licenseUrl": "https://github.com/google/fonts/blob/main/ofl/delagothicone/OFL.txt",
+            "scripts": [
+              "latin",
+              "japanese"
+            ],
+            "source": "external",
+            "stylesheetUrl": "https://fonts.googleapis.com/css2?family=Dela+Gothic+One&display=swap",
+            "weights": [
+              400
             ]
           }
         ],

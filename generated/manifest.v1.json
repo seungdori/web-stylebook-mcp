@@ -1,6 +1,6 @@
 {
-  "catalogVersion": "0.10.0",
-  "contentHash": "sha256:f268ba30fa2a3cdf1d49f0ddf8d9097f5d6e91a8cc63c29a98acf2d7d1499295",
+  "catalogVersion": "0.10.1",
+  "contentHash": "sha256:33f3638c2fec095af63918f11e2c06d37127dd590bc5fdcc09ec6d66d0df4327",
   "counts": {
     "auditChecks": 51,
     "components": 20,
