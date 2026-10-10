@@ -19,6 +19,8 @@ All notable changes to this project are documented here. The format follows
 - A reproducible 14-case audit-contract quality benchmark comparing legacy pass-through verdicts
   with normalized results. The benchmark raises labeled verdict accuracy from 28.57% to 100% and
   reduces false PASS results from 9 to 0 while explicitly excluding subjective visual-judge claims.
+- `docs/issue-1-status.md`, an acceptance audit of canonical visual-contract fidelity.
+  Public compose fields and default token output are unchanged.
 
 ### Changed
 
@@ -44,6 +46,38 @@ All notable changes to this project are documented here. The format follows
 - Package/server and canonical catalog version: `0.10.1`; catalog schema remains v1.
 - No font binaries, browser font loader or website UI are added to the npm package.
 - Live repeated AI-output comparisons remain not run.
+
+## [0.10.0] — 2026-09-22
+
+### Added
+
+- Opt-in canonical visual contracts on `compose_design_tokens` through
+  `contract.schema` `webstylebook.visual.v1`, with optional library `contentHash`
+  and per-style `revision` pins. The approved artifact and portable MIT resolver
+  ship inside the package. A missing pin or schema fails closed, with no runtime
+  request to the website.
+- Contract results add `contract`, `visualContract`, and inert `repairProposals`.
+  JSON, CSS variables, TypeScript, and Tailwind keep role typography, including
+  line-height, and keep explicit `none` and `0` values. Non-scalar component
+  pairs stay in the companion instead of being dropped.
+- `docs/visual-contract-rollout.md` records resolution order, format limits,
+  provenance, and the reviewed startup and size budgets.
+
+### Changed
+
+- An explicit `density` of `compact` or `comfortable` now sets row and gutter
+  even when the style family already has density tokens. Omitting `density`
+  still keeps that family density, including extra keys.
+- Legacy CSS includes `--line-height-*`. The legacy Tailwind theme includes
+  `lineHeight`, and `colorMode: "both"` also emits a complete per-mode `themes`
+  object.
+
+### Unchanged
+
+- A call that omits `contract` keeps the previous light-mode default, family
+  font starting points, generic shadows, and accent-only `secondaryStyleId`
+  overlay. A contract request rejects `secondaryStyleId` rather than treating
+  it as typography or full-style mixing.
 
 ## [0.9.0] — 2026-08-31
 
