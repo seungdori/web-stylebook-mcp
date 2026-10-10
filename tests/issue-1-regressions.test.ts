@@ -18,7 +18,8 @@ function exportedJson(rendered: string, name: string): Record<string, any> {
   const marker = `export const ${name} = `;
   const start = rendered.indexOf(marker);
   expect(start).toBeGreaterThanOrEqual(0);
-  return JSON.parse(rendered.slice(start + marker.length).replace(/ as const;\s*$/, '').replace(/;\s*$/, ''));
+  const statement = rendered.slice(start + marker.length).split(';\n')[0]!;
+  return JSON.parse(statement.replace(/ as const\s*$/, ''));
 }
 
 function withoutSecondaryAccent(tokens: DesignTokens): DesignTokens {
