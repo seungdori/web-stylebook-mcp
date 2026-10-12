@@ -5,7 +5,7 @@
 import type { DesignTokens, DesignTokenColor, Lang } from '../types.js';
 import type { CatalogRepository } from '../catalog/repository.js';
 import { composeContractTokens } from './visual.js';
-import type { ResolvedVisualContract, VisualOverrides, VisualRepair } from '../visual-canonical/types.js';
+import type { ResolvedVisualContract, VisualContract, VisualOverrides, VisualRepair } from '../visual-canonical/types.js';
 import { parseHex, luminanceOf, contrastRatio, checkContrast, type Rgb } from './contrast.js';
 
 export interface ComposeDesignTokensInput {
@@ -16,7 +16,7 @@ export interface ComposeDesignTokensInput {
   density?: 'comfortable' | 'compact';
   colorMode?: 'light' | 'dark' | 'both';
   locale?: Lang;
-  /** Opt in to the pinned website specification; omitted keeps the legacy defaults. */
+  /** Opt in to the full pinned specification. Omission keeps the legacy token shape. */
   contract?: { schema: string; contentHash?: string; revision?: string };
   overrides?: VisualOverrides;
   acceptedRepairs?: VisualRepair[];
@@ -65,6 +65,30 @@ function chromaOf(hex: string): number {
 }
 
 const NEUTRAL_CHROMA = 28; // <= this counts as "neutral enough" to be a page background
+const GENERIC_SOFT_SHADOW = {
+  sm: '0 1px 2px rgba(0,0,0,0.06)',
+  md: '0 4px 12px rgba(0,0,0,0.10)',
+  lg: '0 12px 32px rgba(0,0,0,0.16)',
+};
+
+function legacyUsesAuthoredFonts(style: { id: string; styleFamilyId?: string }, contract: VisualContract): boolean {
+  if (style.styleFamilyId === 'editorial' || /editorial|mono/i.test(style.id)) return true;
+  const led = `${contract.typography.roles.display.fontFamily} ${contract.typography.roles.body.fontFamily}`;
+  return /\b(?:mono(?:space)?|courier)\b/i.test(led);
+}
+
+function authoredShadows(contract: VisualContract, mode: 'light' | 'dark'): Record<string, string> {
+  return { ...(contract.modes[mode]?.shadows ?? contract.shadows) };
+}
+
+function authoredFontFamilies(contract: VisualContract, mode: 'light' | 'dark') {
+  const roles = (contract.modes[mode]?.typography ?? contract.typography).roles;
+  return {
+    displayFamily: roles.display.fontFamily,
+    bodyFamily: roles.body.fontFamily,
+    monoFamily: roles.data.fontFamily,
+  };
+}
 
 // A usable canvas anchor must be low-chroma AND actually light (light mode) or dark
 // (dark mode) — the lightest *available* neutral can still be near-black. If none
@@ -151,20 +175,24 @@ function buildColor(palette: string[], accent: string, mode: 'light' | 'dark', s
 function buildTokens(
   repo: CatalogRepository, primaryId: string, mode: 'light' | 'dark', accent: string, density: 'comfortable' | 'compact' | undefined,
   secondaryAccent?: string,
-): { tokens: DesignTokens; repairs: string[] } {
+): { tokens: DesignTokens; repairs: string[]; authoredFonts: boolean } {
   const style = repo.getStyle(primaryId);
   if (!style) throw new TokenError(`unknown style '${primaryId}'`);
   const family = style.styleFamilyId ? repo.getFamily(style.styleFamilyId) : undefined;
   const td = family?.tokenDefaults;
+  const contract = repo.visualContracts.library.contracts[primaryId];
+  const authoredFonts = contract !== undefined && legacyUsesAuthoredFonts(style, contract);
 
   const compact = density === 'compact';
   const { color, repairs } = buildColor(style.palette, accent, mode, secondaryAccent);
   const tokens: DesignTokens = {
     color,
     typography: {
-      displayFamily: td?.typography.displayFamily ?? 'system-ui, sans-serif',
-      bodyFamily: td?.typography.bodyFamily ?? 'system-ui, sans-serif',
-      monoFamily: td?.typography.monoFamily ?? 'ui-monospace, monospace',
+      ...(authoredFonts && contract ? authoredFontFamilies(contract, mode) : {
+        displayFamily: td?.typography.displayFamily ?? 'system-ui, sans-serif',
+        bodyFamily: td?.typography.bodyFamily ?? 'system-ui, sans-serif',
+        monoFamily: td?.typography.monoFamily ?? 'ui-monospace, monospace',
+      }),
       scale: { xs: '0.75rem', sm: '0.875rem', base: '1rem', lg: '1.125rem', xl: '1.5rem', '2xl': '2rem', '3xl': '3rem' },
       lineHeight: { tight: 1.2, normal: 1.5, relaxed: 1.7 },
     },
@@ -172,11 +200,7 @@ function buildTokens(
       ? { '1': '4px', '2': '8px', '3': '12px', '4': '16px', '6': '20px', '8': '28px' }
       : { '1': '4px', '2': '8px', '3': '12px', '4': '16px', '6': '24px', '8': '32px' },
     radius: td?.radius ?? { sm: '4px', md: '8px', lg: '16px' },
-    shadow: {
-      sm: '0 1px 2px rgba(0,0,0,0.06)',
-      md: '0 4px 12px rgba(0,0,0,0.10)',
-      lg: '0 12px 32px rgba(0,0,0,0.16)',
-    },
+    shadow: contract ? authoredShadows(contract, mode) : { ...GENERIC_SOFT_SHADOW },
     motion: td?.motion ?? { duration: '200ms', easing: 'cubic-bezier(0.4, 0, 0.2, 1)' },
     density: {
       ...(td?.density ?? { row: '40px', gutter: '20px' }),
@@ -185,7 +209,7 @@ function buildTokens(
       ...(density === undefined ? {} : compact ? { row: '32px', gutter: '12px' } : { row: '40px', gutter: '20px' }),
     },
   };
-  return { tokens, repairs };
+  return { tokens, repairs, authoredFonts };
 }
 
 function warningsFor(t: DesignTokens, mode: string, accentOverridden: boolean): { warnings: string[]; notes: string[] } {
@@ -244,10 +268,12 @@ export function composeDesignTokens(input: ComposeDesignTokensInput, repo: Catal
     allNotes.add(`${style.id} is a dark-only style; ${colorMode === 'both' ? 'the light' : 'these light'} tokens are a mechanical inversion and may not match the intended aesthetic — prefer the dark set or reconsider the style for a light surface.`);
   }
 
+  let sampleBuilt: ReturnType<typeof buildTokens>;
   if (colorMode === 'both') {
     const light = buildTokens(repo, input.primaryStyleId, 'light', accent, density, secondaryAccent);
     const dark = buildTokens(repo, input.primaryStyleId, 'dark', accent, density, secondaryAccent);
     tokens = { light: light.tokens, dark: dark.tokens };
+    sampleBuilt = light;
     for (const [m, built] of [['light', light], ['dark', dark]] as const) {
       const w = warningsFor(built.tokens, m, !!input.accentOverride);
       allWarnings.push(...w.warnings); w.notes.forEach((n) => allNotes.add(n));
@@ -256,28 +282,31 @@ export function composeDesignTokens(input: ComposeDesignTokensInput, repo: Catal
   } else {
     const single = buildTokens(repo, input.primaryStyleId, colorMode, accent, density, secondaryAccent);
     tokens = single.tokens;
+    sampleBuilt = single;
     const w = warningsFor(single.tokens, colorMode, !!input.accentOverride);
     allWarnings.push(...w.warnings); w.notes.forEach((n) => allNotes.add(n));
     single.repairs.forEach((r) => allNotes.add(`Auto-repaired: ${r}`));
   }
-
-  // flag when the family-derived font stack contradicts the style's documented typography
-  // intent (round 6): the fonts are family DEFAULTS, not derived from style.typography.
-  const sampleTokens = ('light' in tokens ? tokens.light : tokens) as DesignTokens;
-  const fontStack = `${sampleTokens.typography.displayFamily} ${sampleTokens.typography.bodyFamily}`.toLowerCase();
-  const typoIntent = style.typography.toLowerCase();
-  // 'serif' as a positive type indicator: not 'sans-serif', not negated even with an
-  // intervening adjective ('no classical serif', 'without any serif', 'anti-serif').
-  const wantsSerif = /\bserif\b/.test(typoIntent)
-    && !/sans-?\s?serif/.test(typoIntent)
-    && !/\b(?:no|without|not|anti|never)\b[\w\s-]{0,24}?\bserif\b/.test(typoIntent);
-  // strip the CSS generic 'sans-serif' before checking the stack for a real serif face
-  const fontsNoSans = fontStack.replace(/sans-serif/g, ' ');
-  const hasSerif = /\bserif\b|fraunces|georgia|sectra|tiempos|source serif|playfair|lora/.test(fontsNoSans);
-  if (wantsSerif && !hasSerif) {
-    allNotes.add(`Typography: ${style.id}'s intended type ("${style.typography}") suggests a serif face, but these are sans family-defaults — override display/body font to match the style.`);
+  if (sampleBuilt.authoredFonts) {
+    allNotes.add(`Typography fonts are ${style.id}'s authored faces from the pinned visual contract, not ${style.styleFamilyId ?? 'family'} token defaults.`);
   } else {
-    allNotes.add(`Typography fonts are ${style.styleFamilyId ?? 'default'}-family starting points, not derived from the style's own typography ("${style.typography}") — reconcile if needed.`);
+    // Family fonts still need the mismatch note. Editorial and mono styles no longer reach this branch.
+    const sampleTokens = sampleBuilt.tokens;
+    const fontStack = `${sampleTokens.typography.displayFamily} ${sampleTokens.typography.bodyFamily}`.toLowerCase();
+    const typoIntent = style.typography.toLowerCase();
+    // 'serif' as a positive type indicator: not 'sans-serif', not negated even with an
+    // intervening adjective ('no classical serif', 'without any serif', 'anti-serif').
+    const wantsSerif = /\bserif\b/.test(typoIntent)
+      && !/sans-?\s?serif/.test(typoIntent)
+      && !/\b(?:no|without|not|anti|never)\b[\w\s-]{0,24}?\bserif\b/.test(typoIntent);
+    // strip the CSS generic 'sans-serif' before checking the stack for a real serif face
+    const fontsNoSans = fontStack.replace(/sans-serif/g, ' ');
+    const hasSerif = /\bserif\b|fraunces|georgia|sectra|tiempos|source serif|playfair|lora/.test(fontsNoSans);
+    if (wantsSerif && !hasSerif) {
+      allNotes.add(`Typography: ${style.id}'s intended type ("${style.typography}") suggests a serif face, but these are sans family-defaults — override display/body font to match the style.`);
+    } else {
+      allNotes.add(`Typography fonts are ${style.styleFamilyId ?? 'default'}-family starting points, not derived from the style's own typography ("${style.typography}") — reconcile if needed.`);
+    }
   }
 
   const rendered = render(input.format, tokens, colorMode);
