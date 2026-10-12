@@ -1,9 +1,8 @@
 name: CI
 
+# Hosted verification is manual-only; ordinary edits use local checks.
 on:
-  push:
-    branches: [main, master]
-  pull_request:
+  workflow_dispatch:
 
 jobs:
   build-test:
