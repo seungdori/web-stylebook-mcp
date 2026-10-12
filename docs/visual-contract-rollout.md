@@ -6,7 +6,7 @@ The resolver, validator, contrast assessment and exporters are portable MIT sour
 
 ## Compatibility and projection
 
-Existing `compose_design_tokens` requests retain the light-mode default and legacy secondary-accent overlay. Explicit density now controls row/gutter even when a family defines defaults. CSS includes line-height variables; the legacy Tailwind theme includes line-height/motion/density and a complete `themes` companion for both modes.
+Existing `compose_design_tokens` requests retain the light-mode default and legacy secondary-accent overlay. As of 0.11.0, a call that omits `contract` still returns the legacy token shape, but its shadows come from the pinned visual contract and editorial or monospace-led styles use authored font families. Color, type scale, line-height, spacing, radius, motion, and omitted density stay on the previous path. Explicit density controls row/gutter even when a family defines defaults. CSS includes line-height variables; the legacy Tailwind theme includes line-height/motion/density and a complete `themes` companion for both modes.
 
 Opt in using `contract: { "schema": "webstylebook.visual.v1" }`. Read the manifest to pin the library `contentHash`; read the selected style resource to pin its `revision`. The omitted color mode resolves the authored native mode. Unsupported modes, schemas, revisions, conflicting overrides and unsafe scalar values fail with an actionable error. A contract request cannot silently fall back to family defaults. `secondaryStyleId` remains legacy-only; per-axis selections from the website are explicit color/typography/spacing/font overrides.
 

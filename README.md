@@ -379,7 +379,7 @@ source check.
 - **Transport:** stdio (Model Context Protocol)
 - **Clients:** Codex CLI / IDE extension, Claude Code, Claude Desktop, Cursor, Windsurf, and any MCP-compatible client
 
-Calls without `contract` keep the existing token format and family defaults. Explicit legacy density now takes precedence over a family's defaults, and CSS / theme output retains line-height tokens. The shared contract is additive; no new tool is required.
+Calls without `contract` keep the same token shape and light-mode default. As of 0.11.0, those calls emit the pinned style's authored shadows instead of the generic soft shadow, and editorial or monospace-led styles emit authored font families instead of the style-family fonts. Color, type scale, line-height, spacing, radius, motion, and omitted density stay on the previous legacy path. An explicit `density` still takes precedence over a family's row and gutter, and CSS / theme output retains line-height tokens. Pass `contract` for the full authored specification. The shared contract is additive; no new tool is required.
 
 ## License
 

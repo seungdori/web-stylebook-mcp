@@ -6,8 +6,32 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.11.0] — 2026-10-12
+
+### Breaking
+
+- Calls that omit `contract` now emit authored shadows from the pinned visual contract.
+  `brutalist-grid` and every other bundled style no longer receive the generic soft shadow
+  `0 1px 2px rgba(0,0,0,0.06)` / `0 4px 12px rgba(0,0,0,0.10)` / `0 12px 32px rgba(0,0,0,0.16)`
+  unless that exact value is what the style authored.
+- Editorial styles and monospace-led styles now emit authored display, body, and mono font
+  families instead of the style-family `tokenDefaults` fonts. This includes `editorial-silence`,
+  `mono-type`, `brutalist-grid`, and the other editorial or mono-led styles in the catalog.
+
+### Migration
+
+- The `compose_design_tokens` input and the `DesignTokens` field names are unchanged. `contract`
+  requests, `secondaryStyleId` accent-only overlay, explicit density, and the legacy type scale,
+  line-height, color, spacing, radius, and motion behavior are unchanged.
+- Clients that depended on the generic soft shadow or on family fonts for an editorial or
+  monospace-led style need to pin those previous strings themselves. Pass `contract.schema`
+  `webstylebook.visual.v1` when the full authored specification is required.
+
 ### Added
 
+- Pinned website parity fixtures for `brutalist-grid`, editorial, and mono styles, compared
+  locally with no network access at test time. The fixture source is website commit
+  `b6771f98480eabbe3dc602ab7c5dfd665d338178`.
 - Deterministic `webstylebook.audit-plan.v1` identities containing the catalog version, catalog
   content hash, and a stable plan hash.
 - `validate_design_audit_result`, a read-only audit-result contract validator for target coverage,
@@ -20,10 +44,10 @@ All notable changes to this project are documented here. The format follows
   with normalized results. The benchmark raises labeled verdict accuracy from 28.57% to 100% and
   reduces false PASS results from 9 to 0 while explicitly excluding subjective visual-judge claims.
 - `docs/issue-1-status.md`, an acceptance audit of canonical visual-contract fidelity.
-  Public compose fields and default token output are unchanged.
 
 ### Changed
 
+- Package and catalog version are `0.11.0`. The catalog schema stays v1.
 - Design workflows now submit one result per planned check/target after inspecting the real UI.
   Missing result slots are materialized as `NOT_VERIFIED`, and `valid` is explicitly contract
   validity rather than an overall design-quality score.

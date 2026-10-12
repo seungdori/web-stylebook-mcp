@@ -1,6 +1,6 @@
 {
-  "catalogVersion": "0.10.1",
-  "contentHash": "sha256:72bd2fd8e23292df3d1f23b8322fdecfcf0769ef3555abc74b77057858cc1d56",
+  "catalogVersion": "0.11.0",
+  "contentHash": "sha256:c348c636076ec6d7bfd98c758f9850c9b3473c9a0e70f4a49bd0f5c04659a43d",
   "contracts": {
     "aurora-gradient": {
       "borders": {

@@ -336,13 +336,17 @@ describe('round 6 — compare safety axes + token typography', () => {
   });
 
   it('token output notes a serif/sans typography mismatch only when real (r6)', () => {
-    // risograph-print: serif-described but expressive/sans family -> mismatch note
-    const miss = composeDesignTokens({ primaryStyleId: 'risograph-print', format: 'json' }, repo);
+    // midnight-noir still uses sans family fonts, so the prose serif intent stays a mismatch.
+    const miss = composeDesignTokens({ primaryStyleId: 'midnight-noir', format: 'json' }, repo);
     expect(miss.notes.some((n) => n.includes('suggests a serif'))).toBe(true);
-    // editorial-silence: editorial family already serif -> no mismatch (general note only)
+    // risograph-print is monospace-led, so the default output uses the authored faces.
+    const authored = composeDesignTokens({ primaryStyleId: 'risograph-print', format: 'json' }, repo);
+    expect(authored.rendered).toContain('Space Mono');
+    expect(authored.notes.some((n) => n.includes('suggests a serif'))).toBe(false);
+    expect(authored.notes.some((n) => n.includes('authored faces'))).toBe(true);
+    // fusion-grain-mono: authored mono faces, no family-serif mismatch note
     const ok = composeDesignTokens({ primaryStyleId: 'fusion-grain-mono', format: 'json' }, repo);
     expect(ok.notes.some((n) => n.includes('suggests a serif'))).toBe(false);
-    // every token result carries a typography reconciliation note
     expect(miss.notes.some((n) => n.toLowerCase().includes('typography'))).toBe(true);
   });
 
