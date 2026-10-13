@@ -6,6 +6,14 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.11.1] — 2026-10-13
+
+### Fixed
+
+- `v0.11.0` was tagged, but the publish workflow failed canonical catalog byte parity, so 0.11.0 was never published to npm.
+- Regenerated the canonical snapshot from website commit `b6771f98480eabbe3dc602ab7c5dfd665d338178` and copied `generated/catalog.v1.json` and `generated/manifest.v1.json` together. Catalog version stays `0.10.1`, content hash `sha256:33f3638c2fec095af63918f11e2c06d37127dd590bc5fdcc09ec6d66d0df4327`, with 48 styles and 57 state recipes.
+- Restored `generated/visual-contracts.v1.json` and its provenance hash from that same generation. The portable resolver sources remain byte-identical to the website revision.
+
 ## [0.11.0] — 2026-10-12
 
 ### Breaking
@@ -47,7 +55,7 @@ All notable changes to this project are documented here. The format follows
 
 ### Changed
 
-- Package and catalog version are `0.11.0`. The catalog schema stays v1.
+- The package version was set to `0.11.0` and the bundled catalog version string was rewritten to match. That tag was not published. 0.11.1 restores canonical catalog version `0.10.1`. The catalog schema stays v1.
 - Design workflows now submit one result per planned check/target after inspecting the real UI.
   Missing result slots are materialized as `NOT_VERIFIED`, and `valid` is explicitly contract
   validity rather than an overall design-quality score.

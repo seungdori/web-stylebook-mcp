@@ -5,7 +5,6 @@ import { describe, expect, it } from 'vitest';
 import { CatalogRepository } from '../src/catalog/repository.js';
 import { validateLoaded } from '../src/catalog/validate.js';
 import { contentHashOf } from '../src/catalog/stable-hash.js';
-import { SERVER_VERSION } from '../src/server-info.js';
 import {
   DESIGN_CONCERNS,
   DESIGN_PRINCIPLE_CATEGORIES,
@@ -39,7 +38,11 @@ describe('bundled catalog integrity', () => {
   it('keeps manifest identity, hash, and version aligned with the runtime catalog', () => {
     expect(manifest.schema).toBe(catalog.schema);
     expect(manifest.catalogVersion).toBe(catalog.catalogVersion);
-    expect(manifest.catalogVersion).toBe(SERVER_VERSION);
+    expect(manifest.catalogVersion).toBe(repo.catalogVersion);
+    // Website compiler CATALOG_VERSION. The package version can move without rewriting this snapshot.
+    expect(manifest.catalogVersion).toBe('0.10.1');
+    expect(manifest.counts.stateRecipes).toBe(57);
+    expect(manifest.contentHash).toBe('sha256:33f3638c2fec095af63918f11e2c06d37127dd590bc5fdcc09ec6d66d0df4327');
     expect(manifest.contentHash).toBe(catalog.contentHash);
     expect(manifest.contentHash).toBe(repo.contentHash);
   });
