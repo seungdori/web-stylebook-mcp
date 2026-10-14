@@ -1,4 +1,3 @@
-// Regression tests for the content audit (2026-06). Each test locks a confirmed fix.
 import { describe, it, expect, beforeAll } from 'vitest';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';

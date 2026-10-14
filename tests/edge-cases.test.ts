@@ -142,7 +142,6 @@ describe('hardening sweep regressions', () => {
   it('empty / invalid accentOverride is rejected, never silently corrupt (#1)', () => {
     expect(() => composeDesignTokens({ primaryStyleId: 'brutalist-grid', format: 'css-variables', accentOverride: '' }, repo)).toThrow();
     expect(() => composeDesignTokens({ primaryStyleId: 'brutalist-grid', format: 'json', accentOverride: 'red' }, repo)).toThrow();
-    // a valid override still works and never yields an empty color token
     const t = composeDesignTokens({ primaryStyleId: 'brutalist-grid', format: 'css-variables', accentOverride: '#abc' }, repo);
     expect(t.rendered).not.toContain('--color-accent: ;');
   });

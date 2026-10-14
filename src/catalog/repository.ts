@@ -1,7 +1,3 @@
-// Runtime catalog repository. Loads the committed catalog.v1.json (ADR-003: the
-// only thing the MCP runtime reads), verifies the schema id, and builds id indexes
-// once at startup. Per-request schema validation is NOT repeated (02 §7).
-
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';

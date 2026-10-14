@@ -1,7 +1,3 @@
-// Workflow prompts (01 §9). Prompts do NOT call tools; they hand the host model a
-// recommended order. The companion skill (ADR-011) is the primary trigger; prompts
-// are a secondary affordance for clients that surface them.
-
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { UX_SURFACES } from '../types.js';

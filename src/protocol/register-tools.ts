@@ -1,6 +1,3 @@
-// Read-only deterministic compute tools. Input is validated by zod at the
-// protocol boundary; the pure engines remain SDK-free.
-
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { CatalogRepository } from '../catalog/repository.js';
@@ -226,7 +223,6 @@ function toToolError(e: unknown, repo: CatalogRepository): ToolError {
 }
 
 export function registerTools(server: McpServer, repo: CatalogRepository): void {
-  // ---------------------------------------------------------------- recommend
   server.registerTool('recommend_design_direction', {
     title: 'Recommend a design direction',
     description: 'Given product context, return scored style candidates with reason codes, rejected styles with reasons, secondary pairings, assumptions and confidence. Evidence-provider: the host model makes the final pick. Call before writing UI. The "tone" field (named "tone", not "tones") is an ARRAY of zero or more of: calm, technical, trustworthy, premium, editorial, playful, bold, experimental. Each candidate.score already includes soft penalties (density/motion/tone fit) that are not itemized in scoreBreakdown.',
@@ -246,7 +242,6 @@ export function registerTools(server: McpServer, repo: CatalogRepository): void 
     } catch (e) { return errorResult(toToolError(e, repo)); }
   });
 
-  // ---------------------------------------------------------------- compare
   server.registerTool('compare_design_directions', {
     title: 'Compare design directions',
     description: 'Compare 2-4 directions across product fit, repeated-use suitability, density, trust, distinctiveness, accessibility risk, motion and maintenance. Returns each direction\'s favorable conditions and likely failure mode — never a single winner.',
@@ -264,7 +259,6 @@ export function registerTools(server: McpServer, repo: CatalogRepository): void 
     } catch (e) { return errorResult(toToolError(e, repo)); }
   });
 
-  // ---------------------------------------------------- real-world references
   server.registerTool('search_design_references', {
     title: 'Search real-world design references',
     description: 'Search the bundled, attributed real-world design reference library. Query text is matched deterministically against titles, ids, categories, tags, and localized analysis. category is an exact filter; every supplied tag must match case-insensitively. Returns concise localized observations and resource links, never screenshots or brand assets.',
@@ -318,7 +312,6 @@ export function registerTools(server: McpServer, repo: CatalogRepository): void 
     } catch (e) { return errorResult(toToolError(e, repo)); }
   });
 
-  // ------------------------------------------------------ design principles
   server.registerTool('get_design_principle_plan', {
     title: 'Plan relevant design principles',
     description: 'Select a small set of practical visual-design principles for intent and iteration, semantic hierarchy, adaptive layout and density, typography and localization, tokens and themes, accessible interaction, and complete states and recovery. Filter by design concerns, surface, phase, or explicit ids. Returns placement guidance, application steps, verification checks, cautions, related principles, and deterministic relevance scores.',
@@ -346,7 +339,6 @@ export function registerTools(server: McpServer, repo: CatalogRepository): void 
     } catch (e) { return errorResult(toToolError(e, repo)); }
   });
 
-  // --------------------------------------------------------- UX principles
   server.registerTool('get_ux_principle_plan', {
     title: 'Plan relevant UX principles',
     description: 'Select a small, evidence-labeled set of UX principles for a target outcome, surface, design phase, or explicit principle ids. Returns design questions, application steps, verification checks, cautions, references, and relevance scores. Treat the result as decision prompts rather than universal laws.',
@@ -374,7 +366,6 @@ export function registerTools(server: McpServer, repo: CatalogRepository): void 
     } catch (e) { return errorResult(toToolError(e, repo)); }
   });
 
-  // ----------------------------------------------------------- design audit plan
   server.registerTool('get_design_audit_plan', {
     title: 'Build an evidence-backed design audit plan',
     description: 'Return a localized, surface-aware audit checklist with stable check ids, severity, applicability, required evidence, remediation, verdict definitions, user-facing content checks, selected principle checks, and UI-state coverage. The host should confirm audit coverage and change depth with the user before choosing includeGroups. This tool does not inspect a project: the host must collect actual rendered/code/interaction evidence, and missing evidence is NOT_VERIFIED rather than PASS.',
@@ -413,7 +404,6 @@ export function registerTools(server: McpServer, repo: CatalogRepository): void 
     } catch (e) { return errorResult(toToolError(e, repo)); }
   });
 
-  // ------------------------------------------------------------ ui state plan
   server.registerTool('get_ui_state_plan', {
     title: 'Plan UI states for a surface',
     description: 'For a surface (data-table, form, checkout, chat, developer-console), return required / recommended / domain-specific states with triggers, must-show, must-not, accessibility and motion guidance, plus an implementation order. Covers the non-happy-path.',
@@ -438,7 +428,6 @@ export function registerTools(server: McpServer, repo: CatalogRepository): void 
     } catch (e) { return errorResult(toToolError(e, repo)); }
   });
 
-  // ----------------------------------------------------------------- tokens
   server.registerTool('compose_design_tokens', {
     title: 'Compose design tokens',
     description: 'Compile role-based design tokens in json / css-variables / tailwind / typescript. Calls without contract keep that token shape. Their shadows follow the pinned visual contract, and editorial or monospace-led styles use authored font families; other fields remain family-derived starting points. For the full authored style and web-editor values, pass contract.schema from manifest.visualContract.contractSchema; optionally pin the manifest visualContract.contentHash and style visualContract.revision. Contract mode defaults to the authored native color mode, preserves explicit overrides, and rejects unsupported modes or a legacy secondaryStyleId overlay. Apply colors, typography, spacing, and fonts selected from another style as explicit overrides. Repairs are proposed separately; only acceptedRepairs are applied. locale controls content typography adaptation. No browser font availability or rendered appearance is claimed as verified.',
@@ -469,8 +458,6 @@ export function registerTools(server: McpServer, repo: CatalogRepository): void 
     } catch (e) { return errorResult(toToolError(e, repo)); }
   });
 }
-
-/* ----------------------------- text renderers ----------------------------- */
 
 function renderRecommend(r: EvidenceResult): string {
   const lines = ['# Design direction (scored evidence)'];

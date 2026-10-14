@@ -1,5 +1,3 @@
-// WCAG contrast math (08 token compiler §8.4). No dependencies.
-
 export interface Rgb { r: number; g: number; b: number; }
 
 export function parseHex(hex: string): Rgb | null {

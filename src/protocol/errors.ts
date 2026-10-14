@@ -58,7 +58,6 @@ export class ToolError extends Error {
   }
 }
 
-/** Levenshtein distance (small inputs only). */
 export function editDistance(a: string, b: string): number {
   const m = a.length; const n = b.length;
   const dp: number[] = Array.from({ length: n + 1 }, (_, j) => j);
@@ -75,7 +74,6 @@ export function editDistance(a: string, b: string): number {
   return dp[n] ?? 0;
 }
 
-/** Near-miss ids (edit distance <= 3), closest first, max 3. */
 export function nearestIds(target: string, ids: string[]): string[] {
   return ids
     .map((id) => ({ id, d: editDistance(target, id) }))

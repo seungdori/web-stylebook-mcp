@@ -1,6 +1,3 @@
-// Read-only design knowledge as MCP resources (01 §7). Fixed compact lists +
-// per-id templates. All application/json. Internal file paths / React names excluded.
-
 import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { CatalogRepository } from '../catalog/repository.js';
 import type { VisualResolutionOptions } from '../visual-canonical/types.js';
@@ -20,7 +17,6 @@ export function registerResources(server: McpServer, repo: CatalogRepository): v
   const fixed = (name: string, uri: string, description: string, build: () => unknown) =>
     server.registerResource(name, uri, { title: name, description, mimeType: JSON_MIME }, async (u) => json(u.href, build()));
 
-  // -------- fixed resources --------
   fixed('manifest', 'webstylebook://manifest', 'Server + catalog manifest', () => ({
     server: { name: SERVER_NAME, version: SERVER_VERSION },
     catalogVersion: repo.catalogVersion,
@@ -94,7 +90,6 @@ export function registerResources(server: McpServer, repo: CatalogRepository): v
   fixed('verification', 'webstylebook://policies/verification', 'Verification checklist', () => repo.policies.verification);
   fixed('audit-checks', 'webstylebook://policies/audit-checks', 'Stable audit ids, applicability, severity and evidence metadata', () => repo.policies.auditChecks);
 
-  // -------- templates --------
   server.registerResource('style', new ResourceTemplate('webstylebook://styles/{styleId}', {
     list: async () => ({ resources: repo.allStyles().map((s) => ({ uri: `webstylebook://styles/${s.id}`, name: s.id, mimeType: JSON_MIME })) }),
   }), {

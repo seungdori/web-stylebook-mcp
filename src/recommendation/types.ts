@@ -1,5 +1,3 @@
-// Recommendation engine public shapes (01 §8.2 input, 05 §11 output).
-
 import type {
   ProductType, Tone, Density, UsageFrequency, TrustLevel, TaskTag, Lang,
 } from '../types.js';

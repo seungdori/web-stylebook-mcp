@@ -1,6 +1,3 @@
-// Localized rendering of reason codes, matched facets, and cautions (05 §11).
-// Numbers are never shown alone — every score is paired with human text.
-
 import type { CatalogStyle, Lang } from '../types.js';
 import type { ReasonCode, ResolvedContext } from './types.js';
 
@@ -61,7 +58,6 @@ export function reasonText(codes: ReasonCode[], _styleId: string, locale: string
 
 export function cautionText(codes: ReasonCode[], style: CatalogStyle, locale: string): string[] {
   const out = codes.map((c) => pick(REASON[c], locale));
-  // surface the style's own top risk as a caution too
   const risk = style.recommendationFacets.risks[0];
   if (risk) {
     const r: Tri = {

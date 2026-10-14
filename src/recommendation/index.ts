@@ -1,4 +1,3 @@
-// Recommendation engine public API.
 import type { CatalogRepository } from '../catalog/repository.js';
 import type { ProductContext, EvidenceResult } from './types.js';
 import { normalizeContext } from './normalize-context.js';

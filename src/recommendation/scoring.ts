@@ -1,6 +1,3 @@
-// Recommendation scoring engine. Normative implementation of 05 §4-10.
-// Deterministic: fixed-precision rounding, codepoint tie-break, fixed accumulation order.
-
 import type {
   CatalogStyle, ProductType, Ontology, ConstraintMapping,
 } from '../types.js';
@@ -22,7 +19,6 @@ function ordDist(a: string, set: string[]): number {
   return Math.min(...set.map((s) => Math.abs(av - (ORDINAL[s] ?? 1))));
 }
 
-/** Symmetric productType adjacency over the catalog map. */
 function adjacent(p: ProductType, ont: Ontology): Set<ProductType> {
   const out = new Set<ProductType>(ont.productAdjacency[p] ?? []);
   for (const [k, vs] of Object.entries(ont.productAdjacency)) {
@@ -38,7 +34,6 @@ interface FitBreakdown {
 function computeFits(ctx: ResolvedContext, s: CatalogStyle, ont: Ontology): FitBreakdown {
   const f = s.recommendationFacets;
 
-  // 4.1 productFit
   let product: number;
   const pt = ctx.productType.value;
   if (f.productTypes.includes(pt)) product = 1.0;
@@ -48,7 +43,6 @@ function computeFits(ctx: ResolvedContext, s: CatalogStyle, ont: Ontology): FitB
     product = f.productTypes.some((x) => adj.has(x)) ? 0.5 : 0.2;
   }
 
-  // 4.2 taskFit
   const tasks = ctx.primaryTaskTags.value;
   const strengthBag = new Set(f.strengths.map((x) => x.toLowerCase()));
   let task: number;
@@ -58,7 +52,6 @@ function computeFits(ctx: ResolvedContext, s: CatalogStyle, ont: Ontology): FitB
     task = clamp01(m / tasks.length);
   }
 
-  // 4.3 toneFit
   const ctxTones = ctx.tones.value;
   let tone: number;
   if (!ctxTones.length) tone = 0.4;
@@ -69,15 +62,12 @@ function computeFits(ctx: ResolvedContext, s: CatalogStyle, ont: Ontology): FitB
     tone = clamp01(base - conflict);
   }
 
-  // 4.4 densityFit
   const density = f.density.includes(ctx.density.value)
     ? 1.0 : Math.max(0, 1 - 0.5 * ordDist(ctx.density.value, f.density));
 
-  // 4.5 usageFit
   const usage = f.usageFrequency.includes(ctx.usageFrequency.value)
     ? 1.0 : Math.max(0, 1 - 0.5 * ordDist(ctx.usageFrequency.value, f.usageFrequency));
 
-  // 4.6 trustFit (asymmetric)
   const req = ORDINAL[ctx.trustSensitivity.value] ?? 1;
   const styleMax = f.trust.length ? Math.max(...f.trust.map((t) => ORDINAL[t] ?? 1)) : 1;
   let trust: number;
@@ -85,7 +75,6 @@ function computeFits(ctx: ResolvedContext, s: CatalogStyle, ont: Ontology): FitB
   else if (req <= styleMax) trust = 0.8;
   else trust = Math.max(0, 1 - 0.5 * (req - styleMax));
 
-  // 4.7 constraintFit
   let constraint: number;
   if (!ctx.constraints.length) constraint = 1.0;
   else {
@@ -145,11 +134,9 @@ function hardReject(ctx: ResolvedContext, s: CatalogStyle, repo: CatalogReposito
   const codes: ReasonCode[] = [];
   const f = s.recommendationFacets;
 
-  // EXPLICITLY_AVOIDED
   const aestheticAvoided = ctx.avoidedStyleIdsViaAesthetic.includes(s.id);
   if (ctx.avoidStyleIds.includes(s.id) || (!relaxAesthetic && aestheticAvoided)) codes.push('EXPLICITLY_AVOIDED');
 
-  // PRODUCT_NOT_IDEAL via notIdealMap
   const pt = ctx.productType.value;
   const notIdealTypes = new Set<ProductType>();
   for (const phrase of s.notIdealFor) {
@@ -160,17 +147,14 @@ function hardReject(ctx: ResolvedContext, s: CatalogStyle, repo: CatalogReposito
   // productType in its facets, a narrow notIdealFor phrase must not hard-reject it (eval #3).
   if (pt !== 'other' && notIdealTypes.has(pt) && !f.productTypes.includes(pt)) codes.push('PRODUCT_NOT_IDEAL');
 
-  // HIGH_TRUST_MISMATCH (gap >= 2)
   const req = ORDINAL[ctx.trustSensitivity.value] ?? 1;
   const styleMax = f.trust.length ? Math.max(...f.trust.map((t) => ORDINAL[t] ?? 1)) : 1;
   if (req - styleMax >= 2) codes.push('HIGH_TRUST_MISMATCH');
 
-  // DAILY_USE_OVERSTIMULATION
   if (ctx.usageFrequency.value === 'daily' && f.motionIntensity === 'high' && f.continuousSpectacle) {
     codes.push('DAILY_USE_OVERSTIMULATION');
   }
 
-  // ACCESSIBILITY_CONFLICT
   if (accessibilityConflict(ctx, s, ont)) codes.push('ACCESSIBILITY_CONFLICT');
 
   return { rejected: codes.length > 0, codes };
@@ -279,7 +263,6 @@ export function recommend(
   let compromised = false;
   let relaxed: string[] | undefined;
 
-  // 05 §10 degradation: relax aesthetic avoids if everything was rejected
   if (survivors.length === 0 && ctx.avoidAestheticTerms.length > 0) {
     const second = run(true);
     if (second.survivors.length > 0) {

@@ -152,7 +152,6 @@ describe('MCP contract', () => {
     const wb = JSON.parse(wrong.contents[0]!.text as string);
     expect(wb.error, 'cross-surface recipe URI must be a not-found').toBeTruthy();
     expect(wb.id).toBeUndefined();
-    // correct surface still works
     const right = await client.readResource({ uri: 'webstylebook://states/data-table/populated' });
     expect(JSON.parse(right.contents[0]!.text as string).id).toBe('populated');
   });
@@ -171,7 +170,6 @@ describe('MCP contract', () => {
     expect(sc.candidates.map((c: any) => c.styleId)).toContain('runtime-signal');
     expect(sc.rejected.map((x: any) => x.styleId)).toContain('cyberpunk-glitch');
     expect(sc.rejected.find((x: any) => x.styleId === 'cyberpunk-glitch').reasonCodes).toContain('EXPLICITLY_AVOIDED');
-    // text fallback present
     const text = (r.content as any[]).find((c) => c.type === 'text')?.text ?? '';
     expect(text).toContain('runtime-signal');
   });
@@ -508,7 +506,7 @@ describe('MCP contract', () => {
     const rejected = new Set(probe.rejected.map((r) => r.styleId));
     const survivors = repo.allStyles().map((s) => s.id).filter((id) => !rejected.has(id));
     expect(survivors.length).toBeGreaterThan(0);
-    expect(survivors.length).toBeLessThanOrEqual(20); // must fit the avoid-array limit for this test
+    expect(survivors.length).toBeLessThanOrEqual(20);
     const r = await client.callTool({ name: 'recommend_design_direction', arguments: { productType: 'consumer-app', productDescription: 'x', avoid: survivors } });
     expect(r.isError).toBe(true);
     const sc = r.structuredContent as any;
@@ -517,7 +515,6 @@ describe('MCP contract', () => {
   });
 
   it('zod input validation rejects bad args', async () => {
-    // candidateLimit out of range
     const r = await client.callTool({ name: 'recommend_design_direction', arguments: { productDescription: 'x', candidateLimit: 99 } }).catch((e) => ({ thrown: e }));
     // SDK may surface this as isError or a thrown protocol error; either is acceptable, but it must NOT silently succeed with 99 candidates
     if ('thrown' in (r as any)) { expect((r as any).thrown).toBeTruthy(); } else { expect((r as any).isError ?? false).toBeTruthy(); }

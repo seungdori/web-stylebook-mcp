@@ -1,7 +1,3 @@
-// Raw ProductContext -> ResolvedContext (05 §2-3). Structured input wins; free text
-// is matched against ontology aliases ONLY (never semantically analyzed). Every
-// inferred/default facet is recorded in assumptions.
-
 import type {
   ProductType, Tone, Density, UsageFrequency, TrustLevel, TaskTag, OntologyTerm,
 } from '../types.js';
@@ -12,7 +8,6 @@ function norm(s: string): string {
   return s.normalize('NFKC').toLowerCase();
 }
 
-/** Build "haystack" text from a context for alias matching. */
 function haystack(ctx: ProductContext): string {
   return norm([ctx.productDescription, ...(ctx.audience ?? []), ...(ctx.primaryTasks ?? [])].join(' '));
 }
@@ -49,7 +44,6 @@ function matchSingle(text: string, terms: OntologyTerm[]): { value: string; alia
   return best ? { value: best.value, alias: best.alias } : null;
 }
 
-/** All ontology values whose value/alias appears in text. */
 function matchMulti(text: string, terms: OntologyTerm[]): string[] {
   const out: string[] = [];
   for (const term of terms) {
@@ -68,7 +62,6 @@ export function normalizeContext(raw: ProductContext, repo: CatalogRepository): 
   const assumptions: string[] = [];
   const missingInformation: string[] = [];
 
-  // productType
   let productType: ResolvedFacet<ProductType>;
   if (raw.productType) {
     productType = facet(raw.productType, 'explicit');
@@ -85,7 +78,6 @@ export function normalizeContext(raw: ProductContext, repo: CatalogRepository): 
 
   const archetype = repo.getProduct(productType.value);
 
-  // tones
   let tones: ResolvedFacet<Tone[]>;
   if (raw.tone && raw.tone.length) {
     tones = facet(raw.tone, 'explicit');
@@ -99,7 +91,6 @@ export function normalizeContext(raw: ProductContext, repo: CatalogRepository): 
     }
   }
 
-  // density / usageFrequency / trust — explicit -> archetype default -> global default
   const density = resolveOrdinal<Density>(
     raw.density, archetype?.defaultDensity, 'medium', 'density', assumptions, !!archetype,
   );
@@ -110,7 +101,6 @@ export function normalizeContext(raw: ProductContext, repo: CatalogRepository): 
     raw.trustSensitivity, archetype?.defaultTrust, 'medium', 'trustSensitivity', assumptions, !!archetype,
   );
 
-  // primary task tags
   let primaryTaskTags: ResolvedFacet<TaskTag[]>;
   const taskText = norm([...(raw.primaryTasks ?? []), raw.productDescription].join(' '));
   const matchedTasks = matchMulti(taskText, ont.taskTags) as TaskTag[];
@@ -123,10 +113,8 @@ export function normalizeContext(raw: ProductContext, repo: CatalogRepository): 
     missingInformation.push('explicit primary tasks');
   }
 
-  // constraints (normalized lowercased tokens; mapping to risks happens in scoring)
   const constraints = (raw.constraints ?? []).map((c) => norm(c));
 
-  // avoid resolution
   const { avoidStyleIds, avoidAestheticTerms, avoidedStyleIdsViaAesthetic } = resolveAvoid(raw.avoid ?? [], repo, missingInformation);
 
   return {
@@ -162,7 +150,6 @@ function resolveAvoid(
     if (!term) continue;
     const tokens = term.split(/[^a-z0-9가-힣ぁ-んァ-ヶ一-龯]+/).filter((t) => t.length >= 3);
 
-    // direct style id / name match
     let directHit = false;
     for (const s of styles) {
       if (s.id === term || term.includes(s.id) || s.id.includes(term)) { avoidStyleIds.add(s.id); directHit = true; }
@@ -171,7 +158,6 @@ function resolveAvoid(
     }
     if (directHit) continue;
 
-    // aesthetic term: match against id tokens, tags, risks, name tokens
     let aestheticHit = false;
     for (const s of styles) {
       const bag = norm([s.id, ...s.tags, ...s.recommendationFacets.risks, s.name.en].join(' '));
