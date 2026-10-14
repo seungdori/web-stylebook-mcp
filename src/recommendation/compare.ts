@@ -1,7 +1,3 @@
-// compare_design_directions (01 §8.3). Compares 2-4 directions across axes and
-// returns each direction's favorable conditions + likely failure mode — never a
-// single winner.
-
 import type { CatalogStyle, Intensity, Density, TrustLevel, UsageFrequency, ProductType, Tone, Lang } from '../types.js';
 import type { CatalogRepository } from '../catalog/repository.js';
 import type { ProductContext } from './types.js';
@@ -46,8 +42,6 @@ function maxLevel(levels: string[]): string {
   return levels.reduce((acc, l) => (RANK[l] ?? 1) > (RANK[acc] ?? 1) ? l : acc, levels[0] as string);
 }
 
-// A direction's combined facet signals: primary alone, or merged with the secondary
-// (worst-case for risk axes, union for coverage) so secondaryStyleId actually matters.
 interface Signals {
   family: string | undefined;
   motionIntensity: Intensity;
@@ -107,7 +101,6 @@ function repeatedUse(sig: Signals): string {
   return 'medium';
 }
 
-// symmetric productType adjacency over the catalog ontology map
 function adjacentTypes(pt: ProductType, repo: CatalogRepository): Set<ProductType> {
   const adj = repo.ontology.productAdjacency;
   const out = new Set<ProductType>(adj[pt] ?? []);

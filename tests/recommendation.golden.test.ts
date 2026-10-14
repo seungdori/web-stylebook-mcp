@@ -11,8 +11,8 @@ interface GoldenCase {
   input: ProductContext;
   expect: {
     candidatesNonEmpty?: boolean;
-    topIncludes?: string[];        // at least one must be present among candidates
-    rejectedIncludes?: string[];   // styleIds that must be rejected
+    topIncludes?: string[];
+    rejectedIncludes?: string[];
     rejectedReason?: { styleId: string; code: string };
     notInCandidates?: string[];
     confidenceNot?: ('low' | 'medium' | 'high')[];

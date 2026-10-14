@@ -1,7 +1,3 @@
-// UI State Atlas planner — get_ui_state_plan (01 §8.6, 02 §12, 06).
-// Pure selection over the catalog: required/recommended/domain-specific, category
-// filter, criticalOnly, coverage groups, implementation order.
-
 import type { StateRecipe, StateCategory, Lang } from '../types.js';
 import { STATE_CATEGORIES } from '../types.js';
 import type { CatalogRepository } from '../catalog/repository.js';
@@ -44,7 +40,6 @@ export interface UiStatePlan {
   unresolvedQuestions: string[];
 }
 
-// 03 §12 implementation priority by category.
 const CATEGORY_ORDER: StateCategory[] = ['data', 'content', 'interaction', 'network', 'permission', 'time', 'environment'];
 
 function summarize(r: StateRecipe, locale: Lang): StateSummary {
@@ -92,7 +87,6 @@ export function planUiStates(input: GetUiStatePlanInput, repo: CatalogRepository
   const recommended = byCrit('recommended');
   const domainSpecific = byCrit('domain-specific');
 
-  // coverage groups by category; stateIds sorted by id for order-independence
   const coverageGroups = STATE_CATEGORIES
     .map((cat) => ({ category: cat, stateIds: recipes.filter((r) => r.category === cat).map((r) => r.id).sort() }))
     .filter((g) => g.stateIds.length > 0);

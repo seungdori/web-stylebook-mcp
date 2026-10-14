@@ -1,7 +1,3 @@
-// Lightweight runtime validation of the packaged catalog (CLI --validate-catalog).
-// Deep zod/reference validation lives in the repo's build scripts; this is a fast
-// load-time sanity check that the shipped artifact is intact.
-
 import type { CatalogRepository } from './repository.js';
 import {
   DESIGN_CONCERNS,

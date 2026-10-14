@@ -1,4 +1,3 @@
-// Canonical composition delegates to the website's portable resolver and exporters.
 import type { CatalogRepository } from '../catalog/repository.js';
 import { VISUAL_SCHEMA } from '../catalog/visual.js';
 import { TokenError, type ComposeDesignTokensInput, type ComposeDesignTokensResult } from './compile.js';

@@ -1,7 +1,4 @@
 import type { VisualContract } from './visual-canonical/types.js';
-// Catalog types for the independently packaged MCP runtime. The additive visual
-// specification uses the generated portable website types; no runtime website
-// imports are needed. Catalog and shared-source parity tests guard against drift.
 
 export type Lang = 'en' | 'ko' | 'ja';
 export type LocalizedText = Record<Lang, string>;

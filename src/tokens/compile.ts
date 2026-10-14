@@ -1,7 +1,3 @@
-// Token compiler — compose_design_tokens (01 §8.7, 02 §13, 08 §8).
-// Pipeline: style palette/accent -> family defaults -> secondary overlay -> accent
-// override -> density override -> color-mode resolution -> contrast warnings -> format.
-
 import type { DesignTokens, DesignTokenColor, Lang } from '../types.js';
 import type { CatalogRepository } from '../catalog/repository.js';
 import { composeContractTokens } from './visual.js';
@@ -126,21 +122,18 @@ function buildColor(palette: string[], accent: string, mode: 'light' | 'dark', s
   const valid = palette.filter((p) => parseHex(p));
   const tintSource = mostSaturated(valid.length ? valid : [accent]);
 
-  // canvas: prefer a neutral palette anchor; else synthesize a barely-tinted near-white/near-black
   let canvas = pickNeutralAnchor(valid, mode);
   if (!canvas) {
     canvas = mode === 'light' ? blend('#ffffff', tintSource, 0.04) : blend('#0b0b0c', tintSource, 0.06);
     repairs.push(`canvas synthesized as a tinted-neutral — palette had no low-chroma ${mode} anchor`);
   }
 
-  // ink/text: prefer a neutral anchor at the opposite end; force a neutral if it fails AA on canvas
   let ink = pickNeutralAnchor(valid, mode === 'light' ? 'dark' : 'light');
   if (!ink || contrastRatio(ink, canvas) < 4.5) {
     if (ink && contrastRatio(ink, canvas) < 4.5) repairs.push('text replaced with a neutral — palette text candidate failed AA on canvas');
     ink = mode === 'light' ? '#0a0a0b' : '#fafafa';
   }
 
-  // focus: accent if it reads on canvas; else repair (shifted accent, then ink) and RETURN the fixed value
   let focus = accent;
   if (contrastRatio(accent, canvas) < 3) {
     focus = repairFocus(accent, canvas, ink, mode);
@@ -255,7 +248,6 @@ export function composeDesignTokens(input: ComposeDesignTokensInput, repo: Catal
   const density = input.density;
   const colorMode = input.colorMode ?? 'light';
 
-  // secondary overlay: the secondary style's accent becomes accentSecondary for secondary surfaces
   const secondaryStyle = input.secondaryStyleId ? repo.getStyle(input.secondaryStyleId) : undefined;
   const secondaryAccent = secondaryStyle?.accent;
 
@@ -290,7 +282,6 @@ export function composeDesignTokens(input: ComposeDesignTokensInput, repo: Catal
   if (sampleBuilt.authoredFonts) {
     allNotes.add(`Typography fonts are ${style.id}'s authored faces from the pinned visual contract, not ${style.styleFamilyId ?? 'family'} token defaults.`);
   } else {
-    // Family fonts still need the mismatch note. Editorial and mono styles no longer reach this branch.
     const sampleTokens = sampleBuilt.tokens;
     const fontStack = `${sampleTokens.typography.displayFamily} ${sampleTokens.typography.bodyFamily}`.toLowerCase();
     const typoIntent = style.typography.toLowerCase();
@@ -321,8 +312,6 @@ export function composeDesignTokens(input: ComposeDesignTokensInput, repo: Catal
     notes: [...allNotes],
   };
 }
-
-/* ----------------------------- renderers ----------------------------- */
 
 function flatten(t: DesignTokens): Record<string, string> {
   const out: Record<string, string> = {};
@@ -365,7 +354,6 @@ function render(format: ComposeDesignTokensInput['format'], tokens: ComposeDesig
     return `// Web Stylebook tokens (${mode})\nexport const tokens = ${JSON.stringify(tokens, null, 2)} as const;\n`;
   }
 
-  // tailwind: pure theme object (framework-version agnostic)
   const themeOf = (t: DesignTokens) => ({
     colors: t.color,
     fontFamily: { display: [t.typography.displayFamily], body: [t.typography.bodyFamily], mono: [t.typography.monoFamily] },
