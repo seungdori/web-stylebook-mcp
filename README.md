@@ -50,44 +50,49 @@ No API key. No model call. No network. No project filesystem access. **Determini
 ```
 
 ```jsonc
-// ← result
+// ← result (trimmed)
 {
   "confidence": "high",
-  "candidates": [                      // all tied at 0.91 — ordering is NOT meaningful
-    { "styleId": "notion-style",   "score": 0.91 },
-    { "styleId": "platform-core",  "score": 0.91 },
-    { "styleId": "quiet-utility",  "score": 0.91 },
-    { "styleId": "runtime-signal", "score": 0.91 },
-    { "styleId": "console-launch", "score": 0.91 }
+  "candidates": [
+    { "styleId": "quiet-utility",  "score": 0.93 },
+    { "styleId": "runtime-signal", "score": 0.90 },
+    { "styleId": "notion-style",   "score": 0.84 },
+    { "styleId": "glass-orbit",    "score": 0.78 },
+    { "styleId": "console-launch", "score": 0.77 }
   ],
-  "rejected": [
+  "ranking": {
+    "winner": "quiet-utility",
+    "runnerUp": "runtime-signal",
+    "gap": 0.03,
+    "tied": false,
+    "reasonCodes": ["USE_CASE_FIT", "LOWER_UPKEEP"],
+    "explanation": "quiet-utility outranks runtime-signal by 0.03: 3 of 3 bestFor entries aim at operational-saas (runtime-signal: 2 of 3); lighter upkeep for daily use (quiet-utility: motion low, maintenance low; runtime-signal: motion low, maintenance medium)."
+  },
+  "rejected": [                        // 29 in total, three shown
     { "styleId": "aurora-gradient",  "reasonCodes": ["PRODUCT_NOT_IDEAL", "DAILY_USE_OVERSTIMULATION"] },
     { "styleId": "claymorphism",     "reasonCodes": ["PRODUCT_NOT_IDEAL"] },
     { "styleId": "cyberpunk-glitch", "reasonCodes": ["EXPLICITLY_AVOIDED", "DAILY_USE_OVERSTIMULATION"] }
   ],
   "pairings": [
-    {
-      "styleId": "macos-liquid-glass",
-      "pairWith": "notion-style",
-      "role": ["forms", "navigation", "repetitive surfaces"]
-    }
+    { "styleId": "notion-style",       "pairWith": "quiet-utility", "role": ["forms", "navigation", "repetitive surfaces"] },
+    { "styleId": "macos-liquid-glass", "pairWith": "quiet-utility", "role": ["forms", "navigation", "repetitive surfaces"] }
   ],
-  "guidance": "Treat candidates as scored evidence; choose using product context. candidates[0] is the strongest match, not a mandate. 5 candidates are tied at the top score — the ordering among them is not meaningful; pick using their \"differentiators\" and your product context."
+  "guidance": "Treat candidates as scored evidence; choose using product context. candidates[0] is the strongest match, not a mandate."
 }
 ```
 
-Notice what it *doesn't* do: it doesn't pretend there's one winner. Five directions tie at 0.91, rejected styles come with reason codes, and pairings are suggestions rather than a mandate. That honesty is the point — the server provides evidence, the agent decides.
+Notice what it does: five candidates get five different scores, and `ranking` says why #1 beat #2 — here every `bestFor` entry of `quiet-utility` targets operational SaaS, and its upkeep is lighter for daily use. When two directions really do score alike, `ranking.tied` says so instead of inventing a winner. Rejected styles come with reason codes, and pairings are suggestions rather than a mandate. The server provides evidence; the agent decides.
 
 Then turn the chosen direction into real tokens:
 
 ```jsonc
-// → compose_design_tokens(style: "notion-style", format: "css-variables", theme: "light")
+// → compose_design_tokens(style: "quiet-utility", format: "css-variables", theme: "light")
 // 0 WCAG contrast warnings
 :root {
   --color-canvas: #ffffff;
-  --color-text:   #37352f;
-  --color-accent: #2383e2;
-  --color-border: #d3d3d1;
+  --color-text:   #1f2328;
+  --color-accent: #526371;
+  --color-border: #cecfd0;
   /* … role-based color, type, spacing, radius, motion, density */
 }
 ```
@@ -207,7 +212,7 @@ Add the same block to your `claude_desktop_config.json`, then restart:
 
 | Tool | What you get | The honest part |
 |------|--------------|-----------------|
-| **`recommend_design_direction`** | Scored style candidates with reason codes, **rejected** styles with *why*, secondary pairings, confidence | The model makes the final pick — this is the evidence provider |
+| **`recommend_design_direction`** | Scored style candidates with reason codes, a `ranking` that says why #1 beat #2 (or reports a tie), **rejected** styles with *why*, secondary pairings, confidence | The model makes the final pick — this is the evidence provider |
 | **`compare_design_directions`** | 2–4 directions compared across product-fit, repeated-use, density, trust, distinctiveness, accessibility-risk, motion, maintenance | No single winner is declared |
 | **`search_design_references`** | Bounded search across real-world references by text, category, and tags, with concise localized observations | Returns attributed research summaries, not copied screenshots or brand assets |
 | **`get_design_reference`** | One complete localized reference with palette/layout/interaction/motion observations, normalized tokens, source revision, attribution, and rights notice | Original-site copy, typefaces, screenshots, and visual identity remain with their owners |

@@ -6,6 +6,42 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- `recommend_design_direction` no longer returns a wall of ties for a realistic brief (#6). On the README brief
+  (SRE monitoring dashboard, calm and technical, high density, daily use, avoid cyberpunk) five styles scored
+  exactly 0.91 and the order among them was decided by a hidden calmness rank and the style id. Four things caused it:
+  every factor was a membership test capped at 1.0, so any style whose facet lists contained the request earned full
+  credit; the task factor was a constant 0.5 because "monitoring" and "watched" did not match the `monitor` tag;
+  `bestFor` and `avoid` distance were never read; and nothing weighted how specific a style's claim was.
+- Task tags are now matched on inflected forms (`monitoring`, `watched`, `reading`). Product type and tone inference
+  are unchanged.
+- Ties are judged on the displayed score across every surviving style, so `candidateLimit: 1` can no longer hide a tie
+  with the runner-up.
+
+### Changed
+
+- Scoring is graded and specificity-aware. A style that claims more product types, task strengths or density and usage
+  levels earns less from each hit; the order of `productTypes` and of the requested `tone` array is weighted; unlisted
+  tasks count as unknown instead of a miss; `bestFor` and `notIdealFor` are read against the brief; a style close to an
+  avoided one loses up to 0.12; a heavier motion and maintenance load costs frequent-use briefs up to 0.06. The hidden
+  calmness rank and id order no longer decide anything except an exact tie, and an exact tie is reported.
+- Scores and candidate order change for most briefs. Clients that pinned a score or a rank should refresh them.
+  The input schema and every existing output field are unchanged.
+- The `tone` array is now read in priority order, so list the most important tone first.
+- `bestFor` and `notIdealFor` are matched against Latin-script words of `productDescription`, `audience` and `primaryTasks`
+  with no synonym table, so write the catalog's wording ("education", not "learning"). Korean and Japanese briefs still get
+  every other signal.
+
+### Added
+
+- `ranking` on the `recommend_design_direction` result (optional, absent when only one style survives): `winner`,
+  `runnerUp`, `gap`, `tied`, `reasonCodes` and a short localized `explanation` of why #1 beat #2, or `TIED` when they
+  score alike at the displayed precision. The text fallback prints the same sentence.
+- `useCase` in each candidate's `scoreBreakdown`.
+- `tests/fixtures/recommend-briefs.v1.json`: fifteen realistic briefs with an expected top-1 (or top-2 set) and a
+  minimum score gap, plus ranking, tie and catalog-order tests.
+
 ## [0.11.1] — 2026-10-13
 
 ### Fixed

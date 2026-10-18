@@ -46,7 +46,8 @@ Map the answer to `get_design_audit_plan.includeGroups`:
    usageFrequency, trustSensitivity, constraints, avoid). It returns **scored candidates** with
    reason codes, **rejected** styles with reasons, secondary **pairings**, assumptions, and a
    confidence. Treat `candidates` as evidence — *you* pick using product context; `candidates[0]`
-   is the strongest match, not a mandate.
+   is the strongest match, not a mandate. `ranking` says why #1 beat #2, or reports a tie; list the
+   most important tone first.
 2. **Read the chosen styles** — `webstylebook://styles/{id}` for each pick (primary + any pairing).
    Then call **`search_design_references`** with a narrow product/category/tag query and inspect only
    a few selected entries with **`get_design_reference`**. Record their observation date,
