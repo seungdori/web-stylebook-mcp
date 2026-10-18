@@ -34,11 +34,13 @@ All notable changes to this project are documented here. The format follows
   The input schema and every existing output field are unchanged.
 - The `tone` array is now read in priority order, so list the most important tone first.
 - `bestFor` and `notIdealFor` are matched against Latin-script words of `productDescription`, `audience` and `primaryTasks`
-  with no synonym table, so write the catalog's wording ("education", not "learning"). A word that names a kind of product
-  ("dashboard", "developer") earns at most half credit alone, because the product-type factor already scores it. A
-  `notIdealFor` entry counts only when the brief shares one vertical word that is half of the phrase, or two or more of its
-  distinctive words. Generic words such as "app" and "tool" never change a match. Korean and Japanese briefs still get every
-  other signal.
+  with no synonym table, so write the catalog's wording ("education", not "learning"). A `bestFor` entry earns full credit
+  for two or more shared distinctive words, or for one shared word that does not merely name a kind of product ("dashboard",
+  "developer"; the product-type factor already scores those), and half credit otherwise. A `notIdealFor` entry counts only
+  when the brief repeats the whole phrase or shares two or more of its distinctive words, and phrases that name a tone,
+  density, usage or trust level are left to those factors. Generic words such as "app" and "tool" never change `bestFor`
+  credit. Korean and Japanese briefs still get every other signal.
+- `confidence` is never `high` when the product type is `other`.
 
 ### Added
 

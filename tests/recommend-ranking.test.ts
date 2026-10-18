@@ -197,13 +197,14 @@ describe('inputs that used to be ignored now move the score', () => {
     expect(byId(kids, 'midnight-noir')!.score).toBeLessThan(byId(adult, 'midnight-noir')!.score);
   });
 
-  it('counts a notIdealFor entry only on a vertical word or several shared words, never on one product-kind word', () => {
+  it('counts a notIdealFor entry only when the brief repeats it or shares most of its distinctive words', () => {
     expect(evidenceOf('Online shop for a small-batch ceramics brand', 'fusion-soft-inflate').notIdeal).toBe(0);
     expect(evidenceOf('Marketing analytics dashboard for growth teams', 'quiet-utility').notIdeal).toBe(0);
     expect(evidenceOf('Landing pages and consumer marketing pages', 'quiet-utility').notIdeal).toBe(1);
     expect(evidenceOf('A developer portfolio', 'earth-atelier').notIdeal).toBe(0);
-    expect(evidenceOf('Developer tools for CI', 'earth-atelier').notIdeal).toBe(0);
-    expect(evidenceOf('Learning app for children aged 6 to 10', 'cyberpunk-glitch').notIdeal).toBe(1);
+    expect(evidenceOf('Developer tools for CI', 'earth-atelier').notIdeal).toBe(1);
+    expect(evidenceOf('A shop for children products', 'cyberpunk-glitch').notIdeal).toBe(1);
+    expect(evidenceOf('Learning app for children aged 6 to 10', 'cyberpunk-glitch').notIdeal).toBe(0);
   });
 
   it('gives half credit to one product-kind word and full credit to a vertical word or repeated phrase', () => {
@@ -213,18 +214,21 @@ describe('inputs that used to be ignored now move the score', () => {
     expect(evidenceOf('Weekly gardening newsletter', 'duotone-bold').lexical).toBe(0);
   });
 
-  it('does not let generic words such as app or tool change what a brief matches', () => {
-    for (const style of ['duotone-bold', 'cyberpunk-glitch', 'quiet-utility']) {
-      for (const [plain, withGeneric] of [['music streaming for artists', 'music streaming app for artists'], ['children aged 6 to 10', 'children products aged 6 to 10'], ['admin console', 'admin console tool']] as const) {
-        expect(evidenceOf(withGeneric, style), `${style}: ${withGeneric}`).toEqual(evidenceOf(plain, style));
+  it('does not let generic words such as app or tool change how much credit bestFor gives', () => {
+    for (const style of ['duotone-bold', 'cyberpunk-glitch', 'quiet-utility', 'fusion-soft-inflate']) {
+      for (const [plain, withGeneric] of [['music streaming for artists', 'music streaming app for artists'], ['admin console', 'admin console tool'], ['ceramics and wellness', 'ceramics and wellness platform']] as const) {
+        const [a, b] = [evidenceOf(plain, style), evidenceOf(withGeneric, style)];
+        expect([b.lexical, b.phrase], `${style}: ${withGeneric}`).toEqual([a.lexical, a.phrase]);
       }
     }
   });
 
   it('scores a style the same whatever order its productTypes are listed in', () => {
     const reversed = repoWithClones(repo, 'notion-style', [{ id: 'notion-style-reversed', edit: (style) => { style.recommendationFacets.productTypes.reverse(); } }]);
-    const r = recommendDesignDirection({ ...headline, candidateLimit: 10 }, reversed);
-    expect(byId(r, 'notion-style-reversed')!.score).toBe(byId(r, 'notion-style')!.score);
+    const ctx = normalizeContext(headline, reversed);
+    const [a, b] = ['notion-style', 'notion-style-reversed'].map((id) => scoreStyle(ctx, reversed.getStyle(id)!, reversed));
+    expect(a!.fits.product).toBeLessThan(1);
+    expect(b!.total).toBe(a!.total);
   });
 
   it('weighs the order of the requested tones', () => {

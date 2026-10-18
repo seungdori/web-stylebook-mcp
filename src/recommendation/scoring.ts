@@ -419,7 +419,8 @@ function computeConfidence(ctx: ResolvedContext, survivors: ScoredStyle[]): 'low
   // clear 0.6 on non-tone facets while the direction is tonally wrong (hardening #4).
   const toneSatisfied = ctx.tones.source !== 'explicit'
     || (winner !== undefined && toneCoverage(ctx.tones.value, winner.style.recommendationFacets) >= 0.5);
-  if (e >= 4 && top1 >= 0.6 && ctx.productType.source === 'explicit' && toneSatisfied) return 'high';
+  const knowsProduct = ctx.productType.source === 'explicit' && ctx.productType.value !== 'other';
+  if (e >= 4 && top1 >= 0.6 && knowsProduct && toneSatisfied) return 'high';
   if (e >= 2 && top1 >= 0.5) return 'medium';
   return 'low';
 }

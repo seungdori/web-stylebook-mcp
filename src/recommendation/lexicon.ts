@@ -80,20 +80,28 @@ function targetsProduct(phrase: string, productType: ProductType, repo: CatalogR
   });
 }
 
-// One shared word is weak evidence, because common words such as "small" recur in unrelated phrases. A phrase is
-// repeated in full when the brief shares two or more of its distinctive words covering `pairCoverage` of them, or one
-// vertical word (not a product-kind word) that makes up half of the phrase. Anything else that shares a word earns
-// half credit. Generic words never count for or against, so adding "app" or "tool" to a brief changes nothing.
+// One shared word is weak evidence, because common words such as "small" or "form" recur in unrelated phrases.
+// bestFor is positive evidence and earns graded credit: full when the brief shares two or more distinctive words
+// covering 40% of the phrase, or one word that does not merely name a kind of product and is half of the phrase;
+// half for any other shared word. Generic words never count, so "app" or "tool" in a brief changes nothing.
+// notIdealFor excludes a style, so it needs more: the brief must repeat the whole phrase, or share two or more
+// distinctive words covering 60% of it. A notIdealFor phrase that names a tone, density, usage or trust level
+// ("high-density data", "editorial pages") is left to those factors: without that word it would shrink to a
+// common one.
 function bestMatch(
-  phrases: string[], request: ReadonlySet<string>, domain: ReadonlySet<string>, pairCoverage: number,
+  phrases: string[], request: ReadonlySet<string>, domain: ReadonlySet<string>, negative: boolean,
 ): { strength: number; phrase?: string } {
   let best: { strength: number; hits: number; phrase: string } | undefined;
   for (const phrase of phrases) {
+    if (negative && wordKeys(phrase).some((k) => FACET_KEYS.has(k))) continue;
+    const all = contentKeys(phrase);
     const core = distinctiveKeys(phrase);
     const hits = core.filter((k) => request.has(k));
     if (hits.length === 0) continue;
     const covered = hits.length / core.length;
-    const full = hits.length >= 2 ? covered >= pairCoverage : covered >= 0.5 && hits.some((k) => !domain.has(k));
+    const full = negative
+      ? all.every((k) => request.has(k)) || (hits.length >= 2 && covered >= 0.6)
+      : hits.length >= 2 ? covered >= 0.4 : covered >= 0.5 && hits.some((k) => !domain.has(k));
     const strength = full ? 1 : 0.5;
     if (!best || strength > best.strength || (strength === best.strength && hits.length > best.hits)) best = { strength, hits: hits.length, phrase };
   }
@@ -107,8 +115,8 @@ export function useCaseEvidence(
   const targeted = productType === 'other' || total === 0
     ? 0 : style.bestFor.filter((p) => targetsProduct(p, productType, repo)).length;
   const domain = domainKeys(repo);
-  const best = bestMatch(style.bestFor, request, domain, 0.4);
-  const worst = bestMatch(style.notIdealFor, request, domain, 0.6);
+  const best = bestMatch(style.bestFor, request, domain, false);
+  const worst = bestMatch(style.notIdealFor, request, domain, true);
   return {
     targeted,
     total,

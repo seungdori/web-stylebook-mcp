@@ -222,11 +222,11 @@ describe('G. regressions found in review', () => {
     expect(score(`${base.productDescription} (tool)`)).toBe(score(base.productDescription));
   });
 
-  it('notIdealFor "children products" fires the same for "app" as for "products"', () => {
+  it('notIdealFor "children products" fires on a repeat of the phrase, not on the word "children" alone', () => {
     const fires = (description: string) =>
       useCaseEvidence(repo.getStyle('cyberpunk-glitch')!, new Set(contentKeys(description)), 'consumer-app', repo).notIdeal;
-    expect(fires('Learning app for children aged 6 to 10')).toBe(1);
     expect(fires('Learning products for children aged 6 to 10')).toBe(1);
+    expect(fires('Learning app for children aged 6 to 10')).toBe(0);
   });
 
   it('the ranking claims a bestFor match only when the phrase was repeated in full', () => {
