@@ -93,7 +93,7 @@ describe('A. the phrase matcher holds its rules across the whole catalog', () =>
     }
   });
 
-  it('repeating a phrase word for word earns full credit unless the phrase is one product-kind word, has no distinctive word, or names a facet level', () => {
+  it('repeating a phrase word for word earns full credit unless a bestFor phrase is one product-kind word, or a notIdealFor phrase would shrink to one word without its facet level', () => {
     let capped = 0;
     for (const kind of ['bestFor', 'notIdealFor'] as const) {
       for (const { style, phrase } of phrasesOf(kind)) {
@@ -101,7 +101,7 @@ describe('A. the phrase matcher holds its rules across the whole catalog', () =>
         if (core.length === 0) continue;
         const ev = useCaseEvidence(style, new Set(contentKeys(phrase)), 'other', repo);
         const full = kind === 'bestFor' ? ev.lexical === 1 : ev.notIdeal === 1;
-        const expectedFull = kind === 'bestFor' ? core.length >= 2 || !DOMAIN.has(core[0]!) : !mentionsFacet(phrase);
+        const expectedFull = kind === 'bestFor' ? core.length >= 2 || !DOMAIN.has(core[0]!) : core.length >= 2 || !mentionsFacet(phrase);
         if (!expectedFull) capped++;
         expect(full, `${style.id} ${kind} "${phrase}"`).toBe(expectedFull);
       }

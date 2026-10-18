@@ -37,8 +37,8 @@ All notable changes to this project are documented here. The format follows
   with no synonym table, so write the catalog's wording ("education", not "learning"). A `bestFor` entry earns full credit
   for two or more shared distinctive words, or for one shared word that does not merely name a kind of product ("dashboard",
   "developer"; the product-type factor already scores those), and half credit otherwise. A `notIdealFor` entry counts only
-  when the brief repeats the whole phrase or shares two or more of its distinctive words, and phrases that name a tone,
-  density, usage or trust level are left to those factors. Generic words such as "app" and "tool" never change `bestFor`
+  when the brief repeats the whole phrase or shares two or more of its distinctive words, and a phrase that names a tone,
+  density, usage or trust level and would shrink to one common word without it is left to those factors. Generic words such as "app" and "tool" never change `bestFor`
   credit. Korean and Japanese briefs still get every other signal.
 - `confidence` is never `high` when the product type is `other`.
 

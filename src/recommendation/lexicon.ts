@@ -83,19 +83,19 @@ function targetsProduct(phrase: string, productType: ProductType, repo: CatalogR
 // One shared word is weak evidence, because common words such as "small" or "form" recur in unrelated phrases.
 // bestFor is positive evidence and earns graded credit: full when the brief shares two or more distinctive words
 // covering 40% of the phrase, or one word that does not merely name a kind of product and is half of the phrase;
-// half for any other shared word. Generic words never count, so "app" or "tool" in a brief changes nothing.
-// notIdealFor excludes a style, so it needs more: the brief must repeat the whole phrase, or share two or more
-// distinctive words covering 60% of it. A notIdealFor phrase that names a tone, density, usage or trust level
-// ("high-density data", "editorial pages") is left to those factors: without that word it would shrink to a
-// common one.
+// half for any other shared word. Generic words do not count there, so "app" or "tool" in a brief changes nothing.
+// notIdealFor excludes a style, so it needs more: the brief must repeat the whole phrase (generic words included),
+// or share two or more distinctive words covering 60% of it. A phrase that names a tone, density, usage or trust
+// level and keeps fewer than two other distinctive words ("high-density data") is left to those factors, because
+// without that word it would shrink to a common one.
 function bestMatch(
   phrases: string[], request: ReadonlySet<string>, domain: ReadonlySet<string>, negative: boolean,
 ): { strength: number; phrase?: string } {
   let best: { strength: number; hits: number; phrase: string } | undefined;
   for (const phrase of phrases) {
-    if (negative && wordKeys(phrase).some((k) => FACET_KEYS.has(k))) continue;
     const all = contentKeys(phrase);
     const core = distinctiveKeys(phrase);
+    if (negative && core.length < 2 && wordKeys(phrase).some((k) => FACET_KEYS.has(k))) continue;
     const hits = core.filter((k) => request.has(k));
     if (hits.length === 0) continue;
     const covered = hits.length / core.length;
