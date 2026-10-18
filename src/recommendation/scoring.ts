@@ -1,14 +1,35 @@
 import type {
-  CatalogStyle, ProductType, Ontology, ConstraintMapping,
+  CatalogStyle, ProductType, Ontology, ConstraintMapping, RecommendationFacets, TaskTag,
 } from '../types.js';
+import { TASK_TAGS } from '../types.js';
 import type { CatalogRepository } from '../catalog/repository.js';
 import type {
   ResolvedContext, ReasonCode, StyleCandidate, EvidenceResult, RejectedStyle, Pairing,
+  FitKey, FitBreakdown, ScoreTerms, ScoredStyle, UseCaseEvidence,
 } from './types.js';
+import { useCaseEvidence } from './lexicon.js';
+import { explainRanking } from './rank-reason.js';
 
-const W = { product: 0.24, task: 0.18, tone: 0.16, density: 0.12, usage: 0.10, trust: 0.10, constraint: 0.10 } as const;
+const W = {
+  product: 0.20, useCase: 0.10, task: 0.14, tone: 0.16, density: 0.12, usage: 0.10, trust: 0.08, constraint: 0.10,
+} as const satisfies Record<FitKey, number>;
 const ORDINAL: Record<string, number> = { low: 0, medium: 1, high: 2, 'one-off': 0, occasional: 1, daily: 2 };
+const USAGE_WEIGHT: Record<string, number> = { 'one-off': 0, occasional: 0.5, daily: 1 };
 
+// A style that claims more values for a facet is less specific to any one of them, so a membership
+// hit earns less as the claim widens. productTypes and tones are authored most relevant first.
+const PRODUCT_PRIMACY = 0.03;
+const PRODUCT_BREADTH = 0.02;
+const TASK_BREADTH = 0.015;
+const RANGE_BREADTH = 0.15;
+const TONE_ORDER_DECAY = 0.15;
+const TONE_SLOT_DECAY = 0.10;
+const UPKEEP_WEIGHT = 0.06;
+const AVOID_WEIGHT = 0.12;
+const NOT_IDEAL_WEIGHT = 0.08;
+const RELAXED_AVOID_DEMOTION = 0.4;
+
+function round6(x: number): number { return Math.round(x * 1e6) / 1e6; }
 function round3(x: number): number { return Math.round(x * 1000) / 1000; }
 function round2(x: number): number { return Math.round(x * 100) / 100; }
 function clamp01(x: number): number { return x < 0 ? 0 : x > 1 ? 1 : x; }
@@ -27,65 +48,55 @@ function adjacent(p: ProductType, ont: Ontology): Set<ProductType> {
   return out;
 }
 
-interface FitBreakdown {
-  product: number; task: number; tone: number; density: number; usage: number; trust: number; constraint: number;
+function productFit(pt: ProductType, f: RecommendationFacets, ont: Ontology): number {
+  const i = f.productTypes.indexOf(pt);
+  if (i >= 0) return 1 - PRODUCT_PRIMACY * i - PRODUCT_BREADTH * (f.productTypes.length - 1);
+  if (pt === 'other') return 0.5;
+  const adj = adjacent(pt, ont);
+  return f.productTypes.some((x) => adj.has(x)) ? 0.5 : 0.2;
 }
 
-function computeFits(ctx: ResolvedContext, s: CatalogStyle, ont: Ontology): FitBreakdown {
-  const f = s.recommendationFacets;
+function useCaseFit(pt: ProductType, ev: UseCaseEvidence): number {
+  return pt === 'other' ? ev.lexical : 0.5 * ev.share + 0.5 * ev.lexical;
+}
 
-  let product: number;
-  const pt = ctx.productType.value;
-  if (f.productTypes.includes(pt)) product = 1.0;
-  else if (pt === 'other') product = 0.5;
-  else {
-    const adj = adjacent(pt, ont);
-    product = f.productTypes.some((x) => adj.has(x)) ? 0.5 : 0.2;
-  }
+function taskFit(tasks: TaskTag[], f: RecommendationFacets, taskStrengths: number): number {
+  if (!tasks.length) return 0.5;
+  const strengths = new Set(f.strengths.map((x) => x.toLowerCase()));
+  const covered = tasks.filter((t) => strengths.has(t)).length / tasks.length;
+  // strengths highlight what a style does best; they do not list everything it supports. A task they
+  // omit is therefore no better or worse than an unknown one (0.5), and a listed task lifts it.
+  return 0.5 + 0.5 * covered * Math.max(0, 1 - TASK_BREADTH * (taskStrengths - 1));
+}
 
-  const tasks = ctx.primaryTaskTags.value;
-  const strengthBag = new Set(f.strengths.map((x) => x.toLowerCase()));
-  let task: number;
-  if (!tasks.length) task = 0.5;
-  else {
-    const m = tasks.filter((t) => strengthBag.has(t.toLowerCase())).length;
-    task = clamp01(m / tasks.length);
-  }
+function toneFit(ctx: ResolvedContext, f: RecommendationFacets): number {
+  const requested = [...new Set(ctx.tones.value)];
+  if (!requested.length) return 0.4;
+  // Inferred tones arrive in ontology order, so only a caller-typed order says which tone matters most.
+  const ordered = ctx.tones.source === 'explicit';
+  let weights = 0;
+  let credit = 0;
+  requested.forEach((tone, i) => {
+    const w = ordered ? Math.max(0.5, 1 - TONE_ORDER_DECAY * i) : 1;
+    const slot = f.tones.indexOf(tone);
+    weights += w;
+    if (slot >= 0) credit += w * (1 - TONE_SLOT_DECAY * slot);
+  });
+  const conflicts = requested.filter((t) => f.antiTones.includes(t)).length;
+  return clamp01(credit / weights - 0.15 * conflicts);
+}
 
-  const ctxTones = ctx.tones.value;
-  let tone: number;
-  if (!ctxTones.length) tone = 0.4;
-  else {
-    const inter = ctxTones.filter((t) => f.tones.includes(t)).length;
-    const base = inter / ctxTones.length;
-    const conflict = 0.15 * ctxTones.filter((t) => f.antiTones.includes(t)).length;
-    tone = clamp01(base - conflict);
-  }
+function rangeFit(level: string, declared: string[]): number {
+  if (declared.includes(level)) return 1 - RANGE_BREADTH * ((declared.length - 1) / 2);
+  return Math.max(0, 1 - 0.5 * ordDist(level, declared));
+}
 
-  const density = f.density.includes(ctx.density.value)
-    ? 1.0 : Math.max(0, 1 - 0.5 * ordDist(ctx.density.value, f.density));
-
-  const usage = f.usageFrequency.includes(ctx.usageFrequency.value)
-    ? 1.0 : Math.max(0, 1 - 0.5 * ordDist(ctx.usageFrequency.value, f.usageFrequency));
-
+function trustFit(ctx: ResolvedContext, f: RecommendationFacets): number {
   const req = ORDINAL[ctx.trustSensitivity.value] ?? 1;
   const styleMax = f.trust.length ? Math.max(...f.trust.map((t) => ORDINAL[t] ?? 1)) : 1;
-  let trust: number;
-  if (f.trust.includes(ctx.trustSensitivity.value)) trust = 1.0;
-  else if (req <= styleMax) trust = 0.8;
-  else trust = Math.max(0, 1 - 0.5 * (req - styleMax));
-
-  let constraint: number;
-  if (!ctx.constraints.length) constraint = 1.0;
-  else {
-    const violated = ctx.constraints.filter((c) => constraintViolates(c, s, ont)).length;
-    constraint = clamp01(1 - violated / ctx.constraints.length);
-  }
-
-  return {
-    product: round3(product), task: round3(task), tone: round3(tone), density: round3(density),
-    usage: round3(usage), trust: round3(trust), constraint: round3(constraint),
-  };
+  if (f.trust.includes(ctx.trustSensitivity.value)) return 1.0;
+  if (req <= styleMax) return 0.8;
+  return Math.max(0, 1 - 0.5 * (req - styleMax));
 }
 
 // generic qualifier words that are NOT distinguishing — must not drive a match
@@ -172,45 +183,94 @@ function softPenalties(ctx: ResolvedContext, s: CatalogStyle): { total: number; 
   return { total: round3(total), codes };
 }
 
-interface ScoredStyle {
-  style: CatalogStyle;
-  fits: FitBreakdown;
-  weightedTotal: number;
-  adjustedTotal: number;
-  softCodes: ReasonCode[];
-  softCount: number;
+function traitsOf(s: CatalogStyle, requestedTones: ReadonlySet<string>): Map<string, string> {
+  const out = new Map<string, string>();
+  for (const t of s.tags) out.set(`tag:${t.toLowerCase()}`, t);
+  for (const r of s.recommendationFacets.risks) out.set(`risk:${r.toLowerCase()}`, r);
+  // A tone the brief asks for is not evidence of resemblance to a style it wants to avoid.
+  for (const t of s.recommendationFacets.tones) if (!requestedTones.has(t)) out.set(`tone:${t}`, t);
+  return out;
 }
 
-function scoreStyle(ctx: ResolvedContext, s: CatalogStyle, ont: Ontology): ScoredStyle {
-  const fits = computeFits(ctx, s, ont);
-  return scoreFromFits(ctx, s, fits);
+function avoidProximity(ctx: ResolvedContext, s: CatalogStyle, repo: CatalogRepository): { penalty: number; nearest?: ScoredStyle['nearestAvoided'] } {
+  const avoided = [...new Set([...ctx.avoidStyleIds, ...ctx.avoidedStyleIdsViaAesthetic])].filter((id) => id !== s.id);
+  const requestedTones = new Set<string>(ctx.tones.value);
+  const mine = traitsOf(s, requestedTones);
+  let nearest: { affinity: number; styleId: string; shared: string[] } | undefined;
+  for (const id of avoided) {
+    const other = repo.getStyle(id);
+    if (!other) continue;
+    const theirs = traitsOf(other, requestedTones);
+    const shared = [...mine].filter(([key]) => theirs.has(key)).map(([, label]) => label);
+    const overlap = shared.length / Math.max(1, Math.min(mine.size, theirs.size));
+    const lineage = s.fusionOf?.includes(id) || other.fusionOf?.includes(s.id) ? 0.6 : 0;
+    const affinity = Math.min(1, overlap + lineage);
+    if (!nearest || affinity > nearest.affinity) nearest = { affinity, styleId: id, shared };
+  }
+  return nearest ? { penalty: AVOID_WEIGHT * nearest.affinity, nearest: { styleId: nearest.styleId, shared: nearest.shared } } : { penalty: 0 };
 }
 
-function scoreFromFits(ctx: ResolvedContext, s: CatalogStyle, fits: FitBreakdown): ScoredStyle {
-  const weightedTotal = round3(
-    W.product * fits.product + W.task * fits.task + W.tone * fits.tone + W.density * fits.density
-    + W.usage * fits.usage + W.trust * fits.trust + W.constraint * fits.constraint,
-  );
+function upkeepPenalty(ctx: ResolvedContext, f: RecommendationFacets): number {
+  const load = ((ORDINAL[f.motionIntensity] ?? 1) + (ORDINAL[f.maintenanceComplexity] ?? 1)) / 4 + (f.continuousSpectacle ? 0.25 : 0);
+  return UPKEEP_WEIGHT * (USAGE_WEIGHT[ctx.usageFrequency.value] ?? 0.5) * Math.min(1, load);
+}
+
+/** Exported so tests can check that the weighted terms add up to the total. */
+export function scoreStyle(ctx: ResolvedContext, s: CatalogStyle, repo: CatalogRepository): ScoredStyle {
+  const f = s.recommendationFacets;
+  const pt = ctx.productType.value;
+  const evidence = useCaseEvidence(s, new Set(ctx.requestKeys), pt, repo);
+  const violated = ctx.constraints.filter((c) => constraintViolates(c, s, repo.ontology));
+  const taskStrengths = f.strengths.filter((x) => (TASK_TAGS as readonly string[]).includes(x.toLowerCase())).length;
+  const fits: FitBreakdown = {
+    product: productFit(pt, f, repo.ontology),
+    useCase: useCaseFit(pt, evidence),
+    task: taskFit(ctx.primaryTaskTags.value, f, taskStrengths),
+    tone: toneFit(ctx, f),
+    density: rangeFit(ctx.density.value, f.density),
+    usage: rangeFit(ctx.usageFrequency.value, f.usageFrequency),
+    trust: trustFit(ctx, f),
+    constraint: ctx.constraints.length ? clamp01(1 - violated.length / ctx.constraints.length) : 1,
+  };
   const soft = softPenalties(ctx, s);
-  const adjustedTotal = round3(clamp01(weightedTotal - soft.total));
-  return { style: s, fits, weightedTotal, adjustedTotal, softCodes: soft.codes, softCount: soft.codes.length };
+  const avoid = avoidProximity(ctx, s, repo);
+  const terms: ScoreTerms = {
+    product: W.product * fits.product,
+    useCase: W.useCase * fits.useCase,
+    task: W.task * fits.task,
+    tone: W.tone * fits.tone,
+    density: W.density * fits.density,
+    usage: W.usage * fits.usage,
+    trust: W.trust * fits.trust,
+    constraint: W.constraint * fits.constraint,
+    cautions: -(soft.total + NOT_IDEAL_WEIGHT * evidence.notIdeal),
+    upkeep: -upkeepPenalty(ctx, f),
+    avoidance: -avoid.penalty,
+  };
+  const total = round6(clamp01(Object.values(terms).reduce((sum, x) => sum + x, 0)));
+  return { style: s, fits, terms, total, softCodes: soft.codes, violated, taskStrengths, evidence, nearestAvoided: avoid.nearest };
 }
 
-// Among score-tied candidates, the calmer + more durable style ranks first
-// (a conservative, non-arbitrary default — beats styleId-alphabetical). styleId is
-// only the final determinism tiebreak. (eval issue #2)
-function meritRank(s: ScoredStyle): number {
-  const f = s.style.recommendationFacets;
-  return (f.continuousSpectacle ? 4 : 0) + (ORDINAL[f.motionIntensity] ?? 1) + (ORDINAL[f.maintenanceComplexity] ?? 1);
+function demoteRelaxed(sc: ScoredStyle): ScoredStyle {
+  return {
+    ...sc,
+    terms: { ...sc.terms, avoidance: sc.terms.avoidance - RELAXED_AVOID_DEMOTION },
+    total: round6(clamp01(sc.total - RELAXED_AVOID_DEMOTION)),
+  };
 }
 
+// Only an exact tie reaches the id comparison. It keeps the output byte-stable and says nothing
+// about preference: the result reports the tie in `ranking` and `guidance`.
 function compareScored(a: ScoredStyle, b: ScoredStyle): number {
-  if (b.adjustedTotal !== a.adjustedTotal) return b.adjustedTotal - a.adjustedTotal;
-  if (b.fits.product !== a.fits.product) return b.fits.product - a.fits.product;
-  if (a.softCount !== b.softCount) return a.softCount - b.softCount;
-  const ma = meritRank(a); const mb = meritRank(b);
-  if (ma !== mb) return ma - mb;
+  if (a.total !== b.total) return b.total - a.total;
   return a.style.id < b.style.id ? -1 : a.style.id > b.style.id ? 1 : 0;
+}
+
+function roundedFits(fits: FitBreakdown): Record<string, number> {
+  return {
+    product: round3(fits.product), task: round3(fits.task), tone: round3(fits.tone), density: round3(fits.density),
+    usage: round3(fits.usage), trust: round3(fits.trust), constraint: round3(fits.constraint), useCase: round3(fits.useCase),
+  };
 }
 
 type Tri = { en: string; ko: string; ja: string };
@@ -251,7 +311,7 @@ export function recommend(
       if (hr.rejected) {
         rejected.push({ styleId: s.id, reasonCodes: hr.codes, explanation: reasonText(hr.codes, s.id, locale) });
       } else {
-        survivors.push(scoreStyle(ctx, s, repo.ontology));
+        survivors.push(scoreStyle(ctx, s, repo));
       }
     }
     survivors.sort(compareScored);
@@ -266,11 +326,9 @@ export function recommend(
   if (survivors.length === 0 && ctx.avoidAestheticTerms.length > 0) {
     const second = run(true);
     if (second.survivors.length > 0) {
-      // demote aesthetic-avoided styles by 0.40 instead of hard reject
+      // demote aesthetic-avoided styles instead of hard reject
       second.survivors = second.survivors.map((sc) =>
-        ctx.avoidedStyleIdsViaAesthetic.includes(sc.style.id)
-          ? { ...sc, adjustedTotal: round3(clamp01(sc.adjustedTotal - 0.4)) }
-          : sc,
+        ctx.avoidedStyleIdsViaAesthetic.includes(sc.style.id) ? demoteRelaxed(sc) : sc,
       ).sort(compareScored);
       survivors = second.survivors;
       rejected = second.rejected;
@@ -282,8 +340,8 @@ export function recommend(
   const top = survivors.slice(0, limit);
   const candidates: StyleCandidate[] = top.map((sc) => ({
     styleId: sc.style.id,
-    score: round2(sc.adjustedTotal),
-    scoreBreakdown: { ...sc.fits },
+    score: round2(sc.total),
+    scoreBreakdown: roundedFits(sc.fits),
     matched: matchedText(sc.style, ctx, locale),
     differentiators: differentiatorsOf(sc.style),
     cautions: cautionText(sc.softCodes, sc.style, locale),
@@ -293,11 +351,12 @@ export function recommend(
   const pairings = computePairings(ctx, top[0], survivors, repo, locale);
   const confidence = compromised ? 'low' : computeConfidence(ctx, survivors);
 
-  // Communicate intra-set ordering uncertainty separately from set confidence (eval #5).
-  // Detect ties at the DISPLAYED (round2) precision so the count matches the visible scores
-  // (round 4: round3 detection vs round2 display produced user-visible contradictions).
-  const topDisp = top[0] ? round2(top[0].adjustedTotal) : 0;
-  const tiedAtTop = top.filter((t) => round2(t.adjustedTotal) === topDisp).length;
+  // Ties are judged on the displayed score and across every survivor: the count then matches what the
+  // caller sees, and candidateLimit cannot hide a tie with the runner-up.
+  const topShown = survivors[0] ? round2(survivors[0].total) : 0;
+  const tiedAtTop = survivors.filter((sc) => round2(sc.total) === topShown).length;
+  const [winner, runnerUp] = survivors;
+  const ranking = winner && runnerUp ? explainRanking(winner, runnerUp, ctx, locale) : undefined;
   let guidance = pickLocale({
     en: 'Treat candidates as scored evidence; choose using product context. candidates[0] is the strongest match, not a mandate.',
     ko: '후보는 점수화된 근거다 — 제품 맥락으로 직접 고르라. candidates[0]은 가장 강한 후보일 뿐 강제가 아니다.',
@@ -321,6 +380,7 @@ export function recommend(
       missingInformation: ctx.missingInformation,
     },
     confidence,
+    ...(ranking ? { ranking } : {}),
     ...(compromised ? { compromised, relaxed } : {}),
     guidance,
   };
@@ -333,7 +393,7 @@ function computeConfidence(ctx: ResolvedContext, survivors: ScoredStyle[]): 'low
   if (ctx.density.source === 'explicit') e++;
   if (ctx.usageFrequency.source === 'explicit') e++;
   if (ctx.trustSensitivity.source === 'explicit') e++;
-  const top1 = survivors[0]?.adjustedTotal ?? 0;
+  const top1 = survivors[0]?.total ?? 0;
   // SET confidence: how sure are we the candidate SET fits — NOT coupled to the top-2
   // margin, since a strong facet tie (several equally-good options) should not read as
   // low confidence (eval #5). Intra-set ordering uncertainty is surfaced in guidance.

@@ -47,7 +47,7 @@ describe('token compiler — usable output for every style (eval #1 regression)'
 describe('recommend — ranking, confidence, pairing fixes', () => {
   const sre: ProductContext = { productType: 'operational-saas', productDescription: 'Daily SRE dashboard, calm, dense', tone: ['calm', 'technical'], density: 'high', usageFrequency: 'daily', avoid: ['cyberpunk decoration'] };
 
-  it('merit tie-break demotes console-launch below quiet-utility/runtime-signal (eval #2)', () => {
+  it('ranks console-launch below quiet-utility/runtime-signal on its own scored merits (eval #2)', () => {
     const r = recommendDesignDirection(sre, repo);
     const ids = r.candidates.map((c) => c.styleId);
     const iConsole = ids.indexOf('console-launch');

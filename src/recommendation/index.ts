@@ -12,4 +12,4 @@ export function recommendDesignDirection(input: ProductContext, repo: CatalogRep
   });
 }
 
-export type { ProductContext, EvidenceResult } from './types.js';
+export type { ProductContext, EvidenceResult, RankingExplanation, RankReasonCode } from './types.js';

@@ -225,7 +225,7 @@ function toToolError(e: unknown, repo: CatalogRepository): ToolError {
 export function registerTools(server: McpServer, repo: CatalogRepository): void {
   server.registerTool('recommend_design_direction', {
     title: 'Recommend a design direction',
-    description: 'Given product context, return scored style candidates with reason codes, rejected styles with reasons, secondary pairings, assumptions and confidence. Evidence-provider: the host model makes the final pick. Call before writing UI. The "tone" field (named "tone", not "tones") is an ARRAY of zero or more of: calm, technical, trustworthy, premium, editorial, playful, bold, experimental. Each candidate.score already includes soft penalties (density/motion/tone fit) that are not itemized in scoreBreakdown.',
+    description: 'Given product context, return scored style candidates with reason codes, rejected styles with reasons, secondary pairings, assumptions and confidence. Evidence-provider: the host model makes the final pick. Call before writing UI. The "tone" field (named "tone", not "tones") is an ARRAY of zero or more of: calm, technical, trustworthy, premium, editorial, playful, bold, experimental. Each candidate.score already includes adjustments (soft penalties, repeated-use load, closeness to avoided styles) that are not itemized in scoreBreakdown. The "ranking" field says why candidates[0] outranks the next style, or reports a tie; list the most important tone first because tone order is weighted.',
     inputSchema: { ...productContextShape, locale: LOCALE.optional(), candidateLimit: z.number().int().min(1).max(10).optional() },
     annotations: READ_ONLY,
   }, async (args): Promise<ToolResult> => {
@@ -462,6 +462,7 @@ export function registerTools(server: McpServer, repo: CatalogRepository): void 
 function renderRecommend(r: EvidenceResult): string {
   const lines = ['# Design direction (scored evidence)'];
   for (const c of r.candidates) lines.push(`- ${c.score.toFixed(2)} **${c.styleId}** — ${c.matched.join(' · ')}`);
+  if (r.ranking) lines.push('', `Ranking: ${r.ranking.explanation}`);
   if (r.pairings.length) lines.push('', 'Secondary pairings:', ...r.pairings.map((p) => `- ${p.styleId} → ${p.role.join(', ')}`));
   if (r.rejected.length) lines.push('', `Rejected (${r.rejected.length}), e.g.: ${r.rejected.slice(0, 3).map((x) => `${x.styleId} (${x.reasonCodes.join(',')})`).join('; ')}`);
   lines.push('', `Confidence: ${r.confidence}${r.compromised ? ' (compromised — constraints relaxed)' : ''}`);

@@ -50,8 +50,12 @@
         "density": "low",
         "usageFrequency": "occasional"
       },
-      "expect": { "top1": ["claymorphism", "paper-cut"], "minGap": 0.02 },
-      "rationale": "Both name education in bestFor and combine playful with calm. soft-pastel and bento-bloom lack the education fit; fusion-clay-aurora is also education but its continuous ambient motion is heavy for a children's lesson screen."
+      "expect": { "top1": ["soft-pastel", "paper-cut"], "minGap": 0.02 },
+      "rationale": "soft-pastel is the catalog's consumer-app primary, pairs calm with playful, supports occasional and daily use and lists read among its strengths for a reading-and-math brief. paper-cut names education in bestFor and leads with playful. claymorphism also names education, but the brief says learning, the catalog says education, and matching has no synonym table by design.",
+      "revised": {
+        "was": { "top1": ["claymorphism", "paper-cut"], "minGap": 0.02 },
+        "reason": "Changed after the first run. The original pair assumed an education match that the brief's wording (learning) cannot produce offline, and claymorphism lists no read strength for a reading lesson app. Reworded with education, paper-cut leads and claymorphism is third; see the pull request."
+      }
     },
     {
       "id": "developer-docs",
