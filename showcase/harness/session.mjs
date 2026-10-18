@@ -1,4 +1,3 @@
-// Reads a headless Claude Code transcript: tool calls, MCP outputs, and an audit of what the session was given.
 import { existsSync, readFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
@@ -80,7 +79,8 @@ export function summarizeStream(events) {
   };
 }
 
-// Confirms the session got exactly the arm's inputs: no user CLAUDE.md, memory, skills, hooks or stray MCP servers.
+// A leaked CLAUDE.md, memory section, skill or extra MCP server would contaminate an arm, so each session is audited
+// against what its arm should have received.
 export function auditSession(arm, init) {
   const problems = [];
   const expect = (ok, message) => {
@@ -131,6 +131,7 @@ export function auditSession(arm, init) {
     expect(!systemPrompt.includes(needle), `system prompt mentions ${needle}`);
   }
 
+  // These needles come from the maintainer's own CLAUDE.md and output style, so this check only bites on a machine that has them.
   const contextText = JSON.stringify(attachments.filter((a) => a.type !== 'prompt_snapshot'));
   for (const needle of ['korean-ste', 'Design Skill Routing', 'Second plan from Sol', 'web-stylebook-design', 'MEMORY.md']) {
     expect(!contextText.includes(needle), `session context mentions ${needle}`);

@@ -1,6 +1,4 @@
 #!/usr/bin/env node
-// Runs every brief/arm build through run-build.mjs with a small worker pool, and records the invocation.
-// Usage: node driver.mjs [--concurrency 4] [--stagger 20] [--only brief:arm,brief:arm]
 import { spawn, spawnSync } from 'node:child_process';
 import { closeSync, existsSync, fstatSync, mkdirSync, openSync, readFileSync, readSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -98,7 +96,7 @@ function readTail(path, bytes) {
   }
 }
 
-// Newest rate_limit_event across the running transcripts, falling back to the last finished build.
+// This guard holds new builds only at 90% and ignores what the running builds will still use, so governor.mjs paces the starts instead.
 function currentLimit() {
   const found = [];
   if (lastKnownLimit) found.push(lastKnownLimit);

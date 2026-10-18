@@ -1,4 +1,3 @@
-// Serves a built dist/ folder and takes full-page Playwright screenshots, capped in height.
 import { createServer } from 'node:http';
 import { mkdirSync } from 'node:fs';
 import { readFile, stat } from 'node:fs/promises';
@@ -56,7 +55,7 @@ function serve(distDir) {
   return new Promise((done) => server.listen(0, '127.0.0.1', () => done(server)));
 }
 
-// Scrolls in steps so sections that reveal on scroll are drawn, then returns to the top.
+// Sections that reveal on scroll are only drawn once they enter the viewport, so scroll through the page once and return to the top.
 async function revealAndSettle(page) {
   await page.evaluate(async () => {
     const wait = (ms) => new Promise((r) => setTimeout(r, ms));

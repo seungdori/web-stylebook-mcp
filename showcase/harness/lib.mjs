@@ -1,4 +1,3 @@
-// Shared configuration for the with/without MCP showcase harness (issue #7).
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { homedir } from 'node:os';

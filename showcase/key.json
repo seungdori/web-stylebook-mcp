@@ -1,0 +1,46 @@
+{
+  "seed": "web-stylebook-mcp#7 blind comparison",
+  "algorithm": "FNV-1a (32-bit) of the seed feeds mulberry32. For each brief in briefs.json order, one draw: below 0.5 puts the control build on the left, otherwise the MCP build.",
+  "assignments": {
+    "sre-incident-dashboard": {
+      "left": "control",
+      "right": "mcp"
+    },
+    "essay-blog": {
+      "left": "control",
+      "right": "mcp"
+    },
+    "luxury-skincare-product": {
+      "left": "mcp",
+      "right": "control"
+    },
+    "kids-coding-landing": {
+      "left": "control",
+      "right": "mcp"
+    },
+    "api-docs-home": {
+      "left": "mcp",
+      "right": "control"
+    },
+    "budgeting-app-overview": {
+      "left": "mcp",
+      "right": "control"
+    },
+    "architecture-studio-portfolio": {
+      "left": "control",
+      "right": "mcp"
+    },
+    "bakery-ordering": {
+      "left": "control",
+      "right": "mcp"
+    },
+    "hr-saas-landing": {
+      "left": "mcp",
+      "right": "control"
+    },
+    "music-festival": {
+      "left": "control",
+      "right": "mcp"
+    }
+  }
+}

@@ -1,6 +1,4 @@
 #!/usr/bin/env node
-// Runs one build: a headless Claude Code session, then an npm build check, screenshots, and metadata.
-// Usage: node run-build.mjs <brief-id> <control|mcp>
 import { spawn, spawnSync } from 'node:child_process';
 import {
   appendFileSync,
@@ -98,6 +96,7 @@ async function runSession() {
   const child = spawn(CLAUDE_BIN, args, { cwd: run, env: childEnv(), stdio: ['pipe', 'pipe', 'pipe'], detached: true });
   child.stdout.pipe(out);
   child.stderr.pipe(err);
+  // claude can exit before it reads the prompt (EPIPE); the exit code and transcript already record that.
   child.stdin.on('error', () => {});
 
   const startedAt = new Date().toISOString();

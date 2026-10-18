@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blind comparison: builds with and without web-stylebook-mcp</title>
+<style>
+  :root { color-scheme: light; --ink: #1d1d1f; --muted: #5c5c63; --line: #d6d6db; --bg: #f6f6f7; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 16px/1.55 system-ui, sans-serif; color: var(--ink); background: var(--bg); }
+  main { max-width: 1500px; margin: 0 auto; padding: 32px 24px 64px; }
+  h1 { font-size: 1.6rem; margin: 0 0 8px; }
+  h2 { font-size: 1.25rem; margin: 0 0 6px; }
+  h3 { font-size: 0.95rem; margin: 24px 0 8px; color: var(--muted); font-weight: 600; }
+  a { color: #0b57d0; }
+  .lede { max-width: 70ch; color: var(--muted); margin: 0 0 16px; }
+  nav ol { columns: 2; padding-left: 1.2rem; margin: 0 0 8px; }
+  section { margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--line); }
+  .brief { max-width: 80ch; margin: 0; }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+  figure { margin: 0; min-width: 0; }
+  figcaption { font-weight: 600; margin-bottom: 6px; }
+  img { display: block; width: 100%; height: auto; border: 1px solid var(--line); background: #fff; }
+  .frame { max-height: 900px; overflow: auto; border: 1px solid var(--line); background: #fff; }
+  .frame img { width: 390px; max-width: 100%; border: 0; margin: 0 auto; }
+  .note { margin: 6px 0 0; font-size: 0.85rem; color: var(--muted); }
+  .missing p { margin: 0; padding: 48px 16px; text-align: center; color: var(--muted); border: 1px dashed var(--line); background: #fff; }
+  @media (max-width: 800px) { .pair { grid-template-columns: 1fr; } nav ol { columns: 1; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Blind comparison: builds with and without web-stylebook-mcp</h1>
+  <p class="lede">Ten briefs, two builds each. One build had the MCP server attached, the other did not. Which side is which was drawn per brief from a fixed seed and is not shown here. Look at every pair first; the mapping is in <code>../key.json</code> and the protocol is in <a href="../README.md">the README</a>. There are no scores. Judge each pair yourself.</p>
+  <p class="lede">Screenshots are full-page and cut at 4000 px. Click one to open it at full size.</p>
+  <nav aria-label="Briefs">
+    <ol>
+      <li><a href="#sre-incident-dashboard">1. SRE incident dashboard</a></li>
+      <li><a href="#essay-blog">2. Indie long-form essay blog</a></li>
+      <li><a href="#luxury-skincare-product">3. Luxury skincare product page</a></li>
+      <li><a href="#kids-coding-landing">4. Kids coding-education landing page</a></li>
+      <li><a href="#api-docs-home">5. Developer API docs homepage</a></li>
+      <li><a href="#budgeting-app-overview">6. Personal budgeting app overview screen</a></li>
+      <li><a href="#architecture-studio-portfolio">7. Architecture studio portfolio</a></li>
+      <li><a href="#bakery-ordering">8. Neighborhood bakery ordering site</a></li>
+      <li><a href="#hr-saas-landing">9. B2B HR SaaS landing page</a></li>
+      <li><a href="#music-festival">10. Music festival event page</a></li>
+    </ol>
+  </nav>
+
+  <section id="sre-incident-dashboard">
+    <h2>1. SRE incident dashboard</h2>
+    <p class="brief">A monitoring dashboard for the site reliability engineers of a company that runs a consumer payments app. The on-call engineer keeps it open all day and during live outages to see which services are degraded, the active incidents with severity, owner, and age, recent deploys, and the key metrics (error rate, latency, traffic) for each service. It has to answer whether anything is broken and what changed within seconds of looking at it.</p>
+    <h3>Desktop, 1440 px wide</h3>
+    <div class="pair"><figure><figcaption>Left</figcaption><a href="../screenshots/sre-incident-dashboard/left-1440.webp"><img src="../screenshots/sre-incident-dashboard/left-1440.webp" width="1440" height="3284" alt="Left build of SRE incident dashboard, 1440 px wide" loading="lazy"></a></figure><figure><figcaption>Right</figcaption><a href="../screenshots/sre-incident-dashboard/right-1440.webp"><img src="../screenshots/sre-incident-dashboard/right-1440.webp" width="1440" height="3841" alt="Right build of SRE incident dashboard, 1440 px wide" loading="lazy"></a></figure></div>
+    <h3>Mobile, 390 px wide</h3>
+    <div class="pair"><figure><figcaption>Left</figcaption><div class="frame"><a href="../screenshots/sre-incident-dashboard/left-390.webp"><img src="../screenshots/sre-incident-dashboard/left-390.webp" width="390" height="4000" alt="Left build of SRE incident dashboard, 390 px wide" loading="lazy"></a></div><p class="note">The page is 6183 px tall; the capture stops at 4000 px.</p></figure><figure><figcaption>Right</figcaption><div class="frame"><a href="../screenshots/sre-incident-dashboard/right-390.webp"><img src="../screenshots/sre-incident-dashboard/right-390.webp" width="390" height="4000" alt="Right build of SRE incident dashboard, 390 px wide" loading="lazy"></a></div><p class="note">The page is 7798 px tall; the capture stops at 4000 px.</p></figure></div>
+  </section>
+
+  <section id="essay-blog">
+    <h2>2. Indie long-form essay blog</h2>
+    <p class="brief">An independent writer's blog that publishes one long-form essay every week or two on cities, technology, and everyday life. The home page introduces the writer, features the newest essay with an excerpt, lists earlier essays with dates, reading times, and topics, and invites readers to subscribe by email. Readers are people who follow the writer and read each essay in full.</p>
+    <h3>Desktop, 1440 px wide</h3>
+    <div class="pair"><figure><figcaption>Left</figcaption><a href="../screenshots/essay-blog/left-1440.webp"><img src="../screenshots/essay-blog/left-1440.webp" width="1440" height="4000" alt="Left build of Indie long-form essay blog, 1440 px wide" loading="lazy"></a><p class="note">The page is 7145 px tall; the capture stops at 4000 px.</p></figure><figure><figcaption>Right</figcaption><a href="../screenshots/essay-blog/right-1440.webp"><img src="../screenshots/essay-blog/right-1440.webp" width="1440" height="4000" alt="Right build of Indie long-form essay blog, 1440 px wide" loading="lazy"></a><p class="note">The page is 4285 px tall; the capture stops at 4000 px.</p></figure></div>
+    <h3>Mobile, 390 px wide</h3>
+    <div class="pair"><figure><figcaption>Left</figcaption><div class="frame"><a href="../screenshots/essay-blog/left-390.webp"><img src="../screenshots/essay-blog/left-390.webp" width="390" height="4000" alt="Left build of Indie long-form essay blog, 390 px wide" loading="lazy"></a></div><p class="note">The page is 9807 px tall; the capture stops at 4000 px.</p></figure><figure><figcaption>Right</figcaption><div class="frame"><a href="../screenshots/essay-blog/right-390.webp"><img src="../screenshots/essay-blog/right-390.webp" width="390" height="4000" alt="Right build of Indie long-form essay blog, 390 px wide" loading="lazy"></a></div><p class="note">The page is 6718 px tall; the capture stops at 4000 px.</p></figure></div>
+  </section>
+
+  <section id="luxury-skincare-product">
+    <h2>3. Luxury skincare product page</h2>
+    <p class="brief">A product page for a night serum from a small-batch luxury skincare house, priced at about 240 dollars for 30 ml. The page presents the product, its key ingredients and where they are sourced, how to use it, results from a clinical study and customer reviews, and a purchase area with size options and delivery information. Shoppers are comparing it with other premium serums before they buy.</p>
+    <h3>Desktop, 1440 px wide</h3>
+    <div class="pair"><figure><figcaption>Left</figcaption><a href="../screenshots/luxury-skincare-product/left-1440.webp"><img src="../screenshots/luxury-skincare-product/left-1440.webp" width="1440" height="4000" alt="Left build of Luxury skincare product page, 1440 px wide" loading="lazy"></a><p class="note">The page is 14289 px tall; the capture stops at 4000 px.</p></figure><figure><figcaption>Right</figcaption><a href="../screenshots/luxury-skincare-product/right-1440.webp"><img src="../screenshots/luxury-skincare-product/right-1440.webp" width="1440" height="4000" alt="Right build of Luxury skincare product page, 1440 px wide" loading="lazy"></a><p class="note">The page is 18649 px tall; the capture stops at 4000 px.</p></figure></div>
+    <h3>Mobile, 390 px wide</h3>
+    <div class="pair"><figure><figcaption>Left</figcaption><div class="frame"><a href="../screenshots/luxury-skincare-product/left-390.webp"><img src="../screenshots/luxury-skincare-product/left-390.webp" width="390" height="4000" alt="Left build of Luxury skincare product page, 390 px wide" loading="lazy"></a></div><p class="note">The page is 22812 px tall; the capture stops at 4000 px.</p></figure><figure><figcaption>Right</figcaption><div class="frame"><a href="../screenshots/luxury-skincare-product/right-390.webp"><img src="../screenshots/luxury-skincare-product/right-390.webp" width="390" height="4000" alt="Right build of Luxury skincare product page, 390 px wide" loading="lazy"></a></div><p class="note">The page is 28657 px tall; the capture stops at 4000 px.</p></figure></div>
+  </section>
+
+  <section id="kids-coding-landing">
+    <h2>4. Kids coding-education landing page</h2>
+    <p class="brief">A landing page for an online coding school for children aged 7 to 12. Parents decide whether to sign up, and the children also look at the page. It explains the courses by age group, how a live class works, the projects children build, monthly pricing, and a free trial class sign-up.</p>
+    <h3>Desktop, 1440 px wide</h3>
+    <div class="pair"><figure><figcaption>Left</figcaption><a href="../screenshots/kids-coding-landing/left-1440.webp"><img src="../screenshots/kids-coding-landing/left-1440.webp" width="1440" height="4000" alt="Left build of Kids coding-education landing page, 1440 px wide" loading="lazy"></a><p class="note">The page is 11781 px tall; the capture stops at 4000 px.</p></figure><figure><figcaption>Right</figcaption><a href="../screenshots/kids-coding-landing/right-1440.webp"><img src="../screenshots/kids-coding-landing/right-1440.webp" width="1440" height="4000" alt="Right build of Kids coding-education landing page, 1440 px wide" loading="lazy"></a><p class="note">The page is 9770 px tall; the capture stops at 4000 px.</p></figure></div>
+    <h3>Mobile, 390 px wide</h3>
+    <div class="pair"><figure><figcaption>Left</figcaption><div class="frame"><a href="../screenshots/kids-coding-landing/left-390.webp"><img src="../screenshots/kids-coding-landing/left-390.webp" width="390" height="4000" alt="Left build of Kids coding-education landing page, 390 px wide" loading="lazy"></a></div><p class="note">The page is 20340 px tall; the capture stops at 4000 px.</p></figure><figure><figcaption>Right</figcaption><div class="frame"><a href="../screenshots/kids-coding-landing/right-390.webp"><img src="../screenshots/kids-coding-landing/right-390.webp" width="390" height="4000" alt="Right build of Kids coding-education landing page, 390 px wide" loading="lazy"></a></div><p class="note">The page is 16976 px tall; the capture stops at 4000 px.</p></figure></div>
+  </section>
+
+  <section id="api-docs-home">
+    <h2>5. Developer API docs homepage</h2>
+    <p class="brief">The documentation homepage for a payments API that software developers integrate into their products. It lets a developer find the right starting point quickly: a quickstart with a copyable code sample, guides by use case, the API reference, client libraries for several languages, and the changelog and system status. Developers visit it many times a day while they are in the middle of a task.</p>
+    <h3>Desktop, 1440 px wide</h3>
+    <div class="pair"><figure><figcaption>Left</figcaption><a href="../screenshots/api-docs-home/left-1440.webp"><img src="../screenshots/api-docs-home/left-1440.webp" width="1440" height="4000" alt="Left build of Developer API docs homepage, 1440 px wide" loading="lazy"></a><p class="note">The page is 5818 px tall; the capture stops at 4000 px.</p></figure><figure><figcaption>Right</figcaption><a href="../screenshots/api-docs-home/right-1440.webp"><img src="../screenshots/api-docs-home/right-1440.webp" width="1440" height="4000" alt="Right build of Developer API docs homepage, 1440 px wide" loading="lazy"></a><p class="note">The page is 7445 px tall; the capture stops at 4000 px.</p></figure></div>
+    <h3>Mobile, 390 px wide</h3>
+    <div class="pair"><figure><figcaption>Left</figcaption><div class="frame"><a href="../screenshots/api-docs-home/left-390.webp"><img src="../screenshots/api-docs-home/left-390.webp" width="390" height="4000" alt="Left build of Developer API docs homepage, 390 px wide" loading="lazy"></a></div><p class="note">The page is 11386 px tall; the capture stops at 4000 px.</p></figure><figure><figcaption>Right</figcaption><div class="frame"><a href="../screenshots/api-docs-home/right-390.webp"><img src="../screenshots/api-docs-home/right-390.webp" width="390" height="4000" alt="Right build of Developer API docs homepage, 390 px wide" loading="lazy"></a></div><p class="note">The page is 14286 px tall; the capture stops at 4000 px.</p></figure></div>
+  </section>
+
+  <section id="budgeting-app-overview">
+    <h2>6. Personal budgeting app overview screen</h2>
+    <p class="brief">The overview screen of a personal budgeting app for people with irregular income, such as freelancers. It shows this month's budget against spending by category, upcoming bills, progress toward savings goals, and recent transactions. People open it several times a week to check whether they are on track.</p>
+    <h3>Desktop, 1440 px wide</h3>
+    <div class="pair"><figure><figcaption>Left</figcaption><a href="../screenshots/budgeting-app-overview/left-1440.webp"><img src="../screenshots/budgeting-app-overview/left-1440.webp" width="1440" height="3618" alt="Left build of Personal budgeting app overview screen, 1440 px wide" loading="lazy"></a></figure><figure><figcaption>Right</figcaption><a href="../screenshots/budgeting-app-overview/right-1440.webp"><img src="../screenshots/budgeting-app-overview/right-1440.webp" width="1440" height="2738" alt="Right build of Personal budgeting app overview screen, 1440 px wide" loading="lazy"></a></figure></div>
+    <h3>Mobile, 390 px wide</h3>
+    <div class="pair"><figure><figcaption>Left</figcaption><div class="frame"><a href="../screenshots/budgeting-app-overview/left-390.webp"><img src="../screenshots/budgeting-app-overview/left-390.webp" width="390" height="4000" alt="Left build of Personal budgeting app overview screen, 390 px wide" loading="lazy"></a></div><p class="note">The page is 5969 px tall; the capture stops at 4000 px.</p></figure><figure><figcaption>Right</figcaption><div class="frame"><a href="../screenshots/budgeting-app-overview/right-390.webp"><img src="../screenshots/budgeting-app-overview/right-390.webp" width="390" height="4000" alt="Right build of Personal budgeting app overview screen, 390 px wide" loading="lazy"></a></div><p class="note">The page is 5192 px tall; the capture stops at 4000 px.</p></figure></div>
+  </section>
+
+  <section id="architecture-studio-portfolio">
+    <h2>7. Architecture studio portfolio</h2>
+    <p class="brief">The portfolio website of a small architecture studio that designs houses, cultural buildings, and public spaces. It presents the studio's approach, a selection of six recent projects with location, year, and building type, a short team section, and contact details. Visitors are prospective clients, journalists, and people who might want to work there.</p>
+    <h3>Desktop, 1440 px wide</h3>
+    <div class="pair"><figure><figcaption>Left</figcaption><a href="../screenshots/architecture-studio-portfolio/left-1440.webp"><img src="../screenshots/architecture-studio-portfolio/left-1440.webp" width="1440" height="4000" alt="Left build of Architecture studio portfolio, 1440 px wide" loading="lazy"></a><p class="note">The page is 9319 px tall; the capture stops at 4000 px.</p></figure><figure><figcaption>Right</figcaption><a href="../screenshots/architecture-studio-portfolio/right-1440.webp"><img src="../screenshots/architecture-studio-portfolio/right-1440.webp" width="1440" height="4000" alt="Right build of Architecture studio portfolio, 1440 px wide" loading="lazy"></a><p class="note">The page is 12113 px tall; the capture stops at 4000 px.</p></figure></div>
+    <h3>Mobile, 390 px wide</h3>
+    <div class="pair"><figure><figcaption>Left</figcaption><div class="frame"><a href="../screenshots/architecture-studio-portfolio/left-390.webp"><img src="../screenshots/architecture-studio-portfolio/left-390.webp" width="390" height="4000" alt="Left build of Architecture studio portfolio, 390 px wide" loading="lazy"></a></div><p class="note">The page is 14484 px tall; the capture stops at 4000 px.</p></figure><figure><figcaption>Right</figcaption><div class="frame"><a href="../screenshots/architecture-studio-portfolio/right-390.webp"><img src="../screenshots/architecture-studio-portfolio/right-390.webp" width="390" height="4000" alt="Right build of Architecture studio portfolio, 390 px wide" loading="lazy"></a></div><p class="note">The page is 15844 px tall; the capture stops at 4000 px.</p></figure></div>
+  </section>
+
+  <section id="bakery-ordering">
+    <h2>8. Neighborhood bakery ordering site</h2>
+    <p class="brief">An online ordering site for a neighborhood bakery that sells bread, pastries, and celebration cakes. Customers browse the menu by category, add items to a basket, choose a pickup day and time slot, and can see opening hours and the shop's address. Some items must be ordered a day or more ahead.</p>
+    <h3>Desktop, 1440 px wide</h3>
+    <div class="pair"><figure><figcaption>Left</figcaption><a href="../screenshots/bakery-ordering/left-1440.webp"><img src="../screenshots/bakery-ordering/left-1440.webp" width="1440" height="4000" alt="Left build of Neighborhood bakery ordering site, 1440 px wide" loading="lazy"></a><p class="note">The page is 7153 px tall; the capture stops at 4000 px.</p></figure><figure><figcaption>Right</figcaption><a href="../screenshots/bakery-ordering/right-1440.webp"><img src="../screenshots/bakery-ordering/right-1440.webp" width="1440" height="3811" alt="Right build of Neighborhood bakery ordering site, 1440 px wide" loading="lazy"></a></figure></div>
+    <h3>Mobile, 390 px wide</h3>
+    <div class="pair"><figure><figcaption>Left</figcaption><div class="frame"><a href="../screenshots/bakery-ordering/left-390.webp"><img src="../screenshots/bakery-ordering/left-390.webp" width="390" height="4000" alt="Left build of Neighborhood bakery ordering site, 390 px wide" loading="lazy"></a></div><p class="note">The page is 10543 px tall; the capture stops at 4000 px.</p></figure><figure><figcaption>Right</figcaption><div class="frame"><a href="../screenshots/bakery-ordering/right-390.webp"><img src="../screenshots/bakery-ordering/right-390.webp" width="390" height="4000" alt="Right build of Neighborhood bakery ordering site, 390 px wide" loading="lazy"></a></div><p class="note">The page is 6072 px tall; the capture stops at 4000 px.</p></figure></div>
+  </section>
+
+  <section id="hr-saas-landing">
+    <h2>9. B2B HR SaaS landing page</h2>
+    <p class="brief">A landing page for a B2B human resources platform that covers onboarding, time off, payroll sync, and performance reviews for companies with 50 to 500 employees. It is aimed at HR directors and operations leads who compare several vendors. The page needs to explain the product, show proof such as customer logos and results, list integrations and plans, and get visitors to book a demo.</p>
+    <h3>Desktop, 1440 px wide</h3>
+    <div class="pair"><figure><figcaption>Left</figcaption><a href="../screenshots/hr-saas-landing/left-1440.webp"><img src="../screenshots/hr-saas-landing/left-1440.webp" width="1440" height="4000" alt="Left build of B2B HR SaaS landing page, 1440 px wide" loading="lazy"></a><p class="note">The page is 10769 px tall; the capture stops at 4000 px.</p></figure><figure><figcaption>Right</figcaption><a href="../screenshots/hr-saas-landing/right-1440.webp"><img src="../screenshots/hr-saas-landing/right-1440.webp" width="1440" height="4000" alt="Right build of B2B HR SaaS landing page, 1440 px wide" loading="lazy"></a><p class="note">The page is 13187 px tall; the capture stops at 4000 px.</p></figure></div>
+    <h3>Mobile, 390 px wide</h3>
+    <div class="pair"><figure><figcaption>Left</figcaption><div class="frame"><a href="../screenshots/hr-saas-landing/left-390.webp"><img src="../screenshots/hr-saas-landing/left-390.webp" width="390" height="4000" alt="Left build of B2B HR SaaS landing page, 390 px wide" loading="lazy"></a></div><p class="note">The page is 19247 px tall; the capture stops at 4000 px.</p></figure><figure><figcaption>Right</figcaption><div class="frame"><a href="../screenshots/hr-saas-landing/right-390.webp"><img src="../screenshots/hr-saas-landing/right-390.webp" width="390" height="4000" alt="Right build of B2B HR SaaS landing page, 390 px wide" loading="lazy"></a></div><p class="note">The page is 23641 px tall; the capture stops at 4000 px.</p></figure></div>
+  </section>
+
+  <section id="music-festival">
+    <h2>10. Music festival event page</h2>
+    <p class="brief">The event page for a three-day outdoor music festival in late summer, with about forty artists on three stages. It announces the dates and location, the lineup by day, ticket tiers with prices, how to get there and where to stay, and answers to common questions. The main goal is to sell tickets before they run out.</p>
+    <h3>Desktop, 1440 px wide</h3>
+    <div class="pair"><figure><figcaption>Left</figcaption><a href="../screenshots/music-festival/left-1440.webp"><img src="../screenshots/music-festival/left-1440.webp" width="1440" height="4000" alt="Left build of Music festival event page, 1440 px wide" loading="lazy"></a><p class="note">The page is 15038 px tall; the capture stops at 4000 px.</p></figure><figure><figcaption>Right</figcaption><a href="../screenshots/music-festival/right-1440.webp"><img src="../screenshots/music-festival/right-1440.webp" width="1440" height="4000" alt="Right build of Music festival event page, 1440 px wide" loading="lazy"></a><p class="note">The page is 11105 px tall; the capture stops at 4000 px.</p></figure></div>
+    <h3>Mobile, 390 px wide</h3>
+    <div class="pair"><figure><figcaption>Left</figcaption><div class="frame"><a href="../screenshots/music-festival/left-390.webp"><img src="../screenshots/music-festival/left-390.webp" width="390" height="4000" alt="Left build of Music festival event page, 390 px wide" loading="lazy"></a></div><p class="note">The page is 25280 px tall; the capture stops at 4000 px.</p></figure><figure><figcaption>Right</figcaption><div class="frame"><a href="../screenshots/music-festival/right-390.webp"><img src="../screenshots/music-festival/right-390.webp" width="390" height="4000" alt="Right build of Music festival event page, 390 px wide" loading="lazy"></a></div><p class="note">The page is 18071 px tall; the capture stops at 4000 px.</p></figure></div>
+  </section>
+</main>
+</body>
+</html>

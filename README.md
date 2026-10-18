@@ -109,6 +109,8 @@ A different brief — *"a marketing landing page for **Throughline**, a B2B SaaS
 
 <div align="center"><sub>Composed by an AI agent following the companion skill — the prompt described the product and stack, nothing about the layout.</sub></div>
 
+That is one hand-picked example. The [with/without showcase](./showcase/) builds ten briefs twice, with and without this MCP, and shows every pair side by side with the arm hidden. Its results note lists what went wrong and where the control build looked better.
+
 ## How it works
 
 ```mermaid
