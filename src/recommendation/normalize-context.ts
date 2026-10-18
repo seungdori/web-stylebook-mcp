@@ -3,6 +3,7 @@ import type {
 } from '../types.js';
 import type { CatalogRepository } from '../catalog/repository.js';
 import type { ProductContext, ResolvedContext, ResolvedFacet, FacetSource } from './types.js';
+import { contentKeys } from './lexicon.js';
 
 function norm(s: string): string {
   return s.normalize('NFKC').toLowerCase();
@@ -19,13 +20,17 @@ const CJK = /[぀-ヿ㐀-鿿가-힯]/;
  * - CJK needles: substring match (CJK has no word boundaries).
  * - Latin needles: WORD-BOUNDARY match, so short aliases ('bi', 'ops', 'kb') don't
  *   collide with unrelated substrings ('bi' inside 'mobile', 'art' inside 'startup').
- *   This is the dominant correctness fix for natural-language briefs (round 3 #1).
+ * - `inflect` also accepts -s/-es/-ed/-ing forms of needles of 4+ letters ("monitoring" for
+ *   "monitor"). Only task tags opt in: a wrong task tag shifts one score factor, while a wrong
+ *   product type or tone would redirect the whole recommendation.
  */
-function needleMatches(nn: string, text: string): boolean {
+function needleMatches(nn: string, text: string, inflect = false): boolean {
   if (nn.length < 2) return false;
   if (CJK.test(nn)) return text.includes(nn);
   const esc = nn.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return new RegExp(`(?:^|[^a-z0-9])${esc}(?:[^a-z0-9]|$)`).test(text);
+  let form = esc;
+  if (inflect && nn.length >= 4) form = nn.endsWith('e') ? `${esc.slice(0, -1)}(?:e|es|ed|ing)` : `${esc}(?:s|es|ed|ing)?`;
+  return new RegExp(`(?:^|[^a-z0-9])${form}(?:[^a-z0-9]|$)`).test(text);
 }
 
 /**
@@ -44,10 +49,10 @@ function matchSingle(text: string, terms: OntologyTerm[]): { value: string; alia
   return best ? { value: best.value, alias: best.alias } : null;
 }
 
-function matchMulti(text: string, terms: OntologyTerm[]): string[] {
+function matchMulti(text: string, terms: OntologyTerm[], inflect = false): string[] {
   const out: string[] = [];
   for (const term of terms) {
-    if ([term.value, ...term.aliases].some((n) => needleMatches(norm(n), text))) out.push(term.value);
+    if ([term.value, ...term.aliases].some((n) => needleMatches(norm(n), text, inflect))) out.push(term.value);
   }
   return out;
 }
@@ -102,12 +107,14 @@ export function normalizeContext(raw: ProductContext, repo: CatalogRepository): 
   );
 
   let primaryTaskTags: ResolvedFacet<TaskTag[]>;
-  const taskText = norm([...(raw.primaryTasks ?? []), raw.productDescription].join(' '));
-  const matchedTasks = matchMulti(taskText, ont.taskTags) as TaskTag[];
-  if (raw.primaryTasks && raw.primaryTasks.length && matchedTasks.length) {
-    primaryTaskTags = facet(matchedTasks, 'explicit');
-  } else if (matchedTasks.length) {
-    primaryTaskTags = facet(matchedTasks, 'inferred', matchedTasks.join(', '));
+  const statedTasks = matchMulti(norm((raw.primaryTasks ?? []).join(' ')), ont.taskTags, true) as TaskTag[];
+  // Tasks the caller stated win outright; the description only fills the gap when none of them names a task.
+  const describedTasks = statedTasks.length ? [] : matchMulti(norm(raw.productDescription), ont.taskTags, true) as TaskTag[];
+  if (statedTasks.length) {
+    primaryTaskTags = facet(statedTasks, 'explicit');
+  } else if (describedTasks.length) {
+    primaryTaskTags = facet(describedTasks, 'inferred', describedTasks.join(', '));
+    assumptions.push(`primaryTasks inferred as ${describedTasks.join(', ')} (from the description)`);
   } else {
     primaryTaskTags = facet([], 'default');
     missingInformation.push('explicit primary tasks');
@@ -117,9 +124,11 @@ export function normalizeContext(raw: ProductContext, repo: CatalogRepository): 
 
   const { avoidStyleIds, avoidAestheticTerms, avoidedStyleIdsViaAesthetic } = resolveAvoid(raw.avoid ?? [], repo, missingInformation);
 
+  const requestKeys = contentKeys([raw.productDescription, ...(raw.audience ?? []), ...(raw.primaryTasks ?? [])].join(' '));
+
   return {
     productType, tones, density, usageFrequency, trustSensitivity, primaryTaskTags,
-    constraints, avoidStyleIds, avoidAestheticTerms, avoidedStyleIdsViaAesthetic,
+    constraints, avoidStyleIds, avoidAestheticTerms, avoidedStyleIdsViaAesthetic, requestKeys,
     assumptions, missingInformation,
   };
 }

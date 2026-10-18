@@ -17,8 +17,9 @@ state coverage.
 
 1. `recommend_design_direction` with the product context (productType, tone, density,
    usageFrequency, trustSensitivity, constraints, avoid). Use the scored `candidates` as
-   evidence and pick with product context; don't blindly take `candidates[0]`. Note the
-   `rejected` styles and their reasons.
+   evidence and pick with product context; don't blindly take `candidates[0]`. Read `ranking` for why #1
+   beat #2, or that they tie, and list the most important tone first. Note the `rejected` styles and
+   their reasons.
 2. Read `webstylebook://styles/{id}` for your picks and record concise candidate-direction notes.
    Use `search_design_references` with a narrow product/category/tag query, then
    `get_design_reference` for only a few selected examples. Record observedAt, attribution, and

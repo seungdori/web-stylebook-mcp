@@ -71,7 +71,7 @@ export function cautionText(codes: ReasonCode[], style: CatalogStyle, locale: st
 export function matchedText(style: CatalogStyle, ctx: ResolvedContext, locale: string): string[] {
   const f = style.recommendationFacets;
   const out: Tri[] = [];
-  if (f.productTypes.includes(ctx.productType.value)) {
+  if (ctx.productType.value !== 'other' && f.productTypes.includes(ctx.productType.value)) {
     out.push({ en: `Fits ${ctx.productType.value}`, ko: `${ctx.productType.value}에 적합`, ja: `${ctx.productType.value}に適合` });
   }
   const toneHits = ctx.tones.value.filter((t) => f.tones.includes(t));

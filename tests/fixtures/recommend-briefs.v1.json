@@ -1,0 +1,199 @@
+{
+  "schema": "webstylebook.recommend-briefs.v1",
+  "provenance": "Expectations were written from the bundled catalog data and design judgment before the scoring change for issue #6. Any expectation edited afterwards is listed in the pull request with its original value and the reason.",
+  "gapRule": "gap = displayed score of candidates[0] minus the displayed score of the best candidate outside expect.top1. candidates[0] must be in expect.top1 and gap must be at least expect.minGap; the unrounded gap must also be at least expect.minGap - 0.005, so rounding alone cannot satisfy a threshold.",
+  "briefs": [
+    {
+      "id": "sre-monitoring-headline",
+      "brief": {
+        "productDescription": "High-density monitoring dashboard for SREs, watched all day on call",
+        "productType": "operational-saas",
+        "tone": ["calm", "technical"],
+        "density": "high",
+        "usageFrequency": "daily",
+        "avoid": ["cyberpunk"]
+      },
+      "expect": { "top1": ["quiet-utility", "runtime-signal"], "preferred": "quiet-utility", "minGap": 0.03 },
+      "rationale": "Both are ops-dashboard specialists. quiet-utility leads with calm, is light for all-day viewing and sits farther from a cyberpunk look. runtime-signal fits observability best but is dark-only with a glow-overuse risk. Generalist or onboarding-oriented styles (platform-core, notion-style, console-launch) should trail."
+    },
+    {
+      "id": "editorial-essay-blog",
+      "brief": {
+        "productDescription": "Long-form essay blog for a small independent publication; readers come for the writing a few times a week",
+        "productType": "content-editorial",
+        "tone": ["editorial", "calm"],
+        "density": "low",
+        "usageFrequency": "occasional"
+      },
+      "expect": { "top1": ["editorial-silence", "fusion-grain-mono"], "minGap": 0.02 },
+      "rationale": "Both list content-editorial first and lead with editorial then calm. editorial-silence names essays in bestFor; fusion-grain-mono is its textured sibling. zen-minimalism, paper-cut and earth-atelier are further from long-form reading."
+    },
+    {
+      "id": "luxury-fashion-store",
+      "brief": {
+        "productDescription": "Online store for a luxury fashion house with editorial campaign imagery; shoppers browse and make considered purchases a few times a year",
+        "productType": "commerce",
+        "tone": ["premium", "editorial"],
+        "density": "low",
+        "usageFrequency": "occasional",
+        "trustSensitivity": "high"
+      },
+      "expect": { "top1": ["midnight-noir"], "minGap": 0.03 },
+      "rationale": "midnight-noir lists commerce first, leads with premium then editorial, carries medium/high trust and its bestFor is luxury commerce. liquid-metal conflicts with editorial; fusion-noir-metal is cinematic brand pages rather than a store."
+    },
+    {
+      "id": "kids-learning-app",
+      "brief": {
+        "productDescription": "Learning app for children aged 6 to 10 with short reading and math lessons; parents set it up and kids use it a few times a week",
+        "productType": "consumer-app",
+        "tone": ["playful", "calm"],
+        "density": "low",
+        "usageFrequency": "occasional"
+      },
+      "expect": { "top1": ["soft-pastel", "paper-cut"], "minGap": 0.02 },
+      "rationale": "soft-pastel is the catalog's consumer-app primary, pairs calm with playful, supports occasional and daily use and lists read among its strengths for a reading-and-math brief. paper-cut names education in bestFor and leads with playful. claymorphism also names education, but the brief says learning, the catalog says education, and matching has no synonym table by design.",
+      "revised": {
+        "was": { "top1": ["claymorphism", "paper-cut"], "minGap": 0.02 },
+        "reason": "Changed after the first run. The original pair assumed an education match that the brief's wording (learning) cannot produce offline, and claymorphism lists no read strength for a reading lesson app. The fixture brief is unchanged. A variant that says education (not in the fixture) puts paper-cut first and claymorphism third; see the pull request."
+      }
+    },
+    {
+      "id": "developer-docs",
+      "brief": {
+        "productDescription": "API reference and SDK guides for a developer platform; engineers search and read these pages daily while coding",
+        "productType": "documentation",
+        "tone": ["technical", "editorial"],
+        "density": "medium",
+        "usageFrequency": "daily",
+        "primaryTasks": ["search", "read"]
+      },
+      "expect": { "top1": ["fusion-editorial-terminal", "mono-type"], "minGap": 0.02 },
+      "rationale": "Documentation-first styles that pair technical with editorial and support daily use. swiss-poster is a one-off/occasional poster grid; platform-core and runtime-signal list documentation only as a secondary product."
+    },
+    {
+      "id": "fintech-back-office",
+      "brief": {
+        "productDescription": "Back-office reconciliation and ledger tool for a fintech finance team; accountants review mismatches all day",
+        "productType": "finance-admin",
+        "tone": ["trustworthy", "technical"],
+        "density": "high",
+        "usageFrequency": "daily",
+        "trustSensitivity": "high"
+      },
+      "expect": { "top1": ["quiet-utility", "platform-core"], "minGap": 0.02 },
+      "rationale": "A dense, high-trust, all-day tool. Both are medium/high density, medium/high trust and daily-capable, and both are curated finance-admin primaries. fusion-bento-noir and glass-orbit list finance first but carry premium tone and the wrong density or tone order."
+    },
+    {
+      "id": "photographer-portfolio",
+      "brief": {
+        "productDescription": "Portfolio site for a freelance photographer; large images, little text, visitors browse once or twice",
+        "productType": "portfolio",
+        "tone": ["calm", "premium"],
+        "density": "low",
+        "usageFrequency": "one-off"
+      },
+      "expect": { "top1": ["zen-minimalism", "editorial-silence"], "minGap": 0.02 },
+      "rationale": "Quiet, spacious, premium showcase. zen-minimalism is the only low-only density style and a curated portfolio primary; editorial-silence is the other curated primary."
+    },
+    {
+      "id": "cli-automation-console",
+      "brief": {
+        "productDescription": "Terminal-first console for configuring and monitoring CI automation; engineers live in it every day",
+        "productType": "developer-tool",
+        "tone": ["technical"],
+        "density": "high",
+        "usageFrequency": "daily",
+        "primaryTasks": ["configure", "monitor"]
+      },
+      "expect": { "top1": ["terminal-core"], "minGap": 0.02 },
+      "rationale": "terminal-core lists developer-tool first, leads with technical and its bestFor is CLIs and automation products. runtime-signal and console-launch are close alternatives."
+    },
+    {
+      "id": "team-knowledge-base",
+      "brief": {
+        "productDescription": "Internal wiki and help center where a support team writes articles and searches for answers during the day",
+        "productType": "knowledge-base",
+        "tone": ["calm"],
+        "density": "medium",
+        "usageFrequency": "daily",
+        "primaryTasks": ["author", "search"]
+      },
+      "expect": { "top1": ["notion-style"], "minGap": 0.03 },
+      "rationale": "notion-style lists knowledge-base first, covers author and search, is daily-capable and its bestFor is knowledge bases. Editorial and mono styles list knowledge-base as a late secondary."
+    },
+    {
+      "id": "creator-merch-launch",
+      "brief": {
+        "productDescription": "One-off launch page for a creator's limited merch drop; fans visit once and the page should feel loud and fun",
+        "productType": "campaign",
+        "tone": ["bold", "playful"],
+        "density": "medium",
+        "usageFrequency": "one-off"
+      },
+      "expect": { "top1": ["kinetic-pop", "fusion-kinetic-brutal"], "minGap": 0.02 },
+      "rationale": "Both list campaign first, lead with bold and name creators in bestFor. duotone-bold is for repeated listening, not a one-off page."
+    },
+    {
+      "id": "ai-writing-copilot",
+      "brief": {
+        "productDescription": "AI writing assistant that knowledge workers use every day for drafting and editing; conversational and unobtrusive",
+        "productType": "ai-chat",
+        "tone": ["calm", "technical"],
+        "density": "medium",
+        "usageFrequency": "daily"
+      },
+      "expect": { "top1": ["platform-core", "glass-orbit"], "minGap": 0.02 },
+      "rationale": "Daily, calm and technical favors platform-core. glass-orbit is the daily-capable AI-dashboard style. mesh-gradient names AI writing tools but is one-off/occasional and its anti-tones include technical."
+    },
+    {
+      "id": "patient-portal-accessible",
+      "brief": {
+        "productDescription": "Patient portal for booking appointments and reading lab results; used a few times a month by people of all ages",
+        "productType": "healthcare-portal",
+        "tone": ["calm", "trustworthy"],
+        "density": "medium",
+        "usageFrequency": "occasional",
+        "trustSensitivity": "high",
+        "constraints": ["high-contrast-required"]
+      },
+      "expect": { "top1": ["platform-core"], "minGap": 0.03 },
+      "rationale": "high-contrast-required rejects the subtle-border and low-contrast healthcare styles (quiet-utility, soft-pastel). platform-core is the remaining style that claims healthcare-portal."
+    },
+    {
+      "id": "music-streaming-app",
+      "brief": {
+        "productDescription": "Music streaming app for independent artists and their fans; evening listening with big cover art",
+        "productType": "consumer-app",
+        "tone": ["bold", "playful"],
+        "density": "medium",
+        "usageFrequency": "daily"
+      },
+      "expect": { "top1": ["duotone-bold"], "minGap": 0.03 },
+      "rationale": "duotone-bold lists consumer-app first, leads with bold then playful, is occasional/daily and its bestFor is music apps and media libraries. The other bold consumer styles are one-off/occasional or high-spectacle."
+    },
+    {
+      "id": "b2b-devtool-landing",
+      "brief": {
+        "productDescription": "Marketing landing page for a B2B developer-infrastructure startup; visitors evaluate the product once before signing up",
+        "productType": "campaign",
+        "tone": ["technical", "premium"],
+        "density": "medium",
+        "usageFrequency": "one-off"
+      },
+      "expect": { "top1": ["fusion-pure-noir", "fusion-strict-console"], "minGap": 0.02 },
+      "rationale": "Both name B2B SaaS and devtool landings in bestFor and carry technical with premium. brutalist-grid and midnight-noir list anti-tones that conflict."
+    },
+    {
+      "id": "craft-wellness-store",
+      "brief": {
+        "productDescription": "Online shop for a small-batch ceramics and wellness brand; warm, quiet pages that let the products breathe",
+        "productType": "commerce",
+        "tone": ["calm", "premium"],
+        "density": "low",
+        "usageFrequency": "occasional"
+      },
+      "expect": { "top1": ["earth-atelier", "fusion-soft-inflate"], "minGap": 0.02 },
+      "rationale": "earth-atelier names wellness and craft brands and leads with calm then premium; fusion-soft-inflate names ceramics and slow wellness. midnight-noir is dark luxury, not warm and quiet."
+    }
+  ]
+}

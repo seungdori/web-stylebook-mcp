@@ -51,45 +51,59 @@ API 키 없음. 모델 호출 없음. 네트워크 없음. 프로젝트 파일�
 ```
 
 ```jsonc
-// ← 결과
+// ← 결과 (일부만 표시)
 {
   "confidence": "high",
-  "candidates": [                      // 모두 0.91 동점 — 순서는 의미 없음
-    { "styleId": "notion-style",   "score": 0.91 },
-    { "styleId": "platform-core",  "score": 0.91 },
-    { "styleId": "quiet-utility",  "score": 0.91 },
-    { "styleId": "runtime-signal", "score": 0.91 },
-    { "styleId": "console-launch", "score": 0.91 }
+  "candidates": [
+    { "styleId": "quiet-utility",  "score": 0.93 },
+    { "styleId": "runtime-signal", "score": 0.89 },
+    { "styleId": "notion-style",   "score": 0.83 },
+    { "styleId": "console-launch", "score": 0.77 },
+    { "styleId": "platform-core",  "score": 0.77 }
   ],
-  "rejected": [
+  "ranking": {
+    "winner": "quiet-utility",
+    "runnerUp": "runtime-signal",
+    "gap": 0.04,
+    "tied": false,
+    "reasonCodes": ["USE_CASE_FIT", "LOWER_UPKEEP"],
+    "explanation": "quiet-utility — runtime-signal보다 0.04점 높음: bestFor 3개 중 3개가 operational-saas 대상 (runtime-signal: 3개 중 2개); daily 사용 기준 유지 부담이 낮음 (quiet-utility: 모션 low, 유지보수 low; runtime-signal: 모션 low, 유지보수 medium)."
+  },
+  "rejected": [                        // 모두 29개, 3개만 표시
     { "styleId": "aurora-gradient",  "reasonCodes": ["PRODUCT_NOT_IDEAL", "DAILY_USE_OVERSTIMULATION"] },
     { "styleId": "claymorphism",     "reasonCodes": ["PRODUCT_NOT_IDEAL"] },
     { "styleId": "cyberpunk-glitch", "reasonCodes": ["EXPLICITLY_AVOIDED", "DAILY_USE_OVERSTIMULATION"] }
   ],
   "pairings": [
     {
-      "styleId": "macos-liquid-glass",
-      "pairWith": "notion-style",
+      "styleId": "notion-style",
+      "pairWith": "quiet-utility",
       "role": ["forms", "navigation", "repetitive surfaces"],
-      "rationale": "operational-saas용으로 짝지은 보조 스타일 — notion-style의 차분하고 반복적인 화면을 보완한다."
+      "rationale": "operational-saas용으로 짝지은 보조 스타일 — quiet-utility의 차분하고 반복적인 화면을 보완한다."
+    },
+    {
+      "styleId": "macos-liquid-glass",
+      "pairWith": "quiet-utility",
+      "role": ["forms", "navigation", "repetitive surfaces"],
+      "rationale": "operational-saas용으로 짝지은 보조 스타일 — quiet-utility의 차분하고 반복적인 화면을 보완한다."
     }
   ],
-  "guidance": "후보는 점수화된 근거다 — 제품 맥락으로 직접 고르라. candidates[0]은 가장 강한 후보일 뿐 강제가 아니다. 상위 5개 후보가 동점이다 — 그 사이 순서는 의미가 없으니 각 후보의 differentiators와 제품 맥락으로 고르라."
+  "guidance": "후보는 점수화된 근거다 — 제품 맥락으로 직접 고르라. candidates[0]은 가장 강한 후보일 뿐 강제가 아니다."
 }
 ```
 
-여기서 *하지 않는* 것에 주목하세요 — 정답 하나를 내세우지 않습니다. 다섯 방향이 0.91로 동점이고, 탈락한 스타일에는 사유 코드가 붙으며, 페어링은 강제가 아니라 제안입니다. 그 정직함이 핵심입니다. 서버는 근거를 주고, 결정은 에이전트가 합니다.
+여기서 달라진 점에 주목하세요 — 상위 후보가 뚜렷이 다른 점수(0.93, 0.89, 0.83)를 받고, `ranking`이 1위가 2위를 이긴 이유를 알려 줍니다. 이 예시에서는 `quiet-utility`의 `bestFor` 항목이 모두 운영 SaaS를 겨냥하고, 매일 쓰는 용도에 유지 부담이 더 낮습니다. 상위 두 방향의 점수가 정말 같으면 승자를 만들어 내지 않고 `ranking.tied`로 동점이라고 알립니다. 탈락한 스타일에는 사유 코드가 붙고, 페어링은 강제가 아니라 제안입니다. 서버는 근거를 주고, 결정은 에이전트가 합니다.
 
 그다음 고른 방향을 실제 토큰으로:
 
 ```jsonc
-// → compose_design_tokens(style: "notion-style", format: "css-variables", theme: "light")
+// → compose_design_tokens(style: "quiet-utility", format: "css-variables", theme: "light")
 // WCAG 대비 경고 0건
 :root {
   --color-canvas: #ffffff;
-  --color-text:   #37352f;
-  --color-accent: #2383e2;
-  --color-border: #d3d3d1;
+  --color-text:   #1f2328;
+  --color-accent: #526371;
+  --color-border: #cecfd0;
   /* … 역할 기반 색·타이포·간격·radius·모션·밀도 */
 }
 ```
@@ -209,7 +223,7 @@ MCP 설정에 추가:
 
 | 툴 | 받는 것 | 정직한 점 |
 |------|--------------|-----------------|
-| **`recommend_design_direction`** | 사유 코드가 붙은 점수화 스타일 후보, *이유*가 붙은 **탈락** 스타일, 보조 페어링, 신뢰도 | 최종 선택은 모델이 — 이건 근거 제공자입니다 |
+| **`recommend_design_direction`** | 사유 코드가 붙은 점수화 스타일 후보, 1위가 2위를 이긴 이유(또는 동점)를 알리는 `ranking`, *이유*가 붙은 **탈락** 스타일, 보조 페어링, 신뢰도 | 최종 선택은 모델이 — 이건 근거 제공자입니다 |
 | **`compare_design_directions`** | 2~4개 방향을 제품 적합성·반복 사용·밀도·신뢰·차별성·접근성 리스크·모션·유지보수로 비교 | 정답 하나를 선언하지 않습니다 |
 | **`search_design_references`** | 실제 디자인 레퍼런스를 텍스트·카테고리·태그로 제한 검색하고 간결한 다국어 관찰 결과 제공 | 스크린샷이나 브랜드 자산 복제가 아니라 출처가 붙은 연구 요약을 반환합니다 |
 | **`get_design_reference`** | 팔레트·레이아웃·인터랙션·모션 관찰, 정규화 토큰, 원본 리비전, 출처와 권리 고지를 포함한 레퍼런스 1건 | 원 사이트 카피·서체·스크린샷·시각 정체성의 권리는 각 권리자에게 있습니다 |

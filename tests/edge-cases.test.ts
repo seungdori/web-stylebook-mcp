@@ -6,9 +6,16 @@ import { compareDirections } from '../src/recommendation/compare.js';
 import { planUiStates } from '../src/state-atlas/planner.js';
 import { contrastRatio, parseHex } from '../src/tokens/contrast.js';
 import type { ProductContext } from '../src/recommendation/types.js';
+import { repoWithTwin } from './helpers/catalog-variants.js';
 
 const repo = CatalogRepository.load();
 const chroma = (hex: string) => { const c = parseHex(hex)!; return Math.max(c.r, c.g, c.b) - Math.min(c.r, c.g, c.b); };
+
+// A twin scores exactly like the winner, so the top of the list is a real tie.
+const tiedAtTop = (input: ProductContext) => {
+  const winner = recommendDesignDirection(input, repo).candidates[0]!.styleId;
+  return recommendDesignDirection(input, repoWithTwin(repo, winner));
+};
 
 describe('token compiler — usable output for every style (eval #1 regression)', () => {
   it('all 48 styles produce AA-clean, non-saturated tokens in BOTH light and dark', () => {
@@ -47,7 +54,7 @@ describe('token compiler — usable output for every style (eval #1 regression)'
 describe('recommend — ranking, confidence, pairing fixes', () => {
   const sre: ProductContext = { productType: 'operational-saas', productDescription: 'Daily SRE dashboard, calm, dense', tone: ['calm', 'technical'], density: 'high', usageFrequency: 'daily', avoid: ['cyberpunk decoration'] };
 
-  it('merit tie-break demotes console-launch below quiet-utility/runtime-signal (eval #2)', () => {
+  it('ranks console-launch below quiet-utility/runtime-signal on its own scored merits (eval #2)', () => {
     const r = recommendDesignDirection(sre, repo);
     const ids = r.candidates.map((c) => c.styleId);
     const iConsole = ids.indexOf('console-launch');
@@ -64,16 +71,17 @@ describe('recommend — ranking, confidence, pairing fixes', () => {
   });
 
   it('confidence is high for a fully-specified query despite a top tie (eval #5)', () => {
-    expect(recommendDesignDirection(sre, repo).confidence).toBe('high');
+    const tied = tiedAtTop(sre);
+    expect(tied.candidates[0]!.score).toBe(tied.candidates[1]!.score);
+    expect(tied.confidence).toBe('high');
     expect(recommendDesignDirection({ productDescription: 'a thing' }, repo).confidence).toBe('low'); // sparse stays low
   });
 
   it('guidance explains the tie when candidates are tied at the top', () => {
-    const r = recommendDesignDirection(sre, repo);
-    const topScore = r.candidates[0]!.score;
-    if (r.candidates.filter((c) => c.score === topScore).length > 1) {
-      expect(r.guidance.toLowerCase()).toContain('tied');
-    }
+    const r = tiedAtTop(sre);
+    expect(r.candidates[0]!.score).toBe(r.candidates[1]!.score);
+    expect(r.guidance.toLowerCase()).toContain('tied');
+    expect(recommendDesignDirection(sre, repo).guidance.toLowerCase()).not.toContain('tied');
   });
 
   it('pairings never include a secondary whose antiTones conflict with the request (eval #3)', () => {
@@ -242,15 +250,18 @@ describe('round 4 — archetype consistency, ties, order, inference', () => {
     const inputs = [
       { productType: 'finance-admin' as const, tone: ['playful', 'bold'] as never, primaryTasks: ['read', 'search'], usageFrequency: 'occasional' as const },
       { productType: 'operational-saas' as const, tone: ['playful', 'bold'] as never, primaryTasks: ['monitor'], usageFrequency: 'occasional' as const },
-    ];
+    ].map((inp) => ({ ...inp, productDescription: 'x' }));
+    let ties = 0;
     for (const inp of inputs) {
-      const r = recommendDesignDirection({ ...inp, productDescription: 'x' }, repo);
-      const top = r.candidates[0]!.score;
-      const visibleTies = r.candidates.filter((c) => c.score === top).length;
-      const claimsTie = /tied at the top/i.test(r.guidance) || /상위.*동점/.test(r.guidance) || /同点/.test(r.guidance);
-      if (visibleTies > 1) expect(claimsTie, `${visibleTies} visible ties but guidance silent`).toBe(true);
-      if (visibleTies === 1) expect(claimsTie, 'no visible tie but guidance claims one').toBe(false);
+      for (const r of [recommendDesignDirection(inp, repo), tiedAtTop(inp)]) {
+        const top = r.candidates[0]!.score;
+        const visibleTies = r.candidates.filter((c) => c.score === top).length;
+        const claimsTie = /tied at the top/i.test(r.guidance) || /상위.*동점/.test(r.guidance) || /同点/.test(r.guidance);
+        if (visibleTies > 1) { ties++; expect(claimsTie, `${visibleTies} visible ties but guidance silent`).toBe(true); }
+        if (visibleTies === 1) expect(claimsTie, 'no visible tie but guidance claims one').toBe(false);
+      }
     }
+    expect(ties).toBeGreaterThanOrEqual(inputs.length);
   });
 
   it('planUiStates lists are order-independent (sorted), not catalog-array dependent (r4)', () => {

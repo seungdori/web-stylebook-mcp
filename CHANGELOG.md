@@ -6,6 +6,51 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- `recommend_design_direction` no longer returns a wall of ties for a realistic brief (#6). On the README brief
+  (SRE monitoring dashboard, calm and technical, high density, daily use, avoid cyberpunk) five styles scored
+  exactly 0.91 and the order among them was decided by a hidden calmness rank and the style id. Four things caused it:
+  every factor was a membership test capped at 1.0, so any style whose facet lists contained the request earned full
+  credit; the task factor was a constant 0.5 because "monitoring" and "watched" did not match the `monitor` tag;
+  `bestFor` and `avoid` distance were never read; and nothing weighted how specific a style's claim was.
+- Task tags are now matched on inflected forms (`monitoring`, `watched`, `reading`). Tasks the caller states in
+  `primaryTasks` win over words in the description, which only fill the gap when no stated task names a task. Product type
+  and tone inference are unchanged.
+- An unknown product type (omitted, or `other`) is neutral for every style. Before, the one style that lists `other`
+  among its product types beat all others for any brief without a usable `productType`.
+- Ties are judged on the displayed score across every surviving style, so `candidateLimit: 1` can no longer hide a tie
+  with the runner-up.
+
+### Changed
+
+- Scoring is graded and specificity-aware. A style that claims more product types, task strengths or density and usage
+  levels earns less from each hit; the catalog's hand-picked primary styles for a product type count as a full product
+  fit; the order of a style's tones and of the requested `tone` array is weighted; unlisted tasks count as unknown instead
+  of a miss; `bestFor` and `notIdealFor` are read against the brief; a style close to an avoided one loses up to 0.12; a
+  heavier motion and maintenance load costs frequent-use briefs up to 0.06. The hidden calmness rank is gone. Only an
+  exact tie falls back to the style id, and that tie is reported.
+- Scores and candidate order change for most briefs. Clients that pinned a score or a rank should refresh them.
+  The input schema and every existing output field are unchanged.
+- The `tone` array is now read in priority order, so list the most important tone first.
+- `bestFor` and `notIdealFor` are matched against Latin-script words of `productDescription`, `audience` and `primaryTasks`
+  with no synonym table, so write the catalog's wording ("education", not "learning"). A `bestFor` entry earns full credit
+  for two or more shared distinctive words, or for one shared word that does not merely name a kind of product ("dashboard",
+  "developer"; the product-type factor already scores those), and half credit otherwise. A `notIdealFor` entry counts only
+  when the brief repeats the whole phrase or shares two or more of its distinctive words, and a phrase that names a tone,
+  density, usage or trust level and would shrink to one common word without it is left to those factors. Generic words such as "app" and "tool" never change `bestFor`
+  credit. Korean and Japanese briefs still get every other signal.
+- `confidence` is never `high` when the product type is `other`.
+
+### Added
+
+- `ranking` on the `recommend_design_direction` result (optional, absent when only one style survives): `winner`,
+  `runnerUp`, `gap`, `tied`, `reasonCodes` and a short localized `explanation` of why #1 beat #2, or `TIED` when they
+  score alike at the displayed precision. The text fallback prints the same sentence.
+- `useCase` in each candidate's `scoreBreakdown`.
+- `tests/fixtures/recommend-briefs.v1.json`: fifteen realistic briefs with an expected top-1 (or top-2 set) and a
+  minimum score gap, plus ranking, tie, invariant and README-example tests.
+
 ## [0.11.1] — 2026-10-13
 
 ### Fixed

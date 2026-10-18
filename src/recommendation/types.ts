@@ -1,5 +1,5 @@
 import type {
-  ProductType, Tone, Density, UsageFrequency, TrustLevel, TaskTag, Lang,
+  ProductType, Tone, Density, UsageFrequency, TrustLevel, TaskTag, Lang, CatalogStyle,
 } from '../types.js';
 
 export interface ProductContext {
@@ -37,8 +37,45 @@ export interface ResolvedContext {
   avoidAestheticTerms: string[];
   /** style ids matched by an aesthetic avoid term (soft-relaxable in degradation, 05 §10). */
   avoidedStyleIdsViaAesthetic: string[];
+  /** Distinct use-case words from the description, audience and tasks (Latin script only). */
+  requestKeys: string[];
   assumptions: string[];
   missingInformation: string[];
+}
+
+export type FitKey = 'product' | 'useCase' | 'task' | 'tone' | 'density' | 'usage' | 'trust' | 'constraint';
+export type FitBreakdown = Record<FitKey, number>;
+
+export type TermKey = FitKey | 'cautions' | 'upkeep' | 'avoidance';
+/** Weighted score points per factor. Adjustments are negative; the terms sum to the style's total. */
+export type ScoreTerms = Record<TermKey, number>;
+
+export interface UseCaseEvidence {
+  targeted: number;
+  total: number;
+  /** Share of bestFor entries aimed at the requested product type. */
+  share: number;
+  /** 0, 0.5 or 1 from the words the best-matching bestFor entry shares with the brief. */
+  lexical: number;
+  phrase?: string;
+  /** 1 when a notIdealFor entry matches the brief, otherwise 0. */
+  notIdeal: number;
+  notIdealPhrase?: string;
+}
+
+export interface ScoredStyle {
+  style: CatalogStyle;
+  fits: FitBreakdown;
+  terms: ScoreTerms;
+  total: number;
+  softCodes: ReasonCode[];
+  violated: string[];
+  /** How many of the style's strengths are task tags; the more it lists, the less any one task defines it. */
+  taskStrengths: number;
+  /** The catalog lists this style among the hand-picked primaries for the requested product type. */
+  primaryPick: boolean;
+  evidence: UseCaseEvidence;
+  nearestAvoided?: { styleId: string; shared: string[] };
 }
 
 export type ReasonCode =
@@ -76,10 +113,38 @@ export interface RejectedStyle {
   explanation: string;
 }
 
+export type RankReasonCode =
+  | 'PRODUCT_FOCUS'
+  | 'USE_CASE_FIT'
+  | 'TASK_FIT'
+  | 'TONE_FIT'
+  | 'DENSITY_FIT'
+  | 'USAGE_FIT'
+  | 'TRUST_FIT'
+  | 'CONSTRAINT_FIT'
+  | 'FEWER_CAUTIONS'
+  | 'LOWER_UPKEEP'
+  | 'FARTHER_FROM_AVOIDED'
+  | 'TIED';
+
+/** Why candidates[0] ranks above the next-best surviving style, or an honest tie. */
+export interface RankingExplanation {
+  winner: string;
+  runnerUp: string;
+  /** Displayed-score gap, 0 when tied. */
+  gap: number;
+  tied: boolean;
+  /** The factors that decided the order, largest first; ['TIED'] when tied. */
+  reasonCodes: RankReasonCode[];
+  explanation: string;
+}
+
 export interface EvidenceResult {
   candidates: StyleCandidate[];
   pairings: Pairing[];
   rejected: RejectedStyle[];
+  /** Absent when only one style survives. */
+  ranking?: RankingExplanation;
   resolvedContext: {
     normalizedFacets: string[];
     assumptions: string[];
