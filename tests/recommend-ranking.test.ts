@@ -6,9 +6,9 @@ import { CatalogRepository } from '../src/catalog/repository.js';
 import { recommendDesignDirection } from '../src/recommendation/index.js';
 import { normalizeContext } from '../src/recommendation/normalize-context.js';
 import { scoreStyle } from '../src/recommendation/scoring.js';
-import { contentKeys, wordKey } from '../src/recommendation/lexicon.js';
+import { contentKeys, useCaseEvidence, wordKey } from '../src/recommendation/lexicon.js';
 import type { ProductContext, RankReasonCode, StyleCandidate } from '../src/recommendation/types.js';
-import type { CatalogStyle } from '../src/types.js';
+import { repoWith, repoWithTwin } from './helpers/catalog-variants.js';
 
 const repo = CatalogRepository.load();
 const fixturePath = join(dirname(fileURLToPath(import.meta.url)), 'fixtures', 'recommend-briefs.v1.json');
@@ -23,13 +23,9 @@ const headline: ProductContext = {
   avoid: ['cyberpunk'],
 };
 
-function repoWith(styles: CatalogStyle[]): CatalogRepository {
-  const envelope = structuredClone(repo.envelope);
-  envelope.data.styles = styles;
-  return new CatalogRepository(envelope);
-}
-
 const byId = (r: { candidates: StyleCandidate[] }, id: string) => r.candidates.find((c) => c.styleId === id);
+const evidenceOf = (description: string, styleId: string) =>
+  useCaseEvidence(repo.getStyle(styleId)!, new Set(contentKeys(description)), 'other', repo);
 
 describe('scoring terms', () => {
   it('weighted terms add up to the total, with every fit inside 0..1', () => {
@@ -54,6 +50,12 @@ describe('scoring terms', () => {
     expect(new Set(scores).size).toBeGreaterThanOrEqual(4);
     expect(r.candidates[0]!.styleId).toBe('quiet-utility');
     expect(r.ranking?.tied).toBe(false);
+  });
+
+  it('keeps quiet-utility first without the avoid term and with the tones reversed', () => {
+    for (const variant of [{ avoid: [] }, { tone: ['technical', 'calm'] as ProductContext['tone'] }]) {
+      expect(recommendDesignDirection({ ...headline, ...variant }, repo).candidates[0]!.styleId).toBe('quiet-utility');
+    }
   });
 });
 
@@ -87,11 +89,12 @@ describe('ranking explanation', () => {
     for (const { id, brief } of briefs) {
       const r = recommendDesignDirection({ ...brief, candidateLimit: 3 }, repo);
       const [a, b] = r.candidates;
+      if (r.ranking!.tied) continue;
       for (const code of r.ranking!.reasonCodes) {
         const holds = observable[code];
         if (holds) expect(holds(a!, b!), `${id}: ${code} claimed but not visible in scoreBreakdown`).toBe(true);
       }
-      if (!r.ranking!.tied) expect(r.ranking!.reasonCodes.length, id).toBeGreaterThan(0);
+      expect(r.ranking!.reasonCodes.length, id).toBeGreaterThan(0);
     }
   });
 
@@ -117,14 +120,21 @@ describe('ranking explanation', () => {
     expect(ko).toContain('quiet-utility');
     expect(ja).toContain('runtime-signal');
   });
+
+  it('says assumed, not requested, for a level the caller never gave', () => {
+    const { density: _density, ...withoutDensity } = headline;
+    const r = recommendDesignDirection({ ...withoutDensity, productType: 'documentation', tone: ['technical'], avoid: [], usageFrequency: 'one-off', candidateLimit: 10 }, repo);
+    const ranking = r.ranking!;
+    expect(r.resolvedContext.assumptions.join(' ')).toMatch(/density defaulted/);
+    if (/density/.test(ranking.explanation)) expect(ranking.explanation).not.toMatch(/requested density/);
+    const stated = recommendDesignDirection({ ...headline, usageFrequency: 'occasional', candidateLimit: 10 }, repo);
+    expect(stated.ranking!.explanation).not.toMatch(/assumed/);
+  });
 });
 
 describe('ties are reported, never broken silently', () => {
-  const quiet = repo.getStyle('quiet-utility')!;
-  const twin: CatalogStyle = { ...structuredClone(quiet), id: 'quiet-utility-twin' };
-
   it('reports two identical styles as a tie with no preference reason', () => {
-    const r = recommendDesignDirection({ ...headline, candidateLimit: 10 }, repoWith([...repo.allStyles(), twin]));
+    const r = recommendDesignDirection({ ...headline, candidateLimit: 10 }, repoWithTwin(repo, 'quiet-utility'));
     expect(r.candidates.slice(0, 2).map((c) => c.styleId)).toEqual(['quiet-utility', 'quiet-utility-twin']);
     expect(r.candidates[0]!.score).toBe(r.candidates[1]!.score);
     expect(r.ranking).toMatchObject({ winner: 'quiet-utility', runnerUp: 'quiet-utility-twin', gap: 0, tied: true, reasonCodes: ['TIED'] });
@@ -133,18 +143,24 @@ describe('ties are reported, never broken silently', () => {
     expect(r.guidance).toMatch(/tied at the top/);
   });
 
+  it('keeps confidence high for a fully specified brief despite a top tie', () => {
+    const r = recommendDesignDirection(headline, repoWithTwin(repo, 'quiet-utility'));
+    expect(r.ranking!.tied).toBe(true);
+    expect(r.confidence).toBe('high');
+  });
+
   it('reports the tie even when candidateLimit returns only one of the tied styles', () => {
-    const r = recommendDesignDirection({ ...headline, candidateLimit: 1 }, repoWith([...repo.allStyles(), twin]));
+    const r = recommendDesignDirection({ ...headline, candidateLimit: 1 }, repoWithTwin(repo, 'quiet-utility'));
     expect(r.candidates).toHaveLength(1);
     expect(r.ranking!.tied).toBe(true);
     expect(r.guidance).toMatch(/2 candidates are tied at the top/);
   });
 
   it('gives the same answer whatever the order of the catalog', () => {
-    const forward = repoWith([...repo.allStyles(), twin]);
-    const reversed = repoWith([...repo.allStyles(), twin].reverse());
+    const twinned = repoWithTwin(repo, 'quiet-utility');
+    const reversed = repoWith(repo, [...twinned.allStyles()].reverse());
     for (const { brief } of briefs) {
-      expect(JSON.stringify(recommendDesignDirection(brief, reversed))).toBe(JSON.stringify(recommendDesignDirection(brief, forward)));
+      expect(JSON.stringify(recommendDesignDirection(brief, reversed))).toBe(JSON.stringify(recommendDesignDirection(brief, twinned)));
     }
   });
 
@@ -152,6 +168,12 @@ describe('ties are reported, never broken silently', () => {
     const r = recommendDesignDirection(headline, repo);
     expect(r.ranking!.tied).toBe(false);
     expect(r.guidance).not.toMatch(/tied/);
+  });
+
+  it('names what each side leads on when a near-equal pair is a tie', () => {
+    const r = recommendDesignDirection(briefs.find((b) => b.id === 'editorial-essay-blog')!.brief, repo);
+    expect(r.ranking!.tied).toBe(true);
+    expect(r.ranking!.explanation).toMatch(/fusion-grain-mono leads: .*; editorial-silence leads: /);
   });
 });
 
@@ -167,18 +189,24 @@ describe('inputs that used to be ignored now move the score', () => {
   });
 
   it('reads notIdealFor text that no product type maps to', () => {
-    const adult = recommendDesignDirection({ productDescription: 'luxury boutique for adults', productType: 'other', candidateLimit: 10 }, repo);
-    const kids = recommendDesignDirection({ productDescription: 'luxury boutique for children', productType: 'other', candidateLimit: 10 }, repo);
+    const adult = recommendDesignDirection({ productDescription: 'luxury boutique with adult products', productType: 'other', candidateLimit: 10 }, repo);
+    const kids = recommendDesignDirection({ productDescription: 'luxury boutique with children products', productType: 'other', candidateLimit: 10 }, repo);
     expect(byId(kids, 'midnight-noir')!.score).toBeLessThan(byId(adult, 'midnight-noir')!.score);
   });
 
-  it('ignores one incidental word shared with a notIdealFor entry', () => {
-    const wellness = recommendDesignDirection({
-      productDescription: 'Online shop for a small-batch ceramics brand', productType: 'commerce', tone: ['calm'], candidateLimit: 10,
-    }, repo);
-    const cautions = byId(wellness, 'fusion-soft-inflate')!.cautions.join(' ');
-    expect(cautions).not.toMatch(/not ideal/i);
-    expect(wellness.ranking!.explanation).not.toMatch(/notIdealFor/);
+  it('counts a notIdealFor entry only when the brief repeats it, not on one shared word', () => {
+    expect(evidenceOf('Online shop for a small-batch ceramics brand', 'fusion-soft-inflate').notIdeal).toBe(0);
+    expect(evidenceOf('Marketing analytics dashboard for growth teams', 'quiet-utility').notIdeal).toBe(0);
+    expect(evidenceOf('Landing pages and consumer marketing pages', 'quiet-utility').notIdeal).toBe(1);
+    expect(evidenceOf('A developer portfolio', 'earth-atelier').notIdeal).toBe(0);
+    expect(evidenceOf('Developer tools for CI', 'earth-atelier').notIdeal).toBe(1);
+  });
+
+  it('gives half credit to one shared bestFor word and full credit to a repeated phrase', () => {
+    expect(evidenceOf('Launch page for an indie game', 'fusion-cyber-console').lexical).toBe(0.5);
+    expect(evidenceOf('A music streaming service for artists', 'duotone-bold').lexical).toBe(0.5);
+    expect(evidenceOf('A music streaming app for artists', 'duotone-bold').lexical).toBe(1);
+    expect(evidenceOf('Weekly gardening newsletter', 'duotone-bold').lexical).toBe(0);
   });
 
   it('weighs the order of the requested tones', () => {
@@ -207,12 +235,46 @@ describe('inputs that used to be ignored now move the score', () => {
     const drop = (id: string) => byId(without, id)!.score - byId(avoiding, id)!.score;
     expect(drop('console-launch')).toBeGreaterThan(drop('quiet-utility'));
   });
+});
+
+describe('what the brief says about product type, tasks and tone', () => {
+  it('treats an unknown product type as neutral instead of favouring the style that lists other', () => {
+    const unknown = recommendDesignDirection({ productDescription: 'A weather app with big temperature typography', tone: ['calm'], candidateLimit: 10 }, repo);
+    expect(unknown.resolvedContext.normalizedFacets[0]).toContain('other (default)');
+    expect(new Set(unknown.candidates.map((c) => c.scoreBreakdown.product))).toEqual(new Set([0.5]));
+    expect(unknown.ranking!.explanation).not.toMatch(/lists other as a product type/);
+  });
+
+  it('still honours an explicit product type of other', () => {
+    const explicit = recommendDesignDirection({ productDescription: 'A calculator', productType: 'other', tone: ['calm'], candidateLimit: 10 }, repo);
+    expect(byId(explicit, 'neumorphism')!.scoreBreakdown.product).toBeGreaterThan(0.5);
+  });
+
+  it('lets stated primaryTasks win over words in the description', () => {
+    const ctx = normalizeContext({ productDescription: 'Long-form essay blog; readers come for the writing', primaryTasks: ['read'] }, repo);
+    expect(ctx.primaryTaskTags).toEqual({ value: ['read'], source: 'explicit' });
+  });
+
+  it('falls back to the description when the stated tasks name no task', () => {
+    const ctx = normalizeContext({ productDescription: 'A monitoring tool watched all day', primaryTasks: ['do the thing'] }, repo);
+    expect(ctx.primaryTaskTags.source).toBe('inferred');
+    expect(ctx.primaryTaskTags.value).toEqual(['monitor']);
+    expect(ctx.assumptions.join(' ')).toMatch(/primaryTasks inferred as monitor/);
+  });
 
   it('infers task tags from inflected words but not product types', () => {
     const monitoring = recommendDesignDirection({ productDescription: 'A monitoring tool watched all day' }, repo);
     expect(monitoring.resolvedContext.assumptions.join(' ')).toMatch(/primaryTasks inferred as monitor/);
     const stored = recommendDesignDirection({ productDescription: 'Stored procedures for a database' }, repo);
     expect(stored.resolvedContext.normalizedFacets[0]).toContain('other');
+  });
+
+  it('keeps confidence high when the winner carries one of two requested tones', () => {
+    const r = recommendDesignDirection({
+      productDescription: 'Internal wiki for engineers', productType: 'knowledge-base', tone: ['trustworthy', 'technical'],
+      density: 'high', usageFrequency: 'daily', trustSensitivity: 'high',
+    }, repo);
+    expect(r.confidence).toBe('high');
   });
 });
 
@@ -224,10 +286,10 @@ describe('lexicon', () => {
     expect(wordKey('process')).toBe('process');
   });
 
-  it('keeps use-case words and drops generic, function and facet words', () => {
+  it('drops function, number and facet words and keeps the rest', () => {
     const keys = contentKeys('A high-density calm dashboard app for the team, used daily by 12 engineers');
-    expect(keys).toEqual(expect.arrayContaining(['dashboard', 'engineer']));
-    for (const dropped of ['high', 'density', 'calm', 'app', 'team', 'daily', '12', 'the', 'for']) expect(keys).not.toContain(dropped);
+    expect(keys).toEqual(expect.arrayContaining(['dashboard', 'app', 'team', 'engineer']));
+    for (const dropped of ['high', 'density', 'calm', 'daily', '12', 'the', 'for']) expect(keys).not.toContain(dropped);
   });
 
   it('reads Latin script only', () => {

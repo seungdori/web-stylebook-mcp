@@ -55,19 +55,19 @@ API 키 없음. 모델 호출 없음. 네트워크 없음. 프로젝트 파일�
 {
   "confidence": "high",
   "candidates": [
-    { "styleId": "quiet-utility",  "score": 0.93 },
-    { "styleId": "runtime-signal", "score": 0.90 },
+    { "styleId": "quiet-utility",  "score": 0.91 },
+    { "styleId": "runtime-signal", "score": 0.87 },
     { "styleId": "notion-style",   "score": 0.84 },
-    { "styleId": "glass-orbit",    "score": 0.78 },
-    { "styleId": "console-launch", "score": 0.77 }
+    { "styleId": "console-launch", "score": 0.77 },
+    { "styleId": "glass-orbit",    "score": 0.75 }
   ],
   "ranking": {
     "winner": "quiet-utility",
     "runnerUp": "runtime-signal",
-    "gap": 0.03,
+    "gap": 0.04,
     "tied": false,
     "reasonCodes": ["USE_CASE_FIT", "LOWER_UPKEEP"],
-    "explanation": "quiet-utility — runtime-signal보다 0.03점 높음: bestFor 3개 중 3개가 operational-saas 대상 (runtime-signal: 3개 중 2개); daily 사용 기준 유지 부담이 낮음 (quiet-utility: 모션 low, 유지보수 low; runtime-signal: 모션 low, 유지보수 medium)."
+    "explanation": "quiet-utility — runtime-signal보다 0.04점 높음: bestFor 3개 중 3개가 operational-saas 대상 (runtime-signal: 3개 중 2개); daily 사용 기준 유지 부담이 낮음 (quiet-utility: 모션 low, 유지보수 low; runtime-signal: 모션 low, 유지보수 medium)."
   },
   "rejected": [                        // 모두 29개, 3개만 표시
     { "styleId": "aurora-gradient",  "reasonCodes": ["PRODUCT_NOT_IDEAL", "DAILY_USE_OVERSTIMULATION"] },

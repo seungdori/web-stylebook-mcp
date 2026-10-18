@@ -107,13 +107,14 @@ export function normalizeContext(raw: ProductContext, repo: CatalogRepository): 
   );
 
   let primaryTaskTags: ResolvedFacet<TaskTag[]>;
-  const taskText = norm([...(raw.primaryTasks ?? []), raw.productDescription].join(' '));
-  const matchedTasks = matchMulti(taskText, ont.taskTags, true) as TaskTag[];
-  if (raw.primaryTasks && raw.primaryTasks.length && matchedTasks.length) {
-    primaryTaskTags = facet(matchedTasks, 'explicit');
-  } else if (matchedTasks.length) {
-    primaryTaskTags = facet(matchedTasks, 'inferred', matchedTasks.join(', '));
-    assumptions.push(`primaryTasks inferred as ${matchedTasks.join(', ')} (from the description)`);
+  const statedTasks = matchMulti(norm((raw.primaryTasks ?? []).join(' ')), ont.taskTags, true) as TaskTag[];
+  // Tasks the caller stated win outright; the description only fills the gap when none of them names a task.
+  const describedTasks = statedTasks.length ? [] : matchMulti(norm(raw.productDescription), ont.taskTags, true) as TaskTag[];
+  if (statedTasks.length) {
+    primaryTaskTags = facet(statedTasks, 'explicit');
+  } else if (describedTasks.length) {
+    primaryTaskTags = facet(describedTasks, 'inferred', describedTasks.join(', '));
+    assumptions.push(`primaryTasks inferred as ${describedTasks.join(', ')} (from the description)`);
   } else {
     primaryTaskTags = facet([], 'default');
     missingInformation.push('explicit primary tasks');

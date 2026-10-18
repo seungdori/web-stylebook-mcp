@@ -14,8 +14,11 @@ All notable changes to this project are documented here. The format follows
   every factor was a membership test capped at 1.0, so any style whose facet lists contained the request earned full
   credit; the task factor was a constant 0.5 because "monitoring" and "watched" did not match the `monitor` tag;
   `bestFor` and `avoid` distance were never read; and nothing weighted how specific a style's claim was.
-- Task tags are now matched on inflected forms (`monitoring`, `watched`, `reading`). Product type and tone inference
-  are unchanged.
+- Task tags are now matched on inflected forms (`monitoring`, `watched`, `reading`). Tasks the caller states in
+  `primaryTasks` win over words in the description, which only fill the gap when no stated task names a task. Product type
+  and tone inference are unchanged.
+- An unknown product type is neutral for every style. Before, the one style that lists `other` among its product types
+  beat all others for any brief without a usable `productType`.
 - Ties are judged on the displayed score across every surviving style, so `candidateLimit: 1` can no longer hide a tie
   with the runner-up.
 
@@ -25,13 +28,14 @@ All notable changes to this project are documented here. The format follows
   levels earns less from each hit; the order of `productTypes` and of the requested `tone` array is weighted; unlisted
   tasks count as unknown instead of a miss; `bestFor` and `notIdealFor` are read against the brief; a style close to an
   avoided one loses up to 0.12; a heavier motion and maintenance load costs frequent-use briefs up to 0.06. The hidden
-  calmness rank and id order no longer decide anything except an exact tie, and an exact tie is reported.
+  calmness rank is gone. Only an exact tie falls back to the style id, and that tie is reported.
 - Scores and candidate order change for most briefs. Clients that pinned a score or a rank should refresh them.
   The input schema and every existing output field are unchanged.
 - The `tone` array is now read in priority order, so list the most important tone first.
 - `bestFor` and `notIdealFor` are matched against Latin-script words of `productDescription`, `audience` and `primaryTasks`
-  with no synonym table, so write the catalog's wording ("education", not "learning"). Korean and Japanese briefs still get
-  every other signal.
+  with no synonym table, so write the catalog's wording ("education", not "learning"). A `notIdealFor` entry counts only
+  when the brief repeats it, so one shared word never penalizes a style. Korean and Japanese briefs still get every other
+  signal.
 
 ### Added
 
@@ -40,7 +44,7 @@ All notable changes to this project are documented here. The format follows
   score alike at the displayed precision. The text fallback prints the same sentence.
 - `useCase` in each candidate's `scoreBreakdown`.
 - `tests/fixtures/recommend-briefs.v1.json`: fifteen realistic briefs with an expected top-1 (or top-2 set) and a
-  minimum score gap, plus ranking, tie and catalog-order tests.
+  minimum score gap, plus ranking, tie, invariant and README-example tests.
 
 ## [0.11.1] — 2026-10-13
 

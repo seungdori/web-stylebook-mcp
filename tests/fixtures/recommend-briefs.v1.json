@@ -54,7 +54,7 @@
       "rationale": "soft-pastel is the catalog's consumer-app primary, pairs calm with playful, supports occasional and daily use and lists read among its strengths for a reading-and-math brief. paper-cut names education in bestFor and leads with playful. claymorphism also names education, but the brief says learning, the catalog says education, and matching has no synonym table by design.",
       "revised": {
         "was": { "top1": ["claymorphism", "paper-cut"], "minGap": 0.02 },
-        "reason": "Changed after the first run. The original pair assumed an education match that the brief's wording (learning) cannot produce offline, and claymorphism lists no read strength for a reading lesson app. Reworded with education, paper-cut leads and claymorphism is third; see the pull request."
+        "reason": "Changed after the first run. The original pair assumed an education match that the brief's wording (learning) cannot produce offline, and claymorphism lists no read strength for a reading lesson app. The fixture brief is unchanged. A variant that says education (not in the fixture) puts paper-cut first and claymorphism third; see the pull request."
       }
     },
     {
@@ -67,8 +67,12 @@
         "usageFrequency": "daily",
         "primaryTasks": ["search", "read"]
       },
-      "expect": { "top1": ["fusion-editorial-terminal", "mono-type"], "minGap": 0.02 },
-      "rationale": "Documentation-first styles that pair technical with editorial and support daily use. swiss-poster is a one-off/occasional poster grid; platform-core and runtime-signal list documentation only as a secondary product."
+      "expect": { "top1": ["fusion-editorial-terminal", "mono-type"], "minGap": 0.01 },
+      "rationale": "Documentation-first styles that pair technical with editorial and support daily use. swiss-poster is a one-off/occasional poster grid; platform-core and runtime-signal list documentation only as a secondary product.",
+      "revised": {
+        "was": { "top1": ["fusion-editorial-terminal", "mono-type"], "minGap": 0.02 },
+        "reason": "Changed after review. swiss-poster is documentation-first and its bestFor names guides, which the brief repeats (SDK guides), so it offsets its one-off/occasional usage mismatch. For this brief the catalog data separates the documentation styles by at most one point; 0.02 asked for more than the evidence holds."
+      }
     },
     {
       "id": "fintech-back-office",

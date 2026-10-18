@@ -54,19 +54,19 @@ No API key. No model call. No network. No project filesystem access. **Determini
 {
   "confidence": "high",
   "candidates": [
-    { "styleId": "quiet-utility",  "score": 0.93 },
-    { "styleId": "runtime-signal", "score": 0.90 },
+    { "styleId": "quiet-utility",  "score": 0.91 },
+    { "styleId": "runtime-signal", "score": 0.87 },
     { "styleId": "notion-style",   "score": 0.84 },
-    { "styleId": "glass-orbit",    "score": 0.78 },
-    { "styleId": "console-launch", "score": 0.77 }
+    { "styleId": "console-launch", "score": 0.77 },
+    { "styleId": "glass-orbit",    "score": 0.75 }
   ],
   "ranking": {
     "winner": "quiet-utility",
     "runnerUp": "runtime-signal",
-    "gap": 0.03,
+    "gap": 0.04,
     "tied": false,
     "reasonCodes": ["USE_CASE_FIT", "LOWER_UPKEEP"],
-    "explanation": "quiet-utility outranks runtime-signal by 0.03: 3 of 3 bestFor entries aim at operational-saas (runtime-signal: 2 of 3); lighter upkeep for daily use (quiet-utility: motion low, maintenance low; runtime-signal: motion low, maintenance medium)."
+    "explanation": "quiet-utility outranks runtime-signal by 0.04: 3 of 3 bestFor entries aim at operational-saas (runtime-signal: 2 of 3); lighter upkeep for daily use (quiet-utility: motion low, maintenance low; runtime-signal: motion low, maintenance medium)."
   },
   "rejected": [                        // 29 in total, three shown
     { "styleId": "aurora-gradient",  "reasonCodes": ["PRODUCT_NOT_IDEAL", "DAILY_USE_OVERSTIMULATION"] },

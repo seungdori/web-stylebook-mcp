@@ -1,5 +1,5 @@
 import type {
-  CatalogStyle, ProductType, Ontology, ConstraintMapping, RecommendationFacets, TaskTag,
+  CatalogStyle, ProductType, Ontology, ConstraintMapping, RecommendationFacets, TaskTag, Tone,
 } from '../types.js';
 import { TASK_TAGS } from '../types.js';
 import type { CatalogRepository } from '../catalog/repository.js';
@@ -48,7 +48,10 @@ function adjacent(p: ProductType, ont: Ontology): Set<ProductType> {
   return out;
 }
 
-function productFit(pt: ProductType, f: RecommendationFacets, ont: Ontology): number {
+function productFit(ctx: ResolvedContext, f: RecommendationFacets, ont: Ontology): number {
+  const pt = ctx.productType.value;
+  // A product type nobody gave is not a category some style fits: listing 'other' must not beat the rest.
+  if (pt === 'other' && ctx.productType.source === 'default') return 0.5;
   const i = f.productTypes.indexOf(pt);
   if (i >= 0) return 1 - PRODUCT_PRIMACY * i - PRODUCT_BREADTH * (f.productTypes.length - 1);
   if (pt === 'other') return 0.5;
@@ -84,6 +87,16 @@ function toneFit(ctx: ResolvedContext, f: RecommendationFacets): number {
   });
   const conflicts = requested.filter((t) => f.antiTones.includes(t)).length;
   return clamp01(credit / weights - 0.15 * conflicts);
+}
+
+// The share of requested tones a style carries, minus conflicts. Confidence asks whether the winner carries
+// what was asked, so unlike the ranking fit this ignores tone order and slot.
+function toneCoverage(requested: Tone[], f: RecommendationFacets): number {
+  const asked = [...new Set(requested)];
+  if (!asked.length) return 1;
+  const carried = asked.filter((t) => f.tones.includes(t)).length;
+  const conflicts = asked.filter((t) => f.antiTones.includes(t)).length;
+  return clamp01(carried / asked.length - 0.15 * conflicts);
 }
 
 function rangeFit(level: string, declared: string[]): number {
@@ -215,7 +228,6 @@ function upkeepPenalty(ctx: ResolvedContext, f: RecommendationFacets): number {
   return UPKEEP_WEIGHT * (USAGE_WEIGHT[ctx.usageFrequency.value] ?? 0.5) * Math.min(1, load);
 }
 
-/** Exported so tests can check that the weighted terms add up to the total. */
 export function scoreStyle(ctx: ResolvedContext, s: CatalogStyle, repo: CatalogRepository): ScoredStyle {
   const f = s.recommendationFacets;
   const pt = ctx.productType.value;
@@ -223,7 +235,7 @@ export function scoreStyle(ctx: ResolvedContext, s: CatalogStyle, repo: CatalogR
   const violated = ctx.constraints.filter((c) => constraintViolates(c, s, repo.ontology));
   const taskStrengths = f.strengths.filter((x) => (TASK_TAGS as readonly string[]).includes(x.toLowerCase())).length;
   const fits: FitBreakdown = {
-    product: productFit(pt, f, repo.ontology),
+    product: productFit(ctx, f, repo.ontology),
     useCase: useCaseFit(pt, evidence),
     task: taskFit(ctx.primaryTaskTags.value, f, taskStrengths),
     tone: toneFit(ctx, f),
@@ -393,14 +405,15 @@ function computeConfidence(ctx: ResolvedContext, survivors: ScoredStyle[]): 'low
   if (ctx.density.source === 'explicit') e++;
   if (ctx.usageFrequency.source === 'explicit') e++;
   if (ctx.trustSensitivity.source === 'explicit') e++;
-  const top1 = survivors[0]?.total ?? 0;
+  const winner = survivors[0];
+  const top1 = winner?.total ?? 0;
   // SET confidence: how sure are we the candidate SET fits — NOT coupled to the top-2
   // margin, since a strong facet tie (several equally-good options) should not read as
   // low confidence (eval #5). Intra-set ordering uncertainty is surfaced in guidance.
   // But never claim 'high' when the winner fails the user's EXPLICIT tone — the score can
   // clear 0.6 on non-tone facets while the direction is tonally wrong (hardening #4).
-  const topToneFit = survivors[0]?.fits.tone ?? 0;
-  const toneSatisfied = ctx.tones.source !== 'explicit' || topToneFit >= 0.5;
+  const toneSatisfied = ctx.tones.source !== 'explicit'
+    || (winner !== undefined && toneCoverage(ctx.tones.value, winner.style.recommendationFacets) >= 0.5);
   if (e >= 4 && top1 >= 0.6 && ctx.productType.source === 'explicit' && toneSatisfied) return 'high';
   if (e >= 2 && top1 >= 0.5) return 'medium';
   return 'low';

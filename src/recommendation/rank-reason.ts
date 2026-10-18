@@ -134,19 +134,20 @@ function toneClause(a: ScoredStyle, b: ScoredStyle, ctx: ResolvedContext, say: S
 function rangeClause(kind: 'density' | 'usage' | 'trust', a: ScoredStyle, b: ScoredStyle, ctx: ResolvedContext, say: Say): string {
   const [A, B] = [a.style.id, b.style.id];
   const [fa, fb] = [a.style.recommendationFacets, b.style.recommendationFacets];
-  const [ra, rb, requested, label] = kind === 'density'
-    ? [fa.density, fb.density, ctx.density.value, say('density', '밀도', '密度')]
+  const [ra, rb, facet, label] = kind === 'density'
+    ? [fa.density, fb.density, ctx.density, say('density', '밀도', '密度')]
     : kind === 'usage'
-      ? [fa.usageFrequency, fb.usageFrequency, ctx.usageFrequency.value, say('usage', '사용 빈도', '利用頻度')]
-      : [fa.trust, fb.trust, ctx.trustSensitivity.value, say('trust', '신뢰 요구', '信頼要件')];
+      ? [fa.usageFrequency, fb.usageFrequency, ctx.usageFrequency, say('usage', '사용 빈도', '利用頻度')]
+      : [fa.trust, fb.trust, ctx.trustSensitivity, say('trust', '신뢰 요구', '信頼要件')];
+  const stated = facet.source === 'explicit';
   return say(
-    `requested ${label} ${requested}: ${A} spans ${ra.join('/')}, ${B} spans ${rb.join('/')}`,
-    `요청한 ${label} ${requested}: ${A} ${ra.join('/')}, ${B} ${rb.join('/')}`,
-    `要求された${label} ${requested}: ${A}は${ra.join('/')}、${B}は${rb.join('/')}`,
+    `${stated ? 'requested' : 'assumed'} ${label} ${facet.value}: ${A} spans ${ra.join('/')}, ${B} spans ${rb.join('/')}`,
+    `${stated ? '요청한' : '가정한'} ${label} ${facet.value}: ${A} ${ra.join('/')}, ${B} ${rb.join('/')}`,
+    `${stated ? '要求された' : '想定された'}${label} ${facet.value}: ${A}は${ra.join('/')}、${B}は${rb.join('/')}`,
   );
 }
 
-function constraintClause(a: ScoredStyle, b: ScoredStyle, say: Say): string {
+function constraintClause(b: ScoredStyle, say: Say): string {
   const B = b.style.id;
   const list = b.violated.join(', ');
   return say(
@@ -199,14 +200,13 @@ function clauseFor(term: TermKey, a: ScoredStyle, b: ScoredStyle, ctx: ResolvedC
     case 'density': return rangeClause('density', a, b, ctx, say);
     case 'usage': return rangeClause('usage', a, b, ctx, say);
     case 'trust': return rangeClause('trust', a, b, ctx, say);
-    case 'constraint': return constraintClause(a, b, say);
+    case 'constraint': return constraintClause(b, say);
     case 'cautions': return cautionsClause(a, b, say);
     case 'upkeep': return upkeepClause(a, b, ctx, say);
     case 'avoidance': return avoidanceClause(b, say);
   }
 }
 
-/** Contrasts the winner with the runner-up using the weighted terms that produced their scores. */
 export function explainRanking(a: ScoredStyle, b: ScoredStyle, ctx: ResolvedContext, locale: string): RankingExplanation {
   const say: Say = (en, ko, ja) => (locale === 'ko' ? ko : locale === 'ja' ? ja : en);
   const [A, B] = [a.style.id, b.style.id];
@@ -218,10 +218,13 @@ export function explainRanking(a: ScoredStyle, b: ScoredStyle, ctx: ResolvedCont
     .sort((m, n) => n.delta - m.delta);
 
   if (shownA === shownB) {
-    const offsets = [
-      ...leadOf(a, b).slice(0, 1).map(({ term }) => clauseFor(term, a, b, ctx, say)),
-      ...leadOf(b, a).slice(0, 1).map(({ term }) => clauseFor(term, b, a, ctx, say)),
-    ].filter(Boolean);
+    const leading = (x: ScoredStyle, y: ScoredStyle) => {
+      const top = leadOf(x, y)[0];
+      const clause = top ? clauseFor(top.term, x, y, ctx, say) : '';
+      return clause ? [{ id: x.style.id, clause }] : [];
+    };
+    const offsets = [...leading(a, b), ...leading(b, a)]
+      .map(({ id, clause }) => say(`${id} leads: ${clause}`, `${id} 우세: ${clause}`, `${id}が優勢: ${clause}`));
     const shown = shownA.toFixed(2);
     return {
       winner: A, runnerUp: B, gap: 0, tied: true, reasonCodes: ['TIED'],

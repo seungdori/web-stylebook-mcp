@@ -20,7 +20,6 @@ const GENERIC_WORDS = [
 // Tone, density, usage and trust are scored by their own factors; matching their words again would double count.
 const FACET_WORDS = [...TONES, ...DENSITY_LEVELS, ...USAGE_FREQUENCIES, ...TRUST_LEVELS, 'dense', 'density'];
 
-/** Folds plural and verb endings so "monitoring", "monitored" and "monitors" share one key. */
 export function wordKey(word: string): string {
   let w = word;
   if (w.length > 4 && w.endsWith('ies')) w = `${w.slice(0, -3)}y`;
@@ -32,23 +31,25 @@ export function wordKey(word: string): string {
   return w.length > 3 && w.endsWith('e') ? w.slice(0, -1) : w;
 }
 
-const IGNORED_KEYS = new Set([...GENERIC_WORDS, ...FACET_WORDS].map(wordKey));
+const GENERIC_KEYS = new Set(GENERIC_WORDS.map(wordKey));
+const FACET_KEYS = new Set(FACET_WORDS.map(wordKey));
 
 function words(text: string): string[] {
   return text.normalize('NFKC').toLowerCase().split(/[^a-z0-9]+/).filter((w) => w.length > 0);
 }
 
-export function wordKeys(text: string): string[] {
+function wordKeys(text: string): string[] {
   return words(text).map(wordKey);
 }
 
-/** Distinct keys of the words that can tell one use case from another. Latin script only. */
+// Generic words stay in the key list: a phrase such as "developer tools" must be repeated whole to count as
+// evidence against a style, and "tools" is what separates it from any mention of developers.
 export function contentKeys(text: string): string[] {
   const out = new Set<string>();
   for (const w of words(text)) {
     if (w.length < 2 || /^\d+$/.test(w) || FUNCTION_WORDS.has(w)) continue;
     const key = wordKey(w);
-    if (!IGNORED_KEYS.has(key)) out.add(key);
+    if (!FACET_KEYS.has(key)) out.add(key);
   }
   return [...out];
 }
@@ -65,29 +66,31 @@ function targetsProduct(phrase: string, productType: ProductType, repo: CatalogR
   });
 }
 
-// One shared word is weak evidence, because common words such as "small" recur in unrelated phrases.
-// A phrase matches when the brief repeats at least two of its words or half of them.
-function bestMatch(phrases: string[], request: ReadonlySet<string>): { strength: number; phrase?: string } {
+// One shared word is weak evidence, because common words such as "marketing" recur in unrelated phrases.
+// A phrase is repeated in full when the brief holds every one of its words, or when it shares two or more of its
+// distinctive words covering `minCoverage` of them. A single shared distinctive word earns half credit.
+function bestMatch(phrases: string[], request: ReadonlySet<string>, minCoverage: number): { strength: number; phrase?: string } {
   let best: { strength: number; hits: number; phrase: string } | undefined;
   for (const phrase of phrases) {
-    const keys = contentKeys(phrase);
-    const hits = keys.filter((k) => request.has(k)).length;
+    const all = contentKeys(phrase);
+    const core = all.filter((k) => !GENERIC_KEYS.has(k));
+    const hits = core.filter((k) => request.has(k)).length;
     if (hits === 0) continue;
-    const strength = hits >= 2 || hits / keys.length >= 0.5 ? 1 : 0.5;
+    const full = all.every((k) => request.has(k)) || (hits >= 2 && hits / core.length >= minCoverage);
+    const strength = full ? 1 : 0.5;
     if (!best || strength > best.strength || (strength === best.strength && hits > best.hits)) best = { strength, hits, phrase };
   }
   return { strength: best?.strength ?? 0, phrase: best?.phrase };
 }
 
-/** Reads bestFor and notIdealFor: the only style fields that name concrete use cases. */
 export function useCaseEvidence(
   style: CatalogStyle, request: ReadonlySet<string>, productType: ProductType, repo: CatalogRepository,
 ): UseCaseEvidence {
   const total = style.bestFor.length;
   const targeted = productType === 'other' || total === 0
     ? 0 : style.bestFor.filter((p) => targetsProduct(p, productType, repo)).length;
-  const best = bestMatch(style.bestFor, request);
-  const worst = bestMatch(style.notIdealFor, request);
+  const best = bestMatch(style.bestFor, request, 0.4);
+  const worst = bestMatch(style.notIdealFor, request, 0.6);
   return {
     targeted,
     total,
