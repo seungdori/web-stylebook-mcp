@@ -4,6 +4,8 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { CatalogRepository } from '../src/catalog/repository.js';
 import { recommendDesignDirection } from '../src/recommendation/index.js';
+import { normalizeContext } from '../src/recommendation/normalize-context.js';
+import { scoreStyle } from '../src/recommendation/scoring.js';
 import type { ProductContext } from '../src/recommendation/types.js';
 
 interface BriefCase {
@@ -35,6 +37,12 @@ describe('recommend_design_direction brief fixture', () => {
       const outside = result.candidates.find((x) => !c.expect.top1.includes(x.styleId));
       const gap = outside ? (hundredths(top.score) - hundredths(outside.score)) / 100 : Infinity;
       expect(gap, `gap to ${outside?.styleId}; ranked: ${ranked}`).toBeGreaterThanOrEqual(c.expect.minGap - 1e-9);
+
+      if (outside) {
+        const ctx = normalizeContext(c.brief, repo);
+        const exact = scoreStyle(ctx, repo.getStyle(top.styleId)!, repo).total - scoreStyle(ctx, repo.getStyle(outside.styleId)!, repo).total;
+        expect(exact, `unrounded gap to ${outside.styleId}; ranked: ${ranked}`).toBeGreaterThanOrEqual(c.expect.minGap - 0.005);
+      }
 
       if (c.expect.preferred) expect(top.styleId, `ranked: ${ranked}`).toBe(c.expect.preferred);
     });

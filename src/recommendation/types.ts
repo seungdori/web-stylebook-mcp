@@ -72,6 +72,8 @@ export interface ScoredStyle {
   violated: string[];
   /** How many of the style's strengths are task tags; the more it lists, the less any one task defines it. */
   taskStrengths: number;
+  /** The catalog lists this style among the hand-picked primaries for the requested product type. */
+  primaryPick: boolean;
   evidence: UseCaseEvidence;
   nearestAvoided?: { styleId: string; shared: string[] };
 }

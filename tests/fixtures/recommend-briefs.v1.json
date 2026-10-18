@@ -1,7 +1,7 @@
 {
   "schema": "webstylebook.recommend-briefs.v1",
   "provenance": "Expectations were written from the bundled catalog data and design judgment before the scoring change for issue #6. Any expectation edited afterwards is listed in the pull request with its original value and the reason.",
-  "gapRule": "gap = displayed score of candidates[0] minus the displayed score of the best candidate outside expect.top1. candidates[0] must be in expect.top1 and gap must be at least expect.minGap.",
+  "gapRule": "gap = displayed score of candidates[0] minus the displayed score of the best candidate outside expect.top1. candidates[0] must be in expect.top1 and gap must be at least expect.minGap; the unrounded gap must also be at least expect.minGap - 0.005, so rounding alone cannot satisfy a threshold.",
   "briefs": [
     {
       "id": "sre-monitoring-headline",
@@ -67,12 +67,8 @@
         "usageFrequency": "daily",
         "primaryTasks": ["search", "read"]
       },
-      "expect": { "top1": ["fusion-editorial-terminal", "mono-type"], "minGap": 0.01 },
-      "rationale": "Documentation-first styles that pair technical with editorial and support daily use. swiss-poster is a one-off/occasional poster grid; platform-core and runtime-signal list documentation only as a secondary product.",
-      "revised": {
-        "was": { "top1": ["fusion-editorial-terminal", "mono-type"], "minGap": 0.02 },
-        "reason": "Changed after review. swiss-poster is documentation-first and its bestFor names guides, which the brief repeats (SDK guides), so it offsets its one-off/occasional usage mismatch. For this brief the catalog data separates the documentation styles by at most one point; 0.02 asked for more than the evidence holds."
-      }
+      "expect": { "top1": ["fusion-editorial-terminal", "mono-type"], "minGap": 0.02 },
+      "rationale": "Documentation-first styles that pair technical with editorial and support daily use. swiss-poster is a one-off/occasional poster grid; platform-core and runtime-signal list documentation only as a secondary product."
     },
     {
       "id": "fintech-back-office",

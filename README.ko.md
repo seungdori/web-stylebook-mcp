@@ -55,11 +55,11 @@ API 키 없음. 모델 호출 없음. 네트워크 없음. 프로젝트 파일�
 {
   "confidence": "high",
   "candidates": [
-    { "styleId": "quiet-utility",  "score": 0.91 },
-    { "styleId": "runtime-signal", "score": 0.87 },
-    { "styleId": "notion-style",   "score": 0.84 },
+    { "styleId": "quiet-utility",  "score": 0.93 },
+    { "styleId": "runtime-signal", "score": 0.89 },
+    { "styleId": "notion-style",   "score": 0.83 },
     { "styleId": "console-launch", "score": 0.77 },
-    { "styleId": "glass-orbit",    "score": 0.75 }
+    { "styleId": "platform-core",  "score": 0.77 }
   ],
   "ranking": {
     "winner": "quiet-utility",
@@ -92,7 +92,7 @@ API 키 없음. 모델 호출 없음. 네트워크 없음. 프로젝트 파일�
 }
 ```
 
-여기서 달라진 점에 주목하세요 — 다섯 후보가 서로 다른 점수를 받고, `ranking`이 1위가 2위를 이긴 이유를 알려 줍니다. 이 예시에서는 `quiet-utility`의 `bestFor` 항목이 모두 운영 SaaS를 겨냥하고, 매일 쓰는 용도에 유지 부담이 더 낮습니다. 두 방향의 점수가 정말 같으면 승자를 만들어 내지 않고 `ranking.tied`로 동점이라고 알립니다. 탈락한 스타일에는 사유 코드가 붙고, 페어링은 강제가 아니라 제안입니다. 서버는 근거를 주고, 결정은 에이전트가 합니다.
+여기서 달라진 점에 주목하세요 — 상위 후보가 뚜렷이 다른 점수(0.93, 0.89, 0.83)를 받고, `ranking`이 1위가 2위를 이긴 이유를 알려 줍니다. 이 예시에서는 `quiet-utility`의 `bestFor` 항목이 모두 운영 SaaS를 겨냥하고, 매일 쓰는 용도에 유지 부담이 더 낮습니다. 상위 두 방향의 점수가 정말 같으면 승자를 만들어 내지 않고 `ranking.tied`로 동점이라고 알립니다. 탈락한 스타일에는 사유 코드가 붙고, 페어링은 강제가 아니라 제안입니다. 서버는 근거를 주고, 결정은 에이전트가 합니다.
 
 그다음 고른 방향을 실제 토큰으로:
 

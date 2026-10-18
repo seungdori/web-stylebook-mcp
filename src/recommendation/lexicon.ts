@@ -42,8 +42,6 @@ function wordKeys(text: string): string[] {
   return words(text).map(wordKey);
 }
 
-// Generic words stay in the key list: a phrase such as "developer tools" must be repeated whole to count as
-// evidence against a style, and "tools" is what separates it from any mention of developers.
 export function contentKeys(text: string): string[] {
   const out = new Set<string>();
   for (const w of words(text)) {
@@ -52,6 +50,22 @@ export function contentKeys(text: string): string[] {
     if (!FACET_KEYS.has(key)) out.add(key);
   }
   return [...out];
+}
+
+export function distinctiveKeys(text: string): string[] {
+  return contentKeys(text).filter((k) => !GENERIC_KEYS.has(k));
+}
+
+// Words that name a kind of product ("dashboard", "developer", "docs") are scored by the product-type factor and its
+// hard rejections. Sharing one is not evidence of a vertical, so it never counts alone.
+const domainKeysByRepo = new WeakMap<CatalogRepository, ReadonlySet<string>>();
+function domainKeys(repo: CatalogRepository): ReadonlySet<string> {
+  let keys = domainKeysByRepo.get(repo);
+  if (!keys) {
+    keys = new Set(repo.ontology.productTypes.flatMap((t) => [t.value, ...t.aliases]).flatMap(wordKeys));
+    domainKeysByRepo.set(repo, keys);
+  }
+  return keys;
 }
 
 function targetsProduct(phrase: string, productType: ProductType, repo: CatalogRepository): boolean {
@@ -66,19 +80,22 @@ function targetsProduct(phrase: string, productType: ProductType, repo: CatalogR
   });
 }
 
-// One shared word is weak evidence, because common words such as "marketing" recur in unrelated phrases.
-// A phrase is repeated in full when the brief holds every one of its words, or when it shares two or more of its
-// distinctive words covering `minCoverage` of them. A single shared distinctive word earns half credit.
-function bestMatch(phrases: string[], request: ReadonlySet<string>, minCoverage: number): { strength: number; phrase?: string } {
+// One shared word is weak evidence, because common words such as "small" recur in unrelated phrases. A phrase is
+// repeated in full when the brief shares two or more of its distinctive words covering `pairCoverage` of them, or one
+// vertical word (not a product-kind word) that makes up half of the phrase. Anything else that shares a word earns
+// half credit. Generic words never count for or against, so adding "app" or "tool" to a brief changes nothing.
+function bestMatch(
+  phrases: string[], request: ReadonlySet<string>, domain: ReadonlySet<string>, pairCoverage: number,
+): { strength: number; phrase?: string } {
   let best: { strength: number; hits: number; phrase: string } | undefined;
   for (const phrase of phrases) {
-    const all = contentKeys(phrase);
-    const core = all.filter((k) => !GENERIC_KEYS.has(k));
-    const hits = core.filter((k) => request.has(k)).length;
-    if (hits === 0) continue;
-    const full = all.every((k) => request.has(k)) || (hits >= 2 && hits / core.length >= minCoverage);
+    const core = distinctiveKeys(phrase);
+    const hits = core.filter((k) => request.has(k));
+    if (hits.length === 0) continue;
+    const covered = hits.length / core.length;
+    const full = hits.length >= 2 ? covered >= pairCoverage : covered >= 0.5 && hits.some((k) => !domain.has(k));
     const strength = full ? 1 : 0.5;
-    if (!best || strength > best.strength || (strength === best.strength && hits > best.hits)) best = { strength, hits, phrase };
+    if (!best || strength > best.strength || (strength === best.strength && hits.length > best.hits)) best = { strength, hits: hits.length, phrase };
   }
   return { strength: best?.strength ?? 0, phrase: best?.phrase };
 }
@@ -89,8 +106,9 @@ export function useCaseEvidence(
   const total = style.bestFor.length;
   const targeted = productType === 'other' || total === 0
     ? 0 : style.bestFor.filter((p) => targetsProduct(p, productType, repo)).length;
-  const best = bestMatch(style.bestFor, request, 0.4);
-  const worst = bestMatch(style.notIdealFor, request, 0.6);
+  const domain = domainKeys(repo);
+  const best = bestMatch(style.bestFor, request, domain, 0.4);
+  const worst = bestMatch(style.notIdealFor, request, domain, 0.6);
   return {
     targeted,
     total,

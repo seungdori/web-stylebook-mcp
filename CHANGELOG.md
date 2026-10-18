@@ -17,25 +17,28 @@ All notable changes to this project are documented here. The format follows
 - Task tags are now matched on inflected forms (`monitoring`, `watched`, `reading`). Tasks the caller states in
   `primaryTasks` win over words in the description, which only fill the gap when no stated task names a task. Product type
   and tone inference are unchanged.
-- An unknown product type is neutral for every style. Before, the one style that lists `other` among its product types
-  beat all others for any brief without a usable `productType`.
+- An unknown product type (omitted, or `other`) is neutral for every style. Before, the one style that lists `other`
+  among its product types beat all others for any brief without a usable `productType`.
 - Ties are judged on the displayed score across every surviving style, so `candidateLimit: 1` can no longer hide a tie
   with the runner-up.
 
 ### Changed
 
 - Scoring is graded and specificity-aware. A style that claims more product types, task strengths or density and usage
-  levels earns less from each hit; the order of `productTypes` and of the requested `tone` array is weighted; unlisted
-  tasks count as unknown instead of a miss; `bestFor` and `notIdealFor` are read against the brief; a style close to an
-  avoided one loses up to 0.12; a heavier motion and maintenance load costs frequent-use briefs up to 0.06. The hidden
-  calmness rank is gone. Only an exact tie falls back to the style id, and that tie is reported.
+  levels earns less from each hit; the catalog's hand-picked primary styles for a product type count as a full product
+  fit; the order of a style's tones and of the requested `tone` array is weighted; unlisted tasks count as unknown instead
+  of a miss; `bestFor` and `notIdealFor` are read against the brief; a style close to an avoided one loses up to 0.12; a
+  heavier motion and maintenance load costs frequent-use briefs up to 0.06. The hidden calmness rank is gone. Only an
+  exact tie falls back to the style id, and that tie is reported.
 - Scores and candidate order change for most briefs. Clients that pinned a score or a rank should refresh them.
   The input schema and every existing output field are unchanged.
 - The `tone` array is now read in priority order, so list the most important tone first.
 - `bestFor` and `notIdealFor` are matched against Latin-script words of `productDescription`, `audience` and `primaryTasks`
-  with no synonym table, so write the catalog's wording ("education", not "learning"). A `notIdealFor` entry counts only
-  when the brief repeats it, so one shared word never penalizes a style. Korean and Japanese briefs still get every other
-  signal.
+  with no synonym table, so write the catalog's wording ("education", not "learning"). A word that names a kind of product
+  ("dashboard", "developer") earns at most half credit alone, because the product-type factor already scores it. A
+  `notIdealFor` entry counts only when the brief shares one vertical word that is half of the phrase, or two or more of its
+  distinctive words. Generic words such as "app" and "tool" never change a match. Korean and Japanese briefs still get every
+  other signal.
 
 ### Added
 

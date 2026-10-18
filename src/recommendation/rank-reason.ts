@@ -31,16 +31,21 @@ function productClause(a: ScoredStyle, b: ScoredStyle, ctx: ResolvedContext, say
   const [A, B, pt] = [a.style.id, b.style.id, ctx.productType.value];
   const fa = a.style.recommendationFacets.productTypes;
   const fb = b.style.recommendationFacets.productTypes;
-  const ia = fa.indexOf(pt);
-  const ib = fb.indexOf(pt);
-  if (ia >= 0 && ib >= 0) {
+  if (a.primaryPick && !b.primaryPick) {
     return say(
-      `${pt} is #${ia + 1} of ${fa.length} product types for ${A} but #${ib + 1} of ${fb.length} for ${B}`,
-      `제품 유형 ${pt}의 위치: ${A} ${fa.length}개 중 ${ia + 1}번째, ${B} ${fb.length}개 중 ${ib + 1}번째`,
-      `製品タイプ${pt}の位置: ${A}は${fa.length}件中${ia + 1}番目、${B}は${fb.length}件中${ib + 1}番目`,
+      `${A} is a catalog primary pick for ${pt}, ${B} is not`,
+      `${pt}의 카탈로그 대표 스타일 여부: ${A} 해당, ${B} 비해당`,
+      `${pt}のカタログ代表スタイルか: ${A}は該当、${B}は非該当`,
     );
   }
-  if (ia >= 0) {
+  if (fa.includes(pt) && fb.includes(pt)) {
+    return say(
+      `${A} lists ${pt} among ${fa.length} product types, ${B} among ${fb.length}`,
+      `제품 유형 목록(${pt} 포함): ${A} ${fa.length}개, ${B} ${fb.length}개`,
+      `製品タイプ一覧(${pt}を含む): ${A}は${fa.length}件、${B}は${fb.length}件`,
+    );
+  }
+  if (fa.includes(pt)) {
     return say(
       `${A} lists ${pt} as a product type and ${B} does not`,
       `제품 유형에 ${pt} 포함 여부: ${A} 포함, ${B} 미포함`,
@@ -60,6 +65,13 @@ function useCaseClause(a: ScoredStyle, b: ScoredStyle, ctx: ResolvedContext, say
   const lexicalGain = ea.lexical - eb.lexical;
   const shareGain = pt === 'other' ? 0 : ea.share - eb.share;
   if (ea.phrase && lexicalGain > 0 && lexicalGain >= shareGain) {
+    if (ea.lexical < 1) {
+      return say(
+        `bestFor "${ea.phrase}" shares a word with the brief, ${B} has no match`,
+        `요청과 단어가 겹치는 bestFor: "${ea.phrase}" (${B}: 일치 없음)`,
+        `依頼と単語が重なるbestFor: 「${ea.phrase}」(${B}: 一致なし)`,
+      );
+    }
     return say(
       `bestFor "${ea.phrase}" matches the brief${eb.phrase ? ` more closely than ${B}'s "${eb.phrase}"` : `, ${B} has no match`}`,
       `요청과 일치하는 bestFor: "${ea.phrase}" (${B}: ${eb.phrase ? `"${eb.phrase}"` : '일치 없음'})`,
@@ -79,11 +91,12 @@ function taskClause(a: ScoredStyle, b: ScoredStyle, ctx: ResolvedContext, say: S
   const strengths = (s: ScoredStyle) => s.style.recommendationFacets.strengths.map((x) => x.toLowerCase());
   const covered = (s: ScoredStyle) => tasks.filter((t) => strengths(s).includes(t));
   const [ca, cb] = [covered(a), covered(b)];
+  const stated = ctx.primaryTaskTags.source === 'explicit';
   if (ca.length > cb.length) {
     return say(
-      `${ca.join('/')} is a listed strength of ${A}; ${B} ${cb.length ? `lists only ${cb.join('/')}` : 'lists none of the requested tasks'}`,
-      `요청한 작업이 강점에 포함: ${A} ${ca.join('/')}, ${B} ${cb.length ? cb.join('/') : '없음'}`,
-      `強みに含まれる要求タスク: ${A}は${ca.join('/')}、${B}は${cb.length ? cb.join('/') : 'なし'}`,
+      `${ca.join('/')} is a listed strength of ${A}; ${B} ${cb.length ? `lists only ${cb.join('/')}` : `lists none of the ${stated ? 'requested' : 'inferred'} tasks`}`,
+      `${stated ? '요청한' : '추론한'} 작업이 강점에 포함: ${A} ${ca.join('/')}, ${B} ${cb.length ? cb.join('/') : '없음'}`,
+      `強みに含まれる${stated ? '要求' : '推定'}タスク: ${A}は${ca.join('/')}、${B}は${cb.length ? cb.join('/') : 'なし'}`,
     );
   }
   const [ka, kb] = [a.taskStrengths, b.taskStrengths];

@@ -54,11 +54,11 @@ No API key. No model call. No network. No project filesystem access. **Determini
 {
   "confidence": "high",
   "candidates": [
-    { "styleId": "quiet-utility",  "score": 0.91 },
-    { "styleId": "runtime-signal", "score": 0.87 },
-    { "styleId": "notion-style",   "score": 0.84 },
+    { "styleId": "quiet-utility",  "score": 0.93 },
+    { "styleId": "runtime-signal", "score": 0.89 },
+    { "styleId": "notion-style",   "score": 0.83 },
     { "styleId": "console-launch", "score": 0.77 },
-    { "styleId": "glass-orbit",    "score": 0.75 }
+    { "styleId": "platform-core",  "score": 0.77 }
   ],
   "ranking": {
     "winner": "quiet-utility",
@@ -81,7 +81,7 @@ No API key. No model call. No network. No project filesystem access. **Determini
 }
 ```
 
-Notice what it does: five candidates get five different scores, and `ranking` says why #1 beat #2 — here every `bestFor` entry of `quiet-utility` targets operational SaaS, and its upkeep is lighter for daily use. When two directions really do score alike, `ranking.tied` says so instead of inventing a winner. Rejected styles come with reason codes, and pairings are suggestions rather than a mandate. The server provides evidence; the agent decides.
+Notice what it does: the top candidates get clearly different scores (0.93, 0.89, 0.83), and `ranking` says why #1 beat #2 — here every `bestFor` entry of `quiet-utility` targets operational SaaS, and its upkeep is lighter for daily use. When the top two really do score alike, `ranking.tied` says so instead of inventing a winner. Rejected styles come with reason codes, and pairings are suggestions rather than a mandate. The server provides evidence; the agent decides.
 
 Then turn the chosen direction into real tokens:
 

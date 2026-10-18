@@ -12,8 +12,7 @@ import { recommendDesignDirection } from '../src/recommendation/index.js';
 import { normalizeContext } from '../src/recommendation/normalize-context.js';
 import { scoreStyle } from '../src/recommendation/scoring.js';
 import type { ProductContext } from '../src/recommendation/types.js';
-import type { CatalogStyle } from '../src/types.js';
-import { repoWith } from './helpers/catalog-variants.js';
+import { repoWith, repoWithClones } from './helpers/catalog-variants.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const repo = CatalogRepository.load();
@@ -170,8 +169,8 @@ describe('3. ties are reported, not hidden', () => {
   const quiet = repo.getStyle('quiet-utility')!;
 
   it('three identical styles tie: ranking.tied, gap 0, TIED code, guidance counts all tied styles', () => {
-    const twins = ['a', 'b', 'c'].map((s) => ({ ...structuredClone(quiet), id: `quiet-twin-${s}` }));
-    const r = recommendDesignDirection({ ...headline, candidateLimit: 10 }, repoWith(repo, [...repo.allStyles(), ...twins]));
+    const twins = repoWithClones(repo, 'quiet-utility', ['a', 'b', 'c'].map((s) => ({ id: `quiet-twin-${s}` })));
+    const r = recommendDesignDirection({ ...headline, candidateLimit: 10 }, twins);
     expect(r.candidates.slice(0, 4).map((c) => c.score)).toEqual([r.candidates[0]!.score, r.candidates[0]!.score, r.candidates[0]!.score, r.candidates[0]!.score]);
     expect(r.ranking).toMatchObject({ tied: true, gap: 0, reasonCodes: ['TIED'] });
     expect(r.guidance).toMatch(/4 candidates are tied at the top/);
@@ -179,10 +178,8 @@ describe('3. ties are reported, not hidden', () => {
   });
 
   it('a displayed-score tie with a sub-cent unrounded difference is reported as a tie, ordered by unrounded score', () => {
-    const clone: CatalogStyle = { ...structuredClone(quiet), id: 'quiet-clone' };
     // an unshared tag dilutes the overlap with the avoided style: a sub-cent change in the unrounded score
-    clone.tags = [...clone.tags, 'unrelated-tag'];
-    const alt = repoWith(repo, [...repo.allStyles(), clone]);
+    const alt = repoWithClones(repo, 'quiet-utility', [{ id: 'quiet-clone', edit: (style) => { style.tags = [...style.tags, 'unrelated-tag']; } }]);
     const r = recommendDesignDirection({ ...headline, candidateLimit: 10 }, alt);
     const [a, b] = r.candidates;
     expect(a!.score).toBe(b!.score);
@@ -195,9 +192,8 @@ describe('3. ties are reported, not hidden', () => {
   });
 
   it('a one-cent difference is not called a tie', () => {
-    const clone: CatalogStyle = { ...structuredClone(quiet), id: 'quiet-clone' };
-    clone.bestFor = [...clone.bestFor, 'something unrelated'];
-    const r = recommendDesignDirection({ ...headline, candidateLimit: 10 }, repoWith(repo, [...repo.allStyles(), clone]));
+    const alt = repoWithClones(repo, 'quiet-utility', [{ id: 'quiet-clone', edit: (style) => { style.bestFor = [...style.bestFor, 'something unrelated']; } }]);
+    const r = recommendDesignDirection({ ...headline, candidateLimit: 10 }, alt);
     expect(r.candidates[0]!.styleId).toBe('quiet-utility');
     expect(r.ranking).toMatchObject({ tied: false, gap: 0.01, winner: 'quiet-utility', runnerUp: 'quiet-clone' });
     expect(r.guidance).not.toMatch(/tied/);
@@ -222,21 +218,22 @@ describe('4. ranking explanations tell the truth about the catalog', () => {
     }
   });
 
-  it('product rank, facet spans, upkeep levels and tone slots quoted in English explanations match the catalog', () => {
+  it('product counts, facet spans, upkeep levels and tone slots quoted in English explanations match the catalog', () => {
     let quoted = 0;
     for (const b of all) {
       const r = recommendDesignDirection({ ...b, candidateLimit: 3 }, repo);
       const ctx = normalizeContext(b, repo);
       const ex = r.ranking!.explanation;
-      for (const m of ex.matchAll(/([a-z-]+) is #(\d+) of (\d+) product types for ([a-z0-9-]+) but #(\d+) of (\d+) for ([a-z0-9-]+)/g)) {
-        const [, pt, ia, na, sa, ib, nb, sb] = m;
-        const fa = repo.getStyle(sa!)!.recommendationFacets.productTypes;
-        const fb = repo.getStyle(sb!)!.recommendationFacets.productTypes;
-        expect([fa.indexOf(pt as never) + 1, fa.length, fb.indexOf(pt as never) + 1, fb.length]).toEqual([+ia!, +na!, +ib!, +nb!]);
+      for (const m of ex.matchAll(/([a-z0-9-]+) lists ([a-z-]+) among (\d+) product types, ([a-z0-9-]+) among (\d+)/g)) {
+        const [, sa, pt, na, sb, nb] = m;
+        expect(repo.getStyle(sa!)!.recommendationFacets.productTypes.length).toBe(+na!);
+        expect(repo.getStyle(sb!)!.recommendationFacets.productTypes.length).toBe(+nb!);
+        expect(repo.getStyle(sa!)!.recommendationFacets.productTypes).toContain(pt);
+        expect(repo.getStyle(sb!)!.recommendationFacets.productTypes).toContain(pt);
         expect(pt).toBe(ctx.productType.value);
         quoted++;
       }
-      for (const m of ex.matchAll(/requested (density|usage|trust) ([\w-]+): ([a-z0-9-]+) spans ([a-z/-]+), ([a-z0-9-]+) spans ([a-z/-]+)/g)) {
+      for (const m of ex.matchAll(/(?:requested|assumed) (density|usage|trust) ([\w-]+): ([a-z0-9-]+) spans ([a-z/-]+), ([a-z0-9-]+) spans ([a-z/-]+)/g)) {
         const [, kind, level, s1, r1, s2, r2] = m;
         const key = kind === 'density' ? 'density' : kind === 'usage' ? 'usageFrequency' : 'trust';
         expect((repo.getStyle(s1!)!.recommendationFacets as any)[key].join('/')).toBe(r1);

@@ -17,8 +17,8 @@ const ORDINAL: Record<string, number> = { low: 0, medium: 1, high: 2, 'one-off':
 const USAGE_WEIGHT: Record<string, number> = { 'one-off': 0, occasional: 0.5, daily: 1 };
 
 // A style that claims more values for a facet is less specific to any one of them, so a membership
-// hit earns less as the claim widens. productTypes and tones are authored most relevant first.
-const PRODUCT_PRIMACY = 0.03;
+// hit earns less as the claim widens. Tones are authored most relevant first; productTypes are not (16 of the
+// 42 curated primary picks list the product type fourth or later), so only their count matters.
 const PRODUCT_BREADTH = 0.02;
 const TASK_BREADTH = 0.015;
 const RANGE_BREADTH = 0.15;
@@ -48,13 +48,17 @@ function adjacent(p: ProductType, ont: Ontology): Set<ProductType> {
   return out;
 }
 
-function productFit(ctx: ResolvedContext, f: RecommendationFacets, ont: Ontology): number {
+function isPrimaryPick(ctx: ResolvedContext, styleId: string, repo: CatalogRepository): boolean {
+  return repo.getProduct(ctx.productType.value)?.recommendedPrimaryStyleIds.includes(styleId) ?? false;
+}
+
+function productFit(ctx: ResolvedContext, f: RecommendationFacets, ont: Ontology, primaryPick: boolean): number {
   const pt = ctx.productType.value;
-  // A product type nobody gave is not a category some style fits: listing 'other' must not beat the rest.
-  if (pt === 'other' && ctx.productType.source === 'default') return 0.5;
-  const i = f.productTypes.indexOf(pt);
-  if (i >= 0) return 1 - PRODUCT_PRIMACY * i - PRODUCT_BREADTH * (f.productTypes.length - 1);
+  // 'other' says nothing about the product, so no style fits it better than another.
   if (pt === 'other') return 0.5;
+  // The catalog's hand-picked primaries for a product type are its own judgment of a full fit.
+  if (primaryPick) return 1;
+  if (f.productTypes.includes(pt)) return 1 - PRODUCT_BREADTH * (f.productTypes.length - 1);
   const adj = adjacent(pt, ont);
   return f.productTypes.some((x) => adj.has(x)) ? 0.5 : 0.2;
 }
@@ -233,9 +237,10 @@ export function scoreStyle(ctx: ResolvedContext, s: CatalogStyle, repo: CatalogR
   const pt = ctx.productType.value;
   const evidence = useCaseEvidence(s, new Set(ctx.requestKeys), pt, repo);
   const violated = ctx.constraints.filter((c) => constraintViolates(c, s, repo.ontology));
+  const primaryPick = isPrimaryPick(ctx, s.id, repo);
   const taskStrengths = f.strengths.filter((x) => (TASK_TAGS as readonly string[]).includes(x.toLowerCase())).length;
   const fits: FitBreakdown = {
-    product: productFit(ctx, f, repo.ontology),
+    product: productFit(ctx, f, repo.ontology, primaryPick),
     useCase: useCaseFit(pt, evidence),
     task: taskFit(ctx.primaryTaskTags.value, f, taskStrengths),
     tone: toneFit(ctx, f),
@@ -260,7 +265,7 @@ export function scoreStyle(ctx: ResolvedContext, s: CatalogStyle, repo: CatalogR
     avoidance: -avoid.penalty,
   };
   const total = round6(clamp01(Object.values(terms).reduce((sum, x) => sum + x, 0)));
-  return { style: s, fits, terms, total, softCodes: soft.codes, violated, taskStrengths, evidence, nearestAvoided: avoid.nearest };
+  return { style: s, fits, terms, total, softCodes: soft.codes, violated, taskStrengths, primaryPick, evidence, nearestAvoided: avoid.nearest };
 }
 
 function demoteRelaxed(sc: ScoredStyle): ScoredStyle {
