@@ -91,7 +91,7 @@
 
 - `src/tokens/compile.ts`: 계약이 없는 호출이 핀된 작성 섀도를 쓰고, 에디토리얼·모노 스타일은 작성 글꼴을 쓴다.
 - `tests/fixtures/website-visual-parity.v1.json`, `tests/website-parity.test.ts`: 웹사이트 리비전 `b6771f9`의 계약 경로 출력과 기본 경로의 섀도·글꼴을 비교한다.
-- 패키지 버전 `0.11.1`. 정규 카탈로그 버전은 `0.10.1`이다. `v0.11.0`은 게시되지 않았다. `CHANGELOG.md`, `README.md`, `README.ko.md`.
+- 패키지 버전 `0.12.0`. 정규 카탈로그 버전은 `0.10.1`이다. `v0.11.0`은 게시되지 않았다. `CHANGELOG.md`, `README.md`, `README.ko.md`.
 
 입력 스키마와 `DesignTokens` 키, 계약 경로의 해석 결과는 바꾸지 않았다.
 

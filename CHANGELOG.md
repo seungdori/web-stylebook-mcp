@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.12.0] — 2026-10-19
+
 ### Fixed
 
 - `recommend_design_direction` no longer returns a wall of ties for a realistic brief (#6). On the README brief
