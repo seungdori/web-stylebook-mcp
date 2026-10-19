@@ -30,6 +30,7 @@ No API key. No model call. No network. No project filesystem access. **Determini
 | **UX evidence** | "Hick's Law says…" as a conversation-ender | Evidence-labeled prompts (`strong` / `contextual` / `contested`) you can't restate as law |
 | **UI states** | Happy path only; empty / error / loading bolted on later | Required / recommended / domain states up front, per surface |
 | **Tokens** | Hand-picked hexes, contrast rarely checked | Role-based tokens with WCAG contrast warnings |
+| **Structure** | Tokens recolor the default hero + logos + 3 cards template | A layout archetype and signature moves per direction, and an audit that flags the template in the built page |
 | **Audit** | "Looks good" from a summary | Surface-aware checks with stable ids, severity, required evidence, and explicit unverified states |
 | **Result** | Generic AI UI | A defensible design contract the agent builds from |
 
@@ -99,6 +100,54 @@ Then turn the chosen direction into real tokens:
 
 One request in — and the agent chose a direction, saw what was rejected and why, and got tokens that pass WCAG, without generating a line of code.
 
+## Structure, not just tokens
+
+Tokens only recolor a page, so every candidate also carries `structure`: a layout archetype (hero composition, grid rhythm, section order, density, and how the type scale is used), two or three signature moves with the job each one does, and the patterns the page must not ship. `webstylebook://styles/{id}` adds each move's build steps and each ban's detection criteria, and `compose_design_tokens` points back to it (style id, resource URI, and move ids) and prints the hero and moves in its text output. Where an archetype breaks from the style's specimen page, its `basis` is `authored` and `departure` says why.
+
+After building, pass the page's HTML and CSS to `audit_page_structure`. This is its real output for a page an agent built from the default SaaS template ([`generic-saas-tailwind.html`](https://github.com/seungdori/web-stylebook-mcp/blob/master/tests/fixtures/page-structure/generic-saas-tailwind.html)), checked against `quiet-utility`:
+
+```jsonc
+// → audit_page_structure({ html, styleId: "quiet-utility" })
+// ← structure audit (trimmed)
+{
+  "summary": { "clean": false, "findings": 8, "major": 6, "minor": 2, "notVerified": 0, "checked": 12 },
+  "findings": [
+    {
+      "patternId": "logo-strip",
+      "name": "Logo strip",
+      "severity": "major",
+      "locations": ["section#customers > div.mx-auto"],
+      "observed": { "logos": 5, "marquee": false, "muted": true },
+      "replaceWith": {
+        "instruction": "Remove it unless you have permission and a reason to name real customers; show proof a visitor can inspect instead (a real result, artifact, or named case) with this style's proof move.",
+        "moves": [
+          { "id": "hairline-gap-list", "name": "Gap-as-hairline state list", "purpose": "Triage: shows many resources and their current state at an even rhythm, with dividers that cannot drift out of alignment." },
+          { "id": "stepped-state-badges", "name": "Three-step state badges", "purpose": "Calm status: state reads through steps of weight and fill instead of traffic-light colors, so the one urgent item stands out." }
+        ]
+      }
+    },
+    {
+      "patternId": "generic-saas-skeleton",
+      "observed": { "sections": "opening → proof → features → testimonials → cta", "templateSections": 5 },
+      "replaceWith": {
+        "archetype": {
+          "sectionOrder": [
+            "Top bar: breadcrumb path on the left, search and one primary action on the right",
+            "The primary working list or table with its filter row",
+            "A detail or form panel for the selected item",
+            "Secondary panels such as activity, audit history, or settings for the same object",
+            "Empty, loading, and error states drawn in the same slots as the data"
+          ]
+        }
+      }
+    }
+    // 6 more: centered-stack-hero, trusted-by-band, icon-feature-grid, testimonial-carousel, closing-cta-banner, quiet-utility/corner-radius
+  ]
+}
+```
+
+Each finding names where the pattern is, what was observed, and what to put there instead: the chosen style's signature moves for the same job (proof, in the logo strip's case), its hero composition, or its section order. Rebuild, run the audit again, then add `"structure"` to `get_design_audit_plan.includeGroups` and pass the returned `evidence` and `results` to `validate_design_audit_result`. Audit each viewport with its own `targetId`: the evidence ids include it, so the runs validate together. The checks are deterministic heuristics over the submitted HTML and CSS, not a browser render, so `clean` means every check ran and found none of these patterns, not that the design passed. Per-style guidance (archetypes and moves) is written in English, like the catalog's own `layout` and `typography` fields; pattern names and instructions follow `locale`.
+
 ## What an agent builds with it
 
 A different brief — *"a marketing landing page for **Throughline**, a B2B SaaS that turns scattered customer feedback (support tickets, sales calls, app reviews, Slack) into one prioritized roadmap."* No layout, no hero, no styling was specified. Following the companion skill, the agent composed the opening **from the product's core idea** instead of reaching for a stock hero: the right half is a bespoke diagram of the product's actual mechanic — feedback sources converging into an auto-ranked roadmap — not a decorative card you could paste onto any other site.
@@ -125,13 +174,16 @@ flowchart LR
     C --> K[search_design_references]
     C --> L[get_design_reference]
     C --> M[validate_design_audit_result]
-    D & E & F & G & H & I & J & K & L -->|design contracts<br/>observations · scores · reasons<br/>placement · evidence · tokens| A
+    C --> N[audit_page_structure]
+    D & E & F & G & H & I & J & K & L -->|design contracts<br/>observations · scores · reasons<br/>placement · evidence · tokens · structure| A
+    A -->|built page HTML · CSS| N
+    N -->|banned patterns · replacement moves<br/>evidence for the structure checks| A
     A -->|target matrix · evidence refs<br/>one verdict per check/target| M
     M -->|coverage · normalized verdicts<br/>plan/evidence/result hashes| A
     A -->|writes code<br/>from evidence| Z[Your UI]
 ```
 
-The agent describes the product; the server scores its curated catalog and returns structured evidence. After inspection, the validator checks the result contract without opening the referenced artifacts or judging visual quality. No code is generated and nothing leaves your machine.
+The agent describes the product; the server scores its curated catalog and returns structured evidence. After building, the agent passes the page markup to the structure audit, which never reads files on its own. After inspection, the validator checks the result contract without opening the referenced artifacts or judging visual quality. No code is generated and nothing leaves your machine.
 
 ## Install
 
@@ -212,7 +264,7 @@ Add the same block to your `claude_desktop_config.json`, then restart:
 
 | Tool | What you get | The honest part |
 |------|--------------|-----------------|
-| **`recommend_design_direction`** | Scored style candidates with reason codes, a `ranking` that says why #1 beat #2 (or reports a tie), **rejected** styles with *why*, secondary pairings, confidence | The model makes the final pick — this is the evidence provider |
+| **`recommend_design_direction`** | Scored style candidates with reason codes, a `ranking` that says why #1 beat #2 (or reports a tie), **rejected** styles with *why*, secondary pairings, confidence, and each candidate's page `structure` | The model makes the final pick — this is the evidence provider |
 | **`compare_design_directions`** | 2–4 directions compared across product-fit, repeated-use, density, trust, distinctiveness, accessibility-risk, motion, maintenance | No single winner is declared |
 | **`search_design_references`** | Bounded search across real-world references by text, category, and tags, with concise localized observations | Returns attributed research summaries, not copied screenshots or brand assets |
 | **`get_design_reference`** | One complete localized reference with palette/layout/interaction/motion observations, normalized tokens, source revision, attribution, and rights notice | Original-site copy, typefaces, screenshots, and visual identity remain with their owners |
@@ -222,8 +274,11 @@ Add the same block to your `claude_desktop_config.json`, then restart:
 | **`compose_design_tokens`** | Role-based tokens as `json` / `css-variables` / `tailwind` / `typescript`; opt into the shared visual contract to preserve authored style values and editor changes | Contract mode uses authored color modes and applies only explicitly accepted contrast repairs |
 | **`get_design_audit_plan`** | Localized, surface-aware checks with stable ids, severity, applicability, required evidence, remediation, user-facing content checks, selected principle checks, and UI-state coverage | The tool plans the audit but never pretends it inspected your project; missing evidence is `NOT_VERIFIED`, not `PASS` |
 | **`validate_design_audit_result`** | Contract validation for the plan query, target matrix, durable evidence references, and one verdict per check/target, with normalized verdicts and stable hashes | It verifies coverage and evidence consistency, not visual quality; `valid: true` is never an overall design pass |
+| **`audit_page_structure`** | Banned generic and style-specific patterns found in the HTML and CSS you pass in, each with its location, observed values, and the chosen style's replacement moves, plus evidence and results for the `structure` audit group | Declared-style heuristics, not a browser; a clean result is not a design pass |
 
 **Catalog:** 520 real-world design references · 48 styles · 25 interface design principles · 23 UX principles · 51 structured audit checks · 20 components · 5 surfaces · 57 UI-state recipes · 29 motion profiles · 14 product archetypes.
+
+**Structure:** 48 layout archetypes · 144 signature moves · 9 banned generic patterns · 142 style-specific bans from 19 detectors.
 
 The reference library is an adapted, high-completeness subset of [OpenDesign](https://opendesign.cc), whose structured specifications are licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Web Stylebook excludes upstream screenshots and brand assets. Original sites, brands, copy, typefaces, and visual identities remain the property of their respective owners; inspect each detail's attribution and rights notice before use.
 
@@ -275,6 +330,7 @@ webstylebook://states/surfaces · /states/{surface} · /states/{surface}/{state}
 webstylebook://products · /products/{id}
 webstylebook://references · /references/{id}
 webstylebook://policies/anti-patterns · /policies/verification · /policies/audit-checks
+webstylebook://structure/banned-patterns
 ```
 
 Style detail accepts optional `locale`, `mode`, and expected `revision` query parameters, for example `webstylebook://styles/brutalist-grid?locale=ko&mode=light`. It returns one resolved locale and mode; unsupported values, duplicate parameters, and unknown query names return an explicit error.
@@ -309,7 +365,9 @@ user-task value rather than banned as types.
 `validate_design_audit_result` regenerates the plan and rejects stale plan hashes, missing or duplicate
 result slots, broken evidence references, cross-target evidence, invalid regions, unsupported
 `NOT_APPLICABLE`, and `PASS` that lacks required evidence or contradicts failed evidence. Missing result
-slots are materialized as `NOT_VERIFIED`, never hidden. The result carries content-addressed plan,
+slots are materialized as `NOT_VERIFIED`, never hidden. With `includeGroups` containing `structure` and a
+`styleId`, the plan adds one automated check per banned pattern; `audit_page_structure` returns evidence and
+results for those check ids that the validator accepts as they are. The result carries content-addressed plan,
 evidence-bundle, and normalized-result hashes for comparable rechecks. The tool never opens the
 artifact references and never turns contract validity into a design-quality score.
 
@@ -384,7 +442,7 @@ source check.
 - **Transport:** stdio (Model Context Protocol)
 - **Clients:** Codex CLI / IDE extension, Claude Code, Claude Desktop, Cursor, Windsurf, and any MCP-compatible client
 
-Calls without `contract` keep the same token shape and light-mode default. As of 0.11.0, those calls emit the pinned style's authored shadows instead of the generic soft shadow, and editorial or monospace-led styles emit authored font families instead of the style-family fonts. Color, type scale, line-height, spacing, radius, motion, and omitted density stay on the previous legacy path. An explicit `density` still takes precedence over a family's row and gutter, and CSS / theme output retains line-height tokens. Pass `contract` for the full authored specification. The shared contract is additive; no new tool is required.
+Tool inputs are unchanged apart from new optional values, and `structure` is an added output field. Plans requested without `includeGroups` keep their checks and hash, because `structure` is opt-in. Calls without `contract` keep the same token shape and light-mode default. As of 0.11.0, those calls emit the pinned style's authored shadows instead of the generic soft shadow, and editorial or monospace-led styles emit authored font families instead of the style-family fonts. Color, type scale, line-height, spacing, radius, motion, and omitted density stay on the previous legacy path. An explicit `density` still takes precedence over a family's row and gutter, and CSS / theme output retains line-height tokens. Pass `contract` for the full authored specification. The shared contract is additive; no new tool is required.
 
 ## License
 

@@ -1,6 +1,6 @@
 import type { CatalogRepository } from '../catalog/repository.js';
 import { VISUAL_SCHEMA } from '../catalog/visual.js';
-import { TokenError, type ComposeDesignTokensInput, type ComposeDesignTokensResult } from './compile.js';
+import { TokenError, type ComposeDesignTokensInput, type TokenSetResult } from './compile.js';
 import type { DesignTokens } from '../types.js';
 import type { ResolvedVisualContract, VisualOverrides } from '../visual-canonical/types.js';
 import { assessContrast, proposeContrastRepairs, parseVisualColor } from '../visual-canonical/contrast.js';
@@ -46,7 +46,7 @@ function resolveOverrides(input: ComposeDesignTokensInput): VisualOverrides {
   return overrides;
 }
 
-export function composeContractTokens(input: ComposeDesignTokensInput, repo: CatalogRepository): ComposeDesignTokensResult {
+export function composeContractTokens(input: ComposeDesignTokensInput, repo: CatalogRepository): TokenSetResult {
   if (input.contract?.schema !== VISUAL_SCHEMA) throw new TokenError(`Unsupported visual contract schema '${input.contract?.schema}'; use '${VISUAL_SCHEMA}'`);
   if (!repo.getStyle(input.primaryStyleId)) throw new TokenError(`unknown style '${input.primaryStyleId}'`);
   if (input.secondaryStyleId !== undefined) throw new TokenError('secondaryStyleId is a legacy accent-only overlay; contract requests must send explicit colors, typography or spacing in overrides');

@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<body>
+  <main>
+    <article>
+      <h1>Token budgets</h1>
+      <p>Each request reserves a token budget. The budget is used by the scheduler to decide which job runs next.</p>
+      <p>This value is trusted by the compiler only after the schema check passes.</p>
+      <pre><code>budget.reserve(512)</code></pre>
+    </article>
+    <section>
+      <h2>Next: read the scheduler source</h2>
+      <p>The queue lives in src/scheduler/queue.ts; start with the reserve and release functions.</p>
+      <a href="/docs/scheduler">Open the scheduler guide</a>
+    </section>
+  </main>
+</body>
+</html>

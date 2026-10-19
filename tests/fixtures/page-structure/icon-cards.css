@@ -1,0 +1,4 @@
+.features { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; }
+.feature { padding: 32px; border-radius: 20px; background: #f8fafc; box-shadow: 0 10px 30px rgba(15, 23, 42, .08); }
+.feature__icon { width: 48px; height: 48px; border-radius: 12px; display: grid; place-items: center; background: #e0e7ff; }
+.feature__icon i { font-size: 22px; }

@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <style>
+    body { margin: 0; background: #0b1020; color: #e5e7eb; }
+    .hero { display: grid; grid-template-columns: 5fr 7fr; gap: 48px; padding: 72px 48px; text-align: left;
+      background: radial-gradient(1200px 600px at 80% -10%, rgba(56, 189, 248, .25), transparent 60%); }
+    .hero::after { content: ""; position: absolute; right: 0; top: 0; width: 400px; height: 400px; filter: blur(80px);
+      background: radial-gradient(circle, #38bdf8, transparent); border-radius: 50%; }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <div>
+        <h1>Find the failing deploy before your users do</h1>
+        <p>Every deploy gets a diff of error rates, latency, and the commits that changed them.</p>
+        <a href="/connect">Connect a repo</a>
+      </div>
+      <table aria-label="Deploy comparison">
+        <thead><tr><th>Deploy</th><th>Errors</th><th>p95</th></tr></thead>
+        <tbody><tr><td>#4821</td><td>0.4%</td><td>212 ms</td></tr><tr><td>#4822</td><td>3.1%</td><td>890 ms</td></tr></tbody>
+      </table>
+    </section>
+    <section><h2>Read the regression</h2><p>Open a deploy to see the three commits that moved p95, ranked by blast radius.</p></section>
+  </main>
+</body>
+</html>

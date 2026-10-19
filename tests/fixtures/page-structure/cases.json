@@ -1,0 +1,38 @@
+{
+  "schema": "webstylebook.structure-fixtures.v1",
+  "description": "Built-page fixtures for audit_page_structure. 'found' lists every pattern the page must trigger; every other global pattern must not be found. 'targets' names the patterns a false-positive fixture is designed to tempt.",
+  "cases": [
+    {
+      "file": "generic-saas-tailwind.html",
+      "kind": "positive",
+      "styleId": "quiet-utility",
+      "found": ["centered-stack-hero", "logo-strip", "trusted-by-band", "icon-feature-grid", "testimonial-carousel", "closing-cta-banner", "generic-saas-skeleton", "quiet-utility/corner-radius"],
+      "notFound": ["quiet-utility/imagery", "quiet-utility/backdrop-blur"]
+    },
+    { "file": "gradient-blob-hero.html", "kind": "positive", "found": ["gradient-blob-hero", "centered-stack-hero"], "superseded": ["centered-stack-hero"] },
+    { "file": "gradient-blob-pseudo.html", "kind": "positive", "found": ["gradient-blob-hero", "centered-stack-hero"], "superseded": ["centered-stack-hero"] },
+    { "file": "stock-photo-hero.html", "kind": "positive", "found": ["stock-photo-hero"] },
+    { "file": "trusted-by-avatars.html", "kind": "positive", "found": ["trusted-by-band"] },
+    { "file": "korean-saas.html", "kind": "positive", "found": ["centered-stack-hero", "trusted-by-band", "closing-cta-banner", "generic-saas-skeleton"] },
+    { "file": "testimonial-carousel-plain.html", "kind": "positive", "found": ["testimonial-carousel"] },
+    { "file": "logo-marquee.html", "kind": "positive", "found": ["logo-strip"] },
+    { "file": "icon-cards-css.html", "css": ["icon-cards.css"], "kind": "positive", "found": ["icon-feature-grid"] },
+    { "file": "fp-left-hero-product-ui.html", "kind": "false-positive", "targets": ["gradient-blob-hero", "centered-stack-hero"], "found": [] },
+    { "file": "fp-centered-auth.html", "kind": "false-positive", "targets": ["centered-stack-hero"], "found": [] },
+    { "file": "fp-functional-logo-rows.html", "kind": "false-positive", "targets": ["logo-strip"], "found": [] },
+    { "file": "fp-cards-without-icons.html", "kind": "false-positive", "targets": ["icon-feature-grid"], "found": [] },
+    { "file": "fp-static-quotes-and-gallery.html", "kind": "false-positive", "targets": ["testimonial-carousel", "generic-saas-skeleton"], "found": [] },
+    { "file": "fp-technical-copy.html", "kind": "false-positive", "targets": ["trusted-by-band", "closing-cta-banner"], "found": [] },
+    { "file": "fp-closing-with-form.html", "kind": "false-positive", "targets": ["closing-cta-banner"], "found": [] },
+    { "file": "fp-aurora-field.html", "kind": "false-positive", "targets": ["gradient-blob-hero"], "found": [] },
+    { "file": "fp-unsplash-gallery.html", "kind": "false-positive", "targets": ["stock-photo-hero"], "found": [] },
+    {
+      "file": "replaced-quiet-utility.html",
+      "kind": "false-positive",
+      "styleId": "quiet-utility",
+      "targets": ["centered-stack-hero", "logo-strip", "icon-feature-grid", "testimonial-carousel", "closing-cta-banner", "generic-saas-skeleton"],
+      "found": [],
+      "notFound": ["quiet-utility/corner-radius", "quiet-utility/imagery", "quiet-utility/backdrop-blur"]
+    }
+  ]
+}

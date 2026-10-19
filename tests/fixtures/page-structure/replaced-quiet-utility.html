@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <style>
+    body { margin: 0; font-family: Inter, system-ui, sans-serif; background: #ffffff; color: #1f2328; }
+    .shell { display: grid; grid-template-columns: 240px minmax(0, 1fr); min-height: 100vh; }
+    .sidebar { background: #edf2f4; border-right: 1px solid #ccd6dd; padding: 16px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 24px; border-bottom: 1px solid #ccd6dd; }
+    .crumbs { font-size: 0.9rem; font-weight: 600; color: #526371; }
+    .list { display: grid; gap: 1px; background: #ccd6dd; border: 1px solid #ccd6dd; border-radius: 8px; overflow: hidden; }
+    .row { display: flex; justify-content: space-between; padding: 12px 16px; background: #ffffff; font-size: 0.875rem; }
+    .badge { font-size: 0.75rem; padding: 4px 10px; border: 1px solid #ccd6dd; border-radius: 4px; }
+    .badge--accent { background: #526371; color: #ffffff; border-color: #526371; }
+    .panel { border: 1px solid #ccd6dd; border-radius: 16px; padding: 16px; }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar"><nav aria-label="Workspace"><a href="/people">People</a><a href="/hiring">Hiring</a><a href="/payroll">Payroll</a></nav></aside>
+    <main>
+      <section>
+        <div class="topbar">
+          <span class="crumbs">Staffline / People / Onboarding</span>
+          <form role="search"><input type="search" name="q" aria-label="Search people"></form>
+        </div>
+        <h1 style="font-size: 2.5rem; letter-spacing: -0.04em">Onboarding this week</h1>
+        <div class="list" role="list">
+          <div class="row" role="listitem"><span>Contract signed: J. Alvarez</span><span class="badge">Done / Mon</span></div>
+          <div class="row" role="listitem"><span>Laptop shipped: J. Alvarez</span><span class="badge">In transit / Tue</span></div>
+          <div class="row" role="listitem"><span>Payroll profile: R. Singh</span><span class="badge badge--accent">Missing tax form</span></div>
+        </div>
+      </section>
+      <section class="panel">
+        <h2>R. Singh — payroll profile</h2>
+        <dl><dt>Start date</dt><dd>3 November</dd><dt>Blocked by</dt><dd>W-4 form not uploaded</dd></dl>
+      </section>
+      <section class="panel">
+        <h2>Audit history</h2>
+        <ol><li>09:12 Offer accepted by R. Singh</li><li>09:40 Contract countersigned by HR</li></ol>
+        <a href="/people/singh/payroll">Request the W-4 from R. Singh</a>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

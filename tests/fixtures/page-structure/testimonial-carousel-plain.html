@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <style>
+    .reviews__track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 24px; }
+    .review { flex: 0 0 100%; scroll-snap-align: center; }
+  </style>
+</head>
+<body>
+  <main>
+    <section><h1>Ship docs your users can search</h1><pre><code>docs build --search</code></pre></section>
+    <section aria-roledescription="carousel" aria-label="What customers say">
+      <h2>What our customers say</h2>
+      <div class="reviews__track">
+        <article class="review"><p>“We replaced three tools with this one and never looked back.”</p><p>Priya, Platform lead</p></article>
+        <article class="review"><p>“Our support tickets dropped by forty percent in a month.”</p><p>Tom, Support manager</p></article>
+        <article class="review"><p>“Setup took ten minutes and the search is instant.”</p><p>Ana, Developer advocate</p></article>
+      </div>
+    </section>
+    <section><h2>Search index size</h2><p>The index for 2,400 pages is 1.8 MB and loads in one request.</p></section>
+  </main>
+</body>
+</html>

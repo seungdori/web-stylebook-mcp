@@ -39,6 +39,10 @@ import {
   type ValidatedDesignAuditResult,
 } from '../audit/evaluator.js';
 import { composeDesignTokens, TokenError, type ComposeDesignTokensResult } from '../tokens/compile.js';
+import {
+  auditPageStructure, PAGE_LIMITS, StructureAuditError, type StructureAuditResult,
+} from '../structure/audit.js';
+import { styleStructure, type StyleStructureSummary } from '../structure/guidance.js';
 import { zVisualOverrides, zVisualRepair } from '../visual-canonical/schema.js';
 import { serializeVisualJson } from '../visual-canonical/export.js';
 import {
@@ -213,6 +217,12 @@ function toToolError(e: unknown, repo: CatalogRepository): ToolError {
     // a color/format problem is INVALID_INPUT, not a missing style
     return new ToolError('INVALID_INPUT', e.message);
   }
+  if (e instanceof StructureAuditError) {
+    if (e.kind === 'STYLE_NOT_FOUND' && e.unknownId) {
+      return new ToolError('STYLE_NOT_FOUND', e.message, nearestIds(e.unknownId, repo.allStyles().map((s) => s.id)));
+    }
+    return new ToolError('INVALID_INPUT', e.message);
+  }
   if (e instanceof CompareError) {
     // mirror the token/state tools: an unknown style id is STYLE_NOT_FOUND + near-miss suggestions
     const m = /unknown (?:secondary )?style '([^']+)'/.exec(e.message);
@@ -225,7 +235,7 @@ function toToolError(e: unknown, repo: CatalogRepository): ToolError {
 export function registerTools(server: McpServer, repo: CatalogRepository): void {
   server.registerTool('recommend_design_direction', {
     title: 'Recommend a design direction',
-    description: 'Given product context, return scored style candidates with reason codes, rejected styles with reasons, secondary pairings, assumptions and confidence. Evidence-provider: the host model makes the final pick. Call before writing UI. The "tone" field (named "tone", not "tones") is an ARRAY of zero or more of: calm, technical, trustworthy, premium, editorial, playful, bold, experimental. Each candidate.score already includes adjustments (soft penalties, repeated-use load, closeness to avoided styles) that are not itemized in scoreBreakdown. The "ranking" field says why candidates[0] outranks the next style, or reports a tie; list the most important tone first because tone order is weighted.',
+    description: 'Given product context, return scored style candidates with reason codes, rejected styles with reasons, secondary pairings, assumptions and confidence. Evidence-provider: the host model makes the final pick. Call before writing UI. The "tone" field (named "tone", not "tones") is an ARRAY of zero or more of: calm, technical, trustworthy, premium, editorial, playful, bold, experimental. Each candidate.score already includes adjustments (soft penalties, repeated-use load, closeness to avoided styles) that are not itemized in scoreBreakdown. The "ranking" field says why candidates[0] outranks the next style, or reports a tie; list the most important tone first because tone order is weighted. Each candidate.structure gives the page structure the direction implies: a layout archetype (hero composition, grid, section order, density, type-scale use), 2-3 signature moves with their purpose, and the generic and style-specific patterns audit_page_structure will flag; read structure.resourceUri for move build steps and ban criteria.',
     inputSchema: { ...productContextShape, locale: LOCALE.optional(), candidateLimit: z.number().int().min(1).max(10).optional() },
     annotations: READ_ONLY,
   }, async (args): Promise<ToolResult> => {
@@ -368,7 +378,7 @@ export function registerTools(server: McpServer, repo: CatalogRepository): void 
 
   server.registerTool('get_design_audit_plan', {
     title: 'Build an evidence-backed design audit plan',
-    description: 'Return a localized, surface-aware audit checklist with stable check ids, severity, applicability, required evidence, remediation, verdict definitions, user-facing content checks, selected principle checks, and UI-state coverage. The host should confirm audit coverage and change depth with the user before choosing includeGroups. This tool does not inspect a project: the host must collect actual rendered/code/interaction evidence, and missing evidence is NOT_VERIFIED rather than PASS.',
+    description: 'Return a localized, surface-aware audit checklist with stable check ids, severity, applicability, required evidence, remediation, verdict definitions, user-facing content checks, selected principle checks, and UI-state coverage. The host should confirm audit coverage and change depth with the user before choosing includeGroups. Include the opt-in "structure" group (with styleId) to add automated checks for banned generic and style-specific page patterns, answered by audit_page_structure. This tool does not inspect a project: the host must collect actual rendered/code/interaction evidence, and missing evidence is NOT_VERIFIED rather than PASS.',
     inputSchema: auditPlanInputShape,
     annotations: READ_ONLY,
   }, async (args): Promise<ToolResult> => {
@@ -379,6 +389,29 @@ export function registerTools(server: McpServer, repo: CatalogRepository): void 
         renderAuditPlan(plan),
         plan.resourceUris,
         auditFallbackLabels[plan.query.locale].resources,
+      );
+    } catch (e) { return errorResult(toToolError(e, repo)); }
+  });
+
+  server.registerTool('audit_page_structure', {
+    title: 'Audit a built page for banned structural patterns',
+    description: `Deterministically inspect submitted page markup (offline; the server never reads files) for the generic SaaS template (centered hero over a gradient blob, all-text centered stack, stock-photo hero, logo strip, "trusted by" band, icon feature cards, testimonial carousel, generic closing CTA banner, and the page skeleton they form) and, with styleId, for that style's own banned treatments. Pass the rendered HTML (for example document.documentElement.outerHTML) and the page's CSS text; Tailwind utility classes are understood without the stylesheet. Each finding names the location, the observed values, and what to replace it with from the chosen style's signature moves and archetype. Also returns evidence and results shaped for validate_design_audit_result with the "structure" audit group. Declared-style heuristics, not a browser: a clean result is not a design pass. Limits: html ${PAGE_LIMITS.htmlChars} characters, ${PAGE_LIMITS.cssFiles} stylesheets, ${PAGE_LIMITS.cssTotalChars} CSS characters in total.`,
+    inputSchema: {
+      html: z.string().min(1).max(PAGE_LIMITS.htmlChars),
+      css: z.array(z.string().max(PAGE_LIMITS.cssChars)).max(PAGE_LIMITS.cssFiles).optional(),
+      styleId: z.string().min(1).max(100).optional(),
+      targetId: z.string().trim().min(1).max(160).optional(),
+      viewportWidth: z.number().int().min(PAGE_LIMITS.viewportMin).max(PAGE_LIMITS.viewportMax).optional(),
+      locale: LOCALE.optional(),
+    },
+    annotations: READ_ONLY,
+  }, async (args): Promise<ToolResult> => {
+    try {
+      const result = auditPageStructure(args, repo);
+      return ok(
+        result as unknown as Record<string, unknown>,
+        renderStructureAudit(result, args.locale ?? 'en'),
+        result.styleId ? [`webstylebook://styles/${result.styleId}`] : [],
       );
     } catch (e) { return errorResult(toToolError(e, repo)); }
   });
@@ -454,14 +487,21 @@ export function registerTools(server: McpServer, repo: CatalogRepository): void 
         throw new ToolError('STYLE_NOT_FOUND', `unknown style '${args.primaryStyleId}'`, nearestIds(args.primaryStyleId, repo.allStyles().map((s) => s.id)));
       }
       const result = composeDesignTokens(args, repo);
-      return ok(result as unknown as Record<string, unknown>, renderTokens(result), [`webstylebook://styles/${args.primaryStyleId}`]);
+      return ok(result as unknown as Record<string, unknown>, renderTokens(result, repo), [`webstylebook://styles/${args.primaryStyleId}`]);
     } catch (e) { return errorResult(toToolError(e, repo)); }
   });
 }
 
+function structureLine(structure: StyleStructureSummary): string {
+  return `structure: ${structure.archetype.hero} Moves: ${structure.signatureMoves.map((move) => move.name).join('; ')}.`;
+}
+
 function renderRecommend(r: EvidenceResult): string {
   const lines = ['# Design direction (scored evidence)'];
-  for (const c of r.candidates) lines.push(`- ${c.score.toFixed(2)} **${c.styleId}** — ${c.matched.join(' · ')}`);
+  for (const c of r.candidates) {
+    lines.push(`- ${c.score.toFixed(2)} **${c.styleId}** — ${c.matched.join(' · ')}`);
+    if (c.structure) lines.push(`  ${structureLine(c.structure)}`);
+  }
   if (r.ranking) lines.push('', `Ranking: ${r.ranking.explanation}`);
   if (r.pairings.length) lines.push('', 'Secondary pairings:', ...r.pairings.map((p) => `- ${p.styleId} → ${p.role.join(', ')}`));
   if (r.rejected.length) lines.push('', `Rejected (${r.rejected.length}), e.g.: ${r.rejected.slice(0, 3).map((x) => `${x.styleId} (${x.reasonCodes.join(',')})`).join('; ')}`);
@@ -599,9 +639,12 @@ const auditFallbackLabels: Record<Lang, {
 
 function renderAuditPlan(plan: DesignAuditPlan): string {
   const labels = auditFallbackLabels[plan.query.locale];
+  const structureChecks = plan.coverage.structureChecks;
   const lines = [
     `# ${labels.title}`,
-    `${labels.checks}: ${plan.coverage.includedChecks}/${plan.coverage.catalogChecks}`,
+    structureChecks === undefined
+      ? `${labels.checks}: ${plan.coverage.includedChecks}/${plan.coverage.catalogChecks}`
+      : `${labels.checks}: ${plan.coverage.includedChecks - structureChecks}/${plan.coverage.catalogChecks} + structure ${structureChecks}`,
     `${labels.surfaces}: ${plan.query.surfaces.join(', ')}`,
     `${labels.catalog}: ${plan.identity.catalogVersion} (${plan.identity.catalogContentHash})`,
     `${labels.planHash}: ${plan.identity.planHash}`,
@@ -852,11 +895,41 @@ function renderPrinciplePlan(p: UxPrinciplePlan): string {
   return lines.join('\n');
 }
 
-function renderTokens(r: ComposeDesignTokensResult): string {
+const structureLabels: Record<Lang, {
+  title: string; clean: string; findings: string; replace: string; moves: string; checks: string; limits: string;
+}> = {
+  en: { title: 'Page structure audit', clean: 'No banned pattern was found.', findings: 'Findings', replace: 'Replace with', moves: 'Moves', checks: 'Checks', limits: 'Limits' },
+  ko: { title: '페이지 구조 감사', clean: '금지 패턴을 찾지 못했습니다.', findings: '발견 항목', replace: '대체 방법', moves: '무브', checks: '검사', limits: '한계' },
+  ja: { title: 'ページ構造の監査', clean: '禁止パターンは見つかりませんでした。', findings: '検出項目', replace: '置き換え', moves: 'ムーブ', checks: '検査', limits: '限界' },
+};
+
+function renderStructureAudit(r: StructureAuditResult, locale: Lang): string {
+  const labels = structureLabels[locale];
+  const lines = [
+    `# ${labels.title}${r.styleId ? ` — ${r.styleId}` : ''}`,
+    `${labels.checks}: ${r.summary.checked} · ${labels.findings}: ${r.summary.findings} (major ${r.summary.major}, minor ${r.summary.minor}) · inputHash ${r.identity.inputHash}`,
+  ];
+  if (!r.findings.length) lines.push('', labels.clean);
+  for (const finding of r.findings) {
+    lines.push('', `- [${finding.severity}] ${finding.patternId} — ${finding.name} @ ${finding.locations[0] ?? ''}${finding.count > 1 ? ` (+${finding.count - 1})` : ''}`,
+      `  ${labels.replace}: ${finding.replaceWith.instruction}`);
+    if (finding.replaceWith.moves.length) lines.push(`  ${labels.moves}: ${finding.replaceWith.moves.map((move) => `${move.name} — ${move.build}`).join(' | ')}`);
+  }
+  lines.push('', `${labels.limits}:`, ...r.limits.map((limit) => `- ${limit}`), '', ...r.guidance);
+  return lines.join('\n');
+}
+
+function renderTokens(r: ComposeDesignTokensResult, repo: CatalogRepository): string {
   const lines = [`# Tokens — ${r.primaryStyleId} (${r.format}, ${r.colorMode})`];
   if (r.warnings.length) lines.push('', '⚠ Contrast warnings:', ...r.warnings.map((w) => `- ${w}`));
   if (r.notes.length) lines.push('', 'Notes:', ...r.notes.map((n) => `- ${n}`));
   lines.push('', '```', r.rendered, '```');
+  if (r.structure) {
+    const structure = styleStructure(r.structure.styleId, repo);
+    lines.push('', `Structure (${structure.styleId}, full detail at ${r.structure.resourceUri}): ${structure.archetype.hero}`,
+      `Section order: ${structure.archetype.sectionOrder.join(' → ')}`,
+      ...structure.signatureMoves.map((move) => `- Move ${move.name}: ${move.build}`));
+  }
   if (r.contract) {
     // Text-only clients need the current companion; a style resource links to
     // native values and cannot recover this request's edits or accepted repairs.

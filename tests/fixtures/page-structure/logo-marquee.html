@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <style>
+    @keyframes scroll { to { transform: translateX(-50%); } }
+    .marquee__track { display: flex; gap: 48px; animation: scroll 30s linear infinite; }
+  </style>
+</head>
+<body>
+  <main>
+    <section><h1>Contracts your sales team can send in a minute</h1><form><input name="client" placeholder="Client name"></form></section>
+    <section>
+      <div class="marquee">
+        <div class="marquee__track">
+          <a href="https://northwind.example"><img src="/brands/northwind.png" alt="Northwind" height="28"></a>
+          <a href="https://contoso.example"><img src="/brands/contoso.png" alt="Contoso" height="28"></a>
+          <a href="https://fabrikam.example"><img src="/brands/fabrikam.png" alt="Fabrikam" height="28"></a>
+          <a href="https://tailspin.example"><img src="/brands/tailspin.png" alt="Tailspin" height="28"></a>
+          <a href="https://wingtip.example"><img src="/brands/wingtip.png" alt="Wingtip" height="28"></a>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

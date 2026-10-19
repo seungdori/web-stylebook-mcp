@@ -41,9 +41,42 @@ All notable changes to this project are documented here. The format follows
   density, usage or trust level and would shrink to one common word without it is left to those factors. Generic words such as "app" and "tool" never change `bestFor`
   credit. Korean and Japanese briefs still get every other signal.
 - `confidence` is never `high` when the product type is `other`.
+- The server instructions and the companion skill tell agents to build from `candidate.structure` and to run
+  `audit_page_structure` before claiming completion. Plans requested without `includeGroups` are unchanged, because
+  `structure` is not a default group. Existing input schemas only gained optional values.
 
 ### Added
 
+- Structural guidance for all 48 styles (#11). Tokens alone only recolored the default SaaS template, so every
+  direction now carries `structure`: a layout archetype (hero composition, grid rhythm, section order, density, and
+  type-scale use) and two or three buildable signature moves, each with its purpose and the jobs it can do on a page.
+  The guidance was written from each style's specimen page, blueprint, and catalog entry; the density and type-scale
+  numbers are read from the visual contract at runtime. Where an archetype breaks from its specimen (nine styles,
+  mostly to avoid the specimen's own centered opening), the guide is labelled `authored` and its `departure` says why. `structure` is a new field on every
+  `recommend_design_direction` candidate (archetype, moves with their purpose and jobs, banned pattern ids) and on
+  `webstylebook://styles/{id}`, which adds each move's build steps and each ban's detection criteria. The `compose_design_tokens` result (legacy and contract mode) gets a compact `structure` reference (style
+  id, resource URI, move ids) so that its largest result stays inside the 48 KB benchmark budget, and its text output
+  prints the hero composition, section order, and moves.
+- Banned patterns with machine-checkable criteria. Nine global patterns: a centered hero over a gradient blob, an
+  all-text centered stack, a stock-photo hero, a logo strip, a generic "trusted by" band, icon feature cards, a
+  testimonial carousel, a generic closing CTA banner, and the page skeleton they form. Each style adds one to three
+  bans from a rule library of 19 detectors (corner radius, blurred or hard shadows, gradient fills, glass blur, glow,
+  centered copy, unguarded motion, accent hue count, canvas tone, text on gradient or glass, nested surfaces, icon
+  tiles, faint borders, typeface, imagery, crowded grids, and more), each grounded in the style's catalog constraint,
+  visual-contract value, or specimen. A style whose identity needs a global pattern says so: `fusion-soft-inflate`
+  allows its photographic plates.
+- `audit_page_structure`, an 11th tool. Pass the built page's HTML and CSS text (the server still reads no files) and
+  an optional `styleId`; it parses the markup, resolves the cascade, understands Tailwind utility classes, and reports
+  each banned pattern with its location, observed values, and replacement: the chosen style's signature moves for the
+  same job, its hero composition, or its section order. It also returns `evidence` and `results` shaped for
+  `validate_design_audit_result`, plus a ruleset hash and an input hash. Evidence ids carry the `targetId`, so runs at
+  several viewports validate together. A page is `clean` only when every check ran and found nothing; a stylesheet
+  that needs more selector matching than the audit allows reports its absences as not verified instead of passing.
+- An opt-in `structure` group for `get_design_audit_plan` with one automated check per banned pattern. The audit
+  prompts include it in visual coverage.
+- `webstylebook://structure/banned-patterns` and a `structure` block in the manifest. `--validate-catalog` now fails
+  when a catalog style has no structure guide, when a ban cites a constraint or value the catalog does not have, or
+  when two styles' guidance is near-identical.
 - `ranking` on the `recommend_design_direction` result (optional, absent when only one style survives): `winner`,
   `runnerUp`, `gap`, `tied`, `reasonCodes` and a short localized `explanation` of why #1 beat #2, or `TIED` when they
   score alike at the displayed precision. The text fallback prints the same sentence.

@@ -2,6 +2,7 @@ import { text, texts } from '../localization.js';
 import type { CatalogRepository } from '../catalog/repository.js';
 import { stableHashOf } from '../catalog/stable-hash.js';
 import { planUiStates } from '../state-atlas/planner.js';
+import { structureChecks } from '../structure/checks.js';
 import type {
   AuditApplicability,
   AuditAutomationLevel,
@@ -15,9 +16,11 @@ import type {
 } from '../types.js';
 
 export const AUDIT_GROUP_IDS = [
-  'build', 'layout', 'fidelity', 'content', 'behavior', 'principles', 'docs', 'anti-patterns',
+  'build', 'layout', 'fidelity', 'content', 'behavior', 'principles', 'docs', 'anti-patterns', 'structure',
 ] as const;
 export type AuditGroupId = (typeof AUDIT_GROUP_IDS)[number];
+/** `structure` is opt-in so that plans requested without includeGroups keep their earlier checks and hash. */
+export const DEFAULT_AUDIT_GROUP_IDS: readonly AuditGroupId[] = AUDIT_GROUP_IDS.filter((group) => group !== 'structure');
 
 export const AUDIT_VERDICTS = [
   'PASS', 'FIX_NOW', 'RISK', 'NOT_APPLICABLE', 'NOT_VERIFIED',
@@ -47,7 +50,7 @@ export interface ResolvedAuditCheck {
   automation: AuditAutomationLevel;
   applicability: AuditApplicability;
   surfaceTags: UxSurface[];
-  source: AuditCheckDefinition['source'];
+  source: AuditCheckDefinition['source'] | { kind: 'structure'; patternId: string; scope: 'global' | 'style' };
 }
 
 interface PrincipleAuditContract {
@@ -107,6 +110,8 @@ export interface DesignAuditPlan {
     catalogChecks: number;
     includedChecks: number;
     excludedChecks: number;
+    /** Present only when the structure group is included; those checks come from the structure ruleset, not the catalog. */
+    structureChecks?: number;
   };
   resourceUris: string[];
   guidance: string[];
@@ -133,6 +138,7 @@ const labels: Record<Lang, {
   verificationFix: string;
   antiPatternCriterion: (pattern: string) => string;
   guidance: string[];
+  structureGuidance: string;
 }> = {
   en: {
     verdicts: {
@@ -162,6 +168,7 @@ const labels: Record<Lang, {
       'Report one verdict per check with evidence, exact location, and the smallest concrete fix for every FIX_NOW.',
       'Do not collapse subjective design judgment into a single numeric score.',
     ],
+    structureGuidance: "Structure checks are automated: run audit_page_structure on each target's rendered HTML and CSS with the same styleId, then submit its evidence and results for these check ids.",
   },
   ko: {
     verdicts: {
@@ -191,6 +198,7 @@ const labels: Record<Lang, {
       '검사마다 증거와 정확한 위치를 붙이고, 모든 FIX_NOW에는 가장 작은 구체적 수정안을 적으세요.',
       '주관적 디자인 판단을 하나의 숫자 점수로 뭉개지 마세요.',
     ],
+    structureGuidance: '구조 검사는 자동입니다. 대상마다 렌더링한 HTML과 CSS로, 같은 styleId를 넘겨 audit_page_structure를 실행하세요. 그 evidence와 results를 이 검사 id로 제출하세요.',
   },
   ja: {
     verdicts: {
@@ -220,6 +228,7 @@ const labels: Record<Lang, {
       '各検査に証拠と正確な場所を添え、すべてのFIX_NOWに最小の具体的修正を記録してください。',
       '主観的なデザイン判断を単一の数値スコアにまとめないでください。',
     ],
+    structureGuidance: '構造検査は自動です。対象ごとに描画したHTMLとCSSで、同じstyleIdを渡してaudit_page_structureを実行し、そのevidenceとresultsをこの検査idで提出してください。',
   },
 };
 
@@ -292,7 +301,7 @@ export function planDesignAudit(
   const surfaces: UxSurface[] = unique(
     input.surfaces?.length ? input.surfaces : ['global' as UxSurface],
   ).sort();
-  const requestedGroups = unique(input.includeGroups?.length ? input.includeGroups : [...AUDIT_GROUP_IDS]);
+  const requestedGroups = unique(input.includeGroups?.length ? input.includeGroups : [...DEFAULT_AUDIT_GROUP_IDS]);
   const includeGroups = AUDIT_GROUP_IDS.filter((group) => requestedGroups.includes(group));
   const includeDocumentation = input.includeDocumentation ?? true;
   const designPrincipleIds = unique(input.designPrincipleIds ?? []).sort();
@@ -341,17 +350,35 @@ export function planDesignAudit(
     };
   });
 
-  const checks = repo.policies.auditChecks
+  const catalogChecks = repo.policies.auditChecks
     .filter((check) => includeGroups.includes(groupOf(check)))
     .filter((check) => includeDocumentation || check.applicability !== 'workflow-only')
     .filter((check) => check.surfaceTags.includes('global')
       || check.surfaceTags.some((surface) => surfaces.includes(surface)))
     .map((check) => resolveCheck(check, locale, repo));
+  const withStructure = includeGroups.includes('structure');
+  const structure: ResolvedAuditCheck[] = withStructure
+    ? structureChecks(input.styleId, locale).map((check) => ({
+      id: check.id,
+      groupId: 'structure',
+      criterion: check.criterion,
+      why: check.why,
+      remediation: check.remediation,
+      severity: check.severity,
+      evidenceTypes: ['dom'],
+      automation: 'automated',
+      applicability: check.applicability,
+      surfaceTags: ['global'],
+      source: { kind: 'structure', patternId: check.patternId, scope: check.scope },
+    }))
+    : [];
+  const checks = [...catalogChecks, ...structure];
 
   const stateAtlasUnmappedSurfaces: UxSurface[] = surfaces
     .filter((surface) => surface !== 'global' && !repo.getSurface(surface));
   const resourceUris = unique([
     ...(input.styleId ? [`webstylebook://styles/${input.styleId}`] : []),
+    ...(withStructure ? ['webstylebook://structure/banned-patterns'] : []),
     ...designPrinciples.map((principle) => principle.resourceUri),
     ...uxPrinciples.map((principle) => principle.resourceUri),
     ...stateCoverage.map((surface) => surface.resourceUri),
@@ -384,10 +411,11 @@ export function planDesignAudit(
     coverage: {
       catalogChecks: repo.policies.auditChecks.length,
       includedChecks: checks.length,
-      excludedChecks: repo.policies.auditChecks.length - checks.length,
+      excludedChecks: repo.policies.auditChecks.length - catalogChecks.length,
+      ...(withStructure ? { structureChecks: structure.length } : {}),
     },
     resourceUris,
-    guidance: label.guidance,
+    guidance: withStructure ? [...label.guidance, label.structureGuidance] : label.guidance,
   } satisfies Omit<DesignAuditPlan, 'identity'>;
 
   return {

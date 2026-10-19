@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <style>
+    body { margin: 0; background: #070b1f; color: #f8fafc; }
+    .aurora { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+    .aurora span { position: absolute; width: 60vw; height: 60vw; border-radius: 50%; filter: blur(120px);
+      background: radial-gradient(circle, #34d399, transparent 70%); }
+    .island { background: #0f172a; border-radius: 0; padding: 32px; max-width: 640px; }
+  </style>
+</head>
+<body>
+  <div class="aurora" aria-hidden="true"><span></span><span></span></div>
+  <main>
+    <section style="text-align: center">
+      <div class="aurora" aria-hidden="true"><span></span></div>
+      <h1>Watch the night sky forecast hour by hour</h1>
+      <div class="island"><p>Cloud cover, moon phase, and KP index for your exact coordinates, refreshed every 15 minutes.</p>
+      <canvas width="600" height="180" aria-label="KP index chart"></canvas></div>
+    </section>
+  </main>
+</body>
+</html>

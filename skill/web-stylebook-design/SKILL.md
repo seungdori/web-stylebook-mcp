@@ -34,7 +34,7 @@ asking a duplicate gate.
 
 Map the answer to `get_design_audit_plan.includeGroups`:
 
-- **Visual only:** `layout`, `fidelity`, `anti-patterns`.
+- **Visual only:** `layout`, `fidelity`, `anti-patterns`, `structure`.
 - **Visual + content/structure:** add `content` and `behavior` so labels, navigation, and information
   relationships are inspected with the visuals.
 - **Full experience:** use every matching group, selected-principle checks, documentation, and UI-state
@@ -47,7 +47,10 @@ Map the answer to `get_design_audit_plan.includeGroups`:
    reason codes, **rejected** styles with reasons, secondary **pairings**, assumptions, and a
    confidence. Treat `candidates` as evidence — *you* pick using product context; `candidates[0]`
    is the strongest match, not a mandate. `ranking` says why #1 beat #2, or reports a tie; list the
-   most important tone first.
+   most important tone first. Each candidate also carries **`structure`**: a layout archetype (hero
+   composition, grid, section order, density, type-scale use), 2-3 signature moves with their purpose
+   (the style resource in step 2 has their build steps), and the generic and style-specific patterns the
+   page audit will flag. Build the page from it.
 2. **Read the chosen styles** — `webstylebook://styles/{id}` for each pick (primary + any pairing).
    Then call **`search_design_references`** with a narrow product/category/tag query and inspect only
    a few selected entries with **`get_design_reference`**. Record their observation date,
@@ -102,7 +105,8 @@ Map the answer to `get_design_audit_plan.includeGroups`:
    Implement the required + recommended states, honoring `mustNot` (e.g. no silent auto-retry, don't
    lose user input, don't imply a charge that didn't happen).
 9. **`compose_design_tokens`** — emit a starting token set (css-variables / tailwind / typescript).
-   Heed the contrast warnings; don't ship 8–12% ghost borders.
+   Heed the contrast warnings; don't ship 8–12% ghost borders. Its `structure` field points back to the
+   chosen style's archetype and moves: the tokens set the surface, the structure sets the page.
 10. **Write `design.md`** — a brief with: intent, audience/tasks, chosen direction + why, rejected
    directions, tone, color *roles* (not a raw palette), type roles, spacing/density, layout rules,
    surface hierarchy, component behavior, motion (use AND avoid), selected visual-design principles
@@ -119,6 +123,9 @@ Map the answer to `get_design_audit_plan.includeGroups`:
    if the visual is generic
    furniture (a stock photo, an abstract shape, or a card you could paste onto another product)
    rather than a bespoke product demonstration, or the copy column is the full quartet, recompose.
+   Run **`audit_page_structure`** on each built page's rendered HTML and CSS with the chosen `styleId`.
+   Replace every finding with the signature move or archetype step it names, rebuild, and rerun it; then
+   include `structure` in `includeGroups` and submit its `evidence` and `results` with the rest of the audit.
    Do not skip the checklist's **`principles` group**: run each principle's recorded verification
    check against the built UI and write down the outcome (pass / fail / n-a + why). A principle name
    in `design.md` with no placement decision and no observed check is the `principle-as-decoration`
@@ -310,7 +317,9 @@ do not turn a mnemonic or systems maxim into a scientific claim.
 
 ## Rules
 
-- **Never present a token-swap recolor as a design direction** — compose each direction's own layout.
+- **Never present a token-swap recolor as a design direction** — compose each direction's own layout
+  from its `structure` (archetype + signature moves), and clear `audit_page_structure` findings before
+  calling the page done.
 - **Direction = starting tone, not a mold** — compose the components THIS brief needs and adapt the
   style (fonts, grid, structure) to fit; never ship a generic "page in style X."
 - **The opening's visual is a product demonstration, not furniture** — a stock photo, abstract blob,
