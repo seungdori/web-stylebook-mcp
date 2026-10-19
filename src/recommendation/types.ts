@@ -1,6 +1,7 @@
 import type {
   ProductType, Tone, Density, UsageFrequency, TrustLevel, TaskTag, Lang, CatalogStyle,
 } from '../types.js';
+import type { StyleStructureSummary } from '../structure/guidance.js';
 
 export interface ProductContext {
   productDescription: string;
@@ -139,8 +140,17 @@ export interface RankingExplanation {
   explanation: string;
 }
 
-export interface EvidenceResult {
-  candidates: StyleCandidate[];
+export interface RecommendedCandidate extends StyleCandidate {
+  /**
+   * Layout archetype, signature moves, and banned patterns for this style; tokens alone only recolor a page.
+   * Build steps and ban criteria are on `structure.resourceUri`. Every bundled style has a structure guide
+   * (--validate-catalog enforces it); only a style added to a catalog copy can lack one.
+   */
+  structure?: StyleStructureSummary;
+}
+
+export interface EvidenceResult<Candidate extends StyleCandidate = RecommendedCandidate> {
+  candidates: Candidate[];
   pairings: Pairing[];
   rejected: RejectedStyle[];
   /** Absent when only one style survives. */

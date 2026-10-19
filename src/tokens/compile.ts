@@ -3,6 +3,7 @@ import type { CatalogRepository } from '../catalog/repository.js';
 import { composeContractTokens } from './visual.js';
 import type { ResolvedVisualContract, VisualContract, VisualOverrides, VisualRepair } from '../visual-canonical/types.js';
 import { parseHex, luminanceOf, contrastRatio, checkContrast, type Rgb } from './contrast.js';
+import { hasStructureGuide, structureReference, type StructureReference } from '../structure/guidance.js';
 
 export interface ComposeDesignTokensInput {
   primaryStyleId: string;
@@ -18,7 +19,7 @@ export interface ComposeDesignTokensInput {
   acceptedRepairs?: VisualRepair[];
 }
 
-export interface ComposeDesignTokensResult {
+export interface TokenSetResult {
   primaryStyleId: string;
   secondaryStyleId?: string;
   format: string;
@@ -30,6 +31,11 @@ export interface ComposeDesignTokensResult {
   contract?: { schema: string; contractSchema: string; catalogVersion: string; contentHash: string; styleCount: number; provenance: { source: string; license: 'MIT' } };
   visualContract?: ResolvedVisualContract | { light: ResolvedVisualContract; dark: ResolvedVisualContract };
   repairProposals?: VisualRepair[] | { light: VisualRepair[]; dark: VisualRepair[] };
+}
+
+export interface ComposeDesignTokensResult extends TokenSetResult {
+  /** Where the primary style's page structure lives; tokens set the surface but do not compose the page. */
+  structure?: StructureReference;
 }
 
 export class TokenError extends Error {}
@@ -228,6 +234,11 @@ function warningsFor(t: DesignTokens, mode: string, accentOverridden: boolean): 
 }
 
 export function composeDesignTokens(input: ComposeDesignTokensInput, repo: CatalogRepository): ComposeDesignTokensResult {
+  const result = composeTokenSet(input, repo);
+  return hasStructureGuide(input.primaryStyleId) ? { ...result, structure: structureReference(input.primaryStyleId) } : result;
+}
+
+function composeTokenSet(input: ComposeDesignTokensInput, repo: CatalogRepository): TokenSetResult {
   if (input.contract !== undefined) return composeContractTokens(input, repo);
   if (input.overrides !== undefined || input.acceptedRepairs !== undefined) throw new TokenError('overrides and acceptedRepairs require contract.schema = webstylebook.visual.v1');
   const style = repo.getStyle(input.primaryStyleId);

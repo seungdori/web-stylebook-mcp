@@ -30,6 +30,7 @@ API 키 없음. 모델 호출 없음. 네트워크 없음. 프로젝트 파일�
 | **UX 근거** | "힉의 법칙에 따르면…"으로 논의 종료 | 근거 신뢰도(strong·contextual·contested)가 붙어 법칙으로 단정할 수 없는 점검 질문 |
 | **UI 상태** | 해피패스만, 빈/에러/로딩은 나중에 덧붙임 | 표면별 필수/권장/도메인 상태를 처음부터 |
 | **토큰** | 손으로 고른 hex, 대비는 거의 미확인 | 역할 기반 토큰 + WCAG 대비 경고 |
+| **구조** | 토큰이 기본 템플릿(히어로 + 로고 + 카드 3장)의 색만 바꿈 | 방향마다 레이아웃 아키타입과 시그니처 무브, 그리고 빌드한 페이지에서 템플릿을 잡아내는 감사 |
 | **감사** | 요약만 보고 "좋아 보임" 판정 | 안정적인 검사 ID·심각도·필요 증거·미검증 상태를 갖춘 화면별 감사 계획 |
 | **결과** | 천편일률 AI UI | 에이전트가 근거로 삼아 구현하는 디자인 계약 |
 
@@ -110,6 +111,54 @@ API 키 없음. 모델 호출 없음. 네트워크 없음. 프로젝트 파일�
 
 요청 한 번에 — 에이전트는 방향을 고르고, 무엇이 왜 탈락했는지 보고, WCAG를 통과하는 토큰까지 받았습니다. 코드 한 줄 생성하지 않고.
 
+## 토큰이 아니라 구조
+
+토큰은 페이지의 색만 바꿉니다. 그래서 모든 후보에 `structure`가 함께 붙습니다. 레이아웃 아키타입(히어로 구성, 그리드 리듬, 섹션 순서, 밀도, 타입 스케일 쓰는 법), 각자 맡는 역할이 적힌 시그니처 무브 2~3개, 그리고 페이지에 넣으면 안 되는 패턴입니다. `webstylebook://styles/{id}`에는 무브별 구현 단계와 금지 항목별 탐지 기준이 더 들어 있습니다. `compose_design_tokens`는 이 구조를 가리키는 참조(스타일 id, 리소스 URI, 무브 id)를 돌려주고 텍스트 출력에 히어로와 무브를 적습니다. 아키타입이 스타일의 표본 페이지와 다르면 `basis`가 `authored`이고, `departure`에 그 이유가 있습니다.
+
+빌드한 뒤에는 페이지의 HTML과 CSS를 `audit_page_structure`에 넘깁니다. 아래는 에이전트가 기본 SaaS 템플릿으로 만든 페이지([`generic-saas-tailwind.html`](https://github.com/seungdori/web-stylebook-mcp/blob/master/tests/fixtures/page-structure/generic-saas-tailwind.html))를 `quiet-utility` 기준으로 검사한 실제 출력입니다.
+
+```jsonc
+// → audit_page_structure({ html, styleId: "quiet-utility", locale: "ko" })
+// ← 구조 감사 결과 (일부)
+{
+  "summary": { "clean": false, "findings": 8, "major": 6, "minor": 2, "notVerified": 0, "checked": 12 },
+  "findings": [
+    {
+      "patternId": "logo-strip",
+      "name": "로고 띠",
+      "severity": "major",
+      "locations": ["section#customers > div.mx-auto"],
+      "observed": { "logos": 5, "marquee": false, "muted": true },
+      "replaceWith": {
+        "instruction": "실제 고객을 밝힐 권한과 이유가 없다면 지우세요. 대신 방문자가 직접 확인할 수 있는 근거(실제 결과·결과물·이름이 있는 사례)를 이 스타일의 근거 무브로 보여 주세요.",
+        "moves": [
+          { "id": "hairline-gap-list", "name": "Gap-as-hairline state list", "purpose": "Triage: shows many resources and their current state at an even rhythm, with dividers that cannot drift out of alignment." },
+          { "id": "stepped-state-badges", "name": "Three-step state badges", "purpose": "Calm status: state reads through steps of weight and fill instead of traffic-light colors, so the one urgent item stands out." }
+        ]
+      }
+    },
+    {
+      "patternId": "generic-saas-skeleton",
+      "observed": { "sections": "opening → proof → features → testimonials → cta", "templateSections": 5 },
+      "replaceWith": {
+        "archetype": {
+          "sectionOrder": [
+            "Top bar: breadcrumb path on the left, search and one primary action on the right",
+            "The primary working list or table with its filter row",
+            "A detail or form panel for the selected item",
+            "Secondary panels such as activity, audit history, or settings for the same object",
+            "Empty, loading, and error states drawn in the same slots as the data"
+          ]
+        }
+      }
+    }
+    // 나머지 6개: centered-stack-hero, trusted-by-band, icon-feature-grid, testimonial-carousel, closing-cta-banner, quiet-utility/corner-radius
+  ]
+}
+```
+
+발견 항목마다 위치, 관찰값, 그리고 그 자리에 대신 넣을 것을 알려 줍니다. 대신 넣을 것은 고른 스타일에서 같은 역할을 하는 시그니처 무브(로고 띠라면 근거 역할), 히어로 구성, 섹션 순서입니다. 다시 빌드하고 감사를 한 번 더 돌린 뒤, `get_design_audit_plan.includeGroups`에 `"structure"`를 넣고 돌려받은 `evidence`와 `results`를 `validate_design_audit_result`에 넘기세요. 뷰포트마다 다른 `targetId`로 감사하세요. 증거 id에 `targetId`가 들어가므로 여러 실행 결과를 함께 검증할 수 있습니다. 이 검사는 브라우저 렌더링이 아니라 제출한 HTML과 CSS에 대한 결정적 휴리스틱입니다. `clean`은 모든 검사가 실행되었고 이 패턴들을 찾지 못했다는 뜻이지, 디자인이 통과했다는 뜻이 아닙니다. 스타일별 지침(아키타입과 무브)은 카탈로그의 `layout`·`typography` 필드처럼 영어로 작성되어 있고, 패턴 이름과 안내 문장은 `locale`을 따릅니다.
+
 ## 에이전트가 이걸로 만든 결과물
 
 다른 브리프 — *"흩어진 고객 피드백(지원 티켓, 세일즈 콜, 앱 리뷰, 슬랙)을 하나의 우선순위 로드맵으로 정리해주는 B2B SaaS **Throughline**의 마케팅 랜딩."* 레이아웃도, 히어로도, 스타일도 지정하지 않았습니다. 동반 스킬을 따라 에이전트는 스톡 히어로로 도망치는 대신 **제품의 핵심 아이디어에서** 첫 화면을 구성했습니다 — 오른쪽 절반은 다른 사이트에 복붙할 수 있는 장식 카드가 아니라, 제품의 실제 메커니즘(피드백 소스가 모여 자동 랭킹된 로드맵이 되는)을 그린 맞춤 다이어그램입니다.
@@ -136,13 +185,16 @@ flowchart LR
     C --> K[search_design_references]
     C --> L[get_design_reference]
     C --> M[validate_design_audit_result]
-    D & E & F & G & H & I & J & K & L -->|디자인 계약<br/>관찰 · 점수 · 사유<br/>배치 · 증거 · 토큰| A
+    C --> N[audit_page_structure]
+    D & E & F & G & H & I & J & K & L -->|디자인 계약<br/>관찰 · 점수 · 사유<br/>배치 · 증거 · 토큰 · 구조| A
+    A -->|빌드한 페이지 HTML · CSS| N
+    N -->|금지 패턴 · 대체 무브<br/>구조 검사용 증거| A
     A -->|대상 행렬 · 증거 참조<br/>검사/대상별 판정| M
     M -->|범위 · 정규화 판정<br/>plan/evidence/result hash| A
     A -->|근거로<br/>코드 작성| Z[당신의 UI]
 ```
 
-에이전트가 제품을 설명하면, 서버가 큐레이션 카탈로그를 점수화해 구조화된 근거를 돌려줍니다. 검사 후 validator는 참조된 artifact를 직접 열거나 시각 품질을 판단하지 않고 결과 계약만 검증합니다. 코드는 생성하지 않고, 어떤 것도 기기를 벗어나지 않습니다.
+에이전트가 제품을 설명하면, 서버가 큐레이션 카탈로그를 점수화해 구조화된 근거를 돌려줍니다. 빌드한 뒤에는 에이전트가 페이지 마크업을 구조 감사에 넘깁니다. 구조 감사는 스스로 파일을 읽지 않습니다. 검사 후 validator는 참조된 artifact를 직접 열거나 시각 품질을 판단하지 않고 결과 계약만 검증합니다. 코드는 생성하지 않고, 어떤 것도 기기를 벗어나지 않습니다.
 
 ## 설치
 
@@ -223,7 +275,7 @@ MCP 설정에 추가:
 
 | 툴 | 받는 것 | 정직한 점 |
 |------|--------------|-----------------|
-| **`recommend_design_direction`** | 사유 코드가 붙은 점수화 스타일 후보, 1위가 2위를 이긴 이유(또는 동점)를 알리는 `ranking`, *이유*가 붙은 **탈락** 스타일, 보조 페어링, 신뢰도 | 최종 선택은 모델이 — 이건 근거 제공자입니다 |
+| **`recommend_design_direction`** | 사유 코드가 붙은 점수화 스타일 후보, 1위가 2위를 이긴 이유(또는 동점)를 알리는 `ranking`, *이유*가 붙은 **탈락** 스타일, 보조 페어링, 신뢰도, 후보별 페이지 `structure` | 최종 선택은 모델이 — 이건 근거 제공자입니다 |
 | **`compare_design_directions`** | 2~4개 방향을 제품 적합성·반복 사용·밀도·신뢰·차별성·접근성 리스크·모션·유지보수로 비교 | 정답 하나를 선언하지 않습니다 |
 | **`search_design_references`** | 실제 디자인 레퍼런스를 텍스트·카테고리·태그로 제한 검색하고 간결한 다국어 관찰 결과 제공 | 스크린샷이나 브랜드 자산 복제가 아니라 출처가 붙은 연구 요약을 반환합니다 |
 | **`get_design_reference`** | 팔레트·레이아웃·인터랙션·모션 관찰, 정규화 토큰, 원본 리비전, 출처와 권리 고지를 포함한 레퍼런스 1건 | 원 사이트 카피·서체·스크린샷·시각 정체성의 권리는 각 권리자에게 있습니다 |
@@ -233,8 +285,11 @@ MCP 설정에 추가:
 | **`compose_design_tokens`** | 역할 기반 토큰을 `json` / `css-variables` / `tailwind` / `typescript`로 출력하며, 공통 시각 명세를 선택하면 스타일 원본과 편집값을 보존 | 명세에 작성된 색상 모드를 사용하며, 명시적으로 수락한 대비 수정만 적용합니다 |
 | **`get_design_audit_plan`** | 안정적인 검사 ID·심각도·적용 조건·필요 증거·수정 방향·사용자용 콘텐츠 검사·선택 원칙 검사·UI 상태 범위를 담은 다국어 감사 계획 | 프로젝트를 실제로 봤다고 가장하지 않으며, 증거가 없으면 `PASS`가 아니라 `NOT_VERIFIED`입니다 |
 | **`validate_design_audit_result`** | plan query·대상 행렬·지속 가능한 증거 참조·검사/대상별 판정을 검증하고 정규화 판정과 안정 hash를 반환 | 범위와 증거 정합성을 검증할 뿐 시각 품질을 판정하지 않으며, `valid: true`는 전체 디자인 통과가 아닙니다 |
+| **`audit_page_structure`** | 넘겨받은 HTML·CSS에서 일반 금지 패턴과 스타일 전용 금지 항목을 찾아, 위치·관찰값·고른 스타일의 대체 무브와 함께 반환하고 `structure` 감사 그룹용 증거와 결과도 만듭니다 | 브라우저가 아니라 선언된 스타일로 판단하며, 결과가 깨끗해도 디자인 통과가 아닙니다 |
 
 **카탈로그:** 실제 디자인 레퍼런스 520 · 스타일 48 · 인터페이스 디자인 원칙 25 · UX 원칙 23 · 구조화 감사 검사 51 · 컴포넌트 20 · 표면 5 · UI 상태 레시피 57 · 모션 프로파일 29 · 제품 아키타입 14.
+
+**구조:** 레이아웃 아키타입 48 · 시그니처 무브 144 · 일반 금지 패턴 9 · 탐지기 19종으로 만든 스타일 전용 금지 항목 142.
 
 레퍼런스 라이브러리는 [OpenDesign](https://opendesign.cc)의 완성도 높은 항목을 선별·수정한 데이터이며, 구조화 스펙은 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)으로 제공됩니다. Web Stylebook은 원본 스크린샷과 브랜드 자산을 포함하지 않습니다. 원 사이트·브랜드·카피·서체·시각 정체성의 권리는 각 권리자에게 있으므로 사용 전 상세 항목의 출처와 권리 고지를 확인하세요.
 
@@ -286,6 +341,7 @@ webstylebook://states/surfaces · /states/{surface} · /states/{surface}/{state}
 webstylebook://products · /products/{id}
 webstylebook://references · /references/{id}
 webstylebook://policies/anti-patterns · /policies/verification · /policies/audit-checks
+webstylebook://structure/banned-patterns
 ```
 
 스타일 상세에는 `locale`, `mode`, 기대하는 `revision`을 쿼리로 지정할 수 있습니다. 예: `webstylebook://styles/brutalist-grid?locale=ko&mode=light`. 선택한 언어와 모드 1개의 명세를 반환하며, 지원하지 않는 값·중복 인자·알 수 없는 쿼리 이름은 명확한 오류로 반환합니다.
@@ -318,7 +374,9 @@ webstylebook://policies/anti-patterns · /policies/verification · /policies/aud
 `validate_design_audit_result`는 plan을 다시 생성해 오래된 plan hash, 누락·중복 결과,
 끊어진 evidence reference, 다른 target의 evidence, 잘못된 region, 부당한
 `NOT_APPLICABLE`, 필수 증거가 없거나 실패 증거와 모순되는 `PASS`를 거부합니다. 누락된
-결과는 숨기지 않고 `NOT_VERIFIED`로 구체화합니다. 재검증 가능한 비교를 위해 plan,
+결과는 숨기지 않고 `NOT_VERIFIED`로 구체화합니다. `includeGroups`에 `structure`를 넣고 `styleId`를 주면,
+plan에 금지 패턴마다 자동 검사가 1개씩 붙습니다. `audit_page_structure`는 이 검사 id에 맞는 evidence와
+results를 돌려주고, validator는 그대로 받습니다. 재검증 가능한 비교를 위해 plan,
 evidence bundle, 정규화된 result의 content-addressed hash도 반환합니다. 이 툴은 artifact를
 직접 열지 않으며 계약 유효성을 디자인 품질 점수로 바꾸지 않습니다.
 
@@ -392,7 +450,7 @@ enum, 개수, 런타임 계약을 검증하고, 이 명령은 두 저장소 사�
 - **전송:** stdio (Model Context Protocol)
 - **클라이언트:** Codex CLI / IDE 확장 · Claude Code · Claude Desktop · Cursor · Windsurf, 그리고 모든 MCP 호환 클라이언트
 
-`contract`를 생략한 호출은 같은 토큰 형식과 라이트 모드 기본값을 유지합니다. 0.11.0부터 이 호출은 일반 소프트 섀도 대신 핀된 스타일의 작성 섀도를 내고, 에디토리얼·모노스페이스 스타일은 계열 글꼴 대신 작성된 글꼴을 냅니다. 색, 타입 스케일, 행간, 간격, 반지름, 모션, 밀도를 생략했을 때의 값은 이전 레거시 경로입니다. 명시한 밀도는 여전히 계열의 row·gutter보다 우선하고, CSS·테마 출력에 줄간격 토큰이 포함됩니다. 작성값 전체가 필요하면 `contract`를 넘깁니다. 공통 명세는 기존 도구에 추가한 옵션이므로 새 도구가 필요하지 않습니다.
+도구 입력은 새 선택값이 생긴 것 말고는 그대로이고, `structure`는 출력에 추가된 필드입니다. `structure` 그룹은 직접 지정할 때만 들어가므로, `includeGroups` 없이 요청한 plan의 검사 목록과 hash는 바뀌지 않습니다. `contract`를 생략한 호출은 같은 토큰 형식과 라이트 모드 기본값을 유지합니다. 0.11.0부터 이 호출은 일반 소프트 섀도 대신 핀된 스타일의 작성 섀도를 내고, 에디토리얼·모노스페이스 스타일은 계열 글꼴 대신 작성된 글꼴을 냅니다. 색, 타입 스케일, 행간, 간격, 반지름, 모션, 밀도를 생략했을 때의 값은 이전 레거시 경로입니다. 명시한 밀도는 여전히 계열의 row·gutter보다 우선하고, CSS·테마 출력에 줄간격 토큰이 포함됩니다. 작성값 전체가 필요하면 `contract`를 넘깁니다. 공통 명세는 기존 도구에 추가한 옵션이므로 새 도구가 필요하지 않습니다.
 
 ## 라이선스
 

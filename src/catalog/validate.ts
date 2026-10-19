@@ -17,6 +17,8 @@ import {
 } from '../types.js';
 import type { LocalizedText } from '../types.js';
 import { contentHashOf } from './stable-hash.js';
+import { STRUCTURE_GUIDES } from '../structure/guides/index.js';
+import { validateStructureGuides } from '../structure/validate.js';
 
 function localeComplete(v: unknown): v is LocalizedText {
   if (!v || typeof v !== 'object') return false;
@@ -488,6 +490,7 @@ export function validateLoaded(repo: CatalogRepository): ValidateReport {
   for (const s of data.styles) {
     if (s.styleFamilyId && !repo.getFamily(s.styleFamilyId)) errors.push(`style ${s.id} -> unknown family ${s.styleFamilyId}`);
   }
+  errors.push(...validateStructureGuides(STRUCTURE_GUIDES, repo));
 
   return {
     ok: errors.length === 0,
@@ -504,6 +507,7 @@ export function validateLoaded(repo: CatalogRepository): ValidateReport {
       recipes: data.stateRecipes.length,
       products: data.productArchetypes.length,
       designReferences: data.referenceLibrary.references.length,
+      structureGuides: STRUCTURE_GUIDES.length,
     },
   };
 }

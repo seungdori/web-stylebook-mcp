@@ -71,10 +71,10 @@ function scopeGate(
   }
 
   const groups = auditScope === 'visual-only'
-    ? '["layout", "fidelity", "anti-patterns"]'
+    ? '["layout", "fidelity", "anti-patterns", "structure"]'
     : auditScope === 'visual-and-content'
-      ? '["layout", "fidelity", "content", "behavior", "anti-patterns"]'
-      : 'all matching groups, selected principles, documentation, and UI-state coverage';
+      ? '["layout", "fidelity", "content", "behavior", "anti-patterns", "structure"]'
+      : 'all matching groups including "structure", selected principles, documentation, and UI-state coverage';
   const action = copy.actions[changeScope];
 
   return [
@@ -170,6 +170,7 @@ export function registerPrompts(server: McpServer): void {
     ...scopeGate(locale, auditScope, changeScope),
     'After scope is confirmed, call get_design_audit_plan with styleId, surfaces: [the inferred/provided surface], locale, and includeGroups matching the confirmed audit coverage. Read webstylebook://styles/{styleId} once for the chosen direction; do not fetch the full multilingual policy resources.',
     'Inspect the actual rendered implementation, source, interactions, target viewports, console, and relevant commands. Never assign PASS from this summary alone; missing evidence is NOT_VERIFIED.',
+    'For the structure group, pass each target\'s rendered HTML and CSS to audit_page_structure with the same styleId and targetId; replace every finding with the signature move or archetype step it names, rerun it, and submit its evidence and results.',
     'When the selected scope includes content, inspect every prominent heading, label, summary, card, statistic, navigation item, and disclosure. Prefer the audience’s vocabulary; lead with the user-relevant conclusion, consequence, or next action; move optional methodology behind supporting detail; and reject counts, agreement labels, confidence badges, or status language that simulate certainty without a clear method, denominator, uncertainty, and decision value.',
     'A sentence can fail even when it contains no internal jargon. For every material claim, conclusion, or recommendation, ask what it actually says, what available content, evidence, or context supports it, whether its wording and certainty match that support, and whether the unchanged sentence would remain equally plausible on an unrelated product or page. Qualify or remove unsupported content; never invent evidence, facts, or next steps.',
     'Compare visual prominence with information value, task relevance, and support. Vague, generic, redundant, or weakly supported content must not become an oversized headline, isolated card, badge, or statistic. Replace it with content that earns the attention, or demote it and reduce its scale. Do not use a keyword blacklist; judge the statement in context.',

@@ -174,7 +174,8 @@ describe('audit L12 — all seven workflow prompts render a non-empty user messa
       },
     });
     const text = (res.messages[0]?.content as { text?: string }).text ?? '';
-    expect(text).toContain('["layout", "fidelity", "content", "behavior", "anti-patterns"]');
+    expect(text).toContain('["layout", "fidelity", "content", "behavior", "anti-patterns", "structure"]');
+    expect(text).toContain('audit_page_structure');
     expect(text).toContain('concrete before/after copy');
     expect(text).toContain('do not modify files');
     expect(text).toMatch(/no content type is banned/i);

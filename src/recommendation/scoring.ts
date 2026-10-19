@@ -316,7 +316,7 @@ export function recommend(
   matchedText: (s: CatalogStyle, ctx: ResolvedContext, locale: string) => string[],
   cautionText: (codes: ReasonCode[], s: CatalogStyle, locale: string) => string[],
   opts: RecommendOptions = {},
-): EvidenceResult {
+): EvidenceResult<StyleCandidate> {
   const locale = opts.locale ?? 'en';
   const limit = Math.max(1, Math.min(opts.candidateLimit ?? 5, 10));
 

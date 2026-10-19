@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <style>
+    :root { --brand: #7c3aed; --brand-2: #ec4899; }
+    body { margin: 0; font-family: Inter, system-ui, sans-serif; background: #ffffff; color: #0f172a; }
+    .hero { position: relative; padding: 120px 24px; text-align: center; overflow: hidden; }
+    .hero__glow { position: absolute; top: -120px; left: 50%; width: 720px; height: 720px; border-radius: 50%;
+      background: radial-gradient(circle at center, var(--brand) 0%, var(--brand-2) 40%, transparent 70%);
+      filter: blur(90px); opacity: .45; z-index: -1; }
+    .eyebrow { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; }
+    .cta { display: inline-block; padding: 12px 24px; border-radius: 999px; background: var(--brand); color: #fff; }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <div class="hero__glow" aria-hidden="true"></div>
+      <p class="eyebrow">Introducing Lumen</p>
+      <h1>The future of analytics, today</h1>
+      <p>Lumen turns your data into insights with the power of AI, so every team can move faster.</p>
+      <a class="cta" href="/start">Get started</a>
+      <a href="/tour">Take the tour</a>
+    </section>
+    <section>
+      <h2>How Lumen reads a query</h2>
+      <p>Paste a question, and Lumen shows the SQL it wrote, the rows it read, and the chart it drew.</p>
+    </section>
+  </main>
+</body>
+</html>

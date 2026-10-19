@@ -4,6 +4,7 @@ import type { VisualResolutionOptions } from '../visual-canonical/types.js';
 import { REFERENCE_CATEGORIES } from '../types.js';
 import { TOOL_NAMES, SERVER_NAME, SERVER_VERSION } from '../server-info.js';
 import { ERROR_CODES } from './errors.js';
+import { bannedPatternCatalog, styleStructure, structureManifest } from '../structure/guidance.js';
 
 const JSON_MIME = 'application/json';
 function json(uri: string, value: unknown) {
@@ -23,6 +24,7 @@ export function registerResources(server: McpServer, repo: CatalogRepository): v
     contentHash: repo.contentHash,
     schema: repo.envelope.schema,
     visualContract: repo.visualContractMetadata,
+    structure: structureManifest(repo),
     languages: repo.envelope.languages,
     counts: {
       styles: repo.allStyles().length,
@@ -89,12 +91,18 @@ export function registerResources(server: McpServer, repo: CatalogRepository): v
   fixed('anti-patterns', 'webstylebook://policies/anti-patterns', 'Common anti-patterns', () => repo.policies.antiPatterns);
   fixed('verification', 'webstylebook://policies/verification', 'Verification checklist', () => repo.policies.verification);
   fixed('audit-checks', 'webstylebook://policies/audit-checks', 'Stable audit ids, applicability, severity and evidence metadata', () => repo.policies.auditChecks);
+  fixed(
+    'structure-banned-patterns',
+    'webstylebook://structure/banned-patterns',
+    'Generic page patterns audit_page_structure flags for every style, with machine-checkable criteria, thresholds, and the ruleset hash',
+    () => bannedPatternCatalog(),
+  );
 
   server.registerResource('style', new ResourceTemplate('webstylebook://styles/{styleId}', {
     list: async () => ({ resources: repo.allStyles().map((s) => ({ uri: `webstylebook://styles/${s.id}`, name: s.id, mimeType: JSON_MIME })) }),
   }), {
     title: 'Style detail',
-    description: 'Full detail for one style, including its resolved native visual contract and source identity. Optional query parameters: locale=en|ko|ja, mode=light|dark, revision=<expected revision>.',
+    description: 'Full detail for one style, including its resolved native visual contract, source identity, and page structure (layout archetype, signature moves, banned patterns with their detection criteria). Optional query parameters: locale=en|ko|ja, mode=light|dark, revision=<expected revision>.',
     mimeType: JSON_MIME,
   }, async (u, v) => {
     // The SDK's simple URI-template variable also captures a query suffix.
@@ -127,7 +135,11 @@ export function registerResources(server: McpServer, repo: CatalogRepository): v
         options.mode = mode;
       }
       if (revision !== null) options.revision = revision;
-      return json(u.href, { ...s, visualContract: repo.getVisualContract(s.id, options) });
+      return json(u.href, {
+        ...s,
+        visualContract: repo.getVisualContract(s.id, options),
+        structure: styleStructure(s.id, repo, options.contentLocale ?? 'en', true),
+      });
     } catch (error) {
       return json(u.href, {
         error: { code: 'INVALID_INPUT', message: error instanceof Error ? error.message : String(error) },

@@ -30,9 +30,10 @@ describe('MCP contract', () => {
     expect(instructions).toContain('read-only');
   });
 
-  it('exposes exactly the 10 compute tools, all read-only', async () => {
+  it('exposes exactly the 11 compute tools, all read-only', async () => {
     const { tools } = await client.listTools();
     expect(tools.map((t) => t.name).sort()).toEqual([
+      'audit_page_structure',
       'compare_design_directions', 'compose_design_tokens', 'get_design_audit_plan',
       'get_design_principle_plan', 'get_design_reference', 'get_ui_state_plan',
       'get_ux_principle_plan',
@@ -52,6 +53,7 @@ describe('MCP contract', () => {
     expect(uris).toContain('webstylebook://principles');
     expect(uris).toContain('webstylebook://references');
     expect(uris).toContain('webstylebook://policies/audit-checks');
+    expect(uris).toContain('webstylebook://structure/banned-patterns');
     const { resourceTemplates } = await client.listResourceTemplates();
     expect(resourceTemplates.map((t) => t.uriTemplate)).toContain('webstylebook://styles/{styleId}');
     expect(resourceTemplates.map((t) => t.uriTemplate))
@@ -71,7 +73,9 @@ describe('MCP contract', () => {
     expect(body.domains).toContain('design-principles');
     expect(body.domains).toContain('principles');
     expect(body.domains).toContain('references');
-    expect(body.tools).toHaveLength(10);
+    expect(body.tools).toHaveLength(11);
+    expect(body.structure).toMatchObject({ schema: 'webstylebook.structure.v1', styles: 48, catalogStyles: 48, globalBannedPatterns: 9 });
+    expect(body.structure.rulesetHash).toMatch(/^sha256:[0-9a-f]{64}$/);
     expect(body.resourceUriTemplates).toContain('webstylebook://design-principles/{id}');
     expect(body.resourceUriTemplates).toContain('webstylebook://principles/{id}');
     expect(body.resourceUriTemplates).toContain('webstylebook://references/{id}');
@@ -83,6 +87,17 @@ describe('MCP contract', () => {
     const body = JSON.parse(res.contents[0]!.text as string);
     expect(body.id).toBe('runtime-signal');
     expect(body.recommendationFacets).toBeDefined();
+    expect(body.structure.styleId).toBe('runtime-signal');
+    expect(body.structure.signatureMoves.length).toBeGreaterThanOrEqual(2);
+    expect(body.structure.bannedPatterns.style[0].detect.criteria.length).toBeGreaterThan(0);
+  });
+
+  it('reads the banned-pattern catalog resource', async () => {
+    const res = await client.readResource({ uri: 'webstylebook://structure/banned-patterns' });
+    const body = JSON.parse(res.contents[0]!.text as string);
+    expect(body.global.map((pattern: any) => pattern.id)).toContain('logo-strip');
+    expect(body.global.every((pattern: any) => pattern.criteria.length > 0 && pattern.name.ko && pattern.name.ja)).toBe(true);
+    expect(body.thresholds.logoMinItems).toBe(4);
   });
 
   it('reads a state recipe via nested template', async () => {
@@ -172,6 +187,35 @@ describe('MCP contract', () => {
     expect(sc.rejected.find((x: any) => x.styleId === 'cyberpunk-glitch').reasonCodes).toContain('EXPLICITLY_AVOIDED');
     const text = (r.content as any[]).find((c) => c.type === 'text')?.text ?? '';
     expect(text).toContain('runtime-signal');
+    for (const candidate of sc.candidates) {
+      expect(candidate.structure.styleId).toBe(candidate.styleId);
+      expect(candidate.structure.archetype.sectionOrder.length).toBeGreaterThanOrEqual(3);
+      expect(candidate.structure.signatureMoves.length).toBeGreaterThanOrEqual(2);
+    }
+    expect(text).toContain('structure:');
+  });
+
+  it('audit_page_structure: flags banned patterns in submitted markup and names the replacement moves', async () => {
+    const r = await client.callTool({
+      name: 'audit_page_structure',
+      arguments: {
+        styleId: 'quiet-utility',
+        html: '<main><section style="text-align:center"><p>New</p><h1>Run payroll in minutes</h1><p>All-in-one HR platform for modern growing teams everywhere.</p><a href="/s">Start free trial</a><a href="/d">Book a demo</a></section><section><h2>Trusted by 2,000+ teams</h2></section></main>',
+        locale: 'ko',
+      },
+    });
+    expect(r.isError).toBeFalsy();
+    const sc = r.structuredContent as any;
+    expect(sc.identity.schema).toBe('webstylebook.structure-audit.v1');
+    expect(sc.findings.map((finding: any) => finding.patternId)).toEqual(expect.arrayContaining(['centered-stack-hero', 'trusted-by-band']));
+    expect(sc.findings.find((finding: any) => finding.patternId === 'centered-stack-hero').replaceWith.moves.length).toBeGreaterThan(0);
+    const text = (r.content as any[]).find((c) => c.type === 'text')?.text ?? '';
+    expect(text).toContain('# 페이지 구조 감사');
+    expect(text).toContain('centered-stack-hero');
+    const bad = await client.callTool({ name: 'audit_page_structure', arguments: { html: '<main></main>', styleId: 'quiet-utilty' } });
+    expect(bad.isError).toBe(true);
+    expect((bad.structuredContent as any).error.code).toBe('STYLE_NOT_FOUND');
+    expect((bad.structuredContent as any).suggestions).toContain('quiet-utility');
   });
 
   it('get_ui_state_plan: required states for checkout', async () => {
@@ -426,6 +470,10 @@ describe('MCP contract', () => {
     const sc = r.structuredContent as any;
     expect(sc.rendered).toContain('--color-canvas');
     expect(Array.isArray(sc.warnings)).toBe(true);
+    expect(sc.structure).toMatchObject({ styleId: 'runtime-signal', resourceUri: 'webstylebook://styles/runtime-signal' });
+    expect(sc.structure.signatureMoves.length).toBeGreaterThanOrEqual(2);
+    const text = (r.content as any[]).find((c) => c.type === 'text')?.text ?? '';
+    expect(text).toContain('Structure (runtime-signal, full detail at webstylebook://styles/runtime-signal)');
   });
 
   it('compare_design_directions: no single winner', async () => {

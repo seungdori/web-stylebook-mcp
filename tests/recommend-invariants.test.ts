@@ -77,7 +77,7 @@ describe('1. public contract stays backward compatible', () => {
     await client.close();
   });
 
-  it('returns every legacy output field unchanged in shape; ranking is the only new top-level field', async () => {
+  it('returns every legacy output field unchanged in shape; ranking is the only new top-level field and structure the only new candidate field', async () => {
     const server = createWebStylebookServer();
     const [ct, st] = InMemoryTransport.createLinkedPair();
     const client = new Client({ name: 'review', version: '0.0.0' });
@@ -86,7 +86,7 @@ describe('1. public contract stays backward compatible', () => {
     expect(res.isError).toBeFalsy();
     const sc = res.structuredContent;
     expect(Object.keys(sc).sort()).toEqual(['candidates', 'confidence', 'guidance', 'pairings', 'ranking', 'rejected', 'resolvedContext']);
-    expect(Object.keys(sc.candidates[0]).sort()).toEqual(['cautions', 'differentiators', 'matched', 'resourceUri', 'score', 'scoreBreakdown', 'styleId']);
+    expect(Object.keys(sc.candidates[0]).sort()).toEqual(['cautions', 'differentiators', 'matched', 'resourceUri', 'score', 'scoreBreakdown', 'structure', 'styleId']);
     for (const legacy of ['product', 'task', 'tone', 'density', 'usage', 'trust', 'constraint']) expect(sc.candidates[0].scoreBreakdown).toHaveProperty(legacy);
     expect(Object.keys(sc.resolvedContext).sort()).toEqual(['assumptions', 'missingInformation', 'normalizedFacets']);
     expect(Object.keys(sc.ranking).sort()).toEqual(['explanation', 'gap', 'reasonCodes', 'runnerUp', 'tied', 'winner']);
