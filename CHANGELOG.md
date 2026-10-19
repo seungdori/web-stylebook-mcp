@@ -6,6 +6,38 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- `audit_page_structure` no longer passes three common template pages as clean (#11 follow-up):
+  - A centered hero whose blob is an inline SVG painted with a `<linearGradient>`, or a decorative image named as a
+    blob, is a gradient-blob hero, and that decoration no longer counts as the opening's product visual.
+  - Icon feature cards are found when the icon sits inside the title, as in Tailwind UI's `<dt><svg/>Title</dt>`
+    lists and `<h3><svg/>Title</h3>` cards.
+  - Pages keep their sections when an empty portal root, a toast region, an announcement bar, a skip link, a dialog,
+    or a fixed overlay such as a cookie banner or chat widget sits beside the content wrapper. Visually hidden
+    elements (the `sr-only` clip, or a skip link moved off-screen until focused) are no longer page sections, and a
+    visually hidden brand `<h1>` in the site header no longer becomes the opening.
+- Fewer false positives: a fully transparent border is not a faint border, a one-sided divider rule does not make a
+  card (Tailwind `border-b` now sets only the bottom border), paginated reviews with numbered or Previous/Next page
+  buttons are not a testimonial carousel, a round named portrait is not an icon, and a product image is a blob only
+  when it is marked as decoration. Decoration needs both aria-hidden and an out-of-flow or behind layer before it
+  stops counting as the opening's product visual, so an aria-hidden demo beside the copy still counts.
+- Fewer misses: `color-mix()` is evaluated, so compiled Tailwind v4 `border-white/10` is a faint border; compiled
+  `rounded-full` (`calc(infinity * 1px)`) reads as fully rounded again; and an inline-SVG logo row under a heading
+  that names customers, clients, or partners is a logo strip.
+- Hostile input within the documented limits now stays linear: descendant, general-sibling, and `:has()` selectors on
+  deep or wide pages, stray end tags against a deep open stack, thousands of claims or calls to action in one block,
+  deep animated chains, claims in separate wrappers, thousands of image rows, implied end tags at a table boundary,
+  and selectors with hundreds of classes. A custom-property chain deeper than 64 steps resolves as invalid instead of
+  overflowing the stack, `inherit` on a deep page no longer recurses, and selector memos take one byte per element.
+  The selector budget is 5,000,000 checks (the 48 specimen pages use at most about 630,000); past it every check is
+  reported as not verified, a found pattern and a not-applicable one included.
+
+### Changed
+
+- platform-core's archetype is labelled `authored` with a `departure` note: its specimen opens with the eyebrow stack
+  and icon-tile cards that the audit bans, and the guide replaces both.
+
 ## [0.12.0] — 2026-10-19
 
 ### Fixed

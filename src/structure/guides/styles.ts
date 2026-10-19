@@ -280,7 +280,8 @@ export const STYLE_GUIDES: readonly StructureGuideDef[] = [
   },
   {
     styleId: 'platform-core',
-    basis: 'specimen',
+    basis: 'authored',
+    departure: 'The specimen puts an eyebrow over its centered headline and leads every feature and resource card with a 38px icon tile, so it reads as the template\'s centered stack and icon cards. This guide drops the eyebrow, makes the working entry form the opening\'s object, and labels cards by route instead of icon.',
     hero: 'A compact product nav (brand mark, three or four section links, a light/dark toggle, one primary pill) sits over a centered column: a 16ch Inter 600 headline with text-wrap: balance and one 62ch line, then the hero object, an 820px working entry form whose 74px pill rows (work email or project name, one solid Continue, an \'or\' hairline divider, and three or four outlined SSO or provider buttons) outweigh the copy. The eye goes from the headline straight to the Continue pill; there is no eyebrow, no illustration, and no button outside the form.',
     grid: 'A 1280px container with no column overlay, built from card grids on one shared 16px gap: the 980px hero with its 820px form, a four-up resource row, a 1.1fr/0.9fr split, a 0.82fr/1.18fr pair, and a four-step strip. Sections sit 72px apart with left-aligned heads capped at 720px; four-ups become two-up at 1024px and everything stacks at 768px.',
     sectionOrder: [

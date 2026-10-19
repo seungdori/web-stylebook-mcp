@@ -24,10 +24,15 @@ const INHERITED = new Set([
 ]);
 const TAILWIND_ORDER_BASE = 1e9;
 const SPECIFICITY_INLINE: Specificity = [0, 0, 0];
-/** Compound-selector checks one page may spend; the fixtures and real pages tested use well under 100,000. */
-export const MATCH_BUDGET = 3_000_000;
+/**
+ * Compound-selector checks one page may spend. The 48 rendered specimen pages use 60,000-630,000, and a page eight
+ * times the largest specimen with its 1.4 MB of CSS stays under it; past it the audit reports not verified.
+ */
+export const MATCH_BUDGET = 5_000_000;
 /** A resolved custom property longer than this is treated as invalid, which stops var() fan-out from exploding. */
 const MAX_CUSTOM_VALUE = 10_000;
+/** Custom properties referencing custom properties deeper than this resolve as invalid instead of exhausting the stack. */
+const MAX_CUSTOM_DEPTH = 64;
 const NON_RENDERED = new Set(['script', 'style', 'template', 'head', 'meta', 'link', 'title', 'noscript']);
 
 function outranks(a: Entry, b: Entry): boolean {
@@ -64,6 +69,7 @@ export class StyledDocument {
   private readonly hasHtmlRoot: boolean;
   private readonly customCache = new Map<DomElement, Map<string, string | null>>();
   private readonly resolving = new Set<string>();
+  private customDepth = 0;
   private readonly hiddenCache = new Map<DomElement, boolean>();
 
   constructor(readonly doc: ParsedHtml, cssSources: readonly string[], readonly ctx: LengthContext) {
@@ -103,7 +109,7 @@ export class StyledDocument {
     this.unparsedSelectors = unparsed;
     this.ruleCount = ruleCount;
 
-    const matcher = new SelectorMatcher(MATCH_BUDGET);
+    const matcher = new SelectorMatcher(MATCH_BUDGET, doc.elements.length);
     for (const element of doc.elements) {
       // Each rule sits in exactly one bucket, so walking the element's buckets visits a rule at most once.
       const buckets = matcher.exhausted ? [] : [
@@ -112,14 +118,16 @@ export class StyledDocument {
         ...[...new Set(element.classes)].map((cls) => byClass.get(cls) ?? []),
         byTag.get(element.tag) ?? [],
       ];
-      for (const rule of buckets.flat()) {
-        if (!this.matches(matcher, element, rule.selector)) continue;
-        const box: Box = rule.selector.pseudoElement ?? 'element';
-        for (const declaration of rule.declarations) {
-          this.put(element, box, rule.motion, declaration.prop, {
-            value: declaration.value, important: declaration.important, inline: false,
-            specificity: rule.selector.specificity, order: rule.order, motion: rule.motion,
-          });
+      for (const bucket of buckets) {
+        for (const rule of bucket) {
+          if (!this.matches(matcher, element, rule.selector)) continue;
+          const box: Box = rule.selector.pseudoElement ?? 'element';
+          for (const declaration of rule.declarations) {
+            this.put(element, box, rule.motion, declaration.prop, {
+              value: declaration.value, important: declaration.important, inline: false,
+              specificity: rule.selector.specificity, order: rule.order, motion: rule.motion,
+            });
+          }
         }
       }
       for (const cls of element.classes) {
@@ -197,8 +205,14 @@ export class StyledDocument {
     if (prop.startsWith('--')) return this.customProperty(element, prop);
     const own = this.store(element, box)?.get(prop);
     if (own) {
-      if (own.value.trim().toLowerCase() === 'inherit') return element.parent ? this.get(element.parent, prop) : undefined;
-      return this.resolve(element, own.value);
+      if (own.value.trim().toLowerCase() !== 'inherit') return this.resolve(element, own.value);
+      // `inherit` takes the parent's value; walking up instead of recursing keeps a deep page off the call stack.
+      for (let node = element.parent; node && node.tag !== '#document'; node = node.parent) {
+        const entry = this.store(node, 'element')?.get(prop);
+        if (entry && entry.value.trim().toLowerCase() !== 'inherit') return this.resolve(node, entry.value);
+        if (!entry && !INHERITED.has(prop)) return undefined;
+      }
+      return undefined;
     }
     if (INHERITED.has(prop) && box === 'element') {
       for (let node = element.parent; node && node.tag !== '#document'; node = node.parent) {
@@ -225,11 +239,19 @@ export class StyledDocument {
     if (!cache) { cache = new Map(); this.customCache.set(owner, cache); }
     if (cache.has(name)) return cache.get(name) ?? undefined;
     const key = `${owner.order}:${name}`;
-    if (this.resolving.has(key)) return undefined;
+    if (this.resolving.has(key) || this.customDepth >= MAX_CUSTOM_DEPTH) return undefined;
     this.resolving.add(key);
-    const resolved = this.resolve(owner, raw);
-    this.resolving.delete(key);
+    this.customDepth++;
+    let resolved: string;
+    try {
+      resolved = this.resolve(owner, raw);
+    } finally {
+      this.customDepth--;
+      this.resolving.delete(key);
+    }
     const value = resolved.length > MAX_CUSTOM_VALUE ? null : resolved;
+    // Every value is cached, including one cut off by the depth limit: resolving it again per reference would make
+    // fan-out above a deep chain exponential. Lookups run in a fixed order, so the result stays deterministic.
     cache.set(name, value);
     return value ?? undefined;
   }

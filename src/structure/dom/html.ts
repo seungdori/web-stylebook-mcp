@@ -112,24 +112,37 @@ export function parseHtml(html: string, maxElements: number): ParsedHtml {
   const elements: DomElement[] = [];
   const styleSheets: string[] = [];
   const stack: DomElement[] = [root];
+  // Stack positions of the open elements of each tag, so finding the nearest open one never scans a deep stack.
+  const openAt = new Map<string, number[]>();
   let truncated = false;
   let i = 0;
 
   const current = (): DomElement => stack[stack.length - 1]!;
+  const push = (element: DomElement) => {
+    let positions = openAt.get(element.tag);
+    if (!positions) { positions = []; openAt.set(element.tag, positions); }
+    positions.push(stack.length);
+    stack.push(element);
+  };
+  const truncate = (depth: number) => {
+    while (stack.length > depth) openAt.get(stack.pop()!.tag)!.pop();
+  };
+  const nearest = (tags: Iterable<string>) => {
+    let position = -1;
+    for (const tag of tags) {
+      const positions = openAt.get(tag);
+      if (positions?.length) position = Math.max(position, positions[positions.length - 1]!);
+    }
+    return position;
+  };
   const appendText = (raw: string) => {
     const text = decodeEntities(raw);
     if (!text.trim()) return;
     current().children.push({ kind: 'text', text, parent: current() });
   };
   const closeTo = (tags: readonly string[], stopAt: ReadonlySet<string>) => {
-    for (let depth = stack.length - 1; depth > 0; depth--) {
-      const tag = stack[depth]!.tag;
-      if (tags.includes(tag)) {
-        stack.length = depth;
-        return;
-      }
-      if (stopAt.has(tag)) return;
-    }
+    const target = nearest(tags);
+    if (target > 0 && target > nearest(stopAt)) truncate(target);
   };
 
   while (i < html.length) {
@@ -155,14 +168,8 @@ export function parseHtml(html: string, maxElements: number): ParsedHtml {
       const end = html.indexOf('>', lt + 2);
       if (end === -1) break;
       const name = html.slice(lt + 2, end).trim().split(/\s/)[0]?.toLowerCase() ?? '';
-      if (name) {
-        for (let depth = stack.length - 1; depth > 0; depth--) {
-          if (stack[depth]!.tag === name) {
-            stack.length = depth;
-            break;
-          }
-        }
-      }
+      const target = name ? nearest([name]) : -1;
+      if (target > 0) truncate(target);
       i = end + 1;
       continue;
     }
@@ -197,7 +204,7 @@ export function parseHtml(html: string, maxElements: number): ParsedHtml {
       continue;
     }
 
-    if (current().tag === 'p' && CLOSES_P.has(tag)) stack.length -= 1;
+    if (current().tag === 'p' && CLOSES_P.has(tag)) truncate(stack.length - 1);
     const implied = IMPLIED_CLOSE[tag];
     if (implied) closeTo(implied, new Set(['ul', 'ol', 'dl', 'table', 'select', 'datalist']));
 
@@ -205,14 +212,34 @@ export function parseHtml(html: string, maxElements: number): ParsedHtml {
     const element = makeElement(tag, attrs, current(), elements.length);
     elements.push(element);
     current().children.push(element);
-    if (!selfClosing && !VOID.has(tag)) stack.push(element);
+    if (!selfClosing && !VOID.has(tag)) push(element);
   }
 
   return { root, elements, styleSheets, truncated };
 }
 
+const childCache = new WeakMap<DomElement, DomElement[]>();
+const indexCache = new WeakMap<DomElement, Map<DomElement, number>>();
+
+/** Child elements, computed once per element; a parsed document never changes, and callers must not mutate the list. */
 export function elementChildren(element: DomElement): DomElement[] {
-  return element.children.filter((child): child is DomElement => child.kind === 'element');
+  let children = childCache.get(element);
+  if (!children) {
+    children = element.children.filter((child): child is DomElement => child.kind === 'element');
+    childCache.set(element, children);
+  }
+  return children;
+}
+
+/** The element just before this one among its parent's element children, found without rescanning the siblings. */
+export function previousElement(element: DomElement): DomElement | undefined {
+  const parent = element.parent;
+  if (!parent) return undefined;
+  const siblings = elementChildren(parent);
+  let index = indexCache.get(parent);
+  if (!index) { index = new Map(siblings.map((child, at) => [child, at])); indexCache.set(parent, index); }
+  const at = index.get(element) ?? 0;
+  return at > 0 ? siblings[at - 1] : undefined;
 }
 
 const textCache = new WeakMap<DomElement, string>();
@@ -227,7 +254,7 @@ function collapse(text: string): string {
  * changes, so each element is computed once; the post-order walk is iterative so deep nesting cannot overflow the
  * stack or turn repeated lookups quadratic.
  */
-function bottomUp<T>(element: DomElement, cache: WeakMap<DomElement, T>, combine: (node: DomElement) => T): T {
+export function bottomUp<T>(element: DomElement, cache: WeakMap<DomElement, T>, combine: (node: DomElement) => T): T {
   const cached = cache.get(element);
   if (cached !== undefined) return cached;
   const stack: Array<{ node: DomElement; visited: boolean }> = [{ node: element, visited: false }];
@@ -277,6 +304,22 @@ export function textWords(element: DomElement): number {
 
 export function hasText(element: DomElement): boolean {
   return textWords(element) > 0;
+}
+
+const sizeCache = new WeakMap<DomElement, number>();
+
+/** Number of descendant elements, computed once per subtree. */
+export function descendantCount(element: DomElement): number {
+  return bottomUp(element, sizeCache, (node) => {
+    let count = 0;
+    for (const child of node.children) if (child.kind === 'element') count += 1 + (sizeCache.get(child) ?? 0);
+    return count;
+  });
+}
+
+/** Document order of the last element inside `element`, or its own order when it has none. */
+export function lastOrder(element: DomElement): number {
+  return element.order + descendantCount(element);
 }
 
 export function ownText(element: DomElement): string {
