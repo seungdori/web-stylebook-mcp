@@ -1,6 +1,7 @@
 import { StyledDocument, isRendered, visibleChildren } from './cascade.js';
 import {
-  descendants, elementChildren, hasText, ownText, parseHtml, textWords, wordCount, type DomElement, type ParsedHtml,
+  descendants, elementChildren, hasText, lastOrder, ownText, parseHtml, textContent, textWords, wordCount, type DomElement,
+  type ParsedHtml,
 } from './html.js';
 import { blurPx, hasGradient, lengthPx, radiusOf, urlsIn, type LengthContext } from './values.js';
 
@@ -18,30 +19,107 @@ export interface PageModel {
 
 const CHROME_ROLES = new Set(['navigation', 'banner', 'contentinfo', 'search']);
 const SECTION_TAGS = new Set(['section', 'article', 'header', 'footer', 'aside', 'figure', 'form']);
+const MEDIA_CONTENT = new Set(['img', 'svg', 'picture', 'video', 'canvas', 'iframe', 'object', 'embed', 'input', 'textarea', 'select']);
+// A block this short with no heading or media beside the real content wrapper is an announcement bar or a note.
+const MINOR_WORDS = 30;
+const WRAPPER_DEPTH = 8;
+
+/**
+ * Read by assistive technology but not drawn: the sr-only pattern (a clipped or 1px box), or a box moved off-screen
+ * until it is focused, as skip links are (`top: -40px`, `top: -100%`, `left: -9999px`).
+ */
+export function isVisuallyHidden(styles: StyledDocument, element: DomElement, ctx: LengthContext): boolean {
+  const position = styles.pick(element, ['position'])?.value.trim();
+  if (position !== 'absolute' && position !== 'fixed') return false;
+  const clip = styles.pick(element, ['clip'])?.value ?? '';
+  const clipPath = styles.pick(element, ['clip-path'])?.value ?? '';
+  if (/rect\(\s*0(?:px)?[\s,]+0(?:px)?[\s,]+0(?:px)?[\s,]+0(?:px)?\s*\)/i.test(clip) || /inset\(\s*50%/i.test(clipPath)) return true;
+  const width = lengthPx(styles.pick(element, ['width'])?.value, ctx);
+  const height = lengthPx(styles.pick(element, ['height'])?.value, ctx);
+  if (width !== null && height !== null && width <= 1 && height <= 1) return true;
+  const offset = (side: string) => styles.pick(element, [side])?.value.trim() ?? '';
+  return ['left', 'right'].some((side) => (lengthPx(offset(side), ctx) ?? 0) <= -999)
+    || ['top', 'bottom'].some((side) => (/^-\d*\.?\d+%$/.test(offset(side)) ? parseFloat(offset(side)) <= -100
+      // A short text box pulled above the page is a skip link waiting for focus; a large or pictured one is layout.
+      : (lengthPx(offset(side), ctx) ?? 0) < 0 && textWords(element) <= 6 && !hasMediaContent(element)));
+}
+
+const MEDIA_CONTENT_TAGS = new Set(['img', 'svg', 'picture', 'video', 'canvas', 'iframe']);
+
+function hasMediaContent(element: DomElement): boolean {
+  return MEDIA_CONTENT_TAGS.has(element.tag) || descendants(element).some((node) => MEDIA_CONTENT_TAGS.has(node.tag));
+}
+
+const SKIP_LINK = /\bskip\b|\bjump to\b|본문\s*바로\s*가기|건너뛰기|スキップ|本文へ/i;
+
+/**
+ * Not page content: a skip link, a dialog, or a fixed overlay such as a cookie banner or chat widget. These sit beside
+ * the content wrapper on real pages and must not stop the descent into it or become sections.
+ */
+function isOverlay(styles: StyledDocument, element: DomElement): boolean {
+  if (element.tag === 'a' && (element.attrs.get('href') ?? '').startsWith('#') && SKIP_LINK.test(textContent(element))) return true;
+  const role = element.attrs.get('role') ?? '';
+  if (element.tag === 'dialog' || role === 'dialog' || role === 'alertdialog' || element.attrs.get('aria-modal') === 'true') return true;
+  return styles.pick(element, ['position'])?.value.trim() === 'fixed';
+}
 
 export function buildPage(html: string, css: readonly string[], ctx: LengthContext, maxElements: number): PageModel {
   const parsed = parseHtml(html, maxElements);
   const styles = new StyledDocument(parsed, css, ctx);
   const main = parsed.elements.find((element) => element.tag === 'main' || element.attrs.get('role') === 'main');
   const body = parsed.elements.find((element) => element.tag === 'body');
-  let container = main ?? body ?? parsed.root;
-  // Layout wrappers (React roots, max-width containers) hold the sections one level down, inside <main> or not.
-  for (let depth = 0; depth < 6; depth++) {
-    const blocks = visibleChildren(styles, container).filter((child) => !isChrome(child));
-    const only = blocks[0];
-    if (blocks.length !== 1 || !only || ownText(container) || SECTION_TAGS.has(only.tag)) break;
-    container = only;
+  const unseen = ancestorFlag((node) => isVisuallyHidden(styles, node, ctx));
+  const visibleH1 = (node: DomElement) => node.tag === 'h1' && !isLogoHeading(node) && !unseen(node);
+  const holdsH1 = (element: DomElement) => visibleH1(element) || descendants(element).some(visibleH1);
+  const chrome = (element: DomElement) => isChrome(element, holdsH1);
+  // Overlays are dropped unless nothing else is left, as in an app whose whole shell is a fixed layer.
+  const blocksOf = (element: DomElement) => {
+    const blocks = visibleChildren(styles, element).filter((child) => !chrome(child) && !unseen(child));
+    const inPage = blocks.filter((child) => !isOverlay(styles, child));
+    return inPage.length ? inPage : blocks;
+  };
+  const hasMedia = (element: DomElement) => MEDIA_CONTENT.has(element.tag) || descendants(element).some((node) => MEDIA_CONTENT.has(node.tag));
+  const significant = (element: DomElement) => hasText(element) || hasMedia(element);
+  const holdsHeading = (element: DomElement) => isHeading(element) || descendants(element).some(isHeading);
+  const minor = (element: DomElement) => !holdsHeading(element) && textWords(element) <= MINOR_WORDS && !hasMedia(element);
+  const headedBlocks = (element: DomElement) => blocksOf(element).filter(significant).filter(holdsHeading).length;
+  // One section's own content rather than a list of sections: a bare h1 or h2 beside its paragraphs, or one headed
+  // block beside a visual (a hero's copy and its decoration or screenshot).
+  const oneSection = (element: DomElement) => {
+    const inner = blocksOf(element).filter(significant);
+    if (inner.some((block) => block.tag === 'h1' || block.tag === 'h2')) return true;
+    return inner.filter(holdsHeading).length <= 1 && inner.some((block) => !holdsHeading(block) && !minor(block));
+  };
+
+  // Layout wrappers (React roots, max-width containers, an app shell beside a portal or toast region) hold the
+  // sections further down. Follow the wrapper that carries the content until the next level is one section, then
+  // keep the level with the most headed blocks, the deeper one on a tie.
+  const chain = [main ?? body ?? parsed.root];
+  for (let depth = 0; depth < WRAPPER_DEPTH; depth++) {
+    const level = chain[chain.length - 1]!;
+    if (ownText(level)) break;
+    const blocks = blocksOf(level).filter(significant);
+    const headed = blocks.filter(holdsHeading);
+    const next = blocks.length === 1 ? blocks[0]
+      : headed.length === 1 && blocks.every((block) => block === headed[0] || minor(block)) ? headed[0] : undefined;
+    if (!next || SECTION_TAGS.has(next.tag) || isHeading(next) || oneSection(next)) break;
+    chain.push(next);
   }
-  const sections = visibleChildren(styles, container).filter((child) => !isChrome(child) && (hasText(child) || child.children.some((node) => node.kind === 'element')));
+  let container = chain[0]!;
+  let most = headedBlocks(container);
+  for (const level of chain.slice(1)) {
+    const count = headedBlocks(level);
+    if (count >= most) { most = count; container = level; }
+  }
+  const sections = blocksOf(container).filter((child) => hasText(child) || child.children.some((node) => node.kind === 'element'));
   const footers = parsed.elements.filter((element) => (element.tag === 'footer' || element.attrs.get('role') === 'contentinfo')
     && !(main && isInside(element, main)));
   const footer = footers[footers.length - 1] ?? null;
   const siteHeader = parsed.elements.find((element) => (element.tag === 'header' || element.attrs.get('role') === 'banner')
     && !(main && isInside(element, main)));
-  const holdsH1 = (element: DomElement) => element.tag === 'h1' || descendants(element).some((node) => node.tag === 'h1' && !isLogoHeading(node));
   let opening: DomElement | null = sections.find(holdsH1) ?? null;
   if (!opening && siteHeader && holdsH1(siteHeader)) opening = siteHeader;
-  opening ??= sections.slice(0, 2).find((section) => isHeading(section) || descendants(section).some(isHeading)) ?? null;
+  opening ??= sections.slice(0, 2).find(holdsHeading) ?? null;
   return { html: parsed, styles, ctx, root: container, sections, opening, footer };
 }
 
@@ -58,14 +136,11 @@ function isInside(element: DomElement, ancestor: DomElement): boolean {
   return false;
 }
 
-function isChrome(element: DomElement): boolean {
+/** Navigation, footer, and site-header chrome; a header holding the page's visible h1 is content. */
+function isChrome(element: DomElement, holdsH1: (element: DomElement) => boolean): boolean {
   const role = element.attrs.get('role') ?? '';
   if (CHROME_ROLES.has(role) || element.tag === 'nav' || element.tag === 'footer') return true;
-  if (element.tag === 'header') {
-    const inner = descendants(element);
-    return !inner.some((child) => child.tag === 'h1');
-  }
-  return false;
+  return element.tag === 'header' && !holdsH1(element);
 }
 
 /**
@@ -91,6 +166,8 @@ function ancestorFlag(test: (element: DomElement) => boolean): (element: DomElem
 }
 
 const withinNavigation = ancestorFlag((node) => node.tag === 'nav' || node.attrs.get('role') === 'navigation');
+const hiddenFromAssistiveTech = ancestorFlag((node) => node.attrs.get('aria-hidden') === 'true'
+  || ['presentation', 'none'].includes(node.attrs.get('role') ?? ''));
 const withinFooter = ancestorFlag((node) => node.tag === 'footer' || node.attrs.get('role') === 'contentinfo');
 
 export function inNavigation(element: DomElement): boolean {
@@ -137,8 +214,14 @@ export function containsCta(page: PageModel, element: DomElement): boolean {
 
 /** Outermost CTAs, so a button inside a link is counted once. */
 export function ctasIn(element: DomElement): DomElement[] {
-  const all = descendants(element).filter(isCta);
-  return all.filter((cta) => !all.some((other) => other !== cta && isInside(cta, other)));
+  const out: DomElement[] = [];
+  let insideUntil = -Infinity;
+  for (const node of descendants(element)) {
+    if (node.order <= insideUntil || !isCta(node)) continue;
+    out.push(node);
+    insideUntil = lastOrder(node);
+  }
+  return out;
 }
 
 export function fontSizePx(page: PageModel, element: DomElement): number {
@@ -231,10 +314,13 @@ export function isIcon(page: PageModel, element: DomElement): boolean {
   if (element.tag === 'img') {
     const size = Math.max(sizePx(page, element, 'width') ?? 0, sizePx(page, element, 'height') ?? 0);
     const src = element.attrs.get('src') ?? '';
-    const label = `${src} ${element.attrs.get('alt') ?? ''} ${element.classes.join(' ')}`;
-    // Small photos (avatars, product thumbnails) are content, not icons; only vector or icon-named images qualify.
+    const alt = element.attrs.get('alt')?.trim() ?? '';
+    const label = `${src} ${alt} ${element.classes.join(' ')}`;
+    if (/\bicons?\b/i.test(label)) return true;
+    // Small photos (avatars, product thumbnails) are content, not icons, and so is a round named portrait drawn as SVG.
+    const portrait = !!alt && (radius(page, element).percent >= 50 || radius(page, element).px >= 999);
     const vector = /\.svgz?(?:[?#]|$)/i.test(src) || /^data:image\/svg/i.test(src);
-    return /\bicons?\b/i.test(label) || (vector && (size === 0 || size <= 64)) || (size > 0 && size <= 24);
+    return !portrait && ((vector && (size === 0 || size <= 64)) || (size > 0 && size <= 24));
   }
   const text = ownText(element);
   return !!text && text.length <= 4 && EMOJI.test(text) && elementChildren(element).length === 0;
@@ -245,22 +331,63 @@ function isLargeSvg(element: DomElement): boolean {
   return !!viewBox && viewBox.length === 4 && (viewBox[2]! > 64 || viewBox[3]! > 64);
 }
 
+/** An icon set before the title text inside a heading or term, as in `<dt><svg/>Push to deploy</dt>`. */
+function leadingIcon(page: PageModel, title: DomElement): DomElement | null {
+  for (const child of title.children) {
+    if (child.kind === 'text') {
+      if (child.text.trim()) return null;
+      continue;
+    }
+    if (isIcon(page, child)) return child;
+    if (hasText(child)) return null;
+    const inner = descendants(child).find((node) => isIcon(page, node));
+    if (inner) return inner;
+  }
+  return null;
+}
+
 export function firstIcon(page: PageModel, element: DomElement): DomElement | null {
   for (const node of descendants(element)) {
     if (isIcon(page, node)) return node;
-    if (isHeading(node) || (node.tag === 'p' && words(node) > 0)) return null;
+    if (isHeading(node) || node.tag === 'dt') return leadingIcon(page, node);
+    if (node.tag === 'p' && words(node) > 0) return null;
   }
   return null;
 }
 
 const MEDIA_TAGS = new Set(['img', 'picture', 'video', 'canvas', 'iframe', 'object', 'embed']);
 
+const layerFlags = new WeakMap<PageModel, { aside: (element: DomElement) => boolean; behind: (element: DomElement) => boolean }>();
+
+/** Ancestor-or-self flags: laid aside (out of flow, or behind), and behind (under the content, unclickable, or blurred). */
+function layerOf(page: PageModel) {
+  let flags = layerFlags.get(page);
+  if (!flags) {
+    const behind = (node: DomElement) => (zIndex(page, node) ?? 0) < 0 || page.styles.get(node, 'pointer-events')?.trim() === 'none'
+      || blurPx(page.styles.pick(node, ['filter'])?.value, page.ctx) > 0;
+    flags = { aside: ancestorFlag((node) => isPositionedOut(page, node) || behind(node)), behind: ancestorFlag(behind) };
+    layerFlags.set(page, flags);
+  }
+  return flags;
+}
+
+/**
+ * Decoration: hidden from assistive technology and laid out of flow or behind, or an empty-alt image under the content
+ * or blurred. An aria-hidden demo in the flow, or an empty-alt screenshot merely positioned, is still a product visual.
+ */
+export function isDecoration(page: PageModel, element: DomElement): boolean {
+  const layer = layerOf(page);
+  if (hiddenFromAssistiveTech(element) && layer.aside(element)) return true;
+  return element.tag === 'img' && element.attrs.get('alt') === '' && layer.behind(element);
+}
+
 /** Visual elements that could carry a product demonstration: media, large SVG, forms, tables, code. */
 export function productVisuals(page: PageModel, element: DomElement): DomElement[] {
   return descendants(element).filter((node) => {
     if (!isRendered(page.styles, node)) return false;
-    if (MEDIA_TAGS.has(node.tag)) return !(node.tag === 'img' && isIcon(page, node));
-    if (node.tag === 'svg') return !isIcon(page, node);
+    if (MEDIA_TAGS.has(node.tag) || node.tag === 'svg') {
+      return !(node.tag === 'img' || node.tag === 'svg' ? isIcon(page, node) : false) && !isDecoration(page, node);
+    }
     if (['table', 'form', 'pre', 'code', 'input', 'textarea', 'select', 'dl'].includes(node.tag)) return true;
     return !!backgroundImage(page, node) && urlsIn(backgroundImage(page, node)).length > 0;
   });

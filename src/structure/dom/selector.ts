@@ -200,10 +200,21 @@ function position(element: DomElement): Position {
 }
 
 
+const classSets = new WeakMap<DomElement, Set<string>>();
+
+function classSet(element: DomElement): Set<string> {
+  let set = classSets.get(element);
+  if (!set) { set = new Set(element.classes); classSets.set(element, set); }
+  return set;
+}
+
 function compoundMatches(element: DomElement, compound: CompoundSelector, matcher: SelectorMatcher): boolean {
   if (compound.tag && compound.tag !== '*' && compound.tag !== element.tag) return false;
   for (const id of compound.ids) if (element.id !== id) return false;
-  for (const cls of compound.classes) if (!element.classes.includes(cls)) return false;
+  if (compound.classes.length) {
+    const classes = classSet(element);
+    for (const cls of compound.classes) if (!classes.has(cls)) return false;
+  }
   for (const attr of compound.attrs) if (!attrMatches(element, attr)) return false;
   for (const pseudo of compound.pseudos) if (!pseudoMatches(element, pseudo, matcher)) return false;
   return true;
@@ -240,36 +251,82 @@ function pseudoMatches(element: DomElement, pseudo: PseudoSelector, matcher: Sel
 // Two bits per compound (known, matched) in one number per element; deeper compounds are recomputed.
 const MEMO_COMPOUNDS = 15;
 
+/** A yes/no answer per element: one byte per element when the document size is known, a map otherwise. */
+interface Answers { get(element: DomElement): boolean | undefined; set(element: DomElement, value: boolean): void }
+
+function answers(size: number | undefined): Answers {
+  if (size === undefined) {
+    const map = new Map<DomElement, boolean>();
+    return { get: (element) => map.get(element), set: (element, value) => { map.set(element, value); } };
+  }
+  // Orders run from -1 (the synthetic root) to size - 1; 0 means unknown.
+  const bytes = new Uint8Array(size + 1);
+  return {
+    get: (element) => { const byte = bytes[element.order + 1]; return byte ? byte === 2 : undefined; },
+    set: (element, value) => { bytes[element.order + 1] = value ? 2 : 1; },
+  };
+}
+
+type Reach = Map<ComplexSelector, Map<number, Answers>>;
+
+function reachMemo(store: Reach, selector: ComplexSelector, index: number, size: number | undefined): Answers {
+  let bySelector = store.get(selector);
+  if (!bySelector) { bySelector = new Map(); store.set(selector, bySelector); }
+  let byIndex = bySelector.get(index);
+  if (!byIndex) { byIndex = answers(size); bySelector.set(index, byIndex); }
+  return byIndex;
+}
+
 /**
- * Matches selectors against one document. Results for (selector, element, compound) are memoized, so descendant
- * combinators do not backtrack exponentially, and a budget of compound checks bounds hostile stylesheets. The
- * rightmost compound is asked once per element by the cascade, so it is only remembered for :has(), which asks again
- * from every ancestor.
+ * Matches selectors against one document. Results for (selector, element, compound) are memoized, and so is "some
+ * ancestor (or earlier sibling, or descendant for :has) matches", so descendant, sibling, and :has() checks stay
+ * linear on deep or wide pages; a budget of compound checks bounds hostile stylesheets. The rightmost compound is asked
+ * once per element, by the cascade or by the :has() walk, so only the compounds to its left are remembered.
  */
 export class SelectorMatcher {
   attempts = 0;
   exhausted = false;
   private readonly memo = new Map<ComplexSelector, Map<DomElement, number>>();
+  private readonly above: Reach = new Map();
+  private readonly before: Reach = new Map();
+  private readonly within = new Map<ComplexSelector, Answers>();
 
-  constructor(private readonly budget = Number.POSITIVE_INFINITY) {}
+  /** `size` is the document's element count; it lets the reachability memos use one byte per element. */
+  constructor(private readonly budget = Number.POSITIVE_INFINITY, private readonly size?: number) {}
 
-  matches(element: DomElement, selector: ComplexSelector, remember = false): boolean {
-    return this.matchFrom(element, selector, selector.compounds.length - 1, remember);
+  matches(element: DomElement, selector: ComplexSelector): boolean {
+    return this.matchFrom(element, selector, selector.compounds.length - 1, false);
   }
 
+  /** Whether any descendant matches `selector`; each subtree is answered once and reused by every ancestor. */
   hasDescendant(element: DomElement, selector: ComplexSelector): boolean {
-    const stack = [...elementChildren(element)];
-    while (stack.length && !this.exhausted) {
-      const node = stack.pop()!;
-      if (this.matches(node, selector, true)) return true;
-      stack.push(...elementChildren(node));
+    let memo = this.within.get(selector);
+    if (!memo) { memo = answers(this.size); this.within.set(selector, memo); }
+    const known = memo.get(element);
+    if (known !== undefined) return known;
+    // Post-order over the unanswered part of the subtree; `expanded` marks nodes whose children are already queued.
+    const stack: DomElement[] = [element];
+    const expanded = new Set<DomElement>();
+    while (stack.length) {
+      const node = stack[stack.length - 1]!;
+      if (!expanded.has(node)) {
+        expanded.add(node);
+        for (const child of elementChildren(node)) if (memo.get(child) === undefined) stack.push(child);
+        continue;
+      }
+      stack.pop();
+      let found = false;
+      for (const child of elementChildren(node)) {
+        if (memo.get(child) || this.matches(child, selector)) { found = true; break; }
+      }
+      memo.set(node, found);
     }
-    return false;
+    return memo.get(element)!;
   }
 
-  private matchFrom(element: DomElement, selector: ComplexSelector, index: number, remember = true): boolean {
+  private matchFrom(element: DomElement, selector: ComplexSelector, index: number, remember = true, store = true): boolean {
     if (this.exhausted) return false;
-    const memoized = index < MEMO_COMPOUNDS && (remember || index < selector.compounds.length - 1);
+    const memoized = store && index < MEMO_COMPOUNDS && (remember || index < selector.compounds.length - 1);
     const known = 1 << (2 * index);
     const matched = 2 << (2 * index);
     let bySelector: Map<DomElement, number> | undefined;
@@ -288,21 +345,35 @@ export class SelectorMatcher {
     return result;
   }
 
+  /**
+   * Whether `start` or a node reached from it by `step` matches compound `index`. Walks until a match or a node whose
+   * answer is known, then records the answer for every node on the way, so no chain is walked twice.
+   */
+  private reaches(start: DomElement | null, selector: ComplexSelector, index: number, store: Reach, step: (node: DomElement) => DomElement | null): boolean {
+    const memo = reachMemo(store, selector, index, this.size);
+    const chain: DomElement[] = [];
+    let result = false;
+    for (let node = start; node && node.tag !== '#document'; node = step(node)) {
+      const known = memo.get(node);
+      if (known !== undefined) { result = known; break; }
+      chain.push(node);
+      // The walk records its own answer per node, so the per-compound memo would only hold a second copy.
+      if (this.matchFrom(node, selector, index, true, false)) { result = true; break; }
+    }
+    for (const node of chain) memo.set(node, result);
+    return result;
+  }
+
   private compute(element: DomElement, selector: ComplexSelector, index: number): boolean {
     if (!compoundMatches(element, selector.compounds[index]!, this)) return false;
     if (index === 0) return true;
     const combinator = selector.combinators[index - 1]!;
     if (combinator === '>') return !!element.parent && element.parent.tag !== '#document' && this.matchFrom(element.parent, selector, index - 1);
-    if (combinator === ' ') {
-      for (let node = element.parent; node && node.tag !== '#document'; node = node.parent) {
-        if (this.matchFrom(node, selector, index - 1)) return true;
-      }
-      return false;
-    }
+    if (combinator === ' ') return this.reaches(element.parent, selector, index - 1, this.above, (node) => node.parent);
     const { all, index: at } = position(element);
     if (combinator === '+') return at > 0 && this.matchFrom(all[at - 1]!, selector, index - 1);
-    for (let i = at - 1; i >= 0; i--) if (this.matchFrom(all[i]!, selector, index - 1)) return true;
-    return false;
+    const previous = (node: DomElement) => { const place = position(node); return place.index > 0 ? place.all[place.index - 1]! : null; };
+    return at > 0 && this.reaches(all[at - 1]!, selector, index - 1, this.before, previous);
   }
 }
 

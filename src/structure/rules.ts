@@ -25,17 +25,33 @@ function result(matches: PatternMatch[]): DetectionStatus {
   return matches.length ? { status: 'found', matches } : { status: 'absent' };
 }
 
-const BORDER_SIDES = ['border', 'border-width', 'border-top', 'border-right', 'border-bottom', 'border-left',
-  'border-top-width', 'border-right-width', 'border-bottom-width', 'border-left-width'];
+const SIDES = ['top', 'right', 'bottom', 'left'] as const;
 const BORDER_COLORS = ['border', 'border-color', 'border-top', 'border-right', 'border-bottom', 'border-left',
   'border-top-color', 'border-right-color', 'border-bottom-color', 'border-left-color'];
 
+/** A width that draws a line in a colour that shows; a border whose only colour is transparent reserves hover space. */
 function drawnBorder(value: string): boolean {
-  return /[1-9]/.test(value) && !/\bnone\b|\bhidden\b|^\s*0(?:px)?\s*$/.test(value.trim());
+  if (!/[1-9]/.test(value) || /\bnone\b|\bhidden\b|^\s*0(?:px)?\s*$/.test(value.trim())) return false;
+  const colors = colorsIn(value);
+  return !colors.length || colors.some((color) => color.a > 0.01);
+}
+
+/** The `border-width` value that applies to one side, from its one to four space-separated values. */
+function widthForSide(value: string, side: (typeof SIDES)[number]): string {
+  const parts = value.trim().split(/\s+/);
+  const [top, right = top, bottom = top, left = right] = parts;
+  return { top, right, bottom, left }[side] ?? '';
+}
+
+function drawnSides(page: PageModel, element: DomElement): number {
+  const all = drawnBorder(page.styles.get(element, 'border') ?? '');
+  const widths = page.styles.get(element, 'border-width') ?? '';
+  return SIDES.filter((side) => all || drawnBorder(widthForSide(widths, side))
+    || drawnBorder(page.styles.get(element, `border-${side}`) ?? '') || drawnBorder(page.styles.get(element, `border-${side}-width`) ?? '')).length;
 }
 
 function hasBorder(page: PageModel, element: DomElement): boolean {
-  return BORDER_SIDES.some((prop) => drawnBorder(page.styles.get(element, prop) ?? ''));
+  return drawnSides(page, element) > 0;
 }
 
 function opaqueFill(page: PageModel, element: DomElement): Rgba | null {
@@ -55,7 +71,8 @@ export function isCardLike(page: PageModel, element: DomElement): boolean {
   const fill = opaqueFill(page, element);
   const parentFill = element.parent ? opaqueFill(page, element.parent) : null;
   const ownFill = !!fill && (!parentFill || Math.abs(toHsl(fill).l - toHsl(parentFill).l) > 0.02 || fill.a < 0.98);
-  return hasBorder(page, element) || shadow || ownFill || !!backgroundImage(page, element);
+  // A rule on one or two sides divides a list; it takes a frame of three or more sides to make a card.
+  return drawnSides(page, element) >= 3 || shadow || ownFill || !!backgroundImage(page, element);
 }
 
 function shadowLayers(page: PageModel, element: DomElement, box: (typeof BOXES)[number] = 'element') {
@@ -378,7 +395,8 @@ function faintBorders(page: PageModel, elements: DomElement[], p: StyleRuleParam
   const out: PatternMatch[] = [];
   for (const element of elements) {
     if (!hasBorder(page, element)) continue;
-    const colors = BORDER_COLORS.flatMap((prop) => colorsIn(page.styles.get(element, prop) ?? ''));
+    // A fully transparent border reserves space for a state change; it is not a faint line.
+    const colors = BORDER_COLORS.flatMap((prop) => colorsIn(page.styles.get(element, prop) ?? '')).filter((color) => color.a > 0.01);
     const faintest = colors.reduce<Rgba | null>((low, color) => (!low || color.a < low.a ? color : low), null);
     if (faintest && faintest.a < p.minAlpha) out.push({ element, observed: { borderAlpha: Number(faintest.a.toFixed(2)) } });
   }

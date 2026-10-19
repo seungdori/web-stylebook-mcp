@@ -1,9 +1,12 @@
 import { isRendered } from './dom/cascade.js';
-import { descendants, elementChildren, hasText, ownText, textContent, type DomElement } from './dom/html.js';
+import {
+  bottomUp, descendantCount, descendants, elementChildren, hasText, lastOrder, ownText, previousElement, textContent,
+  type DomElement,
+} from './dom/html.js';
 import {
   backgroundColor, backgroundImage, containsCta, ctasIn, filterBlur, firstIcon, inFooter, inNavigation, isCentered, isCta,
-  isHeading, isIcon, isPositionedOut, isRowLayout, productVisuals, radius, renderedChildren, sizePx, words, zIndex,
-  type PageModel,
+  isDecoration, isHeading, isIcon, isPositionedOut, isRowLayout, productVisuals, radius, renderedChildren,
+  sizePx, words, zIndex, type PageModel,
 } from './dom/page.js';
 import { colorsIn, hasGradient, lengthPx, toHsl, urlsIn } from './dom/values.js';
 import { T } from './patterns.js';
@@ -92,6 +95,30 @@ function layersWithin(page: PageModel, opening: DomElement): Map<DomElement, Lay
   return out;
 }
 
+const BLOB_NAME = /blob|gradient|glow|aurora|orb\b|bokeh|mesh|blur/i;
+
+const gradientIds = new WeakMap<PageModel, Set<string>>();
+
+/** Whether an inline SVG paints with a gradient (a shape filled or stroked with url(#gradient)) or a saturated colour. */
+function svgPaint(page: PageModel, svg: DomElement): { gradient: boolean; saturated: boolean } {
+  let ids = gradientIds.get(page);
+  if (!ids) {
+    ids = new Set(page.html.elements.filter((element) => element.id && /gradient$/.test(element.tag)).map((element) => element.id!));
+    gradientIds.set(page, ids);
+  }
+  let gradient = false; let saturated = false;
+  for (const node of descendants(svg)) {
+    for (const attr of ['fill', 'stroke', 'stop-color', 'style']) {
+      const value = node.attrs.get(attr);
+      if (!value) continue;
+      const ref = /url\(\s*['"]?#([^'")\s]+)/i.exec(value)?.[1];
+      if (ref) gradient = gradient || ids.has(ref);
+      else saturated = saturated || isSaturated(value);
+    }
+  }
+  return { gradient, saturated };
+}
+
 function detectGradientBlob(page: PageModel): DetectionStatus {
   const opening = page.opening;
   const heading = openingHeading(page);
@@ -121,10 +148,15 @@ function detectGradientBlob(page: PageModel): DetectionStatus {
       const clipped = /\b(?:polygon|circle|ellipse)\(/i.test(page.styles.pick(node, ['clip-path', '-webkit-clip-path'], box)?.value ?? '');
       const rounded = clipped || corners.percent >= T.blobMinRoundPercent || corners.px >= 999
         || (width > 0 && height > 0 && corners.px >= Math.min(width, height) * (T.blobMinRoundPercent / 100));
-      const blurred = blur >= T.blobMinBlurPx && (hasGradient(image) || isSaturated(fill));
+      const paint = box === 'element' && node.tag === 'svg' ? svgPaint(page, node) : { gradient: false, saturated: false };
+      const gradient = hasGradient(image) || paint.gradient;
+      const blurred = blur >= T.blobMinBlurPx && (gradient || paint.saturated || isSaturated(fill));
       const radialShape = /radial-gradient/i.test(image) && rounded && Math.max(width, height) >= T.blobMinSizePx;
-      if (blurred || radialShape) {
-        matches.push({ element: node, observed: { box, blurPx: blur, gradient: hasGradient(image), rounded, widthPx: width, heightPx: height } });
+      // An image only counts as a blob when it is marked as decoration; a product shot named "aurora-dashboard" is not.
+      const namedImage = box === 'element' && node.tag === 'img' && (node.attrs.get('alt') === '' || layer.hidden)
+        && BLOB_NAME.test(`${node.attrs.get('src') ?? ''} ${node.classes.join(' ')}`) && (blur >= T.blobMinBlurPx || Math.max(width, height) >= T.blobMinSizePx);
+      if (blurred || radialShape || namedImage) {
+        matches.push({ element: node, observed: { box, blurPx: blur, gradient, rounded, widthPx: width, heightPx: height, ...(node.tag === 'svg' || node.tag === 'img' ? { kind: node.tag } : {}) } });
         break;
       }
     }
@@ -138,17 +170,29 @@ function isHomeLink(node: DomElement): boolean {
 }
 
 function eyebrowBefore(page: PageModel, heading: DomElement): DomElement | null {
-  const opening = page.opening!;
-  return descendants(opening).find((node) => node.order < heading.order && !contains(node, heading)
-    && !inNavigation(node) && !/logo|brand/i.test(node.classes.join(' ')) && !isHomeLink(node) && !mediaOf(node).length
-    && ownText(node).length > 0 && words(node) >= 1 && words(node) <= 8 && !isHeading(node)) ?? null;
+  for (const node of descendants(page.opening!)) {
+    if (node.order >= heading.order) break;
+    if (!ownText(node) || words(node) > 8 || isHeading(node) || contains(node, heading)) continue;
+    if (inNavigation(node) || /logo|brand/i.test(node.classes.join(' ')) || isHomeLink(node) || mediaCount(node) > 0) continue;
+    return node;
+  }
+  return null;
 }
 
-/** A product demonstration built from markup: a labelled block or a block of ten or more elements beside the copy. */
+/**
+ * A product demonstration built from markup beside the copy: a labelled block, or a block of ten or more elements.
+ * Decoration hidden from assistive technology is not a demonstration.
+ */
 function handBuiltMock(page: PageModel, opening: DomElement, keep: readonly DomElement[]): DomElement | null {
+  const kept = new Set(keep);
+  const holders = new Set<DomElement>();
+  for (const item of keep) for (let up = item.parent; up && up !== opening && !holders.has(up); up = up.parent) holders.add(up);
+  let insideUntil = -Infinity;
   for (const node of descendants(opening)) {
-    if (!isRendered(page.styles, node) || keep.some((item) => contains(node, item) || contains(item, node))) continue;
-    const size = descendants(node).length;
+    if (node.order <= insideUntil) continue;
+    if (kept.has(node)) { insideUntil = lastOrder(node); continue; }
+    if (holders.has(node) || !isRendered(page.styles, node) || isDecoration(page, node)) continue;
+    const size = descendantCount(node);
     const labelled = node.tag === 'figure' || node.attrs.get('role') === 'img' || (node.attrs.has('aria-label') && !isCta(node));
     if (size >= 10 || (labelled && size >= 3)) return node;
   }
@@ -160,7 +204,8 @@ function detectCenteredStack(page: PageModel): DetectionStatus {
   const heading = openingHeading(page);
   if (!opening || !heading) return { status: 'not-applicable', reason: NO_OPENING };
   if (!isCentered(page, heading)) return { status: 'absent' };
-  const after = descendants(opening).filter((node) => node.order > heading.order && !contains(heading, node));
+  const headingEnd = lastOrder(heading);
+  const after = descendants(opening).filter((node) => node.order > headingEnd);
   const subline = after.find((node) => (node.tag === 'p' || ownText(node).length > 0) && words(node) >= T.stackSubMinWords
     && !isHeading(node) && node.tag !== 'a' && node.tag !== 'button' && !containsCta(page, node));
   const ctas = ctasIn(opening).filter((cta) => cta.order > heading.order);
@@ -239,17 +284,33 @@ const SOCIAL = /twitter|x\.com|github|linkedin|instagram|facebook|youtube|tiktok
 const PAYMENT = /visa|mastercard|master-card|amex|american express|paypal|apple ?pay|google ?pay|discover|jcb|unionpay|klarna|afterpay|alipay|wechat ?pay|kakaopay|naverpay|toss|app ?store|google play|play store/i;
 const INTEGRATION = /integrat|works with|connects? (?:to|with)|plug-?ins?|compatible|supported (?:apps|tools|platforms)|apps you|연동|통합|対応|連携/i;
 const LOGO_NAMES = /logo|brand|client|customer|partner|sponsor|marquee|trusted|backer|investor/i;
+// A heading names a logo row only when it names organizations; "Client libraries" or "Brand assets" do not.
+const ORGANIZATIONS = /\b(?:customers|clients|partners|sponsors|backers|investors)\b|고객사|파트너사|導入企業|お客様/i;
 const LOOPING = /\binfinite\b/i;
 
+const isMedia = (node: DomElement) => node.tag === 'img' || node.tag === 'svg' || node.tag === 'picture';
+const mediaCache = new WeakMap<DomElement, number>();
+
+/** Outermost images, SVGs, and pictures in a subtree, counted once per subtree. */
+function mediaCount(element: DomElement): number {
+  return bottomUp(element, mediaCache, (node) => (isMedia(node) ? 1
+    : elementChildren(node).reduce((sum, child) => sum + (mediaCache.get(child) ?? 0), 0)));
+}
+
+/** Outermost images, SVGs, and pictures: an SVG's own shapes or a picture's sources are part of it. */
 function mediaOf(element: DomElement): DomElement[] {
-  const all = [element, ...descendants(element)].filter((node) => node.tag === 'img' || node.tag === 'svg' || node.tag === 'picture');
-  return all.filter((node) => !all.some((other) => other !== node && descendants(other).includes(node)));
+  const out: DomElement[] = [];
+  let insideUntil = -Infinity;
+  for (const node of [element, ...descendants(element)]) {
+    if (node.order <= insideUntil || !isMedia(node)) continue;
+    out.push(node);
+    insideUntil = lastOrder(node);
+  }
+  return out;
 }
 
 function isLogoItem(item: DomElement): boolean {
-  if (item.tag === 'button') return false;
-  const media = mediaOf(item);
-  return media.length === 1 && words(item) <= T.logoMaxWords;
+  return item.tag !== 'button' && mediaCount(item) === 1 && words(item) <= T.logoMaxWords;
 }
 
 function cueText(element: DomElement): string {
@@ -293,17 +354,31 @@ export function sectionOf(page: PageModel, element: DomElement): DomElement {
 
 const LABEL_MAX_WORDS = 40;
 
+const firstHeadings = new WeakMap<DomElement, DomElement | null>();
+
 /** The heading and the caption just before a row: what a reader takes as the row's label. */
 function sectionLabel(page: PageModel, element: DomElement): string {
   const section = sectionOf(page, element);
-  const heading = descendants(section).find((node) => isHeading(node) && node.order < element.order);
-  const previous = element.parent ? elementChildren(element.parent).filter((child) => child.order < element.order).pop() : undefined;
+  let first = firstHeadings.get(section);
+  if (first === undefined) {
+    first = descendants(section).find(isHeading) ?? null;
+    firstHeadings.set(section, first);
+  }
+  const heading = first && first.order < element.order ? first : undefined;
+  const previous = previousElement(element);
   const short = (node: DomElement | undefined) => (node && words(node) <= LABEL_MAX_WORDS ? textContent(node) : '');
   return [short(heading), short(previous), element.attrs.get('aria-label') ?? ''].join(' ');
 }
 
+/** Whether `element` sits inside an earlier match; elements arrive in document order, so no match can sit inside it. */
+function withinMatch(matched: ReadonlySet<DomElement>, element: DomElement): boolean {
+  for (let node: DomElement | null = element; node; node = node.parent) if (matched.has(node)) return true;
+  return false;
+}
+
 function detectLogoStrip(page: PageModel): DetectionStatus {
   const matches: PatternMatch[] = [];
+  const matched = new Set<DomElement>();
   for (const container of contentElements(page)) {
     const items = renderedChildren(page, container);
     if (items.length < T.logoMinItems) continue;
@@ -316,13 +391,14 @@ function detectLogoStrip(page: PageModel): DetectionStatus {
     const label = sectionLabel(page, container);
     const media = logos.flatMap(mediaOf);
     const cue = media.some((node) => /logo/i.test(cueText(node))) || [container, ...logos].some((node) => LOGO_NAMES.test(cueText(node)))
-      || [container, ...logos, ...media].some((node) => isMuted(page, node)) || marquee || claims(label);
+      || [container, ...logos, ...media].some((node) => isMuted(page, node)) || marquee || claims(label) || ORGANIZATIONS.test(label);
     if (!cue) continue;
     const linked = logos.map((item) => [item, ...descendants(item)].find((node) => node.tag === 'a')?.attrs.get('href') ?? '').join(' ');
     const social = inFooter(container) && (SOCIAL.test(linked) || logos.every((item) => SOCIAL.test(cueText(item) + cueText(mediaOf(item)[0]!))));
     const payment = media.filter((node) => PAYMENT.test(cueText(node))).length >= media.length / 2;
     if (inNavigation(container) || social || payment || INTEGRATION.test(label)) continue;
-    if (matches.some((match) => contains(match.element, container) || contains(container, match.element))) continue;
+    if (withinMatch(matched, container)) continue;
+    matched.add(container);
     matches.push({ element: container, observed: { logos: logos.length, marquee, muted: [container, ...logos, ...media].some((node) => isMuted(page, node)) } });
   }
   return found(matches);
@@ -356,13 +432,21 @@ function claims(text: string): boolean {
 
 /** Logos or avatars beside a claim: images, or SVGs that are not hidden as decoration (check marks are). */
 function proofMedia(page: PageModel, element: DomElement): number {
-  return [element, ...descendants(element)].filter((node) => isRendered(page.styles, node)
-    && (node.tag === 'img' || (node.tag === 'svg' && node.attrs.get('aria-hidden') !== 'true'))).length;
+  let count = 0;
+  for (const node of [element, ...descendants(element)]) {
+    if ((node.tag === 'img' || (node.tag === 'svg' && node.attrs.get('aria-hidden') !== 'true')) && isRendered(page.styles, node)) count++;
+    if (count >= 3) break;
+  }
+  return count;
 }
 
 function detectTrustedBy(page: PageModel): DetectionStatus {
   const matches: PatternMatch[] = [];
   const bands = new Set<DomElement>();
+  // Many claims share one container, one parent, or one section, so each is judged once.
+  const proofAt = new Map<DomElement, boolean>();
+  const proofAmong = new Map<DomElement, boolean>();
+  const shortAt = new Map<DomElement, boolean>();
   for (const element of contentElements(page)) {
     if ((!ownText(element) && !isHeading(element)) || words(element) > T.claimMaxWords) continue;
     const text = textContent(element);
@@ -370,10 +454,23 @@ function detectTrustedBy(page: PageModel): DetectionStatus {
     const section = sectionOf(page, element);
     if (bands.has(section)) continue;
     const container = element.parent ?? section;
-    const siblings = container !== section && container.parent ? elementChildren(container.parent).filter((node) => node !== container) : [];
-    const proofNearby = [container, ...siblings].some((node) => proofMedia(page, node) >= 3)
-      || (words(container) <= LABEL_MAX_WORDS && /★|⭐|\b\d(?:\.\d)?\s*\/\s*5\b/.test(textContent(container)));
-    const shortBand = words(section) <= T.bandMaxWords && !quoteItemsIn(page, section).length && !containsCta(page, section);
+    let proofNearby = proofAt.get(container);
+    if (proofNearby === undefined) {
+      const parent = container !== section ? container.parent : null;
+      let amongSiblings = parent ? proofAmong.get(parent) : false;
+      if (parent && amongSiblings === undefined) {
+        amongSiblings = elementChildren(parent).some((node) => proofMedia(page, node) >= 3);
+        proofAmong.set(parent, amongSiblings);
+      }
+      proofNearby = !!amongSiblings || proofMedia(page, container) >= 3
+        || (words(container) <= LABEL_MAX_WORDS && /★|⭐|\b\d(?:\.\d)?\s*\/\s*5\b/.test(textContent(container)));
+      proofAt.set(container, proofNearby);
+    }
+    let shortBand = shortAt.get(section);
+    if (shortBand === undefined) {
+      shortBand = words(section) <= T.bandMaxWords && quoteCount(page, section) === 0 && !containsCta(page, section);
+      shortAt.set(section, shortBand);
+    }
     if (!shortBand && !proofNearby) continue;
     bands.add(section);
     matches.push({ element, observed: { claim: text.slice(0, 160), sectionWords: words(section), proofNearby } });
@@ -383,13 +480,18 @@ function detectTrustedBy(page: PageModel): DetectionStatus {
 
 const STEP_HEADING = /^\s*(?:step\s*)?(?:\d+|[ivx]+)[.):]?\s*$/i;
 
+const isTitle = (node: DomElement) => isHeading(node) || node.tag === 'strong' || node.tag === 'b' || node.tag === 'dt';
+
 function iconCard(page: PageModel, card: DomElement): { heading: DomElement; blurb: DomElement } | null {
   const icon = firstIcon(page, card);
   if (!icon) return null;
   const inner = descendants(card);
   const leadingMedia = inner.find((node) => (node.tag === 'img' || node.tag === 'picture' || node.tag === 'video') && !isIcon(page, node));
   if (leadingMedia && leadingMedia.order < icon.order) return null;
-  const heading = inner.find((node) => node.order > icon.order && (isHeading(node) || node.tag === 'strong' || node.tag === 'b' || node.tag === 'dt'));
+  // The icon may sit inside the title itself, as in `<dt><svg/>Push to deploy</dt>` or `<h3><svg/>Title</h3>`.
+  let holder: DomElement | null = null;
+  for (let up = icon.parent; up && up !== card; up = up.parent) if (isTitle(up)) { holder = up; break; }
+  const heading = holder ?? inner.find((node) => node.order > icon.order && isTitle(node));
   if (!heading || words(heading) === 0 || words(heading) > T.cardHeadingMaxWords || STEP_HEADING.test(textContent(heading))) return null;
   const blurb = inner.find((node) => node.order > heading.order && !contains(heading, node)
     && (node.tag === 'p' || node.tag === 'dd' || (ownText(node) && !isHeading(node)))
@@ -402,19 +504,24 @@ function shapeOf(page: PageModel, card: DomElement): string {
     .map((node) => (isIcon(page, node) ? 'icon' : isHeading(node) ? 'h' : 'p')).join('');
 }
 
+// A card is a small block; a child of hundreds of elements is a section or a layout, never one of the cards.
+const CARD_MAX_ELEMENTS = 200;
+
 function detectIconFeatureGrid(page: PageModel): DetectionStatus {
   const matches: PatternMatch[] = [];
+  const matched = new Set<DomElement>();
   for (const container of contentElements(page)) {
     const kids = renderedChildren(page, container);
     if (kids.length < T.cardsMin) continue;
-    const filled = kids.filter(hasText);
+    const filled = kids.filter((kid) => hasText(kid) && descendantCount(kid) <= CARD_MAX_ELEMENTS);
     if (filled.length < T.cardsMin) continue;
     const cards = filled.filter((kid) => iconCard(page, kid) !== null);
     if (cards.length < T.cardsMin || cards.length < filled.length * 0.75) continue;
     const shapes = cards.map((card) => shapeOf(page, card));
     const common = shapes.filter((shape) => shape === shapes[0]).length;
     if (common < Math.ceil(cards.length * 0.66)) continue;
-    if (matches.some((match) => contains(match.element, container))) continue;
+    if (withinMatch(matched, container)) continue;
+    matched.add(container);
     matches.push({ element: container, observed: { cards: cards.length, row: isRowLayout(page, container, 2) } });
   }
   return found(matches);
@@ -424,7 +531,10 @@ const CAROUSEL = /carousel|slider|swiper|splide|slick|glide|embla|keen-slider|fl
 const QUOTE_TOKEN = /^(?:testimonials?|reviews?|quotes?|quotation)$/i;
 const QUOTE_NAME_CJK = /후기|추천사|お客様の声/;
 const PREV_NEXT = /\b(?:prev|previous|next)\b|이전|다음|前へ|次へ/i;
-const DOT = /\bslide\s*\d|\bgo to slide|\bdot\b|\bpage\s*\d|슬라이드|スライド/i;
+const DOT = /\bslide\s*\d|\bgo to slide|\bdot\b|슬라이드|スライド/i;
+// Paging through a list (reviews, results) is not a carousel, even with numbered or previous/next buttons.
+const PAGINATION = /\bpages?\b|\bpagination\b|\bpager\b|페이지|ページ/i;
+const SLIDE_WORD = /slide|testimonial|quote|review|stor(?:y|ies)|후기|슬라이드|スライド/i;
 
 /** Class and id names split into words (kebab, snake, camel case, CSS-modules hashes), so "template-preview" is not "review". */
 function nameTokens(element: DomElement): string[] {
@@ -473,6 +583,29 @@ function quoteItems(page: PageModel): Set<DomElement> {
   return items;
 }
 
+const quoteCounts = new WeakMap<PageModel, WeakMap<DomElement, number>>();
+
+/** How many outermost quote items a subtree holds, computed once per subtree. */
+function quoteCount(page: PageModel, scope: DomElement): number {
+  const items = quoteItems(page);
+  let cache = quoteCounts.get(page);
+  if (!cache) { cache = new WeakMap(); quoteCounts.set(page, cache); }
+  const counts = cache;
+  return bottomUp(scope, counts, (node) => (items.has(node) ? 1
+    : elementChildren(node).reduce((sum, child) => sum + (counts.get(child) ?? 0), 0)));
+}
+
+/** Inside a pagination control: a container labelled or named as pages or a pager. */
+const PAGER_NAME = /^(?:pagination|pager|paginator|page-?nav|page-?numbers)$/i;
+
+/** Inside a pagination control: a container labelled as pages, or named pagination or pager (not any "page" class). */
+function inPager(node: DomElement): boolean {
+  for (let up: DomElement | null = node.parent, depth = 0; up && depth < 6; up = up.parent, depth++) {
+    if (PAGINATION.test(up.attrs.get('aria-label') ?? '') || up.classes.some((cls) => PAGER_NAME.test(cls))) return true;
+  }
+  return false;
+}
+
 /** Outermost quote items inside `scope`. */
 function quoteItemsIn(page: PageModel, scope: DomElement): DomElement[] {
   const items = quoteItems(page);
@@ -493,17 +626,21 @@ function carouselMechanics(page: PageModel, scope: DomElement): DomElement | nul
   const snap = nodes.find((node) => /auto|scroll/.test(page.styles.pick(node, ['overflow-x', 'overflow'])?.value ?? '')
     && /\bx\b|inline|both/.test(page.styles.get(node, 'scroll-snap-type') ?? ''));
   if (snap) return snap;
-  const buttons = nodes.filter((node) => node.tag === 'button' || node.attrs.get('role') === 'button');
+  const buttons = nodes.filter((node) => (node.tag === 'button' || node.attrs.get('role') === 'button') && !inPager(node));
   const arrows = buttons.filter((node) => {
     if (words(node) > 3) return false;
     const text = textContent(node);
-    return PREV_NEXT.test(node.attrs.get('aria-label') || text) || /^[‹›<>←→❮❯]$/.test(text);
+    const label = node.attrs.get('aria-label') ?? '';
+    if (PAGINATION.test(`${label} ${text}`)) return false;
+    if (/^[‹›<>←→❮❯]$/.test(text)) return true;
+    if (!text) return PREV_NEXT.test(label);
+    return PREV_NEXT.test(text) && SLIDE_WORD.test(`${label} ${text}`);
   });
   if (arrows.length >= 2) return arrows[0]!;
-  const dots = buttons.filter((node) => DOT.test(node.attrs.get('aria-label') ?? '')
+  const dots = buttons.filter((node) => (DOT.test(node.attrs.get('aria-label') ?? '') && !PAGINATION.test(node.attrs.get('aria-label') ?? ''))
     || (!hasText(node) && !elementChildren(node).length && !node.attrs.has('aria-label')));
   if (dots.length >= T.dotsMin) return dots[0]!;
-  return nodes.find((node) => animated(page, node) && quoteItemsIn(page, node).length >= T.quotesMin) ?? null;
+  return nodes.find((node) => animated(page, node) && quoteCount(page, node) >= T.quotesMin) ?? null;
 }
 
 function detectTestimonialCarousel(page: PageModel): DetectionStatus {

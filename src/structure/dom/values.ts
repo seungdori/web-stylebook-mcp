@@ -76,7 +76,7 @@ function oklabToRgb(L: number, a: number, b: number): { r: number; g: number; b:
 }
 
 export function parseColor(token: string): Rgba | null {
-  const value = token.trim().toLowerCase();
+  const value = resolveColorMix(token.trim().toLowerCase());
   if (value.startsWith('#')) return parseHex(value);
   if (value === 'transparent') return { r: 0, g: 0, b: 0, a: 0 };
   const named = NAMED_COLORS[value];
@@ -117,8 +117,57 @@ export function parseColor(token: string): Rgba | null {
 
 const COLOR_TOKEN = /#[0-9a-f]{3,8}\b|\b(?:rgba?|hsla?|oklch|oklab)\([^()]*\)|(?<![\w-])[a-z]{3,20}(?![\w(-])/gi;
 
+/**
+ * Replace each color-mix() with the rgba() it produces. Tailwind v4 compiles `border-white/10` to
+ * `color-mix(in oklab, #fff 10%, transparent)`, whose alpha is what makes the line faint. The mix is taken in sRGB
+ * with premultiplied alpha whatever the declared space, which keeps alpha exact and hue close enough here.
+ */
+export function resolveColorMix(value: string): string {
+  if (!value.toLowerCase().includes('color-mix(')) return value;
+  let out = '';
+  let i = 0;
+  while (i < value.length) {
+    const start = value.toLowerCase().indexOf('color-mix(', i);
+    if (start === -1) { out += value.slice(i); break; }
+    out += value.slice(i, start);
+    let depth = 0; let end = start + 'color-mix'.length;
+    for (; end < value.length; end++) {
+      if (value[end] === '(') depth++;
+      else if (value[end] === ')') { depth--; if (depth === 0) break; }
+    }
+    const args = splitTopLevel(resolveColorMix(value.slice(start + 'color-mix('.length, end)));
+    out += mixColors(args.slice(1)) ?? value.slice(start, end + 1);
+    i = end + 1;
+  }
+  return out;
+}
+
+function mixColors(args: string[]): string | null {
+  const stops = args.map((arg) => {
+    const weight = /\s(-?\d*\.?\d+)%\s*$/.exec(` ${arg}`);
+    const color = parseColor(weight ? arg.slice(0, arg.lastIndexOf(weight[1]!)).trim() : arg.trim());
+    return { color, weight: weight ? parseFloat(weight[1]!) / 100 : null };
+  });
+  const [a, b] = stops;
+  if (stops.length !== 2 || !a?.color || !b?.color) return null;
+  const first = { color: a.color, weight: a.weight };
+  const second = { color: b.color, weight: b.weight };
+  let wa = first.weight ?? (second.weight === null ? 0.5 : 1 - second.weight);
+  let wb = second.weight ?? 1 - wa;
+  const total = wa + wb;
+  if (total <= 0) return null;
+  // Weights that sum below 100% scale the alpha down, as the spec does.
+  const scale = Math.min(1, total);
+  wa /= total; wb /= total;
+  const alpha = first.color.a * wa + second.color.a * wb;
+  const channel = (key: 'r' | 'g' | 'b') => (alpha > 0
+    ? (first.color[key] * first.color.a * wa + second.color[key] * second.color.a * wb) / alpha : 0);
+  return `rgba(${channel('r').toFixed(1)}, ${channel('g').toFixed(1)}, ${channel('b').toFixed(1)}, ${(alpha * scale).toFixed(4)})`;
+}
+
 /** Every color literal in a resolved value (gradients, shadows, borders). */
-export function colorsIn(value: string): Rgba[] {
+export function colorsIn(raw: string): Rgba[] {
+  const value = resolveColorMix(raw);
   const out: Rgba[] = [];
   for (const match of value.matchAll(COLOR_TOKEN)) {
     const color = parseColor(match[0]);
@@ -191,8 +240,12 @@ export function lengthPx(raw: string | undefined, ctx: LengthContext): number | 
   return Math.min(Math.max(nums[1]!, nums[0]!), nums[2]!);
 }
 
+// Tailwind v4 compiles rounded-full to calc(infinity * 1px); it stands for "as large as possible".
+const HUGE_PX = 1e7;
+
 function evalCalc(expression: string, ctx: LengthContext): number | null {
-  const tokens = expression.match(/-?\d*\.?\d+[a-z%]*|[()+\-*/]|[a-z]+\([^()]*\)/gi) ?? [];
+  const tokens = expression.replace(/\b-?infinity\b/gi, (word) => (word.startsWith('-') ? `-${HUGE_PX}` : `${HUGE_PX}`))
+    .match(/-?\d*\.?\d+[a-z%]*|[()+\-*/]|[a-z]+\([^()]*\)/gi) ?? [];
   let pos = 0;
   const factor = (): number | null => {
     const token = tokens[pos++];

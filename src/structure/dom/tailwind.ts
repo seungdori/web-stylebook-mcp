@@ -130,6 +130,13 @@ function decl(prop: string, value: string): CssDeclaration {
   return { prop, value: finishColor(value), important: false };
 }
 
+const BORDER_SIDE: Record<string, string[]> = { t: ['top'], r: ['right'], b: ['bottom'], l: ['left'], x: ['left', 'right'], y: ['top', 'bottom'] };
+
+/** The sides a border utility sets: `border-b` is the bottom only, `border-x` left and right, `border` all four. */
+function borderSides(code: string | undefined): Array<string | null> {
+  return code ? BORDER_SIDE[code]! : [null];
+}
+
 function utility(raw: string, ctx: LengthContext): CssDeclaration[] | null {
   const negative = raw.startsWith('-');
   const name = negative ? raw.slice(1) : raw;
@@ -137,6 +144,8 @@ function utility(raw: string, ctx: LengthContext): CssDeclaration[] | null {
     block: [decl('display', 'block')], 'inline-block': [decl('display', 'inline-block')], inline: [decl('display', 'inline')],
     flex: [decl('display', 'flex')], 'inline-flex': [decl('display', 'inline-flex')], grid: [decl('display', 'grid')],
     'inline-grid': [decl('display', 'inline-grid')], hidden: [decl('display', 'none')], contents: [decl('display', 'contents')],
+    'sr-only': [decl('position', 'absolute'), decl('width', '1px'), decl('height', '1px'), decl('overflow', 'hidden'), decl('clip', 'rect(0, 0, 0, 0)')],
+    'not-sr-only': [decl('position', 'static'), decl('width', 'auto'), decl('height', 'auto'), decl('overflow', 'visible'), decl('clip', 'auto')],
     'flex-row': [decl('flex-direction', 'row')], 'flex-col': [decl('flex-direction', 'column')],
     'flex-row-reverse': [decl('flex-direction', 'row-reverse')], 'flex-col-reverse': [decl('flex-direction', 'column-reverse')],
     'flex-wrap': [decl('flex-wrap', 'wrap')], 'flex-nowrap': [decl('flex-wrap', 'nowrap')],
@@ -246,13 +255,13 @@ function utility(raw: string, ctx: LengthContext): CssDeclaration[] | null {
     const tracking: Record<string, string> = { tighter: '-0.05em', tight: '-0.025em', normal: '0em', wide: '0.025em', wider: '0.05em', widest: '0.1em' };
     return [decl('letter-spacing', m[1]!.startsWith('[') ? arbitrary(m[1]!) : tracking[m[1]!]!)];
   }
-  if ((m = /^border(?:-[trblxy])?-(0|2|4|8|\[[\d.]+[a-z]*\])$/.exec(name))) {
-    return [decl('border-width', m[1]!.startsWith('[') ? arbitrary(m[1]!) : `${m[1]}px`), decl('border-style', 'solid')];
+  if ((m = /^border(?:-([trblxy]))?(?:-(0|2|4|8|\[[\d.]+[a-z]*\]))?$/.exec(name))) {
+    const width = m[2] === undefined ? '1px' : m[2].startsWith('[') ? arbitrary(m[2]) : `${m[2]}px`;
+    return [...borderSides(m[1]).map((side) => decl(side ? `border-${side}-width` : 'border-width', width)), decl('border-style', 'solid')];
   }
-  if ((m = /^border(?:-[trblxy])?$/.exec(name))) return [decl('border-width', '1px'), decl('border-style', 'solid')];
-  if ((m = /^border(?:-[trblxy])?-(.+)$/.exec(name))) {
-    const color = paletteColor(m[1]!);
-    return color ? [decl('border-color', color)] : null;
+  if ((m = /^border(?:-([trblxy]))?-(.+)$/.exec(name))) {
+    const color = paletteColor(m[2]!);
+    return color ? borderSides(m[1]).map((side) => decl(side ? `border-${side}-color` : 'border-color', color)) : null;
   }
   if ((m = /^animate-(\[.+\])$/.exec(name))) return [decl('animation', arbitrary(m[1]!))];
   if ((m = /^animate-([\w-]+)$/.exec(name))) {

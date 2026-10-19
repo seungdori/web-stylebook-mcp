@@ -138,7 +138,7 @@ const labels: Record<Lang, {
       notAPass: 'A clean result means none of these patterns was detected; it is not a design pass.',
       truncated: (n) => `Parsing stopped at ${n} elements, so later markup was not checked.`,
       unparsed: (n) => `${n} selector(s) use syntax this audit does not evaluate; their declarations were ignored.`,
-      exhausted: 'The stylesheets need more selector matching than this audit allows, so some rules were not applied; checks that found nothing are reported as not verified.',
+      exhausted: 'The stylesheets need more selector matching than this audit allows, so some rules were not applied; every check is reported as not verified.',
     },
     guidance: [
       'Replace each finding with the listed signature move or archetype step, rebuild, and run audit_page_structure again on the new HTML and CSS.',
@@ -156,7 +156,7 @@ const labels: Record<Lang, {
       notAPass: '결과가 깨끗하다는 것은 이 패턴들을 찾지 못했다는 뜻일 뿐, 디자인 통과가 아닙니다.',
       truncated: (n) => `요소 ${n}개에서 분석을 멈췄습니다. 그 뒤의 마크업은 검사하지 않았습니다.`,
       unparsed: (n) => `선택자 ${n}개는 이 검사가 평가하지 않는 문법을 써서 선언을 무시했습니다.`,
-      exhausted: '스타일시트의 선택자 매칭이 이 검사의 한도를 넘어 일부 규칙을 적용하지 못했습니다. 아무것도 찾지 못한 검사는 확인 못 함으로 보고합니다.',
+      exhausted: '스타일시트의 선택자 매칭이 이 검사의 한도를 넘어 일부 규칙을 적용하지 못했습니다. 모든 검사를 확인 못 함으로 보고합니다.',
     },
     guidance: [
       '발견 항목마다 제시한 시그니처 무브나 아키타입 단계로 바꾸고, 다시 빌드한 뒤 새 HTML과 CSS로 audit_page_structure를 다시 실행하세요.',
@@ -174,7 +174,7 @@ const labels: Record<Lang, {
       notAPass: '結果がクリーンでも、これらのパターンが検出されなかっただけで、デザインの合格ではありません。',
       truncated: (n) => `要素${n}個で解析を止めたため、それ以降のマークアップは検査していません。`,
       unparsed: (n) => `${n}個のセレクターはこの検査が評価しない構文のため、宣言を無視しました。`,
-      exhausted: 'スタイルシートのセレクター照合がこの検査の上限を超え、一部のルールを適用できませんでした。何も検出しなかった検査は未確認として報告します。',
+      exhausted: 'スタイルシートのセレクター照合がこの検査の上限を超え、一部のルールを適用できませんでした。すべての検査を未確認として報告します。',
     },
     guidance: [
       '検出項目ごとに示したシグネチャームーブかアーキタイプの手順で置き換え、再ビルドして、新しいHTMLとCSSでaudit_page_structureを再実行してください。',
@@ -257,9 +257,11 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
   const statuses = new Map<string, { status: DetectionStatus; check?: StructureCheckDef; name: string }>();
 
   const describe = (status: DetectionStatus): { report: StructureCheckStatus; count: number; note?: string } => {
+    // Rules the matcher never applied could hide a pattern, reveal a hidden one, or hide the opening itself, so no
+    // outcome is evidence.
+    if (incomplete) return { report: 'not-verified', count: 0, note: label.limits.exhausted };
     if (status.status === 'found') return { report: 'found', count: status.matches.length };
-    // Rules the matcher never applied could hide the pattern, so an absence is not evidence.
-    if (status.status === 'absent') return incomplete ? { report: 'not-verified', count: 0, note: label.limits.exhausted } : { report: 'absent', count: 0 };
+    if (status.status === 'absent') return { report: 'absent', count: 0 };
     return { report: status.status, count: 0, note: status.reason };
   };
 
@@ -275,7 +277,7 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
     const superseding = pattern.supersededBy?.find((id) => global.get(id)?.status === 'found' && !allowed[id]);
     reports.push({ patternId: pattern.id, checkId, scope: 'global', status: report, count, ...(note ? { note } : superseding && report === 'found' ? { note: label.supersededBy(superseding) } : {}) });
     statuses.set(checkId, { status, check: checkDefs.get(checkId), name: text(pattern.name, locale) });
-    if (status.status !== 'found' || superseding) continue;
+    if (status.status !== 'found' || report !== 'found' || superseding) continue;
     const locations = status.matches.slice(0, LOCATIONS).map((match) => selectorPath(match.element));
     const moves = movesFor(pattern.job, styleId);
     const archetype = archetypeFor(pattern, styleId, moves);
@@ -310,7 +312,7 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
     reports.push({ patternId, checkId, scope: 'style', status: report, count, ...(note ? { note } : {}) });
     const check = checkDefs.get(checkId);
     statuses.set(checkId, { status, check, name });
-    if (status.status !== 'found') continue;
+    if (status.status !== 'found' || report !== 'found') continue;
     findings.push(styleFinding(patternId, checkId, ban, status, name, text(wording.fix, locale), check?.severity ?? 'minor'));
   }
 
@@ -319,7 +321,7 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
   const producer = { name: 'web-stylebook-mcp audit_page_structure', version: SERVER_VERSION, configHash: rulesetHash };
   for (const report of reports) {
     const entry = statuses.get(report.checkId);
-    const first = entry?.status.status === 'found' ? entry.status.matches[0] : undefined;
+    const first = report.status === 'found' && entry?.status.status === 'found' ? entry.status.matches[0] : undefined;
     const evidenceId = evidenceIdFor(targetId, report.patternId);
     const outcome: StructureEvidence['outcome'] = report.status === 'found' ? 'failed' : report.status === 'absent' ? 'passed'
       : report.status === 'not-verified' ? 'cant-tell' : 'inapplicable';

@@ -36,7 +36,7 @@ const t = (en: string, ko: string, ja: string): LocalizedText => ({ en, ko, ja }
 
 const CENTERED_HEADING: CriterionDef = {
   id: 'centered-heading',
-  text: "The opening's headline (its h1, or the first h2 or h3 when the page has no h1) is center-aligned: text-align center (own or inherited), or a centered flex column or grid.",
+  text: "The opening's headline (its h1, or the first h2 or h3 when the page has no visible h1; a visually hidden brand h1 does not count) is center-aligned: text-align center (own or inherited), or a centered flex column or grid.",
 };
 
 export const GLOBAL_PATTERNS: readonly GlobalPatternDef[] = [
@@ -62,7 +62,7 @@ export const GLOBAL_PATTERNS: readonly GlobalPatternDef[] = [
       CENTERED_HEADING,
       {
         id: 'decorative-gradient-shape',
-        text: `Inside the opening, an element with no text, or a ::before/::after (the opening's own included), has a gradient or saturated fill blurred ≥ ${T.blobMinBlurPx}px by its own filter or a wrapper's, or a radial gradient on a shape ≥ ${T.blobMinSizePx}px that is rounded ≥ ${T.blobMinRoundPercent}% or clipped to a polygon, circle, or ellipse. It or a wrapper between it and the opening is absolutely positioned, aria-hidden, role presentation, pointer-events none, or behind content (z-index < 0); a fixed full-page field does not count.`,
+        text: `Inside the opening, an element with no text, or a ::before/::after (the opening's own included), has a gradient or saturated fill blurred ≥ ${T.blobMinBlurPx}px by its own filter or a wrapper's (an inline SVG counts when its shapes are filled with url(#…) pointing at a linear or radial gradient, or with a saturated colour), or a radial gradient on a shape ≥ ${T.blobMinSizePx}px that is rounded ≥ ${T.blobMinRoundPercent}% or clipped to a polygon, circle, or ellipse, or is an image marked as decoration (empty alt or aria-hidden) and named as a blob, gradient, glow, aurora, orb, mesh, or bokeh that is blurred ≥ ${T.blobMinBlurPx}px or ≥ ${T.blobMinSizePx}px. It or a wrapper between it and the opening is absolutely positioned, aria-hidden, role presentation, pointer-events none, or behind content (z-index < 0); a fixed full-page field does not count.`,
       },
     ],
   },
@@ -93,7 +93,7 @@ export const GLOBAL_PATTERNS: readonly GlobalPatternDef[] = [
       },
       {
         id: 'no-product-visual',
-        text: 'The opening contains no image, picture, video, canvas, iframe, form control, table, code block, or SVG larger than an icon, and no hand-built mock: a block apart from the copy with ≥ 10 elements, or a figure, role="img", or aria-labelled block with ≥ 3.',
+        text: 'The opening contains no image, picture, video, canvas, iframe, form control, table, code block, or SVG larger than an icon, and no hand-built mock: a block apart from the copy with ≥ 10 elements, or a figure, role="img", or aria-labelled block with ≥ 3. Decoration does not count as either: something aria-hidden or presentational that is also laid out of flow or behind content, or an empty-alt image behind content, unclickable, or blurred. An aria-hidden demo in the flow beside the copy still counts.',
       },
     ],
   },
@@ -151,7 +151,7 @@ export const GLOBAL_PATTERNS: readonly GlobalPatternDef[] = [
       },
       {
         id: 'logo-cue',
-        text: "At least one cue says the items are logos: 'logo' in alt, src, class, or aria-label; grayscale or opacity ≤ 0.8 on the items or the row; a looping animation; or social-proof wording in the same band.",
+        text: "At least one cue says the items are logos: 'logo' in alt, src, class, or aria-label; grayscale or opacity ≤ 0.8 on the items or the row; a looping animation; social-proof wording in the same band; or a heading that names organizations (customers, clients, partners, sponsors, backers, investors).",
       },
       {
         id: 'not-functional',
@@ -210,9 +210,9 @@ export const GLOBAL_PATTERNS: readonly GlobalPatternDef[] = [
       { id: 'card-row', text: `A container has ≥ ${T.cardsMin} sibling cards with the same structure, laid out as a row or a grid.` },
       {
         id: 'icon-title-blurb',
-        text: `Each card starts with an icon (an SVG ≤ 64px, an icon-font glyph, an icon image, or a lone emoji) before a heading of ≤ ${T.cardHeadingMaxWords} words and a blurb of ${T.cardBlurbMinWords}–${T.cardBlurbMaxWords} words.`,
+        text: `Each card starts with an icon (an SVG ≤ 64px, an icon-font glyph, an icon image, or a lone emoji) before or at the start of a heading or term of ≤ ${T.cardHeadingMaxWords} words (as in \`<dt><svg/>Title</dt>\`), followed by a blurb of ${T.cardBlurbMinWords}–${T.cardBlurbMaxWords} words.`,
       },
-      { id: 'not-media-or-steps', text: 'The cards are not led by a photo or screenshot, and their headings are not step numbers.' },
+      { id: 'not-media-or-steps', text: 'The cards are not led by a photo, a screenshot, or a round named portrait, and their headings are not step numbers.' },
     ],
   },
   {
@@ -240,7 +240,7 @@ export const GLOBAL_PATTERNS: readonly GlobalPatternDef[] = [
       },
       {
         id: 'carousel',
-        text: `It has rendered carousel mechanics: a carousel, slider, swiper, splide, slick, glide, embla, keen, flickity, owl, or marquee class, id, or data attribute; aria-roledescription carousel or slide; a horizontal scroll-snap track; two previous/next controls (buttons of ≤ 3 words labelled prev, previous, or next as whole words, or a lone ‹ › arrow); ≥ ${T.dotsMin} slide dots (empty buttons, or buttons labelled as a slide or page); or a looping animation on the track.`,
+        text: `It has rendered carousel mechanics: a carousel, slider, swiper, splide, slick, glide, embla, keen, flickity, owl, or marquee class, id, or data attribute; aria-roledescription carousel or slide; a horizontal scroll-snap track; two previous/next controls (a lone ‹ › arrow, an icon button labelled prev, previous, or next, or a short label that also names a slide, testimonial, quote, or review); ≥ ${T.dotsMin} slide dots (empty buttons, or buttons labelled as a slide); or a looping animation on the track. Controls labelled as pages, or inside a pagination container (labelled as pages, or named pagination or pager), page through a list and are not carousel controls.`,
       },
     ],
   },
@@ -354,7 +354,7 @@ export const STYLE_RULES: { [R in StyleRuleId]: StyleRuleDef<R> } = {
       )),
     criteria: (p) => [p.max !== undefined
       ? { id: 'radius-above-max', text: `A card, panel, button, input, image, or section has border-radius > ${p.max}px (a percentage ≥ 10% counts as rounded); ${p.allowCircles ? 'circles (equal sides, fully rounded) are exempt, so a round stamp or seal stays' : 'circles of 48px or less without text, such as avatars and status dots, are exempt'}.` }
-      : { id: 'radius-below-min', text: `A card or panel (a container with text plus a border, a shadow, or its own fill; page sections are bands, not cards) has border-radius < ${p.min}px.` }],
+      : { id: 'radius-below-min', text: `A card or panel (a container with text plus a border on three or more sides, a shadow, or its own fill; a one-sided divider rule does not make a card, and page sections are bands, not cards) has border-radius < ${p.min}px.` }],
   }),
   'shadow-blur': rule({
     id: 'shadow-blur',
@@ -547,7 +547,7 @@ export const STYLE_RULES: { [R in StyleRuleId]: StyleRuleDef<R> } = {
       : t('Use one surface level per section; group with spacing or rules.', '섹션마다 표면은 한 단계만 쓰고, 묶음은 여백이나 선으로 나누세요.', 'セクションごとに面は一段階にし、まとまりは余白や罫線で分けてください。')),
     criteria: (p) => [p.kind === 'glass'
       ? { id: 'nested-glass', text: 'An element with backdrop-filter blur contains another element with backdrop-filter blur.' }
-      : { id: 'nested-card', text: 'A card (a container with text plus a border, a shadow, or a fill different from its parent, and corner radius ≥ 4px; page sections are not cards) contains another card.' }],
+      : { id: 'nested-card', text: 'A card (a container with text plus a border on three or more sides, a shadow, or a fill different from its parent, and corner radius ≥ 4px; page sections are not cards) contains another card.' }],
   }),
   'icon-tiles': rule({
     id: 'icon-tiles',
@@ -570,7 +570,7 @@ export const STYLE_RULES: { [R in StyleRuleId]: StyleRuleDef<R> } = {
       `구조가 보이도록 테두리 불투명도를 ${percent(p.minAlpha)} 이상으로 올리세요.`,
       `構造が見えるよう、枠線の不透明度を${percent(p.minAlpha)}以上にしてください。`,
     ),
-    criteria: (p) => [{ id: 'faint-border', text: `A visible border on any side has a color alpha below ${p.minAlpha} (rgba, hsla, #rrggbbaa, or a Tailwind /opacity modifier).` }],
+    criteria: (p) => [{ id: 'faint-border', text: `A visible border on any side has a color alpha below ${p.minAlpha} (rgba, hsla, #rrggbbaa, or a Tailwind /opacity modifier); a fully transparent border reserved for a state change is not visible and does not count. A color-mix() is read by the colour it mixes, so Tailwind v4's \`border-white/10\` is a 10% border.` }],
   }),
   typeface: rule({
     id: 'typeface',

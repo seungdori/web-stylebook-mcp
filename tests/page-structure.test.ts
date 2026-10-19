@@ -194,7 +194,7 @@ describe('audit_page_structure contract', () => {
 
   it('reports absences as not verified when a stylesheet exhausts the selector budget', () => {
     const html = `<main><section><h1>Title</h1><p>Words here for the lede of the page.</p></section><section>${'<div><p>x</p></div>'.repeat(4000)}</section></main>`;
-    const css = Array.from({ length: 1000 }, (_, i) => `section div:nth-child(${i}) { color: red }`).join('\n');
+    const css = Array.from({ length: 1500 }, (_, i) => `section div:nth-child(${i}) { color: red }`).join('\n');
     const started = performance.now();
     const result = auditPageStructure({ html, css: [css], styleId: 'quiet-utility' }, repo);
     expect(performance.now() - started).toBeLessThan(5000);
