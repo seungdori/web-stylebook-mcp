@@ -10,7 +10,7 @@ import {
 } from '../types.js';
 import type { Lang } from '../types.js';
 import { recommendDesignDirection } from '../recommendation/index.js';
-import type { ProductContext, EvidenceResult } from '../recommendation/types.js';
+import type { ProductContext, RecommendationResult } from '../recommendation/types.js';
 import { compareDirections, CompareError, type CompareResult } from '../recommendation/compare.js';
 import { planUiStates, StatePlanError, type UiStatePlan } from '../state-atlas/planner.js';
 import {
@@ -82,6 +82,7 @@ const auditValue = z.union([
 
 const auditPlanInputShape = {
   styleId: z.string().min(1).max(100).optional(),
+  productType: z.enum(PRODUCT_TYPES).describe('with the "structure" group, adds one check per must-have of this product type').optional(),
   surfaces: z.array(z.enum(UX_SURFACES)).min(1).max(12).optional(),
   designPrincipleIds: z.array(z.string().min(1).max(100)).max(12).optional(),
   uxPrincipleIds: z.array(z.string().min(1).max(100)).max(12).optional(),
@@ -235,7 +236,7 @@ function toToolError(e: unknown, repo: CatalogRepository): ToolError {
 export function registerTools(server: McpServer, repo: CatalogRepository): void {
   server.registerTool('recommend_design_direction', {
     title: 'Recommend a design direction',
-    description: 'Given product context, return scored style candidates with reason codes, rejected styles with reasons, secondary pairings, assumptions and confidence. Evidence-provider: the host model makes the final pick. Call before writing UI. The "tone" field (named "tone", not "tones") is an ARRAY of zero or more of: calm, technical, trustworthy, premium, editorial, playful, bold, experimental. Each candidate.score already includes adjustments (soft penalties, repeated-use load, closeness to avoided styles) that are not itemized in scoreBreakdown. The "ranking" field says why candidates[0] outranks the next style, or reports a tie; list the most important tone first because tone order is weighted. Each candidate.structure gives the page structure the direction implies: a layout archetype (hero composition, grid, section order, density, type-scale use), 2-3 signature moves with their purpose, and the generic and style-specific patterns audit_page_structure will flag; read structure.resourceUri for move build steps and ban criteria.',
+    description: 'Given product context, return scored style candidates with reason codes, rejected styles with reasons, secondary pairings, assumptions and confidence. Evidence-provider: the host model makes the final pick. Call before writing UI. The "tone" field (named "tone", not "tones") is an ARRAY of zero or more of: calm, technical, trustworthy, premium, editorial, playful, bold, experimental. Each candidate.score already includes adjustments (soft penalties, repeated-use load, closeness to avoided styles) that are not itemized in scoreBreakdown. The "ranking" field says why candidates[0] outranks the next style, or reports a tie; list the most important tone first because tone order is weighted. Each candidate.structure gives the page structure the direction implies: a layout archetype (hero composition, grid, section order, density, type-scale use), 2-3 signature moves with their purpose, and the generic and style-specific patterns audit_page_structure will flag; read structure.resourceUri for move build steps and ban criteria. The top-level mustHaves lists the elements the resolved product type requires (for example price, variant choice, add to cart, and delivery details on a commerce product page) with the zone each must sit in; a style restyles them but never removes them, they come before the archetype\'s limits on the opening, and each candidate.structure.mustHaves names the signature moves that can present them. Pass the same productType to audit_page_structure to find the ones a built page is missing.',
     inputSchema: { ...productContextShape, locale: LOCALE.optional(), candidateLimit: z.number().int().min(1).max(10).optional() },
     annotations: READ_ONLY,
   }, async (args): Promise<ToolResult> => {
@@ -378,7 +379,7 @@ export function registerTools(server: McpServer, repo: CatalogRepository): void 
 
   server.registerTool('get_design_audit_plan', {
     title: 'Build an evidence-backed design audit plan',
-    description: 'Return a localized, surface-aware audit checklist with stable check ids, severity, applicability, required evidence, remediation, verdict definitions, user-facing content checks, selected principle checks, and UI-state coverage. The host should confirm audit coverage and change depth with the user before choosing includeGroups. Include the opt-in "structure" group (with styleId) to add automated checks for banned generic and style-specific page patterns, answered by audit_page_structure. This tool does not inspect a project: the host must collect actual rendered/code/interaction evidence, and missing evidence is NOT_VERIFIED rather than PASS.',
+    description: 'Return a localized, surface-aware audit checklist with stable check ids, severity, applicability, required evidence, remediation, verdict definitions, user-facing content checks, selected principle checks, and UI-state coverage. The host should confirm audit coverage and change depth with the user before choosing includeGroups. Include the opt-in "structure" group (with styleId) to add automated checks for banned generic and style-specific page patterns, answered by audit_page_structure; add productType to that group for one check per product must-have. This tool does not inspect a project: the host must collect actual rendered/code/interaction evidence, and missing evidence is NOT_VERIFIED rather than PASS.',
     inputSchema: auditPlanInputShape,
     annotations: READ_ONLY,
   }, async (args): Promise<ToolResult> => {
@@ -395,11 +396,12 @@ export function registerTools(server: McpServer, repo: CatalogRepository): void 
 
   server.registerTool('audit_page_structure', {
     title: 'Audit a built page for banned structural patterns',
-    description: `Deterministically inspect submitted page markup (offline; the server never reads files) for the generic SaaS template (centered hero over a gradient blob, all-text centered stack, stock-photo hero, logo strip, "trusted by" band, icon feature cards, testimonial carousel, generic closing CTA banner, and the page skeleton they form) and, with styleId, for that style's own banned treatments. Pass the rendered HTML (for example document.documentElement.outerHTML) and the page's CSS text; Tailwind utility classes are understood without the stylesheet. Each finding names the location, the observed values, and what to replace it with from the chosen style's signature moves and archetype. Also returns evidence and results shaped for validate_design_audit_result with the "structure" audit group. Declared-style heuristics, not a browser: a clean result is not a design pass. Limits: html ${PAGE_LIMITS.htmlChars} characters, ${PAGE_LIMITS.cssFiles} stylesheets, ${PAGE_LIMITS.cssTotalChars} CSS characters in total.`,
+    description: `Deterministically inspect submitted page markup (offline; the server never reads files) for the generic SaaS template (centered hero over a gradient blob, all-text centered stack, stock-photo hero, logo strip, "trusted by" band, icon feature cards, testimonial carousel, generic closing CTA banner, and the page skeleton they form) and, with styleId, for that style's own banned treatments. With productType, it also reports which of that product type's must-haves (the same list recommend_design_direction returns) the page is missing or keeps off the first screen. Pass the rendered HTML (for example document.documentElement.outerHTML) and the page's CSS text; Tailwind utility classes are understood without the stylesheet. Each finding names the location, the observed values, and what to replace it with from the chosen style's signature moves and archetype. Also returns evidence and results shaped for validate_design_audit_result with the "structure" audit group. Declared-style heuristics, not a browser: a clean result is not a design pass. Limits: html ${PAGE_LIMITS.htmlChars} characters, ${PAGE_LIMITS.cssFiles} stylesheets, ${PAGE_LIMITS.cssTotalChars} CSS characters in total.`,
     inputSchema: {
       html: z.string().min(1).max(PAGE_LIMITS.htmlChars),
       css: z.array(z.string().max(PAGE_LIMITS.cssChars)).max(PAGE_LIMITS.cssFiles).optional(),
       styleId: z.string().min(1).max(100).optional(),
+      productType: z.enum(PRODUCT_TYPES).describe('the product type passed to recommend_design_direction; adds its must-have checks').optional(),
       targetId: z.string().trim().min(1).max(160).optional(),
       viewportWidth: z.number().int().min(PAGE_LIMITS.viewportMin).max(PAGE_LIMITS.viewportMax).optional(),
       locale: LOCALE.optional(),
@@ -496,8 +498,15 @@ function structureLine(structure: StyleStructureSummary): string {
   return `structure: ${structure.archetype.hero} Moves: ${structure.signatureMoves.map((move) => move.name).join('; ')}.`;
 }
 
-function renderRecommend(r: EvidenceResult): string {
+function renderRecommend(r: RecommendationResult): string {
   const lines = ['# Design direction (scored evidence)'];
+  const must = r.mustHaves;
+  if (must.items.length) {
+    lines.push('', `## Must-haves — ${must.productType} (${must.page})`,
+      ...must.items.map((item) => `- **${item.name}** (${item.id}) — ${item.placement} ${item.build}`), must.rule, '');
+  } else {
+    lines.push('', must.rule, '');
+  }
   for (const c of r.candidates) {
     lines.push(`- ${c.score.toFixed(2)} **${c.styleId}** — ${c.matched.join(' · ')}`);
     if (c.structure) lines.push(`  ${structureLine(c.structure)}`);
@@ -897,10 +906,11 @@ function renderPrinciplePlan(p: UxPrinciplePlan): string {
 
 const structureLabels: Record<Lang, {
   title: string; clean: string; findings: string; replace: string; moves: string; checks: string; limits: string;
+  mustHaves: string; missing: string; misplaced: string; none: string;
 }> = {
-  en: { title: 'Page structure audit', clean: 'No banned pattern was found.', findings: 'Findings', replace: 'Replace with', moves: 'Moves', checks: 'Checks', limits: 'Limits' },
-  ko: { title: '페이지 구조 감사', clean: '금지 패턴을 찾지 못했습니다.', findings: '발견 항목', replace: '대체 방법', moves: '무브', checks: '검사', limits: '한계' },
-  ja: { title: 'ページ構造の監査', clean: '禁止パターンは見つかりませんでした。', findings: '検出項目', replace: '置き換え', moves: 'ムーブ', checks: '検査', limits: '限界' },
+  en: { title: 'Page structure audit', clean: 'No banned pattern was found.', findings: 'Findings', replace: 'Replace with', moves: 'Moves', checks: 'Checks', limits: 'Limits', mustHaves: 'Must-haves', missing: 'Missing', misplaced: 'Not on the first screen', none: 'none' },
+  ko: { title: '페이지 구조 감사', clean: '금지 패턴을 찾지 못했습니다.', findings: '발견 항목', replace: '대체 방법', moves: '무브', checks: '검사', limits: '한계', mustHaves: '필수 요소', missing: '없음', misplaced: '첫 화면 밖', none: '없음' },
+  ja: { title: 'ページ構造の監査', clean: '禁止パターンは見つかりませんでした。', findings: '検出項目', replace: '置き換え', moves: 'ムーブ', checks: '検査', limits: '限界', mustHaves: '必須要素', missing: 'なし', misplaced: 'ファーストビューの外', none: 'なし' },
 };
 
 function renderStructureAudit(r: StructureAuditResult, locale: Lang): string {
@@ -909,6 +919,11 @@ function renderStructureAudit(r: StructureAuditResult, locale: Lang): string {
     `# ${labels.title}${r.styleId ? ` — ${r.styleId}` : ''}`,
     `${labels.checks}: ${r.summary.checked} · ${labels.findings}: ${r.summary.findings} (major ${r.summary.major}, minor ${r.summary.minor}) · inputHash ${r.identity.inputHash}`,
   ];
+  if (r.mustHaves && r.mustHaves.items.length) {
+    const names = (ids: readonly string[]) => (ids.length
+      ? ids.map((id) => r.mustHaves!.items.find((item) => item.id === id)!.name).join(', ') : labels.none);
+    lines.push('', `${labels.mustHaves} (${r.mustHaves.productType}, ${r.mustHaves.page}): ${labels.missing}: ${names(r.mustHaves.missing)} · ${labels.misplaced}: ${names(r.mustHaves.misplaced)}`);
+  }
   if (!r.findings.length) lines.push('', labels.clean);
   for (const finding of r.findings) {
     lines.push('', `- [${finding.severity}] ${finding.patternId} — ${finding.name} @ ${finding.locations[0] ?? ''}${finding.count > 1 ? ` (+${finding.count - 1})` : ''}`,

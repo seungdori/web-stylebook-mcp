@@ -11,9 +11,11 @@ import type {
   AuditSeverity,
   DesignPrinciple,
   Lang,
+  ProductType,
   UxPrinciple,
   UxSurface,
 } from '../types.js';
+import { PRODUCT_TYPES } from '../types.js';
 
 export const AUDIT_GROUP_IDS = [
   'build', 'layout', 'fidelity', 'content', 'behavior', 'principles', 'docs', 'anti-patterns', 'structure',
@@ -29,6 +31,8 @@ export type AuditVerdict = (typeof AUDIT_VERDICTS)[number];
 
 export interface DesignAuditPlanInput {
   styleId?: string;
+  /** With the structure group, adds one check per must-have of this product type. */
+  productType?: ProductType;
   surfaces?: UxSurface[];
   designPrincipleIds?: string[];
   uxPrincipleIds?: string[];
@@ -50,7 +54,7 @@ export interface ResolvedAuditCheck {
   automation: AuditAutomationLevel;
   applicability: AuditApplicability;
   surfaceTags: UxSurface[];
-  source: AuditCheckDefinition['source'] | { kind: 'structure'; patternId: string; scope: 'global' | 'style' };
+  source: AuditCheckDefinition['source'] | { kind: 'structure'; patternId: string; scope: 'global' | 'style' | 'must-have' };
 }
 
 interface PrincipleAuditContract {
@@ -80,6 +84,8 @@ export interface DesignAuditPlan {
   };
   query: {
     styleId?: string;
+    /** Present only when passed, so plans without it keep their hash. */
+    productType?: ProductType;
     surfaces: UxSurface[];
     designPrincipleIds: string[];
     uxPrincipleIds: string[];
@@ -310,6 +316,15 @@ export function planDesignAudit(
   if (input.styleId && !repo.getStyle(input.styleId)) {
     throw new AuditPlanError(`unknown style '${input.styleId}'`, 'STYLE_NOT_FOUND', input.styleId);
   }
+  if (input.productType !== undefined) {
+    if (!(PRODUCT_TYPES as readonly string[]).includes(input.productType)) {
+      throw new AuditPlanError(`productType must be one of: ${PRODUCT_TYPES.join(', ')}`);
+    }
+    // Must-have checks are answered by audit_page_structure, so they belong to the structure group.
+    if (!includeGroups.includes('structure')) {
+      throw new AuditPlanError('productType adds must-have checks to the "structure" group; include "structure" in includeGroups');
+    }
+  }
 
   const designPrinciples = designPrincipleIds.map((id) => {
     const principle = repo.getDesignPrinciple(id);
@@ -358,7 +373,7 @@ export function planDesignAudit(
     .map((check) => resolveCheck(check, locale, repo));
   const withStructure = includeGroups.includes('structure');
   const structure: ResolvedAuditCheck[] = withStructure
-    ? structureChecks(input.styleId, locale).map((check) => ({
+    ? structureChecks(input.styleId, locale, input.productType).map((check) => ({
       id: check.id,
       groupId: 'structure',
       criterion: check.criterion,
@@ -388,6 +403,7 @@ export function planDesignAudit(
   const plan = {
     query: {
       styleId: input.styleId,
+      ...(input.productType ? { productType: input.productType } : {}),
       surfaces,
       designPrincipleIds,
       uxPrincipleIds,

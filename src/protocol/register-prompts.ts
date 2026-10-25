@@ -95,7 +95,7 @@ export function registerPrompts(server: McpServer): void {
     },
   }, ({ product, audience, pages, constraints }) => userMessage([
     'Use the Web Stylebook MCP in this order:',
-    '1. recommend_design_direction (treat candidates as scored evidence; pick using product context)',
+    '1. recommend_design_direction (treat candidates as scored evidence; pick using product context). Keep every entry of its mustHaves in its zone whichever direction you pick: the style restyles them but never removes them',
     '2. read the chosen webstylebook://styles/{id} resources',
     '3. search_design_references for a small set of product/category/tag-relevant real-world examples, then get_design_reference only for selected entries. Record observedAt, attribution, and rights; borrow principles and measured tokens, never screenshots, brand assets, copy, typefaces, or visual identity',
     '4. plan each screen around its primary user task; name its surface, intended outcomes, and current design phase',
@@ -170,7 +170,7 @@ export function registerPrompts(server: McpServer): void {
     ...scopeGate(locale, auditScope, changeScope),
     'After scope is confirmed, call get_design_audit_plan with styleId, surfaces: [the inferred/provided surface], locale, and includeGroups matching the confirmed audit coverage. Read webstylebook://styles/{styleId} once for the chosen direction; do not fetch the full multilingual policy resources.',
     'Inspect the actual rendered implementation, source, interactions, target viewports, console, and relevant commands. Never assign PASS from this summary alone; missing evidence is NOT_VERIFIED.',
-    'For the structure group, pass each target\'s rendered HTML and CSS to audit_page_structure with the same styleId and targetId; replace every finding with the signature move or archetype step it names, rerun it, and submit its evidence and results.',
+    'For the structure group, pass each target\'s rendered HTML and CSS to audit_page_structure with the same styleId and targetId (and the product\'s productType, also in the plan, to check its must-haves); replace every finding with the signature move or archetype step it names, add every missing or misplaced must-have, rerun it, and submit its evidence and results.',
     'When the selected scope includes content, inspect every prominent heading, label, summary, card, statistic, navigation item, and disclosure. Prefer the audience’s vocabulary; lead with the user-relevant conclusion, consequence, or next action; move optional methodology behind supporting detail; and reject counts, agreement labels, confidence badges, or status language that simulate certainty without a clear method, denominator, uncertainty, and decision value.',
     'A sentence can fail even when it contains no internal jargon. For every material claim, conclusion, or recommendation, ask what it actually says, what available content, evidence, or context supports it, whether its wording and certainty match that support, and whether the unchanged sentence would remain equally plausible on an unrelated product or page. Qualify or remove unsupported content; never invent evidence, facts, or next steps.',
     'Compare visual prominence with information value, task relevance, and support. Vague, generic, redundant, or weakly supported content must not become an oversized headline, isolated card, badge, or statistic. Replace it with content that earns the attention, or demote it and reduce its scale. Do not use a keyword blacklist; judge the statement in context.',

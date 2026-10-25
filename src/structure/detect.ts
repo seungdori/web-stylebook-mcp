@@ -425,7 +425,8 @@ const CLAIM: readonly RegExp[] = [
   new RegExp(String.raw`${CROWD_JA}\s*(?:社|人|チーム)(?:以上)?の?(?:企業|お客様|ユーザー|チーム)?(?:が|に)?\s*(?:導入|信頼|利用|選ばれ)|導入企業|導入実績|(?:企業|チーム|お客様|ユーザー|開発者|ブランド)(?:に|から)(?:信頼|選ばれ|愛用)`),
 ];
 
-function claims(text: string): boolean {
+/** A popularity or press claim ("trusted by 10,000 teams", "as seen in"), in English, Korean, or Japanese. */
+export function claims(text: string): boolean {
   const normalized = plain(text);
   return CLAIM.some((pattern) => pattern.test(normalized));
 }
@@ -558,7 +559,7 @@ const quoteCache = new WeakMap<PageModel, Set<DomElement>>();
  * Rendered quote items: blockquotes, quoted figures, and testimonial-named elements that hold no such item
  * themselves. Computed bottom-up once per page, so a section named "testimonials" never swallows its quotes.
  */
-function quoteItems(page: PageModel): Set<DomElement> {
+export function quoteItems(page: PageModel): Set<DomElement> {
   const cached = quoteCache.get(page);
   if (cached) return cached;
   const items = new Set<DomElement>();

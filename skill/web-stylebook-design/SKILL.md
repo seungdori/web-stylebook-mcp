@@ -50,7 +50,12 @@ Map the answer to `get_design_audit_plan.includeGroups`:
    most important tone first. Each candidate also carries **`structure`**: a layout archetype (hero
    composition, grid, section order, density, type-scale use), 2-3 signature moves with their purpose
    (the style resource in step 2 has their build steps), and the generic and style-specific patterns the
-   page audit will flag. Build the page from it.
+   page audit will flag. Build the page from it. The top-level **`mustHaves`** lists the elements the
+   product type requires and the zone each must sit in (a commerce product page needs price, variant
+   choice, add to cart, and delivery/guarantee details on the first screen; a dashboard needs the
+   current status and what changed; docs need search and a quickstart). The style restyles them but
+   never removes them, and they come before the archetype's opening limits: a first-screen item goes in
+   the hero. `structure.mustHaves` names the candidate's moves that can present each one.
 2. **Read the chosen styles** — `webstylebook://styles/{id}` for each pick (primary + any pairing).
    Then call **`search_design_references`** with a narrow product/category/tag query and inspect only
    a few selected entries with **`get_design_reference`**. Record their observation date,
@@ -123,9 +128,12 @@ Map the answer to `get_design_audit_plan.includeGroups`:
    if the visual is generic
    furniture (a stock photo, an abstract shape, or a card you could paste onto another product)
    rather than a bespoke product demonstration, or the copy column is the full quartet, recompose.
-   Run **`audit_page_structure`** on each built page's rendered HTML and CSS with the chosen `styleId`.
-   Replace every finding with the signature move or archetype step it names, rebuild, and rerun it; then
-   include `structure` in `includeGroups` and submit its `evidence` and `results` with the rest of the audit.
+   Run **`audit_page_structure`** on each built page's rendered HTML and CSS with the chosen `styleId`
+   and the same `productType` you passed to `recommend_design_direction`. Replace every finding with the
+   signature move or archetype step it names, add every must-have listed in `mustHaves.missing`, move
+   every one in `mustHaves.misplaced` onto the first screen, rebuild, and rerun it; then include
+   `structure` in `includeGroups` (with the same `productType`) and submit its `evidence` and `results`
+   with the rest of the audit.
    Do not skip the checklist's **`principles` group**: run each principle's recorded verification
    check against the built UI and write down the outcome (pass / fail / n-a + why). A principle name
    in `design.md` with no placement decision and no observed check is the `principle-as-decoration`
@@ -320,6 +328,9 @@ do not turn a mnemonic or systems maxim into a scientific claim.
 - **Never present a token-swap recolor as a design direction** — compose each direction's own layout
   from its `structure` (archetype + signature moves), and clear `audit_page_structure` findings before
   calling the page done.
+- **Style never removes a must-have** — the product type's `mustHaves` (price and options on a product
+  page, status on a dashboard, search in docs) stay in their zone in every direction; restyle them, don't
+  drop them for a cleaner opening.
 - **Direction = starting tone, not a mold** — compose the components THIS brief needs and adapt the
   style (fonts, grid, structure) to fit; never ship a generic "page in style X."
 - **The opening's visual is a product demonstration, not furniture** — a stock photo, abstract blob,

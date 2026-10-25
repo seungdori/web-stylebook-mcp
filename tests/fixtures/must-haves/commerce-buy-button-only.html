@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Nocturne Serum</title>
+  <style>
+    body { margin: 0; font-family: Georgia, serif; background: #f4efe8; color: #1b1712; }
+    .masthead { min-height: 100vh; display: grid; grid-template-columns: 7fr 5fr; align-items: end; padding: 64px; }
+    .masthead h1 { font-size: 5rem; line-height: 1; }
+    .buy-row { display: grid; grid-template-columns: 2fr 1fr; gap: 32px; padding: 64px; }
+  </style>
+</head>
+<body>
+  <header><a href="/" class="logo">Maison Nuit</a><nav><a href="/journal">Journal</a></nav></header>
+  <main>
+    <!-- The style's archetype allowed one action in the opening, so the purchase details moved below it. -->
+    <section class="masthead">
+      <img src="/nocturne-still-life.jpg" alt="An amber bottle on a linen cloth at night" width="900" height="1100">
+      <div>
+        <h1>Nocturne</h1>
+        <p>A serum for the hours you sleep.</p>
+        <a href="#buy" class="button">Buy now</a>
+      </div>
+    </section>
+    <section class="ritual">
+      <h2>The ritual</h2>
+      <p>Warm three drops between your palms and press them into clean skin after the last light of the evening. The oils settle while you sleep, and by morning the skin feels rested, even, and calm, with no film left on the pillow.</p>
+    </section>
+    <section class="buy-row" id="buy">
+      <fieldset><legend>Size</legend><label><input type="radio" name="size" checked> 30 ml</label><label><input type="radio" name="size"> 50 ml</label></fieldset>
+      <div>
+        <p class="price">$92 · about $1.50 a night</p>
+        <p>Complimentary delivery in two days, with a 60-night guarantee.</p>
+      </div>
+    </section>
+  </main>
+  <footer><p>Maison Nuit, Paris</p></footer>
+</body>
+</html>

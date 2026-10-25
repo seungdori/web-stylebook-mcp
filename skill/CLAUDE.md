@@ -20,7 +20,10 @@ state coverage.
    evidence and pick with product context — don't blindly take `candidates[0]`. Read `ranking` for why #1
    beat #2, or that they tie, and list the most important tone first. Note the `rejected` styles and
    their reasons. Each candidate's `structure` (layout archetype, 2-3 signature moves, banned patterns)
-   is the page to build; tokens only set its surface.
+   is the page to build; tokens only set its surface. The top-level `mustHaves` lists what the product
+   type requires and where (for a commerce product page: price, variant choice, add to cart, and
+   delivery/guarantee details on the first screen). The style restyles them but never drops them, and
+   they come before the archetype's opening limits; `structure.mustHaves` names the moves that present them.
 2. Read `webstylebook://styles/{id}` for your picks and record concise candidate-direction notes.
    Use `search_design_references` with a narrow product/category/tag query, then
    `get_design_reference` for only a few selected examples. Record observedAt, attribution, and
@@ -65,9 +68,10 @@ state coverage.
    it. Never restate a `contextual` or `contested` principle as a law. Do this inline yourself —
    the `audit-design-direction`, `audit-design-principles`, and `audit-ux-principles` prompts are
    deeper audits the *user* invokes, not tools you can call.
-11. Run `audit_page_structure` on each built page's rendered HTML and CSS with the chosen `styleId`,
-   replace every finding with the move it names, and rerun it. Include `structure` in `includeGroups` and
-   submit its `evidence` and `results` with the rest of the audit.
+11. Run `audit_page_structure` on each built page's rendered HTML and CSS with the chosen `styleId` and
+   the same `productType`, replace every finding with the move it names, add every must-have it lists as
+   missing or misplaced, and rerun it. Include `structure` in `includeGroups` (with the same `productType`)
+   and submit its `evidence` and `results` with the rest of the audit.
 12. Call `validate_design_audit_result` with the same plan query, its `identity.planHash`, a target
    for each inspected route/screen/state/viewport/theme/locale, durable evidence references, and one
    result per planned check/target. Fix contract errors or preserve normalized `NOT_VERIFIED`.

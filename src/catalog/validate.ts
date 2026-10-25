@@ -18,7 +18,8 @@ import {
 import type { LocalizedText } from '../types.js';
 import { contentHashOf } from './stable-hash.js';
 import { STRUCTURE_GUIDES } from '../structure/guides/index.js';
-import { validateStructureGuides } from '../structure/validate.js';
+import { validateMustHaves, validateStructureGuides } from '../structure/validate.js';
+import { MUST_HAVES, PRODUCT_MUST_HAVES } from '../structure/must-haves.js';
 
 function localeComplete(v: unknown): v is LocalizedText {
   if (!v || typeof v !== 'object') return false;
@@ -491,6 +492,7 @@ export function validateLoaded(repo: CatalogRepository): ValidateReport {
     if (s.styleFamilyId && !repo.getFamily(s.styleFamilyId)) errors.push(`style ${s.id} -> unknown family ${s.styleFamilyId}`);
   }
   errors.push(...validateStructureGuides(STRUCTURE_GUIDES, repo));
+  errors.push(...validateMustHaves(MUST_HAVES, PRODUCT_MUST_HAVES, repo));
 
   return {
     ok: errors.length === 0,
@@ -508,6 +510,8 @@ export function validateLoaded(repo: CatalogRepository): ValidateReport {
       products: data.productArchetypes.length,
       designReferences: data.referenceLibrary.references.length,
       structureGuides: STRUCTURE_GUIDES.length,
+      mustHaves: MUST_HAVES.length,
+      mustHaveProductTypes: PRODUCT_MUST_HAVES.length,
     },
   };
 }

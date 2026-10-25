@@ -4,7 +4,8 @@ import type { VisualResolutionOptions } from '../visual-canonical/types.js';
 import { REFERENCE_CATEGORIES } from '../types.js';
 import { TOOL_NAMES, SERVER_NAME, SERVER_VERSION } from '../server-info.js';
 import { ERROR_CODES } from './errors.js';
-import { bannedPatternCatalog, styleStructure, structureManifest } from '../structure/guidance.js';
+import { bannedPatternCatalog, styleStructure, structureManifest, structureRulesetHash } from '../structure/guidance.js';
+import { MUST_HAVE_RESOURCE_URI, mustHaveCatalog } from '../structure/must-haves.js';
 
 const JSON_MIME = 'application/json';
 function json(uri: string, value: unknown) {
@@ -96,6 +97,12 @@ export function registerResources(server: McpServer, repo: CatalogRepository): v
     'webstylebook://structure/banned-patterns',
     'Generic page patterns audit_page_structure flags for every style, with machine-checkable criteria, thresholds, and the ruleset hash',
     () => bannedPatternCatalog(),
+  );
+  fixed(
+    'structure-must-haves',
+    MUST_HAVE_RESOURCE_URI,
+    'Elements each product type requires and the zone each must sit in, with the criteria audit_page_structure uses to find them',
+    () => ({ ...mustHaveCatalog(), rulesetHash: structureRulesetHash() }),
   );
 
   server.registerResource('style', new ResourceTemplate('webstylebook://styles/{styleId}', {

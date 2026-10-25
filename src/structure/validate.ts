@@ -1,5 +1,6 @@
 import type { CatalogRepository } from '../catalog/repository.js';
-import type { CatalogStyle } from '../types.js';
+import { LANGS, type CatalogStyle, type LocalizedText } from '../types.js';
+import type { MustHaveDef, ProductMustHaveDef } from './must-haves.js';
 import { contentWords, jaccard, shingles } from './similarity.js';
 import {
   GLOBAL_PATTERN_IDS, GUIDE_BASES, STRUCTURE_JOBS, STYLE_RULE_IDS,
@@ -261,5 +262,45 @@ export function duplicateGuidance(guides: readonly StructureGuideDef[], repo: Ca
       }
     }
   }
+  return errors;
+}
+
+/**
+ * Every catalog product archetype has a must-have list, every list names known must-haves once each, and every
+ * must-have is used and fully localized.
+ */
+export function validateMustHaves(
+  defs: readonly MustHaveDef[], products: readonly ProductMustHaveDef[], repo: CatalogRepository,
+): string[] {
+  const errors: string[] = [];
+  const complete = (value: LocalizedText) => LANGS.every((lang) => value[lang]?.trim());
+  const ids = new Set<string>();
+  for (const def of defs) {
+    if (ids.has(def.id)) errors.push(`duplicate must-have ${def.id}`);
+    ids.add(def.id);
+    if (!complete(def.name) || !complete(def.build)) errors.push(`must-have ${def.id} is not locale-complete`);
+    if (!def.criteria.length) errors.push(`must-have ${def.id} has no detection criteria`);
+  }
+  const used = new Set<string>();
+  const seen = new Set<string>();
+  for (const entry of products) {
+    if (seen.has(entry.productType)) errors.push(`duplicate must-have list for ${entry.productType}`);
+    seen.add(entry.productType);
+    if (!repo.getProduct(entry.productType)) errors.push(`must-have list for unknown product ${entry.productType}`);
+    if (!complete(entry.page)) errors.push(`must-have list for ${entry.productType} page is not locale-complete`);
+    if (!entry.items.length) errors.push(`must-have list for ${entry.productType} is empty`);
+    const local = new Set<string>();
+    for (const item of entry.items) {
+      if (!ids.has(item.id)) errors.push(`${entry.productType} -> unknown must-have ${item.id}`);
+      if (local.has(item.id)) errors.push(`${entry.productType} lists must-have ${item.id} twice`);
+      local.add(item.id);
+      used.add(item.id);
+      if (!complete(item.why)) errors.push(`${entry.productType}/${item.id} why is not locale-complete`);
+    }
+  }
+  for (const product of repo.data.productArchetypes) {
+    if (!seen.has(product.id)) errors.push(`product ${product.id} has no must-have list`);
+  }
+  for (const id of ids) if (!used.has(id)) errors.push(`must-have ${id} is not used by any product type`);
   return errors;
 }
