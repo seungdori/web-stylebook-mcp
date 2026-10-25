@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.12.1] — 2026-10-25
+
 ### Fixed
 
 - `audit_page_structure` no longer passes three common template pages as clean (#11 follow-up):
