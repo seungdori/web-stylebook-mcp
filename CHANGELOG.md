@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.13.0] — 2026-10-25
+
 ### Added
 
 - Product must-haves that a style can't remove (#12). `recommend_design_direction` returns `mustHaves`: the
