@@ -6,6 +6,25 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Product must-haves that a style can't remove (#12). `recommend_design_direction` returns `mustHaves`: the
+  elements the resolved product type requires on its main page and the zone each must sit in (`first-screen` or
+  `page`), with the rule that a style restyles them but never removes them and that they come before the
+  archetype's opening limits. Examples: a commerce product page needs price, variant choice, add to cart, and
+  delivery and guarantee details on the first screen; a dashboard needs the current status and what changed; a
+  campaign landing page needs a primary action and proof; docs need search and a quickstart. All 14 catalog product
+  types have a list (21 must-haves); `other` has none and the result says so. Each candidate's
+  `structure.mustHaves` names the style's signature moves that do the same job.
+- `audit_page_structure` takes `productType` and reports each must-have as `present`, `missing`, `misplaced` (on
+  the page but not on the first screen), or `not-verified`, with `mustHaves.missing` and `mustHaves.misplaced`
+  lists, a major finding per gap, and evidence and results for new `structure-must-have-<id>` checks.
+  `get_design_audit_plan` and `validate_design_audit_result` accept `productType` with the `structure` group; plans
+  without it keep their checks and hash. Detection reads markup, ARIA roles, and visible text in English, Korean, and
+  Japanese, and ignores hidden content.
+- `webstylebook://structure/must-haves` lists every must-have with its criteria, the zone definitions, and each
+  product type's list. `--validate-catalog` checks that every product archetype has a complete, localized list.
+
 ## [0.12.1] — 2026-10-25
 
 ### Fixed

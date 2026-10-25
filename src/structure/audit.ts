@@ -2,7 +2,7 @@ import type { CatalogRepository } from '../catalog/repository.js';
 import { stableHashOf } from '../catalog/stable-hash.js';
 import { text } from '../localization.js';
 import { SERVER_VERSION } from '../server-info.js';
-import type { AuditSeverity, Lang } from '../types.js';
+import { PRODUCT_TYPES, type AuditSeverity, type Lang, type ProductType } from '../types.js';
 import { structureCheckId, structureChecks, type StructureCheckDef } from './checks.js';
 import { detectGlobalPatterns, sectionOf, type DetectionStatus, type Observation } from './detect.js';
 import { selectorPath } from './dom/html.js';
@@ -11,6 +11,11 @@ import { parseColor, type Rgba } from './dom/values.js';
 import { structureGuide, structureRulesetHash, styleBanId } from './guidance.js';
 import { GLOBAL_PATTERNS, styleRuleText } from './patterns.js';
 import { detectStyleBan, type RuleContext } from './rules.js';
+import { detectMustHaves, type MustHaveDetection, type MustHaveStatus } from './must-have-detect.js';
+import {
+  ZONE_CRITERIA, ZONE_TEXT, mustHaveCheckId, mustHaveDef, mustHavePatternId, productMustHaveDef,
+  type MustHaveId, type MustHaveZone,
+} from './must-haves.js';
 import type { GlobalPatternDef, StructureJob, StyleBanDef } from './types.js';
 
 export const STRUCTURE_AUDIT_SCHEMA = 'webstylebook.structure-audit.v1';
@@ -33,6 +38,8 @@ export interface AuditPageStructureInput {
   html: string;
   css?: string[];
   styleId?: string;
+  /** Adds the product type's must-have checks: which required elements the page lacks or keeps off the first screen. */
+  productType?: ProductType;
   targetId?: string;
   viewportWidth?: number;
   locale?: Lang;
@@ -52,7 +59,7 @@ export interface ReplacementMove { id: string; name: string; build: string; purp
 export interface StructureFinding {
   patternId: string;
   checkId: string;
-  scope: 'global' | 'style';
+  scope: 'global' | 'style' | 'must-have';
   name: string;
   severity: AuditSeverity;
   count: number;
@@ -99,6 +106,27 @@ export interface StructureResult {
   remediation?: string;
 }
 
+export interface MustHaveAuditItem {
+  id: MustHaveId;
+  checkId: string;
+  name: string;
+  zone: MustHaveZone;
+  status: MustHaveStatus;
+  /** Matches anywhere on the page; a misplaced must-have has matches but none in its zone. */
+  count: number;
+  locations: string[];
+  note?: string;
+}
+
+export interface MustHaveAuditReport {
+  productType: ProductType;
+  /** The page the product type's list is written for; null when the product type has no list. */
+  page: string | null;
+  missing: MustHaveId[];
+  misplaced: MustHaveId[];
+  items: MustHaveAuditItem[];
+}
+
 export interface StructureAuditResult {
   identity: {
     schema: typeof STRUCTURE_AUDIT_SCHEMA;
@@ -113,6 +141,8 @@ export interface StructureAuditResult {
   findings: StructureFinding[];
   checks: StructureCheckReport[];
   outline: Array<{ index: number; selector: string; patterns: string[] }>;
+  /** Present when productType was passed. */
+  mustHaves: MustHaveAuditReport | null;
   evidence: StructureEvidence[];
   results: StructureResult[];
   limits: string[];
@@ -127,6 +157,16 @@ const labels: Record<Lang, {
   limits: { heuristics: string; notAPass: string; truncated: (n: number) => string; unparsed: (n: number) => string; exhausted: string };
   guidance: string[];
   supersededBy: (id: string) => string;
+  mustHave: {
+    status: Record<MustHaveStatus, string>;
+    missing: (build: string, placement: string) => string;
+    misplaced: (build: string) => string;
+    misplacedAt: (name: string, where: string) => string;
+    reasons: Record<NonNullable<MustHaveDetection['reason']>, string>;
+    limit: string;
+    guidance: string;
+    plan: string;
+  };
 }> = {
   en: {
     status: { found: 'found', absent: 'absent', 'not-applicable': 'not applicable', 'not-verified': 'not verified', 'allowed-by-style': 'allowed by the style' },
@@ -145,6 +185,20 @@ const labels: Record<Lang, {
       'To record the outcome, call get_design_audit_plan with includeGroups containing "structure" and the same styleId, then submit these evidence and results entries to validate_design_audit_result under the same targetId.',
     ],
     supersededBy: (id) => `reported under ${id}`,
+    mustHave: {
+      status: { present: 'present', misplaced: 'not on the first screen', missing: 'missing', 'not-verified': 'not verified' },
+      missing: (build, placement) => `${build} Where: ${placement}`,
+      misplaced: (build) => `Move it onto the first screen; the audit found it only further down the page. ${build}`,
+      misplacedAt: (name, where) => `${name} was found at ${where}, but not on the first screen.`,
+      reasons: {
+        'no-opening': 'the page has no section, so the first screen could not be placed',
+        exhausted: 'the stylesheets exceeded the selector budget, so visibility could not be resolved',
+        truncated: 'parsing stopped before the end of the page, so it may be further down',
+      },
+      limit: 'Must-haves are recognized from markup, roles, and visible text in English, Korean, and Japanese. The first screen is estimated from document order and section size, not measured in a browser.',
+      guidance: 'Add every missing must-have and move every misplaced one onto the first screen in the style\'s own treatment, then rerun audit_page_structure with the same productType.',
+      plan: 'Pass the same productType to get_design_audit_plan as well, so the plan holds the must-have checks these results answer.',
+    },
   },
   ko: {
     status: { found: '발견', absent: '없음', 'not-applicable': '해당 없음', 'not-verified': '확인 못 함', 'allowed-by-style': '스타일이 허용' },
@@ -163,6 +217,20 @@ const labels: Record<Lang, {
       '결과를 기록하려면 includeGroups에 "structure"를 넣고 같은 styleId로 get_design_audit_plan을 호출하세요. 그다음 이 evidence와 results를 같은 targetId로 validate_design_audit_result에 제출하세요.',
     ],
     supersededBy: (id) => `${id} 항목으로 보고함`,
+    mustHave: {
+      status: { present: '있음', misplaced: '첫 화면 밖', missing: '없음', 'not-verified': '확인 못 함' },
+      missing: (build, placement) => `${build} 위치: ${placement}`,
+      misplaced: (build) => `첫 화면으로 옮기세요. 검사에서는 페이지 더 아래에서만 찾았습니다. ${build}`,
+      misplacedAt: (name, where) => `${where}에서 '${name}'을(를) 찾았지만 첫 화면에는 없습니다.`,
+      reasons: {
+        'no-opening': '페이지에 섹션이 없어 첫 화면의 범위를 정하지 못했습니다',
+        exhausted: '스타일시트가 선택자 한도를 넘어 보이는지 판단하지 못했습니다',
+        truncated: '페이지 끝까지 분석하지 못해 더 아래에 있을 수 있습니다',
+      },
+      limit: '필수 요소는 마크업, role, 영어·한국어·일본어로 된 보이는 텍스트로 판단합니다. 첫 화면은 브라우저로 잰 것이 아니라 문서 순서와 섹션 크기로 추정합니다.',
+      guidance: '빠진 필수 요소는 모두 추가하고, 첫 화면 밖에 있는 요소는 스타일에 맞는 모양으로 첫 화면에 옮기세요. 그다음 같은 productType으로 audit_page_structure를 다시 실행하세요.',
+      plan: 'get_design_audit_plan에도 같은 productType을 넘기세요. 그래야 계획에 이 결과가 답하는 필수 요소 검사가 들어갑니다.',
+    },
   },
   ja: {
     status: { found: '検出', absent: 'なし', 'not-applicable': '該当なし', 'not-verified': '未確認', 'allowed-by-style': 'スタイルが許可' },
@@ -181,12 +249,29 @@ const labels: Record<Lang, {
       '結果を記録するには、includeGroupsに"structure"を含め同じstyleIdでget_design_audit_planを呼び、これらのevidenceとresultsを同じtargetIdでvalidate_design_audit_resultに提出してください。',
     ],
     supersededBy: (id) => `${id}として報告`,
+    mustHave: {
+      status: { present: 'あり', misplaced: 'ファーストビューの外', missing: 'なし', 'not-verified': '未確認' },
+      missing: (build, placement) => `${build} 位置: ${placement}`,
+      misplaced: (build) => `ファーストビューに移してください。検査ではページのもっと下でしか見つかりませんでした。${build}`,
+      misplacedAt: (name, where) => `${where}で「${name}」を検出しましたが、ファーストビューにはありません。`,
+      reasons: {
+        'no-opening': 'ページにセクションがないため、ファーストビューの範囲を決められませんでした',
+        exhausted: 'スタイルシートがセレクターの上限を超え、表示されるか判断できませんでした',
+        truncated: 'ページの最後まで解析できなかったため、もっと下にある可能性があります',
+      },
+      limit: '必須要素は、マークアップ、role、英語・韓国語・日本語の表示テキストで判断します。ファーストビューはブラウザで測ったものではなく、文書の順序とセクションの大きさから推定します。',
+      guidance: '欠けている必須要素はすべて追加し、ファーストビューの外にある要素はスタイルに合った見た目でファーストビューに移してください。その後、同じproductTypeでaudit_page_structureを再実行してください。',
+      plan: 'get_design_audit_planにも同じproductTypeを渡してください。そうすると、計画にこの結果が答える必須要素の検査が入ります。',
+    },
   },
 };
 
 function validate(input: AuditPageStructureInput, repo: CatalogRepository): void {
   if (input.styleId && !repo.getStyle(input.styleId)) {
     throw new StructureAuditError(`unknown style '${input.styleId}'`, 'STYLE_NOT_FOUND', input.styleId);
+  }
+  if (input.productType !== undefined && !(PRODUCT_TYPES as readonly string[]).includes(input.productType)) {
+    throw new StructureAuditError(`productType must be one of: ${PRODUCT_TYPES.join(', ')}`);
   }
   if (!input.html.trim()) throw new StructureAuditError('html must contain the built page markup');
   if (input.html.length > PAGE_LIMITS.htmlChars) throw new StructureAuditError(`html exceeds ${PAGE_LIMITS.htmlChars} characters`);
@@ -248,7 +333,8 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
   const styleId = input.styleId;
   const guide = styleId ? structureGuide(styleId) : null;
   const allowed = guide?.allow ?? {};
-  const checkDefs = new Map(structureChecks(styleId, locale).map((check) => [check.id, check]));
+  const productType = input.productType;
+  const checkDefs = new Map(structureChecks(styleId, locale, productType).map((check) => [check.id, check]));
   const incomplete = page.styles.exhausted;
 
   const global = detectGlobalPatterns(page);
@@ -316,6 +402,48 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
     findings.push(styleFinding(patternId, checkId, ban, status, name, text(wording.fix, locale), check?.severity ?? 'minor'));
   }
 
+  const mustHaveEntry = productType ? productMustHaveDef(productType) : null;
+  const detections = detectMustHaves(page, mustHaveEntry?.items ?? [], global);
+  const mustHaveItems: MustHaveAuditItem[] = [];
+  for (const item of mustHaveEntry?.items ?? []) {
+    const detection = detections.get(item.id)!;
+    const def = mustHaveDef(item.id);
+    const name = text(def.name, locale);
+    const shown = detection.status === 'present' ? detection.inZone : detection.matches;
+    mustHaveItems.push({
+      id: item.id,
+      checkId: mustHaveCheckId(item.id),
+      name,
+      zone: item.zone,
+      status: detection.status,
+      count: detection.matches.length,
+      locations: shown.slice(0, LOCATIONS).map(selectorPath),
+      ...(detection.reason ? { note: label.mustHave.reasons[detection.reason] } : {}),
+    });
+    if (detection.status !== 'missing' && detection.status !== 'misplaced') continue;
+    const moves = movesFor(def.job, styleId);
+    const build = text(def.build, locale);
+    findings.push({
+      patternId: mustHavePatternId(item.id),
+      checkId: mustHaveCheckId(item.id),
+      scope: 'must-have',
+      name,
+      severity: 'major',
+      count: detection.matches.length,
+      locations: detection.matches.slice(0, LOCATIONS).map(selectorPath),
+      criteria: [...def.criteria.map((criterion) => criterion.id), ZONE_CRITERIA[item.zone].id],
+      observed: { status: detection.status, zone: item.zone, found: detection.matches.length, inZone: detection.inZone.length },
+      why: text(item.why, locale),
+      replaceWith: {
+        instruction: (detection.status === 'missing' ? label.mustHave.missing(build, text(ZONE_TEXT[item.zone], locale)) : label.mustHave.misplaced(build))
+          + (styleId ? '' : ` ${label.noStyle}`),
+        moves,
+        ...(styleId && item.zone === 'first-screen' ? { archetype: { hero: structureGuide(styleId).hero } } : {}),
+      },
+      relatedAuditCheckIds: [],
+    });
+  }
+
   const evidence: StructureEvidence[] = [];
   const results: StructureResult[] = [];
   const producer = { name: 'web-stylebook-mcp audit_page_structure', version: SERVER_VERSION, configHash: rulesetHash };
@@ -352,7 +480,41 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
     });
   }
 
+  for (const item of mustHaveItems) {
+    const detection = detections.get(item.id)!;
+    const evidenceId = evidenceIdFor(targetId, mustHavePatternId(item.id));
+    const first = item.locations[0];
+    const outcome: StructureEvidence['outcome'] = item.status === 'present' ? 'passed' : item.status === 'not-verified' ? 'cant-tell' : 'failed';
+    evidence.push({
+      id: evidenceId,
+      targetId,
+      type: 'dom',
+      phase: 'static',
+      summary: `${item.name}: ${label.mustHave.status[item.status]}${item.count ? ` (${item.count})` : ''}${item.note ? ` — ${item.note}` : ''}`.slice(0, 1990),
+      outcome,
+      contentHash: inputHash,
+      actual: { status: item.status, zone: item.zone, count: item.count, inZone: detection.inZone.length, ...(first ? { selector: first } : {}) },
+      ...(first ? { location: { selector: first } } : {}),
+      producer,
+    });
+    const check = checkDefs.get(item.checkId);
+    if (!check) continue;
+    const verdict: StructureResult['verdict'] = item.status === 'present' ? 'PASS' : item.status === 'not-verified' ? 'NOT_VERIFIED' : 'FIX_NOW';
+    results.push({
+      checkId: item.checkId,
+      targetId,
+      verdict,
+      evidenceRefs: [evidenceId],
+      rationale: item.status === 'present' ? label.foundAt(item.name, first ?? '', detection.inZone.length)
+        : item.status === 'missing' ? label.absent(item.name)
+          : item.status === 'misplaced' ? label.mustHave.misplacedAt(item.name, first ?? '')
+            : `${item.name}: ${item.note ?? label.mustHave.status[item.status]}`,
+      ...(verdict === 'FIX_NOW' ? { remediation: check.remediation } : {}),
+    });
+  }
+
   const limits = [label.limits.heuristics, label.limits.notAPass];
+  if (mustHaveEntry) limits.push(label.mustHave.limit);
   if (page.html.truncated) limits.push(label.limits.truncated(PAGE_LIMITS.maxElements));
   if (page.styles.unparsedSelectors) limits.push(label.limits.unparsed(page.styles.unparsedSelectors));
   if (incomplete) limits.push(label.limits.exhausted);
@@ -371,7 +533,8 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
   }));
 
   const major = findings.filter((finding) => finding.severity === 'major').length;
-  const notVerified = reports.filter((report) => report.status === 'not-verified').length;
+  const notVerified = reports.filter((report) => report.status === 'not-verified').length
+    + mustHaveItems.filter((item) => item.status === 'not-verified').length;
   return {
     identity: {
       schema: STRUCTURE_AUDIT_SCHEMA,
@@ -389,15 +552,26 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
       major,
       minor: findings.length - major,
       notVerified,
-      checked: reports.length,
+      checked: reports.length + mustHaveItems.length,
     },
     findings,
     checks: reports,
     outline,
+    mustHaves: productType ? {
+      productType,
+      page: mustHaveEntry ? text(mustHaveEntry.page, locale) : null,
+      missing: mustHaveItems.filter((item) => item.status === 'missing').map((item) => item.id),
+      misplaced: mustHaveItems.filter((item) => item.status === 'misplaced').map((item) => item.id),
+      items: mustHaveItems,
+    } : null,
     evidence,
     results,
     limits,
-    guidance: [...label.guidance],
+    guidance: [
+      ...(mustHaveItems.some((item) => item.status === 'missing' || item.status === 'misplaced') ? [label.mustHave.guidance] : []),
+      ...label.guidance,
+      ...(mustHaveItems.length ? [label.mustHave.plan] : []),
+    ],
   };
 }
 

@@ -148,6 +148,67 @@ After building, pass the page's HTML and CSS to `audit_page_structure`. This is 
 
 Each finding names where the pattern is, what was observed, and what to put there instead: the chosen style's signature moves for the same job (proof, in the logo strip's case), its hero composition, or its section order. Rebuild, run the audit again, then add `"structure"` to `get_design_audit_plan.includeGroups` and pass the returned `evidence` and `results` to `validate_design_audit_result`. Audit each viewport with its own `targetId`: the evidence ids include it, so the runs validate together. The checks are deterministic heuristics over the submitted HTML and CSS, not a browser render, so `clean` means every check ran and found none of these patterns, not that the design passed. Per-style guidance (archetypes and moves) is written in English, like the catalog's own `layout` and `typography` fields; pattern names and instructions follow `locale`.
 
+### Must-haves a style can't remove
+
+A direction must not cost the page its function. In the shelved showcase run (#7), the luxury skincare page built with the MCP kept a single buy button above the fold, while the control page showed sizes, a per-night price, add to bag, and delivery and guarantee details. So `recommend_design_direction` also returns `mustHaves`: the elements the resolved product type requires and the zone each one must sit in. A style restyles them but never removes them or moves them out of their zone, and they come before the archetype's limits on the opening ("one action, one short line"): every first-screen item goes in the hero. Each candidate's `structure.mustHaves` names that style's signature moves that do the same job, for example the proof move that can carry delivery and guarantee details.
+
+| Product type | Page | First screen | Anywhere on the page |
+|---|---|---|---|
+| `operational-saas` | main dashboard | Current status (`current-status`), What changed (`recent-changes`) | — |
+| `developer-tool` | product landing page | Code sample (`code-sample`), Documentation link (`docs-link`) | — |
+| `documentation` | docs home | Search (`search`), Quickstart (`quickstart`) | — |
+| `data-analytics` | analytics dashboard | Current status (`current-status`), What changed (`recent-changes`), Time range (`time-range`) | — |
+| `security-console` | security overview | Current status (`current-status`), What changed (`recent-changes`) | — |
+| `finance-admin` | finance overview | Current status (`current-status`), What changed (`recent-changes`) | — |
+| `healthcare-portal` | portal home | Primary action (`primary-cta`) | Contact (`contact`), Privacy notice (`privacy-notice`) |
+| `commerce` | product detail page | Price (`price`), Variant choice (`variant-choice`), Add to cart (`add-to-cart`), Delivery and guarantee details (`purchase-assurance`) | — |
+| `ai-chat` | chat screen | Message input (`composer`) | AI limits note (`ai-limits`) |
+| `content-editorial` | article page | Author (`author`), Publication date (`publish-date`) | — |
+| `knowledge-base` | help center home | Search (`search`) | Topic index (`topic-index`) |
+| `portfolio` | portfolio home | — | Work samples (`work-samples`), Contact (`contact`) |
+| `campaign` | landing page | Primary action (`primary-cta`) | Proof (`proof`) |
+| `consumer-app` | app landing page | Primary action (`primary-cta`) | Proof (`proof`) |
+
+The first screen is everything up to the end of the opening section (the section that holds the page's `h1`), plus up to two following sections while each section so far is short (≤ 40 words, no image, video, table, or large SVG, and not sized to fill the viewport). The site header counts; the footer does not. A brief whose product type is neither given nor inferred resolves to `other`, which has no list, and the result says so instead of inventing one. Every criterion is in `webstylebook://structure/must-haves`.
+
+Pass the same `productType` to `audit_page_structure`, and it reports which must-haves the built page is missing. This is its real output for the showcase failure, rebuilt as a fixture ([`commerce-buy-button-only.html`](https://github.com/seungdori/web-stylebook-mcp/blob/master/tests/fixtures/must-haves/commerce-buy-button-only.html)):
+
+```jsonc
+// → audit_page_structure({ html, styleId: "midnight-noir", productType: "commerce" })
+// ← must-have audit (trimmed)
+{
+  "mustHaves": {
+    "productType": "commerce",
+    "page": "product detail page",
+    "missing": [],
+    "misplaced": ["price", "variant-choice", "purchase-assurance"],
+    "items": [
+      { "id": "price", "checkId": "structure-must-have-price", "zone": "first-screen", "status": "misplaced", "count": 1,
+        "locations": ["section#buy > div > p.price:nth-of-type(1)"] },
+      { "id": "add-to-cart", "checkId": "structure-must-have-add-to-cart", "zone": "first-screen", "status": "present", "count": 1,
+        "locations": ["body > main > section.masthead:nth-of-type(1) > div > a.button"] }
+      // 2 more: variant-choice and purchase-assurance, both misplaced
+    ]
+  },
+  "findings": [
+    {
+      "patternId": "must-have/price",
+      "scope": "must-have",
+      "severity": "major",
+      "observed": { "status": "misplaced", "zone": "first-screen", "found": 1, "inZone": 0 },
+      "replaceWith": {
+        "instruction": "Move it onto the first screen; the audit found it only further down the page. Show the price with its currency next to the product name; when sizes differ in price, show the price of the selected size.",
+        "moves": [],
+        "archetype": { "hero": "Left-heavy and low: a 1.7fr/1fr grid with align-items: end …" }
+      }
+    }
+    // 2 more: must-have/variant-choice, must-have/purchase-assurance
+  ]
+}
+```
+
+Each must-have is `present`, `missing`, `misplaced` (on the page, but not on the first screen), or `not-verified` (the stylesheets exceeded the selector budget, parsing stopped before the end of the page, or the page has no section to place the first screen in). Each one is also a `structure-must-have-<id>` check: pass `productType` with the `structure` group to `get_design_audit_plan`, and the audit's evidence and results validate as they are. Detection reads markup, ARIA roles, and visible text in English, Korean, and Japanese. Anything hidden (`hidden`, `display: none`, a visually hidden `sr-only` box, or `aria-hidden="true"`) does not count. Native controls are found reliably: a `select` or radio group for variants, an `input type="search"` for search, a `time` element for dates.
+
 ## What an agent builds with it
 
 A different brief — *"a marketing landing page for **Throughline**, a B2B SaaS that turns scattered customer feedback (support tickets, sales calls, app reviews, Slack) into one prioritized roadmap."* No layout, no hero, no styling was specified. Following the companion skill, the agent composed the opening **from the product's core idea** instead of reaching for a stock hero: the right half is a bespoke diagram of the product's actual mechanic — feedback sources converging into an auto-ranked roadmap — not a decorative card you could paste onto any other site.
@@ -177,7 +238,7 @@ flowchart LR
     C --> N[audit_page_structure]
     D & E & F & G & H & I & J & K & L -->|design contracts<br/>observations · scores · reasons<br/>placement · evidence · tokens · structure| A
     A -->|built page HTML · CSS| N
-    N -->|banned patterns · replacement moves<br/>evidence for the structure checks| A
+    N -->|banned patterns · replacement moves<br/>missing must-haves<br/>evidence for the structure checks| A
     A -->|target matrix · evidence refs<br/>one verdict per check/target| M
     M -->|coverage · normalized verdicts<br/>plan/evidence/result hashes| A
     A -->|writes code<br/>from evidence| Z[Your UI]
@@ -264,7 +325,7 @@ Add the same block to your `claude_desktop_config.json`, then restart:
 
 | Tool | What you get | The honest part |
 |------|--------------|-----------------|
-| **`recommend_design_direction`** | Scored style candidates with reason codes, a `ranking` that says why #1 beat #2 (or reports a tie), **rejected** styles with *why*, secondary pairings, confidence, and each candidate's page `structure` | The model makes the final pick — this is the evidence provider |
+| **`recommend_design_direction`** | Scored style candidates with reason codes, a `ranking` that says why #1 beat #2 (or reports a tie), **rejected** styles with *why*, secondary pairings, confidence, each candidate's page `structure`, and the product type's `mustHaves` with the zone each must sit in | The model makes the final pick — this is the evidence provider |
 | **`compare_design_directions`** | 2–4 directions compared across product-fit, repeated-use, density, trust, distinctiveness, accessibility-risk, motion, maintenance | No single winner is declared |
 | **`search_design_references`** | Bounded search across real-world references by text, category, and tags, with concise localized observations | Returns attributed research summaries, not copied screenshots or brand assets |
 | **`get_design_reference`** | One complete localized reference with palette/layout/interaction/motion observations, normalized tokens, source revision, attribution, and rights notice | Original-site copy, typefaces, screenshots, and visual identity remain with their owners |
@@ -274,11 +335,11 @@ Add the same block to your `claude_desktop_config.json`, then restart:
 | **`compose_design_tokens`** | Role-based tokens as `json` / `css-variables` / `tailwind` / `typescript`; opt into the shared visual contract to preserve authored style values and editor changes | Contract mode uses authored color modes and applies only explicitly accepted contrast repairs |
 | **`get_design_audit_plan`** | Localized, surface-aware checks with stable ids, severity, applicability, required evidence, remediation, user-facing content checks, selected principle checks, and UI-state coverage | The tool plans the audit but never pretends it inspected your project; missing evidence is `NOT_VERIFIED`, not `PASS` |
 | **`validate_design_audit_result`** | Contract validation for the plan query, target matrix, durable evidence references, and one verdict per check/target, with normalized verdicts and stable hashes | It verifies coverage and evidence consistency, not visual quality; `valid: true` is never an overall design pass |
-| **`audit_page_structure`** | Banned generic and style-specific patterns found in the HTML and CSS you pass in, each with its location, observed values, and the chosen style's replacement moves, plus evidence and results for the `structure` audit group | Declared-style heuristics, not a browser; a clean result is not a design pass |
+| **`audit_page_structure`** | Banned generic and style-specific patterns found in the HTML and CSS you pass in, each with its location, observed values, and the chosen style's replacement moves; with `productType`, the must-haves the page is missing or keeps off the first screen; plus evidence and results for the `structure` audit group | Declared-style heuristics, not a browser; a clean result is not a design pass |
 
 **Catalog:** 520 real-world design references · 48 styles · 25 interface design principles · 23 UX principles · 51 structured audit checks · 20 components · 5 surfaces · 57 UI-state recipes · 29 motion profiles · 14 product archetypes.
 
-**Structure:** 48 layout archetypes · 144 signature moves · 9 banned generic patterns · 142 style-specific bans from 19 detectors.
+**Structure:** 48 layout archetypes · 144 signature moves · 9 banned generic patterns · 142 style-specific bans from 19 detectors · 21 must-haves across 14 product types.
 
 The reference library is an adapted, high-completeness subset of [OpenDesign](https://opendesign.cc), whose structured specifications are licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Web Stylebook excludes upstream screenshots and brand assets. Original sites, brands, copy, typefaces, and visual identities remain the property of their respective owners; inspect each detail's attribution and rights notice before use.
 
@@ -330,7 +391,7 @@ webstylebook://states/surfaces · /states/{surface} · /states/{surface}/{state}
 webstylebook://products · /products/{id}
 webstylebook://references · /references/{id}
 webstylebook://policies/anti-patterns · /policies/verification · /policies/audit-checks
-webstylebook://structure/banned-patterns
+webstylebook://structure/banned-patterns · /structure/must-haves
 ```
 
 Style detail accepts optional `locale`, `mode`, and expected `revision` query parameters, for example `webstylebook://styles/brutalist-grid?locale=ko&mode=light`. It returns one resolved locale and mode; unsupported values, duplicate parameters, and unknown query names return an explicit error.
@@ -366,8 +427,8 @@ user-task value rather than banned as types.
 result slots, broken evidence references, cross-target evidence, invalid regions, unsupported
 `NOT_APPLICABLE`, and `PASS` that lacks required evidence or contradicts failed evidence. Missing result
 slots are materialized as `NOT_VERIFIED`, never hidden. With `includeGroups` containing `structure` and a
-`styleId`, the plan adds one automated check per banned pattern; `audit_page_structure` returns evidence and
-results for those check ids that the validator accepts as they are. The result carries content-addressed plan,
+`styleId`, the plan adds one automated check per banned pattern, and `productType` adds one per must-have;
+`audit_page_structure` returns evidence and results for those check ids that the validator accepts as they are. The result carries content-addressed plan,
 evidence-bundle, and normalized-result hashes for comparable rechecks. The tool never opens the
 artifact references and never turns contract validity into a design-quality score.
 

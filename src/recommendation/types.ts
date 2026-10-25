@@ -2,6 +2,7 @@ import type {
   ProductType, Tone, Density, UsageFrequency, TrustLevel, TaskTag, Lang, CatalogStyle,
 } from '../types.js';
 import type { StyleStructureSummary } from '../structure/guidance.js';
+import type { ProductMustHaves } from '../structure/must-haves.js';
 
 export interface ProductContext {
   productDescription: string;
@@ -164,4 +165,12 @@ export interface EvidenceResult<Candidate extends StyleCandidate = RecommendedCa
   compromised?: boolean;
   relaxed?: string[];
   guidance: string;
+}
+
+export interface RecommendationResult extends EvidenceResult {
+  /**
+   * The elements the resolved product type requires and where each goes, returned once for every candidate. A style
+   * restyles them but never removes them; each candidate's structure.mustHaves says how its archetype places them.
+   */
+  mustHaves: ProductMustHaves;
 }

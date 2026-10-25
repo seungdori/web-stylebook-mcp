@@ -159,6 +159,67 @@ API 키 없음. 모델 호출 없음. 네트워크 없음. 프로젝트 파일�
 
 발견 항목마다 위치, 관찰값, 그리고 그 자리에 대신 넣을 것을 알려 줍니다. 대신 넣을 것은 고른 스타일에서 같은 역할을 하는 시그니처 무브(로고 띠라면 근거 역할), 히어로 구성, 섹션 순서입니다. 다시 빌드하고 감사를 한 번 더 돌린 뒤, `get_design_audit_plan.includeGroups`에 `"structure"`를 넣고 돌려받은 `evidence`와 `results`를 `validate_design_audit_result`에 넘기세요. 뷰포트마다 다른 `targetId`로 감사하세요. 증거 id에 `targetId`가 들어가므로 여러 실행 결과를 함께 검증할 수 있습니다. 이 검사는 브라우저 렌더링이 아니라 제출한 HTML과 CSS에 대한 결정적 휴리스틱입니다. `clean`은 모든 검사가 실행되었고 이 패턴들을 찾지 못했다는 뜻이지, 디자인이 통과했다는 뜻이 아닙니다. 스타일별 지침(아키타입과 무브)은 카탈로그의 `layout`·`typography` 필드처럼 영어로 작성되어 있고, 패턴 이름과 안내 문장은 `locale`을 따릅니다.
 
+### 스타일이 뺄 수 없는 필수 요소
+
+디자인 방향 때문에 페이지가 제 기능을 잃으면 안 됩니다. 보류된 쇼케이스 실험(#7)에서 MCP로 만든 럭셔리 스킨케어 페이지는 첫 화면에 구매 버튼 하나만 남겼습니다. 대조군 페이지는 용량, 하룻밤 기준 가격, 장바구니 담기, 배송·보증 안내를 보여 줬습니다. 그래서 `recommend_design_direction`은 `mustHaves`도 반환합니다. 판단한 제품 유형에 꼭 필요한 요소와 각 요소가 있어야 할 위치(zone)입니다. 스타일은 이 요소의 모양을 바꿀 수 있지만, 빼거나 정해진 위치 밖으로 옮기면 안 됩니다. 이 요소는 첫 화면에 대한 아키타입의 제한("행동 하나, 짧은 문장 하나")보다 우선합니다. 첫 화면 항목은 모두 히어로에 넣으세요. 후보마다 `structure.mustHaves`가 같은 역할을 하는 그 스타일의 시그니처 무브를 알려 줍니다. 예를 들어 배송·보증 안내를 담을 수 있는 근거 무브입니다.
+
+| 제품 유형 | 페이지 | 첫 화면 | 페이지 어디든 |
+|---|---|---|---|
+| `operational-saas` | 메인 대시보드 | 현재 상태 (`current-status`), 변경 사항 (`recent-changes`) | — |
+| `developer-tool` | 제품 랜딩 페이지 | 코드 예시 (`code-sample`), 문서 링크 (`docs-link`) | — |
+| `documentation` | 문서 홈 | 검색 (`search`), 빠른 시작 (`quickstart`) | — |
+| `data-analytics` | 분석 대시보드 | 현재 상태 (`current-status`), 변경 사항 (`recent-changes`), 기간 (`time-range`) | — |
+| `security-console` | 보안 개요 화면 | 현재 상태 (`current-status`), 변경 사항 (`recent-changes`) | — |
+| `finance-admin` | 재무 개요 화면 | 현재 상태 (`current-status`), 변경 사항 (`recent-changes`) | — |
+| `healthcare-portal` | 포털 홈 | 주요 행동 (`primary-cta`) | 연락 방법 (`contact`), 개인정보 안내 (`privacy-notice`) |
+| `commerce` | 상품 상세 페이지 | 가격 (`price`), 옵션 선택 (`variant-choice`), 장바구니 담기 (`add-to-cart`), 배송·보증 안내 (`purchase-assurance`) | — |
+| `ai-chat` | 대화 화면 | 메시지 입력창 (`composer`) | AI 한계 안내 (`ai-limits`) |
+| `content-editorial` | 기사 페이지 | 작성자 (`author`), 발행일 (`publish-date`) | — |
+| `knowledge-base` | 도움말 센터 홈 | 검색 (`search`) | 주제별 목록 (`topic-index`) |
+| `portfolio` | 포트폴리오 홈 | — | 작업 예시 (`work-samples`), 연락 방법 (`contact`) |
+| `campaign` | 랜딩 페이지 | 주요 행동 (`primary-cta`) | 근거 (`proof`) |
+| `consumer-app` | 앱 랜딩 페이지 | 주요 행동 (`primary-cta`) | 근거 (`proof`) |
+
+첫 화면은 첫 섹션(페이지의 `h1`이 있는 섹션)의 끝까지입니다. 지금까지의 섹션이 모두 짧으면 뒤따르는 섹션을 2개까지 더 넣습니다. 짧은 섹션은 40단어 이하이고, 이미지·비디오·표·큰 SVG가 없고, 화면을 채우는 높이를 선언하지 않은 섹션입니다. 사이트 헤더는 첫 화면에 들어가고, 푸터는 들어가지 않습니다. 제품 유형을 받지도 추론하지도 못한 설명은 `other`가 됩니다. `other`에는 목록이 없고, 결과는 목록을 지어내지 않고 그 사실을 알립니다. 모든 판단 기준은 `webstylebook://structure/must-haves`에 있습니다.
+
+같은 `productType`을 `audit_page_structure`에 넘기면, 빌드한 페이지에서 빠진 필수 요소를 알려 줍니다. 아래는 쇼케이스의 실패 사례를 fixture로 다시 만든 페이지([`commerce-buy-button-only.html`](https://github.com/seungdori/web-stylebook-mcp/blob/master/tests/fixtures/must-haves/commerce-buy-button-only.html))의 실제 출력입니다.
+
+```jsonc
+// → audit_page_structure({ html, styleId: "midnight-noir", productType: "commerce", locale: "ko" })
+// ← 필수 요소 감사 결과 (일부)
+{
+  "mustHaves": {
+    "productType": "commerce",
+    "page": "상품 상세 페이지",
+    "missing": [],
+    "misplaced": ["price", "variant-choice", "purchase-assurance"],
+    "items": [
+      { "id": "price", "checkId": "structure-must-have-price", "zone": "first-screen", "status": "misplaced", "count": 1,
+        "locations": ["section#buy > div > p.price:nth-of-type(1)"] },
+      { "id": "add-to-cart", "checkId": "structure-must-have-add-to-cart", "zone": "first-screen", "status": "present", "count": 1,
+        "locations": ["body > main > section.masthead:nth-of-type(1) > div > a.button"] }
+      // 나머지 2개: variant-choice, purchase-assurance
+    ]
+  },
+  "findings": [
+    {
+      "patternId": "must-have/price",
+      "scope": "must-have",
+      "severity": "major",
+      "observed": { "status": "misplaced", "zone": "first-screen", "found": 1, "inZone": 0 },
+      "replaceWith": {
+        "instruction": "첫 화면으로 옮기세요. 검사에서는 페이지 더 아래에서만 찾았습니다. 상품명 옆에 통화와 함께 가격을 보여 주세요. 용량마다 가격이 다르면 고른 용량의 가격을 보여 주세요.",
+        "moves": [],
+        "archetype": { "hero": "Left-heavy and low: a 1.7fr/1fr grid with align-items: end …" }
+      }
+    }
+    // 나머지 2개: must-have/variant-choice, must-have/purchase-assurance
+  ]
+}
+```
+
+필수 요소의 상태는 `present`(있음), `missing`(없음), `misplaced`(페이지에는 있지만 첫 화면에는 없음), `not-verified`(확인 못 함) 중 하나입니다. `not-verified`는 스타일시트가 선택자 한도를 넘었거나, 페이지 끝까지 분석하지 못했거나, 첫 화면을 정할 섹션이 없을 때입니다. 필수 요소마다 `structure-must-have-<id>` 검사도 있습니다. `get_design_audit_plan`에 `structure` 그룹과 `productType`을 함께 넘기면, 감사가 돌려준 evidence와 results를 그대로 검증할 수 있습니다. 탐지는 마크업, ARIA role, 영어·한국어·일본어로 된 보이는 텍스트를 읽습니다. 숨긴 요소(`hidden`, `display: none`, 시각적으로 숨긴 `sr-only` 상자, `aria-hidden="true"`)는 세지 않습니다. 기본 컨트롤은 안정적으로 찾습니다. 옵션은 `select`나 라디오 그룹, 검색은 `input type="search"`, 날짜는 `time` 요소를 쓰세요.
+
 ## 에이전트가 이걸로 만든 결과물
 
 다른 브리프 — *"흩어진 고객 피드백(지원 티켓, 세일즈 콜, 앱 리뷰, 슬랙)을 하나의 우선순위 로드맵으로 정리해주는 B2B SaaS **Throughline**의 마케팅 랜딩."* 레이아웃도, 히어로도, 스타일도 지정하지 않았습니다. 동반 스킬을 따라 에이전트는 스톡 히어로로 도망치는 대신 **제품의 핵심 아이디어에서** 첫 화면을 구성했습니다 — 오른쪽 절반은 다른 사이트에 복붙할 수 있는 장식 카드가 아니라, 제품의 실제 메커니즘(피드백 소스가 모여 자동 랭킹된 로드맵이 되는)을 그린 맞춤 다이어그램입니다.
@@ -188,7 +249,7 @@ flowchart LR
     C --> N[audit_page_structure]
     D & E & F & G & H & I & J & K & L -->|디자인 계약<br/>관찰 · 점수 · 사유<br/>배치 · 증거 · 토큰 · 구조| A
     A -->|빌드한 페이지 HTML · CSS| N
-    N -->|금지 패턴 · 대체 무브<br/>구조 검사용 증거| A
+    N -->|금지 패턴 · 대체 무브<br/>빠진 필수 요소<br/>구조 검사용 증거| A
     A -->|대상 행렬 · 증거 참조<br/>검사/대상별 판정| M
     M -->|범위 · 정규화 판정<br/>plan/evidence/result hash| A
     A -->|근거로<br/>코드 작성| Z[당신의 UI]
@@ -275,7 +336,7 @@ MCP 설정에 추가:
 
 | 툴 | 받는 것 | 정직한 점 |
 |------|--------------|-----------------|
-| **`recommend_design_direction`** | 사유 코드가 붙은 점수화 스타일 후보, 1위가 2위를 이긴 이유(또는 동점)를 알리는 `ranking`, *이유*가 붙은 **탈락** 스타일, 보조 페어링, 신뢰도, 후보별 페이지 `structure` | 최종 선택은 모델이 — 이건 근거 제공자입니다 |
+| **`recommend_design_direction`** | 사유 코드가 붙은 점수화 스타일 후보, 1위가 2위를 이긴 이유(또는 동점)를 알리는 `ranking`, *이유*가 붙은 **탈락** 스타일, 보조 페어링, 신뢰도, 후보별 페이지 `structure`, 제품 유형의 필수 요소와 각 위치를 담은 `mustHaves` | 최종 선택은 모델이 — 이건 근거 제공자입니다 |
 | **`compare_design_directions`** | 2~4개 방향을 제품 적합성·반복 사용·밀도·신뢰·차별성·접근성 리스크·모션·유지보수로 비교 | 정답 하나를 선언하지 않습니다 |
 | **`search_design_references`** | 실제 디자인 레퍼런스를 텍스트·카테고리·태그로 제한 검색하고 간결한 다국어 관찰 결과 제공 | 스크린샷이나 브랜드 자산 복제가 아니라 출처가 붙은 연구 요약을 반환합니다 |
 | **`get_design_reference`** | 팔레트·레이아웃·인터랙션·모션 관찰, 정규화 토큰, 원본 리비전, 출처와 권리 고지를 포함한 레퍼런스 1건 | 원 사이트 카피·서체·스크린샷·시각 정체성의 권리는 각 권리자에게 있습니다 |
@@ -285,11 +346,11 @@ MCP 설정에 추가:
 | **`compose_design_tokens`** | 역할 기반 토큰을 `json` / `css-variables` / `tailwind` / `typescript`로 출력하며, 공통 시각 명세를 선택하면 스타일 원본과 편집값을 보존 | 명세에 작성된 색상 모드를 사용하며, 명시적으로 수락한 대비 수정만 적용합니다 |
 | **`get_design_audit_plan`** | 안정적인 검사 ID·심각도·적용 조건·필요 증거·수정 방향·사용자용 콘텐츠 검사·선택 원칙 검사·UI 상태 범위를 담은 다국어 감사 계획 | 프로젝트를 실제로 봤다고 가장하지 않으며, 증거가 없으면 `PASS`가 아니라 `NOT_VERIFIED`입니다 |
 | **`validate_design_audit_result`** | plan query·대상 행렬·지속 가능한 증거 참조·검사/대상별 판정을 검증하고 정규화 판정과 안정 hash를 반환 | 범위와 증거 정합성을 검증할 뿐 시각 품질을 판정하지 않으며, `valid: true`는 전체 디자인 통과가 아닙니다 |
-| **`audit_page_structure`** | 넘겨받은 HTML·CSS에서 일반 금지 패턴과 스타일 전용 금지 항목을 찾아, 위치·관찰값·고른 스타일의 대체 무브와 함께 반환하고 `structure` 감사 그룹용 증거와 결과도 만듭니다 | 브라우저가 아니라 선언된 스타일로 판단하며, 결과가 깨끗해도 디자인 통과가 아닙니다 |
+| **`audit_page_structure`** | 넘겨받은 HTML·CSS에서 일반 금지 패턴과 스타일 전용 금지 항목을 찾아, 위치·관찰값·고른 스타일의 대체 무브와 함께 반환합니다. `productType`을 주면 페이지에 없거나 첫 화면 밖에 있는 필수 요소도 알려 줍니다. `structure` 감사 그룹용 증거와 결과도 만듭니다 | 브라우저가 아니라 선언된 스타일로 판단하며, 결과가 깨끗해도 디자인 통과가 아닙니다 |
 
 **카탈로그:** 실제 디자인 레퍼런스 520 · 스타일 48 · 인터페이스 디자인 원칙 25 · UX 원칙 23 · 구조화 감사 검사 51 · 컴포넌트 20 · 표면 5 · UI 상태 레시피 57 · 모션 프로파일 29 · 제품 아키타입 14.
 
-**구조:** 레이아웃 아키타입 48 · 시그니처 무브 144 · 일반 금지 패턴 9 · 탐지기 19종으로 만든 스타일 전용 금지 항목 142.
+**구조:** 레이아웃 아키타입 48 · 시그니처 무브 144 · 일반 금지 패턴 9 · 탐지기 19종으로 만든 스타일 전용 금지 항목 142 · 제품 유형 14개의 필수 요소 21종.
 
 레퍼런스 라이브러리는 [OpenDesign](https://opendesign.cc)의 완성도 높은 항목을 선별·수정한 데이터이며, 구조화 스펙은 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)으로 제공됩니다. Web Stylebook은 원본 스크린샷과 브랜드 자산을 포함하지 않습니다. 원 사이트·브랜드·카피·서체·시각 정체성의 권리는 각 권리자에게 있으므로 사용 전 상세 항목의 출처와 권리 고지를 확인하세요.
 
@@ -341,7 +402,7 @@ webstylebook://states/surfaces · /states/{surface} · /states/{surface}/{state}
 webstylebook://products · /products/{id}
 webstylebook://references · /references/{id}
 webstylebook://policies/anti-patterns · /policies/verification · /policies/audit-checks
-webstylebook://structure/banned-patterns
+webstylebook://structure/banned-patterns · /structure/must-haves
 ```
 
 스타일 상세에는 `locale`, `mode`, 기대하는 `revision`을 쿼리로 지정할 수 있습니다. 예: `webstylebook://styles/brutalist-grid?locale=ko&mode=light`. 선택한 언어와 모드 1개의 명세를 반환하며, 지원하지 않는 값·중복 인자·알 수 없는 쿼리 이름은 명확한 오류로 반환합니다.
@@ -375,7 +436,7 @@ webstylebook://structure/banned-patterns
 끊어진 evidence reference, 다른 target의 evidence, 잘못된 region, 부당한
 `NOT_APPLICABLE`, 필수 증거가 없거나 실패 증거와 모순되는 `PASS`를 거부합니다. 누락된
 결과는 숨기지 않고 `NOT_VERIFIED`로 구체화합니다. `includeGroups`에 `structure`를 넣고 `styleId`를 주면,
-plan에 금지 패턴마다 자동 검사가 1개씩 붙습니다. `audit_page_structure`는 이 검사 id에 맞는 evidence와
+plan에 금지 패턴마다 자동 검사가 1개씩 붙고, `productType`을 주면 필수 요소마다 1개씩 더 붙습니다. `audit_page_structure`는 이 검사 id에 맞는 evidence와
 results를 돌려주고, validator는 그대로 받습니다. 재검증 가능한 비교를 위해 plan,
 evidence bundle, 정규화된 result의 content-addressed hash도 반환합니다. 이 툴은 artifact를
 직접 열지 않으며 계약 유효성을 디자인 품질 점수로 바꾸지 않습니다.

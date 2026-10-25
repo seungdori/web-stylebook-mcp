@@ -2,8 +2,11 @@ import type { CatalogRepository } from '../catalog/repository.js';
 import { stableHashOf } from '../catalog/stable-hash.js';
 import { text } from '../localization.js';
 import { SERVER_VERSION } from '../server-info.js';
-import type { Density, Lang } from '../types.js';
+import type { Density, Lang, ProductType } from '../types.js';
 import { STRUCTURE_GUIDES } from './guides/index.js';
+import {
+  MH, MUST_HAVES, PRODUCT_MUST_HAVES, ZONE_CRITERIA, ZONE_TEXT, candidateMustHaves, type CandidateMustHave,
+} from './must-haves.js';
 import { GLOBAL_PATTERNS, T, styleRuleText } from './patterns.js';
 import {
   GLOBAL_PATTERN_IDS, type CriterionDef, type GlobalPatternId, type GuideBasis, type StructureGuideDef,
@@ -59,6 +62,11 @@ export interface StyleStructureSummary {
     style: Array<{ id: string; rule: StyleBanDef['rule']; name: string }>;
     allowed: Array<{ patternId: GlobalPatternId; reason: string }>;
   };
+  /**
+   * How this archetype places the product type's must-haves: each one's zone (a first-screen item goes in the hero)
+   * and the signature moves that do the same job. Present when the product type defines must-haves.
+   */
+  mustHaves?: CandidateMustHave[];
   resourceUri: string;
 }
 
@@ -156,8 +164,11 @@ export function structureReference(styleId: string): StructureReference {
   };
 }
 
-export function styleStructureSummary(styleId: string, repo: CatalogRepository, locale: Lang = 'en'): StyleStructureSummary {
+export function styleStructureSummary(
+  styleId: string, repo: CatalogRepository, locale: Lang = 'en', productType?: ProductType,
+): StyleStructureSummary {
   const full = styleStructure(styleId, repo, locale);
+  const mustHaves = productType ? candidateMustHaves(productType, full.signatureMoves) : [];
   return {
     schema: full.schema,
     styleId,
@@ -169,6 +180,7 @@ export function styleStructureSummary(styleId: string, repo: CatalogRepository, 
       style: full.bannedPatterns.style.map(({ id, rule, name }) => ({ id, rule, name })),
       allowed: full.bannedPatterns.allowed,
     },
+    ...(mustHaves.length ? { mustHaves } : {}),
     resourceUri: full.resourceUri,
   };
 }
@@ -196,6 +208,7 @@ export function structureRulesetHash(): string {
       ...guide,
       bans: guide.bans.map((ban) => ({ ...ban, wording: styleRuleText(ban.rule, ban.params as never) })),
     })),
+    mustHaves: { thresholds: MH, zones: { text: ZONE_TEXT, criteria: ZONE_CRITERIA }, items: MUST_HAVES, productTypes: PRODUCT_MUST_HAVES },
   });
   return rulesetHashMemo;
 }
@@ -212,6 +225,8 @@ export function structureManifest(repo: CatalogRepository) {
     signatureMoves: STRUCTURE_GUIDES.reduce((sum, guide) => sum + guide.moves.length, 0),
     globalBannedPatterns: GLOBAL_PATTERNS.length,
     styleBans: STRUCTURE_GUIDES.reduce((sum, guide) => sum + guide.bans.length, 0),
+    mustHaves: MUST_HAVES.length,
+    mustHaveProductTypes: PRODUCT_MUST_HAVES.length,
     catalogStyles: repo.allStyles().length,
   };
 }

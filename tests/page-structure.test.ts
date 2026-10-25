@@ -187,20 +187,26 @@ describe('audit_page_structure contract', () => {
   it('stays linear on hostile nesting instead of walking every subtree per element', () => {
     const html = `<main><section><h1>Deep</h1>${'<div>'.repeat(PAGE_LIMITS.maxElements - 10)}<p>leaf</p></section></main>`;
     const started = performance.now();
-    const result = auditPageStructure({ html, styleId: 'quiet-utility' }, repo);
+    // productType adds the must-have detectors, whose ancestor checks must stay memoized on a page this deep.
+    const result = auditPageStructure({ html, styleId: 'quiet-utility', productType: 'commerce' }, repo);
     expect(performance.now() - started).toBeLessThan(5000);
     expect(result.summary.checked).toBeGreaterThan(9);
+    expect(result.mustHaves!.missing).toEqual(['price', 'variant-choice', 'add-to-cart', 'purchase-assurance']);
   });
 
   it('reports absences as not verified when a stylesheet exhausts the selector budget', () => {
     const html = `<main><section><h1>Title</h1><p>Words here for the lede of the page.</p></section><section>${'<div><p>x</p></div>'.repeat(4000)}</section></main>`;
     const css = Array.from({ length: 1500 }, (_, i) => `section div:nth-child(${i}) { color: red }`).join('\n');
     const started = performance.now();
-    const result = auditPageStructure({ html, css: [css], styleId: 'quiet-utility' }, repo);
+    const result = auditPageStructure({ html, css: [css], styleId: 'quiet-utility', productType: 'commerce' }, repo);
     expect(performance.now() - started).toBeLessThan(5000);
     expect(result.checks.some((check) => check.status === 'absent')).toBe(false);
     expect(result.summary.clean).toBe(false);
     expect(result.limits.some((line) => line.includes('selector matching'))).toBe(true);
+    // Must-haves are not verified either: a rule that was never applied could hide one or show a hidden one.
+    expect(result.mustHaves!.items.map((item) => item.status)).toEqual(['not-verified', 'not-verified', 'not-verified', 'not-verified']);
+    expect(result.results.filter((item) => item.checkId.startsWith('structure-must-have-')).map((item) => item.verdict))
+      .toEqual(['NOT_VERIFIED', 'NOT_VERIFIED', 'NOT_VERIFIED', 'NOT_VERIFIED']);
   });
 
   it('marks opening patterns not applicable on a page without any heading, as NOT_APPLICABLE results', () => {

@@ -147,7 +147,7 @@ function isChrome(element: DomElement, holdsH1: (element: DomElement) => boolean
  * "This element or an ancestor passes `test`", memoized per element. Each query fills the chain up to the nearest
  * known ancestor, so asking for every element of a deeply nested page stays linear.
  */
-function ancestorFlag(test: (element: DomElement) => boolean): (element: DomElement) => boolean {
+export function ancestorFlag(test: (element: DomElement) => boolean): (element: DomElement) => boolean {
   const cache = new WeakMap<DomElement, boolean>();
   return (element) => {
     const chain: DomElement[] = [];
