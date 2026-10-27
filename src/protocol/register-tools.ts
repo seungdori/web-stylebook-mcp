@@ -38,7 +38,10 @@ import {
   type ValidateDesignAuditResultInput,
   type ValidatedDesignAuditResult,
 } from '../audit/evaluator.js';
-import { composeDesignTokens, TokenError, type ComposeDesignTokensResult } from '../tokens/compile.js';
+import {
+  composeDesignTokens, TokenError, type ComposeDesignTokensResult, type DesignMdTokensResult,
+} from '../tokens/compile.js';
+import { DESIGN_MD_PLACEMENTS } from '../tokens/design-md.js';
 import {
   auditPageStructure, PAGE_LIMITS, StructureAuditError, type StructureAuditResult,
 } from '../structure/audit.js';
@@ -465,12 +468,19 @@ export function registerTools(server: McpServer, repo: CatalogRepository): void 
 
   server.registerTool('compose_design_tokens', {
     title: 'Compose design tokens',
-    description: 'Compile role-based design tokens in json / css-variables / tailwind / typescript. Calls without contract keep that token shape. Their shadows follow the pinned visual contract, and editorial or monospace-led styles use authored font families; other fields remain family-derived starting points. For the full authored style and web-editor values, pass contract.schema from manifest.visualContract.contractSchema; optionally pin the manifest visualContract.contentHash and style visualContract.revision. Contract mode defaults to the authored native color mode, preserves explicit overrides, and rejects unsupported modes or a legacy secondaryStyleId overlay. Apply colors, typography, spacing, and fonts selected from another style as explicit overrides. Repairs are proposed separately; only acceptedRepairs are applied. locale controls content typography adaptation. No browser font availability or rendered appearance is claimed as verified.',
+    description: 'Compile role-based design tokens in json / css-variables / tailwind / typescript, or as a DESIGN.md file (format "design-md", google-labs-code/design.md version alpha) that other agents and tools read: YAML tokens in the front matter or interleaved per section (designMd.tokenPlacement), localized prose, the style\'s Do\'s and Don\'ts, and its page structure plus designMd.productType must-haves. The server returns the file text in content and never writes a file; values DESIGN.md has no key for (a second color mode, status colors, motion) are listed in lossy. Calls without contract keep that token shape. Their shadows follow the pinned visual contract, and editorial or monospace-led styles use authored font families; other fields remain family-derived starting points. For the full authored style and web-editor values, pass contract.schema from manifest.visualContract.contractSchema; optionally pin the manifest visualContract.contentHash and style visualContract.revision. Contract mode defaults to the authored native color mode, preserves explicit overrides, and rejects unsupported modes or a legacy secondaryStyleId overlay. Apply colors, typography, spacing, and fonts selected from another style as explicit overrides. Repairs are proposed separately; only acceptedRepairs are applied. locale controls content typography adaptation. No browser font availability or rendered appearance is claimed as verified.',
     inputSchema: z.object({
       primaryStyleId: z.string(),
       secondaryStyleId: z.string().optional(),
       accentOverride: z.string().regex(/^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/, 'must be a 3/6/8-digit hex color').optional(),
-      format: z.enum(['json', 'css-variables', 'tailwind', 'typescript']),
+      format: z.enum(['json', 'css-variables', 'tailwind', 'typescript', 'design-md']),
+      designMd: z.object({
+        tokenPlacement: z.enum(DESIGN_MD_PLACEMENTS).optional(),
+        includeProse: z.boolean().optional(),
+        includeDoDont: z.boolean().optional(),
+        includeStructure: z.boolean().optional(),
+        productType: z.enum(PRODUCT_TYPES).describe('adds this product type\'s must-haves to the Layout section').optional(),
+      }).strict().describe('only with format "design-md"').optional(),
       density: z.enum(['comfortable', 'compact']).optional(),
       colorMode: z.enum(['light', 'dark', 'both']).optional(),
       locale: LOCALE.optional(),
@@ -489,7 +499,11 @@ export function registerTools(server: McpServer, repo: CatalogRepository): void 
         throw new ToolError('STYLE_NOT_FOUND', `unknown style '${args.primaryStyleId}'`, nearestIds(args.primaryStyleId, repo.allStyles().map((s) => s.id)));
       }
       const result = composeDesignTokens(args, repo);
-      return ok(result as unknown as Record<string, unknown>, renderTokens(result, repo), [`webstylebook://styles/${args.primaryStyleId}`]);
+      if (result.format === 'design-md') {
+        return ok(result as unknown as Record<string, unknown>, renderDesignMd(result as DesignMdTokensResult),
+          [`webstylebook://styles/${args.primaryStyleId}`]);
+      }
+      return ok(result as unknown as Record<string, unknown>, renderTokens(result as ComposeDesignTokensResult, repo), [`webstylebook://styles/${args.primaryStyleId}`]);
     } catch (e) { return errorResult(toToolError(e, repo)); }
   });
 }
@@ -931,6 +945,16 @@ function renderStructureAudit(r: StructureAuditResult, locale: Lang): string {
     if (finding.replaceWith.moves.length) lines.push(`  ${labels.moves}: ${finding.replaceWith.moves.map((move) => `${move.name} — ${move.build}`).join(' | ')}`);
   }
   lines.push('', `${labels.limits}:`, ...r.limits.map((limit) => `- ${limit}`), '', ...r.guidance);
+  return lines.join('\n');
+}
+
+function renderDesignMd(r: DesignMdTokensResult): string {
+  const lines = [`# ${r.fileName} — ${r.primaryStyleId}${r.secondaryStyleId ? ` + ${r.secondaryStyleId}` : ''} (${r.specVersion}, ${r.colorMode})`];
+  if (r.warnings.length) lines.push('', '⚠ Contrast warnings:', ...r.warnings.map((w) => `- ${w}`));
+  if (r.lossy.length) lines.push('', 'Not representable in DESIGN.md:', ...r.lossy.map((item) => `- ${item}`));
+  if (r.omitted.length) lines.push('', 'Omitted sections:', ...r.omitted.map((item) => `- ${item.section}: ${item.reason}`));
+  // The interleaved file carries its own ``` fences, so the wrapper fence is longer.
+  lines.push('', `Save this as ${r.fileName}:`, '', '````markdown', r.content.trimEnd(), '````');
   return lines.join('\n');
 }
 

@@ -1,0 +1,60 @@
+{
+  "format": "design-md",
+  "fileName": "DESIGN.md",
+  "specVersion": "alpha",
+  "sections": [
+    "Overview",
+    "Colors",
+    "Typography",
+    "Layout",
+    "Elevation & Depth",
+    "Shapes",
+    "Components",
+    "Do's and Don'ts"
+  ],
+  "omitted": [],
+  "lossy": [
+    "ダークテーマ: DESIGN.mdはテーマを一つだけ持つため、ダークのセットはこのファイルにありません。必要ならcolorMode \"dark\"でリクエストしてください。",
+    "ステータス色(positive, caution, critical, info): このファイルにありません。",
+    "モーション(500ms, ease): DESIGN.mdにモーションのキーがないため、このファイルにありません。",
+    "影: DESIGN.mdに影のキーがないため、Elevation & Depthに一覧で記載しました。",
+    "タイポグラフィの可変サイズの最小値、行長、段落間隔、overflow-wrap: DESIGN.mdにキーがありません。Typographyで説明しました。",
+    "枠線の太さとスタイル: DESIGN.mdにキーがありません。Shapesで説明しました。",
+    "文字ではない色の組み合わせ(フォーカス、操作要素の境界、区切り線): Componentsで説明しました。",
+    "フォントのスタイルシートの出典とライセンス: このファイルにありません。compose_design_tokensのvisualContract.typography.fontsを参照してください。"
+  ],
+  "sourceHash": "sha256:63c54c193ee9bcf956dfa4969759630487b1692b3b73717b98ff0d9150706fdb",
+  "primaryStyleId": "neumorphism",
+  "colorMode": "both",
+  "warnings": [
+    "Locale reading adjustments are applied; verify actual glyph fallback and heading wrapping in the target browser.",
+    "light: Supporting copy in a panel — 2.37:1; requires 4.5:1",
+    "light: Input placeholder — 2.37:1; requires 4.5:1",
+    "light: Link text — 3.56:1; requires 4.5:1",
+    "light: Success status text — 4.01:1; requires 4.5:1",
+    "light: Caution status text — 3.85:1; requires 4.5:1",
+    "light: Error status text — 4.23:1; requires 4.5:1",
+    "light: Information status text — 4.10:1; requires 4.5:1",
+    "dark: Supporting copy in a panel — 4.17:1; requires 4.5:1",
+    "dark: Input placeholder — 4.17:1; requires 4.5:1",
+    "dark: Link text — 2.93:1; requires 4.5:1",
+    "dark: Focus indicator adjacent to canvas — 2.93:1; requires 3:1",
+    "dark: Focus indicator adjacent to panel — 2.93:1; requires 3:1",
+    "dark: Error status text — 3.94:1; requires 4.5:1"
+  ],
+  "notes": [
+    "Values resolve from the pinned website contract, locale adjustments, then validated overrides; no palette-position or family inference is used.",
+    "visualContract is the complete companion for component color pairs, font provenance, responsive roles, usage, field origins and accepted repairs. tokens contains compatibility aliases.",
+    "Contrast repair proposals are inert until supplied in acceptedRepairs. Identity accents remain unchanged. Font files are not bundled or loaded by MCP."
+  ],
+  "structure": {
+    "schema": "webstylebook.structure.v1",
+    "styleId": "neumorphism",
+    "resourceUri": "webstylebook://styles/neumorphism",
+    "signatureMoves": [
+      "concentric-emboss-dial",
+      "inset-readout-wells",
+      "shadow-flip-selection"
+    ]
+  }
+}

@@ -332,7 +332,7 @@ Add the same block to your `claude_desktop_config.json`, then restart:
 | **`get_design_principle_plan`** | A focused placement, application, and verification plan selected by visual concerns, surface, phase, or principle ids — with source references where available | Craft prompts are testable guidance, not empirical laws or a fixed recipe |
 | **`get_ux_principle_plan`** | A focused apply-and-verify plan selected by outcomes, surface, phase, or principle ids — with questions, cautions, confidence, and references | Principles are contextual prompts, not universal laws or a substitute for research |
 | **`get_ui_state_plan`** | Required / recommended / domain UI states for a surface (data-table, form, checkout, chat, developer-console) — triggers, must-show, must-not, a11y, motion | Covers the states agents forget: empty, error, loading, edge |
-| **`compose_design_tokens`** | Role-based tokens as `json` / `css-variables` / `tailwind` / `typescript`; opt into the shared visual contract to preserve authored style values and editor changes | Contract mode uses authored color modes and applies only explicitly accepted contrast repairs |
+| **`compose_design_tokens`** | Role-based tokens as `json` / `css-variables` / `tailwind` / `typescript`, or a whole `DESIGN.md` file (`design-md`); opt into the shared visual contract to preserve authored style values and editor changes | Contract mode uses authored color modes and applies only explicitly accepted contrast repairs |
 | **`get_design_audit_plan`** | Localized, surface-aware checks with stable ids, severity, applicability, required evidence, remediation, user-facing content checks, selected principle checks, and UI-state coverage | The tool plans the audit but never pretends it inspected your project; missing evidence is `NOT_VERIFIED`, not `PASS` |
 | **`validate_design_audit_result`** | Contract validation for the plan query, target matrix, durable evidence references, and one verdict per check/target, with normalized verdicts and stable hashes | It verifies coverage and evidence consistency, not visual quality; `valid: true` is never an overall design pass |
 | **`audit_page_structure`** | Banned generic and style-specific patterns found in the HTML and CSS you pass in, each with its location, observed values, and the chosen style's replacement moves; with `productType`, the must-haves the page is missing or keeps off the first screen; plus evidence and results for the `structure` audit group | Declared-style heuristics, not a browser; a clean result is not a design pass |
@@ -368,6 +368,28 @@ The result includes the selected `visualContract`, source identity in `contract`
 
 The shared runtime includes seven portable MIT sources, including `fontSources.ts` metadata for Korean/Japanese heavy display fallbacks. It includes no browser font loader or font binaries. `visual:sync` preflights the source import closure and license declarations before writing, and `visual:check` verifies the source hashes and artifact bytes. When updating the website revision, regenerate and synchronize `catalog.v1.json`, `manifest.v1.json`, and the visual artifact together; update the exact source pin in `.github/workflows/publish.yml` as well.
 
+## Export a DESIGN.md
+
+`compose_design_tokens` with `format: "design-md"` returns the chosen direction as a [DESIGN.md](https://github.com/google-labs-code/design.md) file (spec version `alpha`), so other agents and tools can read it. The server never writes the file: save `content` as `DESIGN.md` in the project.
+
+```json
+{
+  "primaryStyleId": "brutalist-grid",
+  "format": "design-md",
+  "contract": { "schema": "webstylebook.visual.v1" },
+  "locale": "ko",
+  "designMd": { "tokenPlacement": "interleaved", "productType": "developer-tool" }
+}
+```
+
+- `designMd.tokenPlacement`: `front-matter` (default) puts every token in one YAML block at the top. `interleaved` keeps only `name` and `description` there and puts each token group in a YAML block inside its section.
+- `includeProse`, `includeDoDont`, and `includeStructure` (all `true` by default) control the prose, the Do's and Don'ts built from the style's bans and the banned page patterns, and the page structure in Layout. `productType` adds that product type's must-haves to Layout.
+- Colors use DESIGN.md names: `primary` is the text color, `surface` the page background, then `accent`, `on-accent`, `surface-container`, `outline`, and so on. The Colors prose names the `compose_design_tokens` role behind each one. Components reference tokens, for example `{colors.action-primary}`. Dimensions are px, em, or rem only, and fluid type keeps its maximum size.
+- The result also has `sections`, `omitted` (sections left out, each with a reason), `lossy` (values DESIGN.md has no key for, such as a second color mode, status colors, motion, and shadows), `specVersion`, and `sourceHash`. The same input returns the same bytes.
+- `webstylebook://design-md/{id}` serves the same file for one style from its pinned visual contract. Optional query parameters: `locale`, `mode`, `placement`.
+
+Every style, in both placements, all three locales, and with or without a contract, passes `npx @google/design.md lint` (0.4.0) with no errors. Its only warnings are text/background pairs below 4.5:1, which `compose_design_tokens` also reports.
+
 ## Localized output
 
 Every tool takes an optional `locale`. Reason codes, guidance, and labels come back in the requested language:
@@ -392,6 +414,7 @@ webstylebook://products · /products/{id}
 webstylebook://references · /references/{id}
 webstylebook://policies/anti-patterns · /policies/verification · /policies/audit-checks
 webstylebook://structure/banned-patterns · /structure/must-haves
+webstylebook://design-md/{id}
 ```
 
 Style detail accepts optional `locale`, `mode`, and expected `revision` query parameters, for example `webstylebook://styles/brutalist-grid?locale=ko&mode=light`. It returns one resolved locale and mode; unsupported values, duplicate parameters, and unknown query names return an explicit error.

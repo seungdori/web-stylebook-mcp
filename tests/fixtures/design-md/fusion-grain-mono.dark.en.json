@@ -1,0 +1,44 @@
+{
+  "format": "design-md",
+  "fileName": "DESIGN.md",
+  "specVersion": "alpha",
+  "sections": [
+    "Overview",
+    "Colors",
+    "Typography",
+    "Layout",
+    "Elevation & Depth",
+    "Shapes",
+    "Components",
+    "Do's and Don'ts"
+  ],
+  "omitted": [],
+  "lossy": [
+    "Status colors (positive, caution, critical, info): not in this file.",
+    "Motion (180ms, ease): DESIGN.md has no motion key; not in this file.",
+    "Shadows: DESIGN.md has no shadow key; listed under Elevation & Depth.",
+    "Typography fluid size minimums, measure, paragraph spacing, overflow-wrap: DESIGN.md has no key; described under Typography.",
+    "Border width and style: DESIGN.md has no key; described under Shapes.",
+    "Non-text color pairs (focus, control boundaries, separators): described under Components.",
+    "Font stylesheet sources and licenses: not in this file; read visualContract.typography.fonts from compose_design_tokens."
+  ],
+  "sourceHash": "sha256:a1203de515307bb8697a027a8959f09d8386d538e0a5aef33d930ddb8a138c58",
+  "primaryStyleId": "fusion-grain-mono",
+  "colorMode": "dark",
+  "warnings": [],
+  "notes": [
+    "Values resolve from the pinned website contract, locale adjustments, then validated overrides; no palette-position or family inference is used.",
+    "visualContract is the complete companion for component color pairs, font provenance, responsive roles, usage, field origins and accepted repairs. tokens contains compatibility aliases.",
+    "Contrast repair proposals are inert until supplied in acceptedRepairs. Identity accents remain unchanged. Font files are not bundled or loaded by MCP."
+  ],
+  "structure": {
+    "schema": "webstylebook.structure.v1",
+    "styleId": "fusion-grain-mono",
+    "resourceUri": "webstylebook://styles/fusion-grain-mono",
+    "signatureMoves": [
+      "filed-provenance-card",
+      "lifted-sheet-on-grain",
+      "folio-contents-ledger"
+    ]
+  }
+}

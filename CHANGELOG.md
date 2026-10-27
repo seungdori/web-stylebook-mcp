@@ -6,6 +6,22 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- DESIGN.md export (#17). `compose_design_tokens` takes `format: "design-md"` and returns the direction as a
+  [DESIGN.md](https://github.com/google-labs-code/design.md) file (spec version `alpha`) in `content`, with
+  `fileName`, `specVersion`, `sections`, `omitted` (left-out sections with the reason), `lossy` (values DESIGN.md
+  has no key for: a second color mode, status colors, motion, shadows, typography measure and similar), and
+  `sourceHash`. `designMd.tokenPlacement` puts the YAML tokens in the front matter (default) or in a block inside
+  each section; `includeProse`, `includeDoDont`, and `includeStructure` switch the localized prose (en, ko, ja), the
+  Do's and Don'ts built from the style's bans and banned page patterns, and the page structure; `designMd.productType`
+  adds that product type's must-haves. Colors use DESIGN.md names (`primary`, `surface`, `accent`, `on-accent`, …),
+  components reference them (`{colors.action-primary}`), and every dimension is px, em, or rem. The server still
+  writes no files, the output for the same input is byte-identical, and the other formats and audit plan hashes do
+  not change.
+- `webstylebook://design-md/{id}` serves one style as DESIGN.md from its pinned visual contract, with optional
+  `locale`, `mode`, and `placement` query parameters.
+
 ## [0.13.0] — 2026-10-25
 
 ### Added

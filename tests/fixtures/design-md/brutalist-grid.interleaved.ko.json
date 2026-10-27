@@ -1,0 +1,51 @@
+{
+  "format": "design-md",
+  "fileName": "DESIGN.md",
+  "specVersion": "alpha",
+  "sections": [
+    "Overview",
+    "Colors",
+    "Typography",
+    "Layout",
+    "Shapes",
+    "Components",
+    "Do's and Don'ts"
+  ],
+  "omitted": [
+    {
+      "section": "Elevation & Depth",
+      "reason": "이 스타일은 그림자를 쓰지 않습니다. 면은 테두리와 채움색으로 나눕니다."
+    }
+  ],
+  "lossy": [
+    "상태 색(positive, caution, critical, info): 이 파일에 없습니다.",
+    "모션(0ms, ease): DESIGN.md에 모션 키가 없어 이 파일에 없습니다.",
+    "타이포그래피 유동 크기 최솟값, 행 길이, 문단 간격, word-break, overflow-wrap: DESIGN.md에 키가 없습니다. Typography에 설명했습니다.",
+    "테두리 두께와 스타일: DESIGN.md에 키가 없습니다. Shapes에 설명했습니다.",
+    "글자가 아닌 색 쌍(포커스, 조작 요소 경계, 구분선): Components에 설명했습니다.",
+    "폰트 스타일시트 출처와 라이선스: 이 파일에 없습니다. compose_design_tokens의 visualContract.typography.fonts를 보세요."
+  ],
+  "sourceHash": "sha256:0b83e1d68b586df19487a71a192f58464c4780ef6926b0c83df42943977641c2",
+  "primaryStyleId": "brutalist-grid",
+  "colorMode": "light",
+  "warnings": [
+    "label: 'IBM Plex Mono' does not declare weight 600; verify font synthesis or select an available weight.",
+    "Locale reading adjustments are applied; verify actual glyph fallback and heading wrapping in the target browser.",
+    "light: Link text — 4.02:1; requires 4.5:1"
+  ],
+  "notes": [
+    "Values resolve from the pinned website contract, locale adjustments, then validated overrides; no palette-position or family inference is used.",
+    "visualContract is the complete companion for component color pairs, font provenance, responsive roles, usage, field origins and accepted repairs. tokens contains compatibility aliases.",
+    "Contrast repair proposals are inert until supplied in acceptedRepairs. Identity accents remain unchanged. Font files are not bundled or loaded by MCP."
+  ],
+  "structure": {
+    "schema": "webstylebook.structure.v1",
+    "styleId": "brutalist-grid",
+    "resourceUri": "webstylebook://styles/brutalist-grid",
+    "signatureMoves": [
+      "ruled-cell-grid",
+      "column-ruler-band",
+      "span-value-blocks"
+    ]
+  }
+}

@@ -50,7 +50,9 @@ state coverage.
    Read `webstylebook://principles/{id}` only for the entries it selected.
 7. `get_ui_state_plan` for each surface and implement required + recommended states (respect
    every `mustNot`).
-8. `compose_design_tokens` for a starting token set; obey the contrast warnings.
+8. `compose_design_tokens` for a starting token set; obey the contrast warnings. With
+   `format: "design-md"` it returns a standard `DESIGN.md` (tokens, prose, Do's and Don'ts, structure)
+   for other agents and tools; save its `content` yourself and report what `lossy` lists.
 9. Write `design.md` using the confirmed decisions and returned design/UX/state/token contracts
    (intent, color *roles*, type roles, layout, motion use/avoid, UI-state coverage, a11y,
    anti-patterns, assumptions, verification) - plus **selected visual-design principles**, each with

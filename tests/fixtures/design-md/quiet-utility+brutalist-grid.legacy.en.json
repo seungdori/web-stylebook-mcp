@@ -1,0 +1,45 @@
+{
+  "format": "design-md",
+  "fileName": "DESIGN.md",
+  "specVersion": "alpha",
+  "sections": [
+    "Overview",
+    "Colors",
+    "Typography",
+    "Layout",
+    "Shapes",
+    "Components",
+    "Do's and Don'ts"
+  ],
+  "omitted": [
+    {
+      "section": "Elevation & Depth",
+      "reason": "The style uses no shadows; surfaces separate by borders and fills."
+    }
+  ],
+  "lossy": [
+    "Status colors (positive, caution, critical, info): not in this file.",
+    "Motion (120ms, cubic-bezier(0.2, 0, 0, 1)): DESIGN.md has no motion key; not in this file."
+  ],
+  "sourceHash": "sha256:2a9b85fb2460315bc12eaf620b1d77e1c3eb289570921bff8f97c7eb84f075e3",
+  "primaryStyleId": "quiet-utility",
+  "secondaryStyleId": "brutalist-grid",
+  "colorMode": "light",
+  "warnings": [],
+  "notes": [
+    "Secondary overlay: accentSecondary = brutalist-grid's accent — apply it to secondary/role surfaces (forms, nav), not the primary action.",
+    "Accent on canvas passes for large fills/icons/borders (>=3:1); if you use the accent as TEXT, verify >=4.5:1 first.",
+    "Status colors are accessible defaults, not brand-derived — confirm they fit the product.",
+    "Typography fonts are signal-family starting points, not derived from the style's own typography (\"Readable sans, compact labels, clear weights\") — reconcile if needed."
+  ],
+  "structure": {
+    "schema": "webstylebook.structure.v1",
+    "styleId": "quiet-utility",
+    "resourceUri": "webstylebook://styles/quiet-utility",
+    "signatureMoves": [
+      "hairline-gap-list",
+      "breadcrumb-work-shell",
+      "stepped-state-badges"
+    ]
+  }
+}

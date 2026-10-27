@@ -112,6 +112,9 @@ Map the answer to `get_design_audit_plan.includeGroups`:
 9. **`compose_design_tokens`** — emit a starting token set (css-variables / tailwind / typescript).
    Heed the contrast warnings; don't ship 8–12% ghost borders. Its `structure` field points back to the
    chosen style's archetype and moves: the tokens set the surface, the structure sets the page.
+   When the project should carry a standard file that other agents and tools read, call it again with
+   `format: "design-md"` and the same `productType` in `designMd`, and save `content` as `DESIGN.md`
+   (the server never writes files). Tell the user what `lossy` lists, such as a second color mode.
 10. **Write `design.md`** — a brief with: intent, audience/tasks, chosen direction + why, rejected
    directions, tone, color *roles* (not a raw palette), type roles, spacing/density, layout rules,
    surface hierarchy, component behavior, motion (use AND avoid), selected visual-design principles

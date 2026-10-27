@@ -1,0 +1,43 @@
+{
+  "format": "design-md",
+  "fileName": "DESIGN.md",
+  "specVersion": "alpha",
+  "sections": [
+    "Overview",
+    "Colors",
+    "Typography",
+    "Layout",
+    "Shapes",
+    "Components",
+    "Do's and Don'ts"
+  ],
+  "omitted": [
+    {
+      "section": "Elevation & Depth",
+      "reason": "The style uses no shadows; surfaces separate by borders and fills."
+    }
+  ],
+  "lossy": [
+    "Status colors (positive, caution, critical, info): not in this file.",
+    "Motion (320ms, cubic-bezier(0.4, 0, 0.2, 1)): DESIGN.md has no motion key; not in this file."
+  ],
+  "sourceHash": "sha256:093e629ea2102af2d680d872b8b6cb296e767e1291d89b04e5431f5e9079ab1d",
+  "primaryStyleId": "editorial-silence",
+  "colorMode": "light",
+  "warnings": [],
+  "notes": [
+    "Accent on canvas passes for large fills/icons/borders (>=3:1); if you use the accent as TEXT, verify >=4.5:1 first.",
+    "Status colors are accessible defaults, not brand-derived — confirm they fit the product.",
+    "Typography fonts are editorial-silence's authored faces from the pinned visual contract, not editorial token defaults."
+  ],
+  "structure": {
+    "schema": "webstylebook.structure.v1",
+    "styleId": "editorial-silence",
+    "resourceUri": "webstylebook://styles/editorial-silence",
+    "signatureMoves": [
+      "section-index-rule-pair",
+      "margin-note-rail",
+      "running-head-reference-sheet"
+    ]
+  }
+}

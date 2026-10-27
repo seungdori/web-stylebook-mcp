@@ -4,12 +4,17 @@ import { composeContractTokens } from './visual.js';
 import type { ResolvedVisualContract, VisualContract, VisualOverrides, VisualRepair } from '../visual-canonical/types.js';
 import { parseHex, luminanceOf, contrastRatio, checkContrast, type Rgb } from './contrast.js';
 import { hasStructureGuide, structureReference, type StructureReference } from '../structure/guidance.js';
+import { tokenSetToDesignMd, type DesignMd, type DesignMdOptions } from './design-md.js';
+
+export type TokenFormat = 'json' | 'css-variables' | 'tailwind' | 'typescript';
 
 export interface ComposeDesignTokensInput {
   primaryStyleId: string;
   secondaryStyleId?: string;
   accentOverride?: string;
-  format: 'json' | 'css-variables' | 'tailwind' | 'typescript';
+  format: TokenFormat | 'design-md';
+  /** Only with format "design-md". */
+  designMd?: DesignMdOptions;
   density?: 'comfortable' | 'compact';
   colorMode?: 'light' | 'dark' | 'both';
   locale?: Lang;
@@ -35,6 +40,15 @@ export interface TokenSetResult {
 
 export interface ComposeDesignTokensResult extends TokenSetResult {
   /** Where the primary style's page structure lives; tokens set the surface but do not compose the page. */
+  structure?: StructureReference;
+}
+
+export interface DesignMdTokensResult extends DesignMd {
+  primaryStyleId: string;
+  secondaryStyleId?: string;
+  colorMode: 'light' | 'dark' | 'both';
+  warnings: string[];
+  notes: string[];
   structure?: StructureReference;
 }
 
@@ -233,12 +247,28 @@ function warningsFor(t: DesignTokens, mode: string, accentOverridden: boolean): 
   return { warnings, notes };
 }
 
-export function composeDesignTokens(input: ComposeDesignTokensInput, repo: CatalogRepository): ComposeDesignTokensResult {
-  const result = composeTokenSet(input, repo);
-  return hasStructureGuide(input.primaryStyleId) ? { ...result, structure: structureReference(input.primaryStyleId) } : result;
+export function composeDesignTokens(input: ComposeDesignTokensInput & { format: 'design-md' }, repo: CatalogRepository): DesignMdTokensResult;
+export function composeDesignTokens(input: ComposeDesignTokensInput & { format: TokenFormat }, repo: CatalogRepository): ComposeDesignTokensResult;
+export function composeDesignTokens(input: ComposeDesignTokensInput, repo: CatalogRepository): ComposeDesignTokensResult | DesignMdTokensResult;
+export function composeDesignTokens(input: ComposeDesignTokensInput, repo: CatalogRepository): ComposeDesignTokensResult | DesignMdTokensResult {
+  if (input.designMd !== undefined && input.format !== 'design-md') throw new TokenError('designMd applies only to format "design-md"');
+  const structure = hasStructureGuide(input.primaryStyleId) ? { structure: structureReference(input.primaryStyleId) } : {};
+  if (input.format === 'design-md') {
+    const set = composeTokenSet({ ...input, format: 'json' }, repo);
+    return {
+      ...tokenSetToDesignMd(set, input, repo),
+      primaryStyleId: set.primaryStyleId,
+      ...(set.secondaryStyleId ? { secondaryStyleId: set.secondaryStyleId } : {}),
+      colorMode: set.colorMode,
+      warnings: set.warnings,
+      notes: set.notes,
+      ...structure,
+    };
+  }
+  return { ...composeTokenSet({ ...input, format: input.format }, repo), ...structure };
 }
 
-function composeTokenSet(input: ComposeDesignTokensInput, repo: CatalogRepository): TokenSetResult {
+function composeTokenSet(input: ComposeDesignTokensInput & { format: TokenFormat }, repo: CatalogRepository): TokenSetResult {
   if (input.contract !== undefined) return composeContractTokens(input, repo);
   if (input.overrides !== undefined || input.acceptedRepairs !== undefined) throw new TokenError('overrides and acceptedRepairs require contract.schema = webstylebook.visual.v1');
   const style = repo.getStyle(input.primaryStyleId);
@@ -345,7 +375,7 @@ function cssBlock(selector: string, vars: Record<string, string>): string {
   return `${selector} {\n${lines}\n}`;
 }
 
-function render(format: ComposeDesignTokensInput['format'], tokens: ComposeDesignTokensResult['tokens'], mode: string): string {
+function render(format: TokenFormat, tokens: ComposeDesignTokensResult['tokens'], mode: string): string {
   const isBoth = 'light' in tokens && 'dark' in tokens;
   if (format === 'json') return JSON.stringify(tokens, null, 2);
 

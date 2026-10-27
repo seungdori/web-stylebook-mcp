@@ -6,6 +6,9 @@ import { TOOL_NAMES, SERVER_NAME, SERVER_VERSION } from '../server-info.js';
 import { ERROR_CODES } from './errors.js';
 import { bannedPatternCatalog, styleStructure, structureManifest, structureRulesetHash } from '../structure/guidance.js';
 import { MUST_HAVE_RESOURCE_URI, mustHaveCatalog } from '../structure/must-haves.js';
+import { composeDesignTokens } from '../tokens/compile.js';
+import { DESIGN_MD_PLACEMENTS } from '../tokens/design-md.js';
+import { VISUAL_SCHEMA } from '../catalog/visual.js';
 
 const JSON_MIME = 'application/json';
 function json(uri: string, value: unknown) {
@@ -56,6 +59,7 @@ export function registerResources(server: McpServer, repo: CatalogRepository): v
       'webstylebook://states/{surface}/{state}',
       'webstylebook://products/{id}',
       'webstylebook://references/{id}',
+      'webstylebook://design-md/{id}',
     ],
   }));
 
@@ -147,6 +151,39 @@ export function registerResources(server: McpServer, repo: CatalogRepository): v
         visualContract: repo.getVisualContract(s.id, options),
         structure: styleStructure(s.id, repo, options.contentLocale ?? 'en', true),
       });
+    } catch (error) {
+      return json(u.href, {
+        error: { code: 'INVALID_INPUT', message: error instanceof Error ? error.message : String(error) },
+      });
+    }
+  });
+
+  server.registerResource('design-md', new ResourceTemplate('webstylebook://design-md/{styleId}', {
+    list: async () => ({ resources: repo.allStyles().map((s) => ({ uri: `webstylebook://design-md/${s.id}`, name: `${s.id} DESIGN.md`, mimeType: 'text/markdown' })) }),
+  }), {
+    title: 'Style as DESIGN.md',
+    description: 'One style as a DESIGN.md file (google-labs-code/design.md, version alpha) built from its pinned visual contract in the authored native color mode: the same text compose_design_tokens returns for format "design-md" with contract.schema set. Optional query parameters: locale=en|ko|ja, mode=light|dark, placement=front-matter|interleaved.',
+    mimeType: 'text/markdown',
+  }, async (u, v) => {
+    const styleId = String(v.styleId).split('?')[0] ?? '';
+    if (!repo.getStyle(styleId)) return notFound(u.href, 'style', styleId);
+    try {
+      for (const key of new Set(u.searchParams.keys())) {
+        if (!['locale', 'mode', 'placement'].includes(key)) throw new Error(`unsupported DESIGN.md query parameter '${key}'`);
+        if (u.searchParams.getAll(key).length !== 1) throw new Error(`DESIGN.md query parameter '${key}' must appear once`);
+      }
+      const locale = u.searchParams.get('locale') ?? 'en';
+      const mode = u.searchParams.get('mode');
+      const placement = u.searchParams.get('placement') ?? 'front-matter';
+      if (locale !== 'en' && locale !== 'ko' && locale !== 'ja') throw new Error(`unsupported DESIGN.md locale '${locale}'`);
+      if (mode !== null && mode !== 'light' && mode !== 'dark') throw new Error(`unsupported DESIGN.md mode '${mode}'`);
+      if (!(DESIGN_MD_PLACEMENTS as readonly string[]).includes(placement)) throw new Error(`unsupported DESIGN.md placement '${placement}'`);
+      const result = composeDesignTokens({
+        primaryStyleId: styleId, format: 'design-md', locale, contract: { schema: VISUAL_SCHEMA },
+        ...(mode !== null ? { colorMode: mode } : {}),
+        designMd: { tokenPlacement: placement as (typeof DESIGN_MD_PLACEMENTS)[number] },
+      }, repo);
+      return { contents: [{ uri: u.href, mimeType: 'text/markdown', text: result.content }] };
     } catch (error) {
       return json(u.href, {
         error: { code: 'INVALID_INPUT', message: error instanceof Error ? error.message : String(error) },
