@@ -46,6 +46,9 @@ import {
   auditPageStructure, PAGE_LIMITS, StructureAuditError, type StructureAuditResult,
 } from '../structure/audit.js';
 import { styleStructure, type StyleStructureSummary } from '../structure/guidance.js';
+import {
+  comparePageRevisions, REVISION_CHANGES, REVISION_KINDS, REVISION_LIMITS, RevisionCompareError, type ComparePageRevisionsResult,
+} from '../structure/revisions.js';
 import { zVisualOverrides, zVisualRepair } from '../visual-canonical/schema.js';
 import { serializeVisualJson } from '../visual-canonical/export.js';
 import {
@@ -93,6 +96,9 @@ const auditPlanInputShape = {
   domainSignals: z.array(z.string().max(200)).max(20).optional(),
   includeGroups: z.array(z.enum(AUDIT_GROUP_IDS)).min(1).max(AUDIT_GROUP_IDS.length).optional(),
   includeDocumentation: z.boolean().optional(),
+  revisionPreservation: z.boolean()
+    .describe('true returns a plan of only the redesign-kept checks that compare_page_revisions answers; includeGroups may then hold only "structure" and "behavior"')
+    .optional(),
   locale: LOCALE.optional(),
 };
 
@@ -227,6 +233,7 @@ function toToolError(e: unknown, repo: CatalogRepository): ToolError {
     }
     return new ToolError('INVALID_INPUT', e.message);
   }
+  if (e instanceof RevisionCompareError) return new ToolError('INVALID_INPUT', e.message);
   if (e instanceof CompareError) {
     // mirror the token/state tools: an unknown style id is STYLE_NOT_FOUND + near-miss suggestions
     const m = /unknown (?:secondary )?style '([^']+)'/.exec(e.message);
@@ -418,6 +425,36 @@ export function registerTools(server: McpServer, repo: CatalogRepository): void 
         renderStructureAudit(result, args.locale ?? 'en'),
         result.styleId ? [`webstylebook://styles/${result.styleId}`] : [],
       );
+    } catch (e) { return errorResult(toToolError(e, repo)); }
+  });
+
+  const revisionSide = z.object({
+    html: z.string().min(1).max(PAGE_LIMITS.htmlChars),
+    css: z.array(z.string().max(PAGE_LIMITS.cssChars)).max(PAGE_LIMITS.cssFiles).optional(),
+  }).strict();
+  server.registerTool('compare_page_revisions', {
+    title: 'Check that a redesign kept the original page\'s content and behavior',
+    description: `Compare the original page (before) with its redesign (after), offline and deterministically, and list what the redesign kept and what it dropped: links (normalized href), form fields with their labels, form actions and inline handlers, test hooks (data-testid, data-test, data-cy), the scriptSelectors your scripts query, h1-h3 headings, images and figures, main/nav/footer landmarks, the visible word count (Korean, Chinese, and Japanese by character), and, with productType, the must-haves audit_page_structure finds. A lost link, field, handler, script hook, or must-have is FIX_NOW (major), a lost test hook FIX_NOW (minor), and lost headings, figures, landmarks, reworded headings or links, and a redesign that keeps under ${REVISION_LIMITS.wordsMinRatio * 100}% of more than ${REVISION_LIMITS.wordsMinBefore} words are RISK. Put intended removals in acknowledged with a reason of at least ${REVISION_LIMITS.reasonMinChars} characters. Keep the original's rendered HTML and CSS before redesigning. Returns redesign-kept-<inventory> evidence and results that validate_design_audit_result accepts with a get_design_audit_plan query of revisionPreservation: true. Static markup, not a browser. Limits per page: html ${PAGE_LIMITS.htmlChars} characters, ${PAGE_LIMITS.cssFiles} stylesheets, ${PAGE_LIMITS.cssTotalChars} CSS characters in total.`,
+    inputSchema: {
+      before: revisionSide,
+      after: revisionSide,
+      scriptSelectors: z.array(z.string().trim().min(1).max(REVISION_LIMITS.selectorChars)).max(REVISION_LIMITS.scriptSelectors).optional(),
+      productType: z.enum(PRODUCT_TYPES).describe('compares this product type\'s must-haves on both pages').optional(),
+      acknowledged: z.array(z.object({
+        kind: z.enum(REVISION_KINDS),
+        key: z.string().trim().min(1).max(REVISION_LIMITS.keyChars),
+        change: z.enum(REVISION_CHANGES),
+        reason: z.string().max(REVISION_LIMITS.reasonChars),
+      }).strict()).max(REVISION_LIMITS.acknowledged).optional(),
+      targetId: z.string().trim().min(1).max(160).optional(),
+      viewportWidth: z.number().int().min(PAGE_LIMITS.viewportMin).max(PAGE_LIMITS.viewportMax).optional(),
+      locale: LOCALE.optional(),
+    },
+    annotations: READ_ONLY,
+  }, async (args): Promise<ToolResult> => {
+    try {
+      const result = comparePageRevisions(args, repo);
+      return ok(result as unknown as Record<string, unknown>, renderRevisions(result, args.locale ?? 'en'));
     } catch (e) { return errorResult(toToolError(e, repo)); }
   });
 
@@ -663,11 +700,14 @@ const auditFallbackLabels: Record<Lang, {
 function renderAuditPlan(plan: DesignAuditPlan): string {
   const labels = auditFallbackLabels[plan.query.locale];
   const structureChecks = plan.coverage.structureChecks;
+  const revisionChecks = plan.coverage.revisionChecks;
   const lines = [
     `# ${labels.title}`,
-    structureChecks === undefined
-      ? `${labels.checks}: ${plan.coverage.includedChecks}/${plan.coverage.catalogChecks}`
-      : `${labels.checks}: ${plan.coverage.includedChecks - structureChecks}/${plan.coverage.catalogChecks} + structure ${structureChecks}`,
+    revisionChecks !== undefined
+      ? `${labels.checks}: redesign-kept ${revisionChecks}`
+      : structureChecks === undefined
+        ? `${labels.checks}: ${plan.coverage.includedChecks}/${plan.coverage.catalogChecks}`
+        : `${labels.checks}: ${plan.coverage.includedChecks - structureChecks}/${plan.coverage.catalogChecks} + structure ${structureChecks}`,
     `${labels.surfaces}: ${plan.query.surfaces.join(', ')}`,
     `${labels.catalog}: ${plan.identity.catalogVersion} (${plan.identity.catalogContentHash})`,
     `${labels.planHash}: ${plan.identity.planHash}`,
@@ -943,6 +983,29 @@ function renderStructureAudit(r: StructureAuditResult, locale: Lang): string {
     lines.push('', `- [${finding.severity}] ${finding.patternId} — ${finding.name} @ ${finding.locations[0] ?? ''}${finding.count > 1 ? ` (+${finding.count - 1})` : ''}`,
       `  ${labels.replace}: ${finding.replaceWith.instruction}`);
     if (finding.replaceWith.moves.length) lines.push(`  ${labels.moves}: ${finding.replaceWith.moves.map((move) => `${move.name} — ${move.build}`).join(' | ')}`);
+  }
+  lines.push('', `${labels.limits}:`, ...r.limits.map((limit) => `- ${limit}`), '', ...r.guidance);
+  return lines.join('\n');
+}
+
+const revisionLabels: Record<Lang, { title: string; verdict: string; findings: string; none: string; words: string; limits: string }> = {
+  en: { title: 'Redesign preservation', verdict: 'Verdict', findings: 'Findings', none: 'Nothing the original page had was lost.', words: 'Visible words', limits: 'Limits' },
+  ko: { title: '리디자인 보존 검사', verdict: '판정', findings: '발견 항목', none: '원래 페이지에 있던 것 중 사라진 항목이 없습니다.', words: '보이는 단어', limits: '한계' },
+  ja: { title: 'リデザイン保持チェック', verdict: '判定', findings: '検出項目', none: '元のページにあったもので失われた項目はありません。', words: '表示される単語', limits: '限界' },
+};
+
+function renderRevisions(r: ComparePageRevisionsResult, locale: Lang): string {
+  const labels = revisionLabels[locale];
+  const lines = [
+    `# ${labels.title} — ${r.target.id}`,
+    `${labels.verdict}: ${r.verdict} · ${labels.findings}: ${r.summary.findings} (FIX_NOW ${r.summary.fixNow}, RISK ${r.summary.risk}) · NOT_VERIFIED ${r.summary.notVerified}`,
+    `${labels.words}: ${r.wordCount.before} → ${r.wordCount.after}`,
+    '',
+    ...r.results.map((result) => `- [${result.verdict}] ${result.checkId} — ${result.rationale}`),
+  ];
+  if (!r.findings.length) lines.push('', labels.none);
+  for (const finding of r.findings) {
+    lines.push('', `- [${finding.verdict}] ${finding.checkId} (${finding.change}): ${finding.keys.slice(0, 10).join(', ')}${finding.keys.length > 10 ? ` (+${finding.keys.length - 10})` : ''}`, `  ${finding.fix}`);
   }
   lines.push('', `${labels.limits}:`, ...r.limits.map((limit) => `- ${limit}`), '', ...r.guidance);
   return lines.join('\n');

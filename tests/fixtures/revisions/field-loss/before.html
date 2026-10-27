@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<body>
+  <main>
+    <section>
+      <h1>Book a demo</h1>
+      <p>Tell us about your team and we will show Ledgerly on your own bank data.</p>
+      <form action="/demo/request" method="post">
+        <input type="hidden" name="csrf_token" value="a1b2c3">
+        <label for="work-email">Work email</label>
+        <input id="work-email" name="email" type="email" required>
+        <label>Company <input name="company" type="text"></label>
+        <label for="team-size">Team size</label>
+        <select id="team-size" name="team_size">
+          <option>1-10</option>
+          <option>11-50</option>
+          <option>51+</option>
+        </select>
+        <textarea name="notes" aria-label="Anything we should know"></textarea>
+        <button type="submit">Request a demo</button>
+      </form>
+    </section>
+  </main>
+</body>
+</html>

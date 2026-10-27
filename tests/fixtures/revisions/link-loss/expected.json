@@ -1,0 +1,560 @@
+{
+  "identity": {
+    "schema": "webstylebook.page-revisions.v1",
+    "catalogVersion": "<catalog version>",
+    "catalogContentHash": "<catalog hash>",
+    "rulesetHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce",
+    "beforeHash": "sha256:cb77ababffee5c497230c1a0b2fc0a663f16969ace24d3fc9f138d3e31c3ae21",
+    "afterHash": "sha256:aa153fe671bf9edc01c8f9d8885c91b2300d1d756cebe92a8dcb63ec3d62ad30"
+  },
+  "target": {
+    "id": "page",
+    "viewportWidth": 1440
+  },
+  "verdict": "FIX_NOW",
+  "summary": {
+    "findings": 1,
+    "fixNow": 1,
+    "risk": 0,
+    "notVerified": 0
+  },
+  "inventory": {
+    "links": {
+      "before": 9,
+      "after": 7,
+      "kept": 7,
+      "acknowledged": 0,
+      "lost": [
+        "/pricing",
+        "/docs/matching#rules"
+      ],
+      "reworded": []
+    },
+    "fields": {
+      "before": 0,
+      "after": 0,
+      "kept": 0,
+      "acknowledged": 0,
+      "lost": [],
+      "reworded": []
+    },
+    "handlers": {
+      "before": 0,
+      "after": 0,
+      "kept": 0,
+      "acknowledged": 0,
+      "lost": [],
+      "reworded": []
+    },
+    "testHooks": {
+      "before": 0,
+      "after": 0,
+      "kept": 0,
+      "acknowledged": 0,
+      "lost": [],
+      "reworded": []
+    },
+    "scriptHooks": {
+      "before": 0,
+      "after": 0,
+      "kept": 0,
+      "acknowledged": 0,
+      "lost": [],
+      "reworded": []
+    },
+    "headings": {
+      "before": 2,
+      "after": 2,
+      "kept": 2,
+      "acknowledged": 0,
+      "lost": [],
+      "reworded": []
+    },
+    "figures": {
+      "before": 0,
+      "after": 0,
+      "kept": 0,
+      "acknowledged": 0,
+      "lost": [],
+      "reworded": []
+    },
+    "landmarks": {
+      "before": 3,
+      "after": 3,
+      "kept": 3,
+      "acknowledged": 0,
+      "lost": [],
+      "reworded": []
+    },
+    "mustHaves": {
+      "before": 0,
+      "after": 0,
+      "kept": 0,
+      "acknowledged": 0,
+      "lost": [],
+      "reworded": []
+    }
+  },
+  "wordCount": {
+    "before": 68,
+    "after": 63,
+    "ratio": 0.93
+  },
+  "mustHaves": null,
+  "acknowledgements": {
+    "applied": 0,
+    "rejected": []
+  },
+  "findings": [
+    {
+      "checkId": "redesign-kept-links",
+      "severity": "major",
+      "verdict": "FIX_NOW",
+      "kind": "link",
+      "change": "dropped",
+      "keys": [
+        "/pricing",
+        "/docs/matching#rules"
+      ],
+      "locations": [
+        "body > header > nav > a:nth-of-type(2)",
+        "body > main > section:nth-of-type(2) > a"
+      ],
+      "fix": "Restore the link, or add it to acknowledged with the reason it was removed."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "revision:page:redesign-kept-links:before",
+      "targetId": "page",
+      "type": "dom",
+      "phase": "before",
+      "summary": "Links: 9",
+      "contentHash": "sha256:cb77ababffee5c497230c1a0b2fc0a663f16969ace24d3fc9f138d3e31c3ae21",
+      "actual": {
+        "count": 9
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "<server version>",
+        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+      }
+    },
+    {
+      "id": "revision:page:redesign-kept-links:after",
+      "targetId": "page",
+      "type": "dom",
+      "phase": "after",
+      "summary": "Links: 7 of 9 kept, 2 lost, 0 acknowledged.",
+      "outcome": "failed",
+      "contentHash": "sha256:aa153fe671bf9edc01c8f9d8885c91b2300d1d756cebe92a8dcb63ec3d62ad30",
+      "actual": {
+        "count": 7,
+        "kept": 7,
+        "lost": 2,
+        "acknowledged": 0,
+        "reworded": 0
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "<server version>",
+        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+      }
+    },
+    {
+      "id": "revision:page:redesign-kept-fields:before",
+      "targetId": "page",
+      "type": "dom",
+      "phase": "before",
+      "summary": "Form fields: 0",
+      "contentHash": "sha256:cb77ababffee5c497230c1a0b2fc0a663f16969ace24d3fc9f138d3e31c3ae21",
+      "actual": {
+        "count": 0
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "<server version>",
+        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+      }
+    },
+    {
+      "id": "revision:page:redesign-kept-fields:after",
+      "targetId": "page",
+      "type": "dom",
+      "phase": "after",
+      "summary": "Form fields: 0 of 0 kept, 0 lost, 0 acknowledged.",
+      "outcome": "passed",
+      "contentHash": "sha256:aa153fe671bf9edc01c8f9d8885c91b2300d1d756cebe92a8dcb63ec3d62ad30",
+      "actual": {
+        "count": 0,
+        "kept": 0,
+        "lost": 0,
+        "acknowledged": 0,
+        "reworded": 0
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "<server version>",
+        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+      }
+    },
+    {
+      "id": "revision:page:redesign-kept-handlers:before",
+      "targetId": "page",
+      "type": "dom",
+      "phase": "before",
+      "summary": "Handlers: 0",
+      "contentHash": "sha256:cb77ababffee5c497230c1a0b2fc0a663f16969ace24d3fc9f138d3e31c3ae21",
+      "actual": {
+        "count": 0
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "<server version>",
+        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+      }
+    },
+    {
+      "id": "revision:page:redesign-kept-handlers:after",
+      "targetId": "page",
+      "type": "dom",
+      "phase": "after",
+      "summary": "Handlers: 0 of 0 kept, 0 lost, 0 acknowledged.",
+      "outcome": "passed",
+      "contentHash": "sha256:aa153fe671bf9edc01c8f9d8885c91b2300d1d756cebe92a8dcb63ec3d62ad30",
+      "actual": {
+        "count": 0,
+        "kept": 0,
+        "lost": 0,
+        "acknowledged": 0,
+        "reworded": 0
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "<server version>",
+        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+      }
+    },
+    {
+      "id": "revision:page:redesign-kept-test-hooks:before",
+      "targetId": "page",
+      "type": "dom",
+      "phase": "before",
+      "summary": "Test hooks: 0",
+      "contentHash": "sha256:cb77ababffee5c497230c1a0b2fc0a663f16969ace24d3fc9f138d3e31c3ae21",
+      "actual": {
+        "count": 0
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "<server version>",
+        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+      }
+    },
+    {
+      "id": "revision:page:redesign-kept-test-hooks:after",
+      "targetId": "page",
+      "type": "dom",
+      "phase": "after",
+      "summary": "Test hooks: 0 of 0 kept, 0 lost, 0 acknowledged.",
+      "outcome": "passed",
+      "contentHash": "sha256:aa153fe671bf9edc01c8f9d8885c91b2300d1d756cebe92a8dcb63ec3d62ad30",
+      "actual": {
+        "count": 0,
+        "kept": 0,
+        "lost": 0,
+        "acknowledged": 0,
+        "reworded": 0
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "<server version>",
+        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+      }
+    },
+    {
+      "id": "revision:page:redesign-kept-script-hooks:before",
+      "targetId": "page",
+      "type": "dom",
+      "phase": "before",
+      "summary": "Script hooks: 0",
+      "contentHash": "sha256:cb77ababffee5c497230c1a0b2fc0a663f16969ace24d3fc9f138d3e31c3ae21",
+      "actual": {
+        "count": 0
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "<server version>",
+        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+      }
+    },
+    {
+      "id": "revision:page:redesign-kept-script-hooks:after",
+      "targetId": "page",
+      "type": "dom",
+      "phase": "after",
+      "summary": "Script hooks: 0 of 0 kept, 0 lost, 0 acknowledged. No scriptSelectors were passed.",
+      "outcome": "inapplicable",
+      "contentHash": "sha256:aa153fe671bf9edc01c8f9d8885c91b2300d1d756cebe92a8dcb63ec3d62ad30",
+      "actual": {
+        "count": 0,
+        "kept": 0,
+        "lost": 0,
+        "acknowledged": 0,
+        "reworded": 0
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "<server version>",
+        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+      }
+    },
+    {
+      "id": "revision:page:redesign-kept-headings:before",
+      "targetId": "page",
+      "type": "dom",
+      "phase": "before",
+      "summary": "Headings: 2",
+      "contentHash": "sha256:cb77ababffee5c497230c1a0b2fc0a663f16969ace24d3fc9f138d3e31c3ae21",
+      "actual": {
+        "count": 2
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "<server version>",
+        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+      }
+    },
+    {
+      "id": "revision:page:redesign-kept-headings:after",
+      "targetId": "page",
+      "type": "dom",
+      "phase": "after",
+      "summary": "Headings: 2 of 2 kept, 0 lost, 0 acknowledged.",
+      "outcome": "passed",
+      "contentHash": "sha256:aa153fe671bf9edc01c8f9d8885c91b2300d1d756cebe92a8dcb63ec3d62ad30",
+      "actual": {
+        "count": 2,
+        "kept": 2,
+        "lost": 0,
+        "acknowledged": 0,
+        "reworded": 0
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "<server version>",
+        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+      }
+    },
+    {
+      "id": "revision:page:redesign-kept-figures:before",
+      "targetId": "page",
+      "type": "dom",
+      "phase": "before",
+      "summary": "Figures: 0",
+      "contentHash": "sha256:cb77ababffee5c497230c1a0b2fc0a663f16969ace24d3fc9f138d3e31c3ae21",
+      "actual": {
+        "count": 0
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "<server version>",
+        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+      }
+    },
+    {
+      "id": "revision:page:redesign-kept-figures:after",
+      "targetId": "page",
+      "type": "dom",
+      "phase": "after",
+      "summary": "Figures: 0 of 0 kept, 0 lost, 0 acknowledged.",
+      "outcome": "passed",
+      "contentHash": "sha256:aa153fe671bf9edc01c8f9d8885c91b2300d1d756cebe92a8dcb63ec3d62ad30",
+      "actual": {
+        "count": 0,
+        "kept": 0,
+        "lost": 0,
+        "acknowledged": 0,
+        "reworded": 0
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "<server version>",
+        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+      }
+    },
+    {
+      "id": "revision:page:redesign-kept-landmarks:before",
+      "targetId": "page",
+      "type": "dom",
+      "phase": "before",
+      "summary": "Landmarks: 3",
+      "contentHash": "sha256:cb77ababffee5c497230c1a0b2fc0a663f16969ace24d3fc9f138d3e31c3ae21",
+      "actual": {
+        "count": 3
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "<server version>",
+        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+      }
+    },
+    {
+      "id": "revision:page:redesign-kept-landmarks:after",
+      "targetId": "page",
+      "type": "dom",
+      "phase": "after",
+      "summary": "Landmarks: 3 of 3 kept, 0 lost, 0 acknowledged.",
+      "outcome": "passed",
+      "contentHash": "sha256:aa153fe671bf9edc01c8f9d8885c91b2300d1d756cebe92a8dcb63ec3d62ad30",
+      "actual": {
+        "count": 3,
+        "kept": 3,
+        "lost": 0,
+        "acknowledged": 0,
+        "reworded": 0
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "<server version>",
+        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+      }
+    },
+    {
+      "id": "revision:page:redesign-kept-words:before",
+      "targetId": "page",
+      "type": "dom",
+      "phase": "before",
+      "summary": "words: 68",
+      "contentHash": "sha256:cb77ababffee5c497230c1a0b2fc0a663f16969ace24d3fc9f138d3e31c3ae21",
+      "actual": {
+        "words": 68
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "<server version>",
+        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+      }
+    },
+    {
+      "id": "revision:page:redesign-kept-words:after",
+      "targetId": "page",
+      "type": "dom",
+      "phase": "after",
+      "summary": "Visible words: 68 before, 63 after (93%).",
+      "outcome": "passed",
+      "contentHash": "sha256:aa153fe671bf9edc01c8f9d8885c91b2300d1d756cebe92a8dcb63ec3d62ad30",
+      "actual": {
+        "words": 63,
+        "ratio": 0.93
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "<server version>",
+        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+      }
+    }
+  ],
+  "results": [
+    {
+      "checkId": "redesign-kept-links",
+      "targetId": "page",
+      "verdict": "FIX_NOW",
+      "evidenceRefs": [
+        "revision:page:redesign-kept-links:before",
+        "revision:page:redesign-kept-links:after"
+      ],
+      "rationale": "Links: 7 of 9 kept, 2 lost, 0 acknowledged.",
+      "remediation": "Restore the link, or add it to acknowledged with the reason it was removed."
+    },
+    {
+      "checkId": "redesign-kept-fields",
+      "targetId": "page",
+      "verdict": "PASS",
+      "evidenceRefs": [
+        "revision:page:redesign-kept-fields:before",
+        "revision:page:redesign-kept-fields:after"
+      ],
+      "rationale": "Form fields: 0 of 0 kept, 0 lost, 0 acknowledged."
+    },
+    {
+      "checkId": "redesign-kept-handlers",
+      "targetId": "page",
+      "verdict": "PASS",
+      "evidenceRefs": [
+        "revision:page:redesign-kept-handlers:before",
+        "revision:page:redesign-kept-handlers:after"
+      ],
+      "rationale": "Handlers: 0 of 0 kept, 0 lost, 0 acknowledged."
+    },
+    {
+      "checkId": "redesign-kept-test-hooks",
+      "targetId": "page",
+      "verdict": "PASS",
+      "evidenceRefs": [
+        "revision:page:redesign-kept-test-hooks:before",
+        "revision:page:redesign-kept-test-hooks:after"
+      ],
+      "rationale": "Test hooks: 0 of 0 kept, 0 lost, 0 acknowledged."
+    },
+    {
+      "checkId": "redesign-kept-script-hooks",
+      "targetId": "page",
+      "verdict": "NOT_APPLICABLE",
+      "evidenceRefs": [
+        "revision:page:redesign-kept-script-hooks:before",
+        "revision:page:redesign-kept-script-hooks:after"
+      ],
+      "rationale": "No scriptSelectors were passed."
+    },
+    {
+      "checkId": "redesign-kept-headings",
+      "targetId": "page",
+      "verdict": "PASS",
+      "evidenceRefs": [
+        "revision:page:redesign-kept-headings:before",
+        "revision:page:redesign-kept-headings:after"
+      ],
+      "rationale": "Headings: 2 of 2 kept, 0 lost, 0 acknowledged."
+    },
+    {
+      "checkId": "redesign-kept-figures",
+      "targetId": "page",
+      "verdict": "PASS",
+      "evidenceRefs": [
+        "revision:page:redesign-kept-figures:before",
+        "revision:page:redesign-kept-figures:after"
+      ],
+      "rationale": "Figures: 0 of 0 kept, 0 lost, 0 acknowledged."
+    },
+    {
+      "checkId": "redesign-kept-landmarks",
+      "targetId": "page",
+      "verdict": "PASS",
+      "evidenceRefs": [
+        "revision:page:redesign-kept-landmarks:before",
+        "revision:page:redesign-kept-landmarks:after"
+      ],
+      "rationale": "Landmarks: 3 of 3 kept, 0 lost, 0 acknowledged."
+    },
+    {
+      "checkId": "redesign-kept-words",
+      "targetId": "page",
+      "verdict": "PASS",
+      "evidenceRefs": [
+        "revision:page:redesign-kept-words:before",
+        "revision:page:redesign-kept-words:after"
+      ],
+      "rationale": "Visible words: 68 before, 63 after (93%)."
+    }
+  ],
+  "limits": [
+    "A static comparison of the submitted HTML and CSS, not a browser: content that JavaScript adds later and stylesheets that were not submitted are not seen.",
+    "Links, headings, figures, landmarks, word counts, and must-haves count visible elements only. Fields, handlers, test hooks, and script hooks count every element, hidden or not, because forms, scripts, and tests still use hidden ones."
+  ],
+  "guidance": [
+    "Keep the original page's rendered HTML and CSS before a redesign, and pass both here when the redesign is built.",
+    "Restore each lost item, or add it to acknowledged with a reason of at least 12 characters, then run compare_page_revisions again.",
+    "To record the outcome, call get_design_audit_plan with revisionPreservation: true (and the same productType), then submit these evidence and results to validate_design_audit_result under the same targetId."
+  ]
+}

@@ -1,0 +1,607 @@
+{
+  "identity": {
+    "schema": "webstylebook.page-revisions.v1",
+    "catalogVersion": "<catalog version>",
+    "catalogContentHash": "<catalog hash>",
+    "rulesetHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce",
+    "beforeHash": "sha256:a1d5ea1fd3372313dee4b430a69c5ace1497c57d97e9bbb7f9b15435f4a05356",
+    "afterHash": "sha256:606ea6da65c97d48c358954ba14bd52dda30a33f1b34879716eb3c9cf8940553"
+  },
+  "target": {
+    "id": "page",
+    "viewportWidth": 1440
+  },
+  "verdict": "RISK",
+  "summary": {
+    "findings": 4,
+    "fixNow": 0,
+    "risk": 4,
+    "notVerified": 0
+  },
+  "inventory": {
+    "links": {
+      "before": 4,
+      "after": 4,
+      "kept": 4,
+      "acknowledged": 0,
+      "lost": [],
+      "reworded": []
+    },
+    "fields": {
+      "before": 0,
+      "after": 0,
+      "kept": 0,
+      "acknowledged": 0,
+      "lost": [],
+      "reworded": []
+    },
+    "handlers": {
+      "before": 0,
+      "after": 0,
+      "kept": 0,
+      "acknowledged": 0,
+      "lost": [],
+      "reworded": []
+    },
+    "testHooks": {
+      "before": 0,
+      "after": 0,
+      "kept": 0,
+      "acknowledged": 0,
+      "lost": [],
+      "reworded": []
+    },
+    "scriptHooks": {
+      "before": 0,
+      "after": 0,
+      "kept": 0,
+      "acknowledged": 0,
+      "lost": [],
+      "reworded": []
+    },
+    "headings": {
+      "before": 3,
+      "after": 2,
+      "kept": 1,
+      "acknowledged": 0,
+      "lost": [
+        "정기 배송"
+      ],
+      "reworded": [
+        {
+          "key": "오늘 아침에 볶은 원두로 내린 커피",
+          "after": "오늘 볶은 원두"
+        }
+      ]
+    },
+    "figures": {
+      "before": 2,
+      "after": 0,
+      "kept": 0,
+      "acknowledged": 0,
+      "lost": [
+        "figure: 매일 새벽 다섯 시, 성수 로스터리",
+        "img: 새벽에 원두를 볶는 로스터"
+      ],
+      "reworded": []
+    },
+    "landmarks": {
+      "before": 3,
+      "after": 3,
+      "kept": 3,
+      "acknowledged": 0,
+      "lost": [],
+      "reworded": []
+    },
+    "mustHaves": {
+      "before": 0,
+      "after": 0,
+      "kept": 0,
+      "acknowledged": 0,
+      "lost": [],
+      "reworded": []
+    }
+  },
+  "wordCount": {
+    "before": 209,
+    "after": 42,
+    "ratio": 0.2
+  },
+  "mustHaves": null,
+  "acknowledgements": {
+    "applied": 0,
+    "rejected": []
+  },
+  "findings": [
+    {
+      "checkId": "redesign-kept-headings",
+      "severity": "minor",
+      "verdict": "RISK",
+      "kind": "heading",
+      "change": "dropped",
+      "keys": [
+        "정기 배송"
+      ],
+      "locations": [
+        "body > main > section:nth-of-type(3) > h2"
+      ],
+      "fix": "제목을 되살리거나, 그 섹션을 뺀 이유를 acknowledged에 적으세요."
+    },
+    {
+      "checkId": "redesign-kept-headings",
+      "severity": "minor",
+      "verdict": "RISK",
+      "kind": "heading",
+      "change": "reworded",
+      "keys": [
+        "오늘 아침에 볶은 원두로 내린 커피"
+      ],
+      "locations": [],
+      "fix": "새 문구가 뜻을 그대로 전하는지 확인하거나, change \"reworded\"로 acknowledged에 적으세요."
+    },
+    {
+      "checkId": "redesign-kept-figures",
+      "severity": "minor",
+      "verdict": "RISK",
+      "kind": "figure",
+      "change": "dropped",
+      "keys": [
+        "figure: 매일 새벽 다섯 시, 성수 로스터리",
+        "img: 새벽에 원두를 볶는 로스터"
+      ],
+      "locations": [
+        "body > main > section:nth-of-type(2) > figure",
+        "body > main > section:nth-of-type(2) > figure > img"
+      ],
+      "fix": "대체 텍스트나 캡션과 함께 이미지 또는 그림을 되살리거나, acknowledged에 적으세요."
+    },
+    {
+      "checkId": "redesign-kept-words",
+      "severity": "minor",
+      "verdict": "RISK",
+      "kind": "words",
+      "change": "shrunk",
+      "keys": [
+        "리디자인이 원래 보이던 단어의 20%만 남겼습니다."
+      ],
+      "locations": [],
+      "fix": "원래 페이지의 내용이 리디자인에서 빠지지 않았는지 확인하고, 사용자에게 아직 필요한 내용은 되살리세요."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "revision:page:redesign-kept-links:before",
+      "targetId": "page",
+      "type": "dom",
+      "phase": "before",
+      "summary": "링크: 4",
+      "contentHash": "sha256:a1d5ea1fd3372313dee4b430a69c5ace1497c57d97e9bbb7f9b15435f4a05356",
+      "actual": {
+        "count": 4
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "<server version>",
+        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+      }
+    },
+    {
+      "id": "revision:page:redesign-kept-links:after",
+      "targetId": "page",
+      "type": "dom",
+      "phase": "after",
+      "summary": "링크: 4개 중 4개 유지, 0개 손실, 0개 인정.",
+      "outcome": "passed",
+      "contentHash": "sha256:606ea6da65c97d48c358954ba14bd52dda30a33f1b34879716eb3c9cf8940553",
+      "actual": {
+        "count": 4,
+        "kept": 4,
+        "lost": 0,
+        "acknowledged": 0,
+        "reworded": 0
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "<server version>",
+        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+      }
+    },
+    {
+      "id": "revision:page:redesign-kept-fields:before",
+      "targetId": "page",
+      "type": "dom",
+      "phase": "before",
+      "summary": "폼 필드: 0",
+      "contentHash": "sha256:a1d5ea1fd3372313dee4b430a69c5ace1497c57d97e9bbb7f9b15435f4a05356",
+      "actual": {
+        "count": 0
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "<server version>",
+        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+      }
+    },
+    {
+      "id": "revision:page:redesign-kept-fields:after",
+      "targetId": "page",
+      "type": "dom",
+      "phase": "after",
+      "summary": "폼 필드: 0개 중 0개 유지, 0개 손실, 0개 인정.",
+      "outcome": "passed",
+      "contentHash": "sha256:606ea6da65c97d48c358954ba14bd52dda30a33f1b34879716eb3c9cf8940553",
+      "actual": {
+        "count": 0,
+        "kept": 0,
+        "lost": 0,
+        "acknowledged": 0,
+        "reworded": 0
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "<server version>",
+        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+      }
+    },
+    {
+      "id": "revision:page:redesign-kept-handlers:before",
+      "targetId": "page",
+      "type": "dom",
+      "phase": "before",
+      "summary": "핸들러: 0",
+      "contentHash": "sha256:a1d5ea1fd3372313dee4b430a69c5ace1497c57d97e9bbb7f9b15435f4a05356",
+      "actual": {
+        "count": 0
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "<server version>",
+        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+      }
+    },
+    {
+      "id": "revision:page:redesign-kept-handlers:after",
+      "targetId": "page",
+      "type": "dom",
+      "phase": "after",
+      "summary": "핸들러: 0개 중 0개 유지, 0개 손실, 0개 인정.",
+      "outcome": "passed",
+      "contentHash": "sha256:606ea6da65c97d48c358954ba14bd52dda30a33f1b34879716eb3c9cf8940553",
+      "actual": {
+        "count": 0,
+        "kept": 0,
+        "lost": 0,
+        "acknowledged": 0,
+        "reworded": 0
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "<server version>",
+        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+      }
+    },
+    {
+      "id": "revision:page:redesign-kept-test-hooks:before",
+      "targetId": "page",
+      "type": "dom",
+      "phase": "before",
+      "summary": "테스트 훅: 0",
+      "contentHash": "sha256:a1d5ea1fd3372313dee4b430a69c5ace1497c57d97e9bbb7f9b15435f4a05356",
+      "actual": {
+        "count": 0
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "<server version>",
+        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+      }
+    },
+    {
+      "id": "revision:page:redesign-kept-test-hooks:after",
+      "targetId": "page",
+      "type": "dom",
+      "phase": "after",
+      "summary": "테스트 훅: 0개 중 0개 유지, 0개 손실, 0개 인정.",
+      "outcome": "passed",
+      "contentHash": "sha256:606ea6da65c97d48c358954ba14bd52dda30a33f1b34879716eb3c9cf8940553",
+      "actual": {
+        "count": 0,
+        "kept": 0,
+        "lost": 0,
+        "acknowledged": 0,
+        "reworded": 0
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "<server version>",
+        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+      }
+    },
+    {
+      "id": "revision:page:redesign-kept-script-hooks:before",
+      "targetId": "page",
+      "type": "dom",
+      "phase": "before",
+      "summary": "스크립트 훅: 0",
+      "contentHash": "sha256:a1d5ea1fd3372313dee4b430a69c5ace1497c57d97e9bbb7f9b15435f4a05356",
+      "actual": {
+        "count": 0
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "<server version>",
+        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+      }
+    },
+    {
+      "id": "revision:page:redesign-kept-script-hooks:after",
+      "targetId": "page",
+      "type": "dom",
+      "phase": "after",
+      "summary": "스크립트 훅: 0개 중 0개 유지, 0개 손실, 0개 인정. scriptSelectors를 넘기지 않았습니다.",
+      "outcome": "inapplicable",
+      "contentHash": "sha256:606ea6da65c97d48c358954ba14bd52dda30a33f1b34879716eb3c9cf8940553",
+      "actual": {
+        "count": 0,
+        "kept": 0,
+        "lost": 0,
+        "acknowledged": 0,
+        "reworded": 0
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "<server version>",
+        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+      }
+    },
+    {
+      "id": "revision:page:redesign-kept-headings:before",
+      "targetId": "page",
+      "type": "dom",
+      "phase": "before",
+      "summary": "제목: 3",
+      "contentHash": "sha256:a1d5ea1fd3372313dee4b430a69c5ace1497c57d97e9bbb7f9b15435f4a05356",
+      "actual": {
+        "count": 3
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "<server version>",
+        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+      }
+    },
+    {
+      "id": "revision:page:redesign-kept-headings:after",
+      "targetId": "page",
+      "type": "dom",
+      "phase": "after",
+      "summary": "제목: 3개 중 1개 유지, 1개 손실, 0개 인정, 1개 문구 변경.",
+      "outcome": "failed",
+      "contentHash": "sha256:606ea6da65c97d48c358954ba14bd52dda30a33f1b34879716eb3c9cf8940553",
+      "actual": {
+        "count": 2,
+        "kept": 1,
+        "lost": 1,
+        "acknowledged": 0,
+        "reworded": 1
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "<server version>",
+        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+      }
+    },
+    {
+      "id": "revision:page:redesign-kept-figures:before",
+      "targetId": "page",
+      "type": "dom",
+      "phase": "before",
+      "summary": "그림: 2",
+      "contentHash": "sha256:a1d5ea1fd3372313dee4b430a69c5ace1497c57d97e9bbb7f9b15435f4a05356",
+      "actual": {
+        "count": 2
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "<server version>",
+        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+      }
+    },
+    {
+      "id": "revision:page:redesign-kept-figures:after",
+      "targetId": "page",
+      "type": "dom",
+      "phase": "after",
+      "summary": "그림: 2개 중 0개 유지, 2개 손실, 0개 인정.",
+      "outcome": "failed",
+      "contentHash": "sha256:606ea6da65c97d48c358954ba14bd52dda30a33f1b34879716eb3c9cf8940553",
+      "actual": {
+        "count": 0,
+        "kept": 0,
+        "lost": 2,
+        "acknowledged": 0,
+        "reworded": 0
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "<server version>",
+        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+      }
+    },
+    {
+      "id": "revision:page:redesign-kept-landmarks:before",
+      "targetId": "page",
+      "type": "dom",
+      "phase": "before",
+      "summary": "랜드마크: 3",
+      "contentHash": "sha256:a1d5ea1fd3372313dee4b430a69c5ace1497c57d97e9bbb7f9b15435f4a05356",
+      "actual": {
+        "count": 3
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "<server version>",
+        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+      }
+    },
+    {
+      "id": "revision:page:redesign-kept-landmarks:after",
+      "targetId": "page",
+      "type": "dom",
+      "phase": "after",
+      "summary": "랜드마크: 3개 중 3개 유지, 0개 손실, 0개 인정.",
+      "outcome": "passed",
+      "contentHash": "sha256:606ea6da65c97d48c358954ba14bd52dda30a33f1b34879716eb3c9cf8940553",
+      "actual": {
+        "count": 3,
+        "kept": 3,
+        "lost": 0,
+        "acknowledged": 0,
+        "reworded": 0
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "<server version>",
+        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+      }
+    },
+    {
+      "id": "revision:page:redesign-kept-words:before",
+      "targetId": "page",
+      "type": "dom",
+      "phase": "before",
+      "summary": "words: 209",
+      "contentHash": "sha256:a1d5ea1fd3372313dee4b430a69c5ace1497c57d97e9bbb7f9b15435f4a05356",
+      "actual": {
+        "words": 209
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "<server version>",
+        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+      }
+    },
+    {
+      "id": "revision:page:redesign-kept-words:after",
+      "targetId": "page",
+      "type": "dom",
+      "phase": "after",
+      "summary": "보이는 단어: 이전 209, 이후 42 (20%).",
+      "outcome": "failed",
+      "contentHash": "sha256:606ea6da65c97d48c358954ba14bd52dda30a33f1b34879716eb3c9cf8940553",
+      "actual": {
+        "words": 42,
+        "ratio": 0.2
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "<server version>",
+        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+      }
+    }
+  ],
+  "results": [
+    {
+      "checkId": "redesign-kept-links",
+      "targetId": "page",
+      "verdict": "PASS",
+      "evidenceRefs": [
+        "revision:page:redesign-kept-links:before",
+        "revision:page:redesign-kept-links:after"
+      ],
+      "rationale": "링크: 4개 중 4개 유지, 0개 손실, 0개 인정."
+    },
+    {
+      "checkId": "redesign-kept-fields",
+      "targetId": "page",
+      "verdict": "PASS",
+      "evidenceRefs": [
+        "revision:page:redesign-kept-fields:before",
+        "revision:page:redesign-kept-fields:after"
+      ],
+      "rationale": "폼 필드: 0개 중 0개 유지, 0개 손실, 0개 인정."
+    },
+    {
+      "checkId": "redesign-kept-handlers",
+      "targetId": "page",
+      "verdict": "PASS",
+      "evidenceRefs": [
+        "revision:page:redesign-kept-handlers:before",
+        "revision:page:redesign-kept-handlers:after"
+      ],
+      "rationale": "핸들러: 0개 중 0개 유지, 0개 손실, 0개 인정."
+    },
+    {
+      "checkId": "redesign-kept-test-hooks",
+      "targetId": "page",
+      "verdict": "PASS",
+      "evidenceRefs": [
+        "revision:page:redesign-kept-test-hooks:before",
+        "revision:page:redesign-kept-test-hooks:after"
+      ],
+      "rationale": "테스트 훅: 0개 중 0개 유지, 0개 손실, 0개 인정."
+    },
+    {
+      "checkId": "redesign-kept-script-hooks",
+      "targetId": "page",
+      "verdict": "NOT_APPLICABLE",
+      "evidenceRefs": [
+        "revision:page:redesign-kept-script-hooks:before",
+        "revision:page:redesign-kept-script-hooks:after"
+      ],
+      "rationale": "scriptSelectors를 넘기지 않았습니다."
+    },
+    {
+      "checkId": "redesign-kept-headings",
+      "targetId": "page",
+      "verdict": "RISK",
+      "evidenceRefs": [
+        "revision:page:redesign-kept-headings:before",
+        "revision:page:redesign-kept-headings:after"
+      ],
+      "rationale": "제목: 3개 중 1개 유지, 1개 손실, 0개 인정, 1개 문구 변경.",
+      "remediation": "제목을 되살리거나, 그 섹션을 뺀 이유를 acknowledged에 적으세요. 새 문구가 뜻을 그대로 전하는지 확인하거나, change \"reworded\"로 acknowledged에 적으세요."
+    },
+    {
+      "checkId": "redesign-kept-figures",
+      "targetId": "page",
+      "verdict": "RISK",
+      "evidenceRefs": [
+        "revision:page:redesign-kept-figures:before",
+        "revision:page:redesign-kept-figures:after"
+      ],
+      "rationale": "그림: 2개 중 0개 유지, 2개 손실, 0개 인정.",
+      "remediation": "대체 텍스트나 캡션과 함께 이미지 또는 그림을 되살리거나, acknowledged에 적으세요."
+    },
+    {
+      "checkId": "redesign-kept-landmarks",
+      "targetId": "page",
+      "verdict": "PASS",
+      "evidenceRefs": [
+        "revision:page:redesign-kept-landmarks:before",
+        "revision:page:redesign-kept-landmarks:after"
+      ],
+      "rationale": "랜드마크: 3개 중 3개 유지, 0개 손실, 0개 인정."
+    },
+    {
+      "checkId": "redesign-kept-words",
+      "targetId": "page",
+      "verdict": "RISK",
+      "evidenceRefs": [
+        "revision:page:redesign-kept-words:before",
+        "revision:page:redesign-kept-words:after"
+      ],
+      "rationale": "보이는 단어: 이전 209, 이후 42 (20%).",
+      "remediation": "원래 페이지의 내용이 리디자인에서 빠지지 않았는지 확인하고, 사용자에게 아직 필요한 내용은 되살리세요."
+    }
+  ],
+  "limits": [
+    "브라우저가 아니라 제출한 HTML과 CSS를 정적으로 비교합니다. 나중에 JavaScript가 추가하는 내용과 제출하지 않은 스타일시트는 보지 못합니다.",
+    "링크, 제목, 그림, 랜드마크, 단어 수, 필수 요소는 보이는 요소만 셉니다. 폼 필드, 핸들러, 테스트 훅, 스크립트 훅은 숨긴 요소도 셉니다. 폼, 스크립트, 테스트는 숨긴 요소도 쓰기 때문입니다."
+  ],
+  "guidance": [
+    "리디자인 전에 원래 페이지의 렌더링된 HTML과 CSS를 보관하세요. 리디자인을 빌드한 뒤 두 쪽을 함께 넘기세요.",
+    "손실 항목은 되살리거나, 12자 이상의 이유와 함께 acknowledged에 넣으세요. 그다음 compare_page_revisions를 다시 실행하세요.",
+    "결과를 기록하려면 revisionPreservation: true(와 같은 productType)로 get_design_audit_plan을 호출하세요. 그다음 이 evidence와 results를 같은 targetId로 validate_design_audit_result에 제출하세요."
+  ]
+}

@@ -3,6 +3,7 @@ import type { CatalogRepository } from '../catalog/repository.js';
 import { stableHashOf } from '../catalog/stable-hash.js';
 import { planUiStates } from '../state-atlas/planner.js';
 import { structureChecks } from '../structure/checks.js';
+import { revisionChecks } from '../structure/revisions.js';
 import type {
   AuditApplicability,
   AuditAutomationLevel,
@@ -23,6 +24,8 @@ export const AUDIT_GROUP_IDS = [
 export type AuditGroupId = (typeof AUDIT_GROUP_IDS)[number];
 /** `structure` is opt-in so that plans requested without includeGroups keep their earlier checks and hash. */
 export const DEFAULT_AUDIT_GROUP_IDS: readonly AuditGroupId[] = AUDIT_GROUP_IDS.filter((group) => group !== 'structure');
+/** The groups the redesign-kept checks belong to; a revisionPreservation plan holds nothing else. */
+export const REVISION_GROUP_IDS: readonly AuditGroupId[] = ['structure', 'behavior'];
 
 export const AUDIT_VERDICTS = [
   'PASS', 'FIX_NOW', 'RISK', 'NOT_APPLICABLE', 'NOT_VERIFIED',
@@ -40,6 +43,8 @@ export interface DesignAuditPlanInput {
   domainSignals?: string[];
   includeGroups?: AuditGroupId[];
   includeDocumentation?: boolean;
+  /** A plan of only the redesign-kept checks that compare_page_revisions answers. */
+  revisionPreservation?: boolean;
   locale?: Lang;
 }
 
@@ -54,7 +59,9 @@ export interface ResolvedAuditCheck {
   automation: AuditAutomationLevel;
   applicability: AuditApplicability;
   surfaceTags: UxSurface[];
-  source: AuditCheckDefinition['source'] | { kind: 'structure'; patternId: string; scope: 'global' | 'style' | 'must-have' };
+  source: AuditCheckDefinition['source']
+    | { kind: 'structure'; patternId: string; scope: 'global' | 'style' | 'must-have' }
+    | { kind: 'revision'; inventory: string };
 }
 
 interface PrincipleAuditContract {
@@ -92,6 +99,8 @@ export interface DesignAuditPlan {
     stateSurfaceIds: string[];
     includeGroups: AuditGroupId[];
     includeDocumentation: boolean;
+    /** Present only when true, so other plans keep their hash. */
+    revisionPreservation?: true;
     locale: Lang;
   };
   verdicts: Array<{ id: AuditVerdict; meaning: string }>;
@@ -118,6 +127,8 @@ export interface DesignAuditPlan {
     excludedChecks: number;
     /** Present only when the structure group is included; those checks come from the structure ruleset, not the catalog. */
     structureChecks?: number;
+    /** Present only in a revisionPreservation plan. */
+    revisionChecks?: number;
   };
   resourceUris: string[];
   guidance: string[];
@@ -145,6 +156,9 @@ const labels: Record<Lang, {
   antiPatternCriterion: (pattern: string) => string;
   guidance: string[];
   structureGuidance: string;
+  revisionGuidance: string;
+  revisionCriterion: (inventory: string) => string;
+  revisionInventory: Record<string, string>;
 }> = {
   en: {
     verdicts: {
@@ -175,6 +189,13 @@ const labels: Record<Lang, {
       'Do not collapse subjective design judgment into a single numeric score.',
     ],
     structureGuidance: "Structure checks are automated: run audit_page_structure on each target's rendered HTML and CSS with the same styleId, then submit its evidence and results for these check ids.",
+    revisionGuidance: 'Redesign-kept checks are automated: run compare_page_revisions with the original and the redesigned HTML and CSS of each target (and the same productType), then submit its evidence and results for these check ids.',
+    revisionCriterion: (inventory) => `Confirm compare_page_revisions finds no ${inventory} of the original page lost in the redesign, or each loss acknowledged with a reason.`,
+    revisionInventory: {
+      links: 'links', fields: 'form fields or field labels', handlers: 'form actions or inline handlers', testHooks: 'test hooks',
+      scriptHooks: 'script selector matches', headings: 'headings', figures: 'images or figures', landmarks: 'landmarks',
+      words: 'large share of visible text', mustHaves: 'product must-haves',
+    },
   },
   ko: {
     verdicts: {
@@ -205,6 +226,13 @@ const labels: Record<Lang, {
       '주관적 디자인 판단을 하나의 숫자 점수로 뭉개지 마세요.',
     ],
     structureGuidance: '구조 검사는 자동입니다. 대상마다 렌더링한 HTML과 CSS로, 같은 styleId를 넘겨 audit_page_structure를 실행하세요. 그 evidence와 results를 이 검사 id로 제출하세요.',
+    revisionGuidance: '리디자인 보존 검사는 자동입니다. 대상마다 원래와 리디자인한 HTML·CSS로(같은 productType과 함께) compare_page_revisions를 실행하세요. 그 evidence와 results를 이 검사 id로 제출하세요.',
+    revisionCriterion: (inventory) => `compare_page_revisions가 원래 페이지의 ${inventory} 중 리디자인에서 사라진 것을 찾지 않는지, 또는 사라진 항목마다 이유를 적어 인정했는지 확인`,
+    revisionInventory: {
+      links: '링크', fields: '폼 필드나 필드 라벨', handlers: '폼 action이나 인라인 핸들러', testHooks: '테스트 훅',
+      scriptHooks: '스크립트 선택자 매치', headings: '제목', figures: '이미지나 그림', landmarks: '랜드마크',
+      words: '보이는 글의 큰 부분', mustHaves: '제품 필수 요소',
+    },
   },
   ja: {
     verdicts: {
@@ -235,6 +263,13 @@ const labels: Record<Lang, {
       '主観的なデザイン判断を単一の数値スコアにまとめないでください。',
     ],
     structureGuidance: '構造検査は自動です。対象ごとに描画したHTMLとCSSで、同じstyleIdを渡してaudit_page_structureを実行し、そのevidenceとresultsをこの検査idで提出してください。',
+    revisionGuidance: 'リデザイン保持検査は自動です。対象ごとに元とリデザイン後のHTML・CSSで(同じproductTypeとともに)compare_page_revisionsを実行し、そのevidenceとresultsをこの検査idで提出してください。',
+    revisionCriterion: (inventory) => `compare_page_revisionsが、元のページの${inventory}のうちリデザインで失われたものを検出しないこと、または失われた項目ごとに理由を付けて承認したことを確認`,
+    revisionInventory: {
+      links: 'リンク', fields: 'フォームフィールドやラベル', handlers: 'フォームのactionやインラインハンドラー', testHooks: 'テストフック',
+      scriptHooks: 'スクリプトセレクターの一致', headings: '見出し', figures: '画像や図版', landmarks: 'ランドマーク',
+      words: '表示テキストの大部分', mustHaves: '製品の必須要素',
+    },
   },
 };
 
@@ -307,8 +342,13 @@ export function planDesignAudit(
   const surfaces: UxSurface[] = unique(
     input.surfaces?.length ? input.surfaces : ['global' as UxSurface],
   ).sort();
-  const requestedGroups = unique(input.includeGroups?.length ? input.includeGroups : [...DEFAULT_AUDIT_GROUP_IDS]);
+  const revision = input.revisionPreservation === true;
+  const requestedGroups = unique(input.includeGroups?.length ? input.includeGroups
+    : revision ? [...REVISION_GROUP_IDS] : [...DEFAULT_AUDIT_GROUP_IDS]);
   const includeGroups = AUDIT_GROUP_IDS.filter((group) => requestedGroups.includes(group));
+  if (revision && includeGroups.some((group) => !REVISION_GROUP_IDS.includes(group))) {
+    throw new AuditPlanError('revisionPreservation plans hold only the redesign-kept checks; includeGroups may contain only "structure" and "behavior"');
+  }
   const includeDocumentation = input.includeDocumentation ?? true;
   const designPrincipleIds = unique(input.designPrincipleIds ?? []).sort();
   const uxPrincipleIds = unique(input.uxPrincipleIds ?? []).sort();
@@ -365,13 +405,13 @@ export function planDesignAudit(
     };
   });
 
-  const catalogChecks = repo.policies.auditChecks
+  const catalogChecks = revision ? [] : repo.policies.auditChecks
     .filter((check) => includeGroups.includes(groupOf(check)))
     .filter((check) => includeDocumentation || check.applicability !== 'workflow-only')
     .filter((check) => check.surfaceTags.includes('global')
       || check.surfaceTags.some((surface) => surfaces.includes(surface)))
     .map((check) => resolveCheck(check, locale, repo));
-  const withStructure = includeGroups.includes('structure');
+  const withStructure = !revision && includeGroups.includes('structure');
   const structure: ResolvedAuditCheck[] = withStructure
     ? structureChecks(input.styleId, locale, input.productType).map((check) => ({
       id: check.id,
@@ -387,7 +427,21 @@ export function planDesignAudit(
       source: { kind: 'structure', patternId: check.patternId, scope: check.scope },
     }))
     : [];
-  const checks = [...catalogChecks, ...structure];
+  const revisionPlan: ResolvedAuditCheck[] = revision
+    ? revisionChecks(input.productType).filter((check) => includeGroups.includes(check.groupId)).map((check) => ({
+      id: check.id,
+      groupId: check.groupId,
+      criterion: labels[locale].revisionCriterion(labels[locale].revisionInventory[check.inventory]!),
+      remediation: labels[locale].verificationFix,
+      severity: check.severity,
+      evidenceTypes: ['dom'],
+      automation: 'automated',
+      applicability: check.applicability,
+      surfaceTags: ['global'],
+      source: { kind: 'revision', inventory: check.inventory },
+    }))
+    : [];
+  const checks = [...catalogChecks, ...structure, ...revisionPlan];
 
   const stateAtlasUnmappedSurfaces: UxSurface[] = surfaces
     .filter((surface) => surface !== 'global' && !repo.getSurface(surface));
@@ -410,6 +464,7 @@ export function planDesignAudit(
       stateSurfaceIds: requestedStateSurfaceIds,
       includeGroups,
       includeDocumentation,
+      ...(revision ? { revisionPreservation: true as const } : {}),
       locale,
     },
     verdicts: AUDIT_VERDICTS.map((id) => ({ id, meaning: label.verdicts[id] })),
@@ -429,9 +484,10 @@ export function planDesignAudit(
       includedChecks: checks.length,
       excludedChecks: repo.policies.auditChecks.length - catalogChecks.length,
       ...(withStructure ? { structureChecks: structure.length } : {}),
+      ...(revision ? { revisionChecks: revisionPlan.length } : {}),
     },
     resourceUris,
-    guidance: withStructure ? [...label.guidance, label.structureGuidance] : label.guidance,
+    guidance: [...label.guidance, ...(withStructure ? [label.structureGuidance] : []), ...(revision ? [label.revisionGuidance] : [])],
   } satisfies Omit<DesignAuditPlan, 'identity'>;
 
   return {

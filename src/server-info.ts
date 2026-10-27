@@ -18,6 +18,7 @@ export const TOOL_NAMES = [
   'get_ui_state_plan',
   'compose_design_tokens',
   'audit_page_structure',
+  'compare_page_revisions',
 ] as const;
 
 export const PROMPT_NAMES = [

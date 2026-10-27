@@ -147,7 +147,9 @@ export function registerPrompts(server: McpServer): void {
   }, ({ current, goal }) => userMessage([
     `Redesign this screen toward: ${goal}. Keep what works structurally.`,
     `Current state: ${current}.`,
+    'Before changing anything, save the current page\'s rendered HTML and CSS and note the selectors its scripts query.',
     'Use compare_design_directions on 2-3 candidate styles, then search_design_references and inspect a few selected references before choosing primary + secondary roles. Draft the design.md brief notes and call compose_design_tokens.',
+    'When the redesign is built, run compare_page_revisions on the saved original and the new page (with those scriptSelectors and the productType); restore every lost link, field, handler, hook, heading, and must-have, or acknowledge an intended removal with a reason, and rerun it.',
     'Finish with the audit-design-direction checklist.',
   ].join('\n')));
 

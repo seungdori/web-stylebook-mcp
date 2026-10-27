@@ -21,6 +21,21 @@ All notable changes to this project are documented here. The format follows
   not change.
 - `webstylebook://design-md/{id}` serves one style as DESIGN.md from its pinned visual contract, with optional
   `locale`, `mode`, and `placement` query parameters.
+- `compare_page_revisions` checks that a redesign kept what the original page had (#18). It takes the original
+  (`before`) and the redesigned (`after`) HTML and CSS and lists the links (normalized href), form fields and their
+  labels, form actions and inline handlers, test hooks (`data-testid`, `data-test`, `data-cy`), `scriptSelectors`
+  matches, h1–h3 headings, images and figures, `main`/`nav`/`footer` landmarks, visible word count (Korean,
+  Chinese, and Japanese by character), and, with `productType`, must-haves that were kept, reworded, or dropped. A
+  lost link, field, handler, script hook, or must-have is FIX_NOW, a lost test hook FIX_NOW (minor), and lost
+  headings, figures, or landmarks, reworded headings or links, and a redesign that keeps under 60% of more than 80
+  words are RISK. `acknowledged` excuses an intended removal when its reason has at least 12 characters. Content
+  inventories count visible elements; fields, handlers, and hooks also count hidden ones. `PAGE_LIMITS` apply to
+  each side.
+- `get_design_audit_plan` and `validate_design_audit_result` accept `revisionPreservation: true`: a plan of only
+  the `redesign-kept-<inventory>` checks (in the `structure` and `behavior` groups) that the evidence and results of
+  `compare_page_revisions` satisfy as they are. Plans without it keep their checks and hash. The README, the
+  companion skill, and the `redesign-with-style` prompt describe the flow: keep the original HTML and CSS before a
+  redesign, then run `compare_page_revisions`.
 
 ## [0.13.0] — 2026-10-25
 

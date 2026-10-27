@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <style>
+    .hero { display: grid; grid-template-columns: 1fr 1fr; gap: 32px }
+    .eyebrow { text-transform: uppercase }
+  </style>
+</head>
+<body class="theme-new">
+  <header class="top">
+    <nav aria-label="Primary" class="nav">
+      <a class="nav__link" href="/features">Features</a>
+      <a class="nav__link" href="/pricing?billing=yearly&amp;plan=team">Team pricing</a>
+    </nav>
+  </header>
+  <main id="content">
+    <section class="hero">
+      <div>
+        <h1 class="hero__title">Track every shipment from one screen</h1>
+        <p class="hero__lede">Carrier updates land in one timeline, so support can answer "where is my order" without opening five tabs.</p>
+        <a data-testid="hero-signup" class="button" href="/signup">Create an account</a>
+      </div>
+      <img alt="Shipment timeline with three carrier updates" src="/img/timeline-v2.png" width="640">
+    </section>
+    <section class="alerts">
+      <h2>Alerts before customers ask</h2>
+      <p>When a package stalls for more than a day, the order owner gets a note with the carrier's last scan.</p>
+      <form method="POST" action="/subscribe" onsubmit="track('subscribe')" class="stack">
+        <label for="email">Email</label>
+        <input type="email" name="email" id="email" class="input">
+        <button class="button" type="submit">Get updates</button>
+      </form>
+    </section>
+  </main>
+  <footer class="footer"><a href="/privacy">Privacy</a></footer>
+</body>
+</html>

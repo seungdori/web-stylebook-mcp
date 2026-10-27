@@ -32,6 +32,15 @@ scope and proceed. Commit, push, release, and deployment remain separate authori
 implementation is selected. For a new build, fold these decisions into workflow step 4 instead of
 asking a duplicate gate.
 
+**Redesigning an existing page:** before changing it, save the original's rendered HTML
+(`document.documentElement.outerHTML`) and its CSS, and note the selectors its scripts query. After
+the redesign is built, call **`compare_page_revisions`** with both versions, those `scriptSelectors`, and
+the product's `productType`. Restore every lost link, field, handler, hook, heading, figure, landmark,
+and must-have, or put an intended removal in `acknowledged` with a reason of at least 12 characters, and
+rerun it until nothing is left unexplained. Record it with a separate `get_design_audit_plan` query of
+`revisionPreservation: true` (same `productType`) and submit its `evidence` and `results` to
+`validate_design_audit_result`.
+
 Map the answer to `get_design_audit_plan.includeGroups`:
 
 - **Visual only:** `layout`, `fidelity`, `anti-patterns`, `structure`.
@@ -331,6 +340,8 @@ do not turn a mnemonic or systems maxim into a scientific claim.
 - **Never present a token-swap recolor as a design direction** — compose each direction's own layout
   from its `structure` (archetype + signature moves), and clear `audit_page_structure` findings before
   calling the page done.
+- **A redesign keeps what worked** — keep the original HTML and CSS before redesigning and clear
+  `compare_page_revisions` findings (restore, or acknowledge with a reason) before calling it done.
 - **Style never removes a must-have** — the product type's `mustHaves` (price and options on a product
   page, status on a dashboard, search in docs) stay in their zone in every direction; restyle them, don't
   drop them for a cleaner opening.

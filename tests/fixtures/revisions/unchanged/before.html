@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head><style>.hidden-mobile{display:none}</style></head>
+<body>
+  <header>
+    <nav aria-label="Primary"><a href="/features">Features</a><a href="/pricing?plan=team&amp;billing=yearly">Team pricing</a></nav>
+  </header>
+  <main>
+    <section>
+      <h1>Track every shipment from one screen</h1>
+      <p>Carrier updates land in one timeline, so support can answer "where is my order" without opening five tabs.</p>
+      <img src="/img/timeline.png" alt="Shipment timeline with three carrier updates">
+      <a href="/signup" data-testid="hero-signup">Create an account</a>
+    </section>
+    <section>
+      <h2>Alerts before customers ask</h2>
+      <p>When a package stalls for more than a day, the order owner gets a note with the carrier's last scan.</p>
+      <form action="/subscribe" method="post" onsubmit="track('subscribe')">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email">
+        <button type="submit">Get updates</button>
+      </form>
+    </section>
+  </main>
+  <footer><a href="/privacy">Privacy</a></footer>
+</body>
+</html>

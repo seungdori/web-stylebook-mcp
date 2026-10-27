@@ -76,7 +76,7 @@ interface Scope {
 }
 
 /** Drawn and exposed: rendered, not visually hidden, and not inside aria-hidden="true". */
-function perceivableFlag(page: PageModel): (element: DomElement) => boolean {
+export function perceivableFlag(page: PageModel): (element: DomElement) => boolean {
   const cache = new WeakMap<DomElement, boolean>();
   return (element) => {
     const chain: DomElement[] = [];

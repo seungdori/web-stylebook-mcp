@@ -336,6 +336,7 @@ Add the same block to your `claude_desktop_config.json`, then restart:
 | **`get_design_audit_plan`** | Localized, surface-aware checks with stable ids, severity, applicability, required evidence, remediation, user-facing content checks, selected principle checks, and UI-state coverage | The tool plans the audit but never pretends it inspected your project; missing evidence is `NOT_VERIFIED`, not `PASS` |
 | **`validate_design_audit_result`** | Contract validation for the plan query, target matrix, durable evidence references, and one verdict per check/target, with normalized verdicts and stable hashes | It verifies coverage and evidence consistency, not visual quality; `valid: true` is never an overall design pass |
 | **`audit_page_structure`** | Banned generic and style-specific patterns found in the HTML and CSS you pass in, each with its location, observed values, and the chosen style's replacement moves; with `productType`, the must-haves the page is missing or keeps off the first screen; plus evidence and results for the `structure` audit group | Declared-style heuristics, not a browser; a clean result is not a design pass |
+| **`compare_page_revisions`** | Before/after comparison of a redesign: which links, form fields and labels, handlers, test hooks, script selectors, headings, figures, landmarks, visible words, and product must-haves it kept, reworded, or dropped, with `acknowledged` for intended removals; plus evidence and results for a `revisionPreservation` audit plan | Static markup, not a browser; it does not run your scripts or record screenshots |
 
 **Catalog:** 520 real-world design references · 48 styles · 25 interface design principles · 23 UX principles · 51 structured audit checks · 20 components · 5 surfaces · 57 UI-state recipes · 29 motion profiles · 14 product archetypes.
 
@@ -436,6 +437,37 @@ context-specific information, and whether its visual emphasis matches informatio
 relevance, and support. Cards, statistics, and Sitemap links are still judged by their actual
 user-task value rather than banned as types.
 
+## Keep what worked through a redesign
+
+Redesigns quietly drop links, form fields, handlers, the selectors a script queries, and must-haves. Before you redesign a page, save its rendered HTML (for example `document.documentElement.outerHTML`) and its CSS. When the redesign is built, pass both versions to `compare_page_revisions`:
+
+```json
+{
+  "before": { "html": "<!doctype html>…", "css": ["…"] },
+  "after": { "html": "<!doctype html>…", "css": ["…"] },
+  "scriptSelectors": ["#cart-form", ".js-variant"],
+  "productType": "commerce",
+  "acknowledged": [
+    { "kind": "link", "key": "/pricing", "change": "dropped", "reason": "Pricing moved to the sales contact page" }
+  ]
+}
+```
+
+| Inventory | What is compared | When it is lost |
+|---|---|---|
+| links | `a[href]`, with scheme and host lowercased and query parameters sorted | FIX_NOW, major |
+| fields | `input`, `select`, `textarea` by `name` (else `id`), and whether each keeps a label | FIX_NOW, major |
+| handlers | form action and method, `formaction`, inline `on*` attributes | FIX_NOW, major |
+| test hooks | `data-testid`, `data-test`, `data-cy` | FIX_NOW, minor |
+| script hooks | each `scriptSelectors` entry that matched the original | FIX_NOW, major |
+| headings, figures, landmarks | h1–h3 text, image alt text and figure captions, `main`/`nav`/`footer` | RISK |
+| words | visible words; Korean, Chinese, and Japanese by character | RISK when the original had more than 80 and the redesign keeps under 60% |
+| must-haves | with `productType`, the must-haves `audit_page_structure` finds | FIX_NOW when one present before is missing or off the first screen |
+
+A heading or link whose wording changed while its place or target stayed is reported as `reworded` (RISK). An `acknowledged` entry needs the matching `kind`, `key`, and `change` and a reason of at least 12 characters; a shorter reason does not excuse the loss and adds a RISK finding. Links, headings, figures, landmarks, words, and must-haves count visible elements only. Fields, handlers, and both kinds of hook also count hidden elements, because a hidden CSRF field, a closed dialog, or a cart drawer behind `display: none` is still part of how the page works.
+
+The result has `verdict` (`PASS`, `FIX_NOW`, or `RISK`), an `inventory` with kept, lost, reworded, and acknowledged items, `wordCount`, `findings`, and `evidence` and `results` for the `redesign-kept-<inventory>` checks. To record them, call `get_design_audit_plan` with `revisionPreservation: true` (and the same `productType`); that plan holds only these checks, so `validate_design_audit_result` accepts the evidence and results as they are. Plans without `revisionPreservation` keep their checks and hash.
+
 ## Audit result contract
 
 `get_design_audit_plan` now returns an `identity` with the catalog version/hash and a deterministic
@@ -451,7 +483,7 @@ result slots, broken evidence references, cross-target evidence, invalid regions
 `NOT_APPLICABLE`, and `PASS` that lacks required evidence or contradicts failed evidence. Missing result
 slots are materialized as `NOT_VERIFIED`, never hidden. With `includeGroups` containing `structure` and a
 `styleId`, the plan adds one automated check per banned pattern, and `productType` adds one per must-have;
-`audit_page_structure` returns evidence and results for those check ids that the validator accepts as they are. The result carries content-addressed plan,
+`audit_page_structure` returns evidence and results for those check ids that the validator accepts as they are. With `revisionPreservation: true`, the plan holds only the `redesign-kept-*` checks that `compare_page_revisions` answers. The result carries content-addressed plan,
 evidence-bundle, and normalized-result hashes for comparable rechecks. The tool never opens the
 artifact references and never turns contract validity into a design-quality score.
 

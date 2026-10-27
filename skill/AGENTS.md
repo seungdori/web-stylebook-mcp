@@ -74,6 +74,10 @@ state coverage.
    the same `productType`, replace every finding with the move it names, add every must-have it lists as
    missing or misplaced, and rerun it. Include `structure` in `includeGroups` (with the same `productType`)
    and submit its `evidence` and `results` with the rest of the audit.
+   For a redesign of an existing page, save the original's rendered HTML and CSS before changing it, then
+   run `compare_page_revisions` on the original and the redesign (with the `scriptSelectors` its scripts
+   use and the same `productType`). Restore every lost item or acknowledge it with a reason of 12+
+   characters, and validate its results under a separate plan query with `revisionPreservation: true`.
 12. Call `validate_design_audit_result` with the same plan query, its `identity.planHash`, a target
    for each inspected route/screen/state/viewport/theme/locale, durable evidence references, and one
    result per planned check/target. Fix contract errors or preserve normalized `NOT_VERIFIED`.

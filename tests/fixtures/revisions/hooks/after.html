@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head><style>#cart-drawer { display: none }</style></head>
+<body>
+  <main>
+    <section class="pdp">
+      <h1>Field Jacket, waxed cotton</h1>
+      <p class="pdp__price">$248</p>
+      <form id="cart-form" action="/cart/add" method="post" data-cy="add-to-cart-form">
+        <fieldset class="variant-picker" data-testid="size-picker">
+          <legend>Size</legend>
+          <label><input type="radio" name="size" value="m"> M</label>
+          <label><input type="radio" name="size" value="l"> L</label>
+        </fieldset>
+        <button type="submit" data-testid="add-to-cart">Add to cart</button>
+      </form>
+    </section>
+    <aside id="cart-drawer" data-test="cart-drawer">
+      <h2>Your cart</h2>
+      <button type="button" class="js-close-drawer" onclick="closeDrawer()">Close</button>
+    </aside>
+  </main>
+</body>
+</html>

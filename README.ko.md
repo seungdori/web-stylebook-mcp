@@ -347,6 +347,7 @@ MCP 설정에 추가:
 | **`get_design_audit_plan`** | 안정적인 검사 ID·심각도·적용 조건·필요 증거·수정 방향·사용자용 콘텐츠 검사·선택 원칙 검사·UI 상태 범위를 담은 다국어 감사 계획 | 프로젝트를 실제로 봤다고 가장하지 않으며, 증거가 없으면 `PASS`가 아니라 `NOT_VERIFIED`입니다 |
 | **`validate_design_audit_result`** | plan query·대상 행렬·지속 가능한 증거 참조·검사/대상별 판정을 검증하고 정규화 판정과 안정 hash를 반환 | 범위와 증거 정합성을 검증할 뿐 시각 품질을 판정하지 않으며, `valid: true`는 전체 디자인 통과가 아닙니다 |
 | **`audit_page_structure`** | 넘겨받은 HTML·CSS에서 일반 금지 패턴과 스타일 전용 금지 항목을 찾아, 위치·관찰값·고른 스타일의 대체 무브와 함께 반환합니다. `productType`을 주면 페이지에 없거나 첫 화면 밖에 있는 필수 요소도 알려 줍니다. `structure` 감사 그룹용 증거와 결과도 만듭니다 | 브라우저가 아니라 선언된 스타일로 판단하며, 결과가 깨끗해도 디자인 통과가 아닙니다 |
+| **`compare_page_revisions`** | 리디자인 전후를 비교해 링크, 폼 필드와 라벨, 핸들러, 테스트 훅, 스크립트 선택자, 제목, 그림, 랜드마크, 보이는 단어 수, 제품 필수 요소 중 무엇을 유지·문구 변경·삭제했는지 알려 줍니다. 의도한 삭제는 `acknowledged`로 표시합니다. `revisionPreservation` 감사 계획용 증거와 결과도 만듭니다 | 브라우저가 아니라 정적 마크업 비교이며, 스크립트를 실행하거나 스크린샷을 남기지 않습니다 |
 
 **카탈로그:** 실제 디자인 레퍼런스 520 · 스타일 48 · 인터페이스 디자인 원칙 25 · UX 원칙 23 · 구조화 감사 검사 51 · 컴포넌트 20 · 표면 5 · UI 상태 레시피 57 · 모션 프로파일 29 · 제품 아키타입 14.
 
@@ -445,6 +446,37 @@ webstylebook://design-md/{id}
 시각적 강조가 정보 가치·과업 관련성·근거 수준에 맞는지도 검사합니다. 카드·통계·Sitemap
 링크는 유형 자체를 금지하지 않고 실제 사용자 과업에 도움이 되는지로 판단합니다.
 
+## 리디자인에서 잘 되던 것 지키기
+
+리디자인을 하면 링크, 폼 필드, 핸들러, 스크립트가 찾는 선택자, 필수 요소가 조용히 사라지곤 합니다. 페이지를 리디자인하기 전에 렌더링된 HTML(예: `document.documentElement.outerHTML`)과 CSS를 보관하세요. 리디자인을 빌드한 뒤 두 버전을 `compare_page_revisions`에 넘기세요.
+
+```json
+{
+  "before": { "html": "<!doctype html>…", "css": ["…"] },
+  "after": { "html": "<!doctype html>…", "css": ["…"] },
+  "scriptSelectors": ["#cart-form", ".js-variant"],
+  "productType": "commerce",
+  "acknowledged": [
+    { "kind": "link", "key": "/pricing", "change": "dropped", "reason": "가격 안내를 영업 문의 페이지로 옮겼습니다" }
+  ]
+}
+```
+
+| 인벤토리 | 비교 대상 | 사라지면 |
+|---|---|---|
+| 링크 | `a[href]`. scheme과 host는 소문자로, 쿼리 인자는 정렬해 비교 | FIX_NOW, major |
+| 필드 | `input`, `select`, `textarea`를 `name`(없으면 `id`)으로 비교하고 라벨이 남았는지 확인 | FIX_NOW, major |
+| 핸들러 | 폼 action과 method, `formaction`, 인라인 `on*` 속성 | FIX_NOW, major |
+| 테스트 훅 | `data-testid`, `data-test`, `data-cy` | FIX_NOW, minor |
+| 스크립트 훅 | 원래 페이지에서 맞던 `scriptSelectors` 항목 | FIX_NOW, major |
+| 제목, 그림, 랜드마크 | h1~h3 텍스트, 이미지 대체 텍스트와 그림 캡션, `main`/`nav`/`footer` | RISK |
+| 단어 수 | 보이는 단어. 한국어·중국어·일본어는 글자 수 | 원래 80개를 넘고 리디자인이 60% 미만만 남기면 RISK |
+| 필수 요소 | `productType`을 주면 `audit_page_structure`가 찾는 필수 요소 | 이전에 있던 요소가 없어지거나 첫 화면 밖으로 가면 FIX_NOW |
+
+위치나 링크 대상은 그대로인데 문구만 바뀐 제목과 링크는 `reworded`(RISK)로 보고합니다. `acknowledged` 항목은 `kind`, `key`, `change`가 맞아야 하고 이유가 12자 이상이어야 합니다. 이유가 더 짧으면 손실을 면제하지 않고 RISK 발견 항목을 하나 더 냅니다. 링크, 제목, 그림, 랜드마크, 단어 수, 필수 요소는 보이는 요소만 셉니다. 필드, 핸들러, 두 종류의 훅은 숨긴 요소도 셉니다. 숨긴 CSRF 필드, 닫힌 대화상자, `display: none` 뒤의 장바구니 서랍도 페이지 동작의 일부이기 때문입니다.
+
+결과에는 `verdict`(`PASS`, `FIX_NOW`, `RISK`), 유지·손실·문구 변경·인정 항목을 담은 `inventory`, `wordCount`, `findings`, 그리고 `redesign-kept-<inventory>` 검사용 `evidence`와 `results`가 들어 있습니다. 기록하려면 `revisionPreservation: true`(와 같은 `productType`)로 `get_design_audit_plan`을 호출하세요. 이 계획에는 이 검사들만 들어 있어서 `validate_design_audit_result`가 evidence와 results를 그대로 받습니다. `revisionPreservation`이 없는 계획은 검사와 hash가 바뀌지 않습니다.
+
 ## 감사 결과 계약
 
 `get_design_audit_plan`은 이제 catalog version/hash와 결정론적 `planHash`를 담은 `identity`를
@@ -460,7 +492,7 @@ webstylebook://design-md/{id}
 `NOT_APPLICABLE`, 필수 증거가 없거나 실패 증거와 모순되는 `PASS`를 거부합니다. 누락된
 결과는 숨기지 않고 `NOT_VERIFIED`로 구체화합니다. `includeGroups`에 `structure`를 넣고 `styleId`를 주면,
 plan에 금지 패턴마다 자동 검사가 1개씩 붙고, `productType`을 주면 필수 요소마다 1개씩 더 붙습니다. `audit_page_structure`는 이 검사 id에 맞는 evidence와
-results를 돌려주고, validator는 그대로 받습니다. 재검증 가능한 비교를 위해 plan,
+results를 돌려주고, validator는 그대로 받습니다. `revisionPreservation: true`를 주면 plan에는 `compare_page_revisions`가 답하는 `redesign-kept-*` 검사만 들어갑니다. 재검증 가능한 비교를 위해 plan,
 evidence bundle, 정규화된 result의 content-addressed hash도 반환합니다. 이 툴은 artifact를
 직접 열지 않으며 계약 유효성을 디자인 품질 점수로 바꾸지 않습니다.
 
