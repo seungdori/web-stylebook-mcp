@@ -37,7 +37,6 @@ export interface DesignMd {
   sourceHash: string;
 }
 
-/** DESIGN.md token names, in file order, for the compose_design_tokens color roles. */
 const COLOR_NAMES: ReadonlyArray<readonly [string, ColorRole]> = [
   ['primary', 'text'], ['on-primary', 'textInverse'], ['secondary', 'textMuted'],
   ['surface', 'canvas'], ['surface-container', 'surface'], ['surface-container-high', 'surfaceRaised'], ['surface-variant', 'surfaceMuted'],
@@ -286,7 +285,6 @@ interface TypeLevel { name: string; props: Array<[string, YamlNode]>; notes: str
 interface Component { name: string; fg?: ColorRole; bg: ColorRole; note?: string }
 interface SectionDraft { section: DesignMdSection; prose: string[]; tokens?: YamlMap; fixed?: string[]; omitReason?: string }
 
-/** A px, em, or rem dimension; pt converts to px. Null when the value has no such form. */
 function dimension(value: string | number): string | null {
   if (typeof value === 'number') return `${value}px`;
   const trimmed = value.trim();
@@ -303,9 +301,19 @@ function selected(set: TokenSetResult): { tokens: DesignTokens; spec?: ResolvedV
   return { tokens, ...(spec ? { spec } : {}), mode: spec?.mode ?? (set.colorMode === 'dark' ? 'dark' : 'light') };
 }
 
+function hexColor(value: string): string {
+  const rgb = /^rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*(?:,\s*(\d*\.?\d+)\s*)?\)$/i.exec(value.trim());
+  if (!rgb) return value;
+  const channels = rgb.slice(1, 4).map(Number);
+  if (channels.some((channel) => channel > 255)) return value;
+  const alpha = rgb[4] === undefined ? 1 : Math.min(1, Number(rgb[4]));
+  const hex = (n: number) => n.toString(16).padStart(2, '0');
+  return `#${channels.map(hex).join('')}${alpha < 1 ? hex(Math.round(alpha * 255)) : ''}`;
+}
+
 function colorTokens(tokens: DesignTokens, spec: ResolvedVisualContract | undefined): ColorToken[] {
   const source = (spec?.colors ?? tokens.color) as Partial<Record<ColorRole, string>>;
-  return COLOR_NAMES.flatMap(([name, role]) => (source[role] ? [{ name, role, value: source[role]! }] : []));
+  return COLOR_NAMES.flatMap(([name, role]) => (source[role] ? [{ name, role, value: hexColor(source[role]!) }] : []));
 }
 
 function typeLevels(tokens: DesignTokens, spec: ResolvedVisualContract | undefined, label: Labels, extras: Set<keyof Labels['lossy']['typeProps']>, units: string[]): TypeLevel[] {
@@ -431,7 +439,6 @@ function componentMap(list: readonly Component[], nameOf: (role: ColorRole) => s
   ]] as const);
 }
 
-/** Converts a composed token set to a DESIGN.md (google-labs-code/design.md, version alpha). */
 export function tokenSetToDesignMd(set: TokenSetResult, input: ComposeDesignTokensInput, repo: CatalogRepository): DesignMd {
   const style = repo.getStyle(set.primaryStyleId);
   if (!style) throw new Error(`unknown style '${set.primaryStyleId}'`);

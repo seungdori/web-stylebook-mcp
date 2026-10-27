@@ -385,7 +385,7 @@ The shared runtime includes seven portable MIT sources, including `fontSources.t
 
 - `designMd.tokenPlacement`: `front-matter` (default) puts every token in one YAML block at the top. `interleaved` keeps only `name` and `description` there and puts each token group in a YAML block inside its section.
 - `includeProse`, `includeDoDont`, and `includeStructure` (all `true` by default) control the prose, the Do's and Don'ts built from the style's bans and the banned page patterns, and the page structure in Layout. `productType` adds that product type's must-haves to Layout.
-- Colors use DESIGN.md names: `primary` is the text color, `surface` the page background, then `accent`, `on-accent`, `surface-container`, `outline`, and so on. The Colors prose names the `compose_design_tokens` role behind each one. Components reference tokens, for example `{colors.action-primary}`. Dimensions are px, em, or rem only, and fluid type keeps its maximum size.
+- Colors use DESIGN.md names: `primary` is the text color, `surface` the page background, then `accent`, `on-accent`, `surface-container`, `outline`, and so on. The Colors prose names the `compose_design_tokens` role behind each one. Color values are hex; translucent colors become 8-digit hex. Components reference tokens, for example `{colors.action-primary}`. Dimensions are px, em, or rem only, and fluid type keeps its maximum size.
 - The result also has `sections`, `omitted` (sections left out, each with a reason), `lossy` (values DESIGN.md has no key for, such as a second color mode, status colors, motion, and shadows), `specVersion`, and `sourceHash`. The same input returns the same bytes.
 - `webstylebook://design-md/{id}` serves the same file for one style from its pinned visual contract. Optional query parameters: `locale`, `mode`, `placement`.
 
@@ -455,7 +455,7 @@ Redesigns quietly drop links, form fields, handlers, the selectors a script quer
 
 | Inventory | What is compared | When it is lost |
 |---|---|---|
-| links | `a[href]`, with scheme and host lowercased and query parameters sorted | FIX_NOW, major |
+| links | `a[href]`, with scheme and host lowercased, a trailing slash dropped, and query parameters sorted | FIX_NOW, major |
 | fields | `input`, `select`, `textarea` by `name` (else `id`), and whether each keeps a label | FIX_NOW, major |
 | handlers | form action and method, `formaction`, inline `on*` attributes | FIX_NOW, major |
 | test hooks | `data-testid`, `data-test`, `data-cy` | FIX_NOW, minor |

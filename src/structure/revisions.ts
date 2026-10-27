@@ -46,11 +46,9 @@ export interface RevisionCheckDef {
   groupId: 'structure' | 'behavior';
   severity: AuditSeverity;
   applicability: AuditApplicability;
-  /** The verdict for an unacknowledged loss. */
   loss: 'FIX_NOW' | 'RISK';
 }
 
-/** One check per inventory; check ids are `redesign-kept-<inventory>`. */
 export const REVISION_CHECKS: readonly RevisionCheckDef[] = [
   { id: 'redesign-kept-links', inventory: 'links', kind: 'link', groupId: 'structure', severity: 'major', applicability: 'always', loss: 'FIX_NOW' },
   { id: 'redesign-kept-fields', inventory: 'fields', kind: 'field', groupId: 'behavior', severity: 'major', applicability: 'always', loss: 'FIX_NOW' },
@@ -64,7 +62,6 @@ export const REVISION_CHECKS: readonly RevisionCheckDef[] = [
   { id: 'redesign-kept-must-haves', inventory: 'mustHaves', kind: 'must-have', groupId: 'structure', severity: 'major', applicability: 'always', loss: 'FIX_NOW' },
 ];
 
-/** The checks a revision plan holds: the must-have check only with a productType. */
 export function revisionChecks(productType?: ProductType): RevisionCheckDef[] {
   return REVISION_CHECKS.filter((check) => check.kind !== 'must-have' || productType !== undefined);
 }
@@ -163,7 +160,6 @@ export interface ComparePageRevisionsResult {
   guidance: string[];
 }
 
-/** `key` matches items across the two pages; `shown` is how the item is reported and acknowledged. */
 interface Item { key: string; shown: string; label: string; element: DomElement | null; level?: number }
 type Inventory = Map<string, Item[]>;
 
@@ -344,7 +340,6 @@ function validate(input: ComparePageRevisionsInput): void {
   }
 }
 
-/** Lowercased scheme and host and sorted query parameters; relative and absolute URLs stay distinct. Null for no target. */
 export function normalizeHref(raw: string): string | null {
   const href = raw.trim();
   if (!href || href === '#' || /^javascript:/i.test(href)) return null;
@@ -355,7 +350,9 @@ export function normalizeHref(raw: string): string | null {
   let path = queryAt >= 0 ? beforeHash.slice(0, queryAt) : beforeHash;
   const query = queryAt >= 0 ? beforeHash.slice(queryAt + 1) : '';
   const origin = /^([a-z][a-z0-9+.-]*:)(\/\/[^/?#]*)?/i.exec(path);
-  if (origin) path = origin[1]!.toLowerCase() + (origin[2] ?? '').toLowerCase() + path.slice(origin[0].length);
+  const prefix = origin ? origin[1]!.toLowerCase() + (origin[2] ?? '').toLowerCase() : '';
+  const rest = origin ? path.slice(origin[0].length) : path;
+  path = prefix + (rest.length > 1 ? rest.replace(/\/+$/, '') || '/' : rest || (origin?.[2] ? '/' : ''));
   const params = query ? query.split('&').filter(Boolean).sort() : [];
   return `${path}${params.length ? `?${params.join('&')}` : ''}${hash}`;
 }
@@ -390,7 +387,7 @@ function fieldLabel(page: PageModel, field: DomElement): string {
   for (let node = field.parent; node && node.tag !== '#document'; node = node.parent) {
     if (node.tag === 'label') return collapse(textContent(node));
   }
-  return collapse(field.attrs.get('title') ?? field.attrs.get('placeholder') ?? '');
+  return collapse(field.attrs.get('title') ?? '');
 }
 
 function add(inventory: Inventory, entry: Omit<Item, 'shown'> & { shown?: string }): void {
@@ -508,7 +505,6 @@ function evidenceIdFor(targetId: string, checkId: string, phase: 'before' | 'aft
   return id.length <= EVIDENCE_ID_MAX ? id : `revision:${stableHashOf(targetId).slice(7, 23)}:${checkId}:${phase}`;
 }
 
-/** Pairs headings lost from the original with headings new in the redesign, level by level, in document order. */
 function pairReworded(lost: Item[], added: Item[]): Array<[Item, Item]> {
   const pairs: Array<[Item, Item]> = [];
   for (const level of [1, 2, 3]) {
@@ -566,10 +562,20 @@ export function comparePageRevisions(input: ComparePageRevisionsInput, repo: Cat
     }
     const addedItems = [...to].filter(([key]) => !from.has(key)).map(([, items]) => items[0]!);
     const pairs = kind === 'heading' ? pairReworded(lostItems, addedItems) : [];
+    if (kind === 'landmark') {
+      const typeOf = (item: Item) => item.key.split(' ')[0];
+      for (const item of [...lostItems]) {
+        const renamed = addedItems.findIndex((candidate) => typeOf(candidate) === typeOf(item));
+        if (renamed < 0) continue;
+        addedItems.splice(renamed, 1);
+        lostItems.splice(lostItems.indexOf(item), 1);
+        count.kept += 1;
+      }
+    }
     for (const item of lostItems) {
       const pair = pairs.find(([from]) => from === item);
       if (pair) {
-        if (acknowledge(kind, [item.shown, item.key], 'reworded')) count.acknowledged += 1;
+        if (acknowledge(kind, [item.shown, item.key], 'reworded') || acknowledge(kind, [item.shown, item.key], 'dropped')) count.acknowledged += 1;
         else count.reworded.push({ key: item.shown, after: pair[1].shown });
         continue;
       }
@@ -636,13 +642,16 @@ export function comparePageRevisions(input: ComparePageRevisionsInput, repo: Cat
       || check.inventory === 'landmarks' || check.inventory === 'words' || check.inventory === 'mustHaves';
     if (truncated) notVerified.push(...truncatedNotes);
     if (exhausted && visibility) notVerified.push(...exhaustedNotes);
+    // An item missing from a page that was not fully read may still be there, so its loss is a risk, not a defect.
+    const uncertain = after.page.html.truncated || (exhausted && visibility) || (check.inventory === 'scriptHooks' && hooksAfter.exhausted);
+    const loss = uncertain ? 'RISK' : check.loss;
     if (check.inventory === 'words') {
-      if (shrunk) finding(check.loss, 'shrunk', [label.shrunk(ratio!)], label.fixes.words);
+      if (shrunk) finding(loss, 'shrunk', [label.shrunk(ratio!)], label.fixes.words);
       rationale = label.words(before.words, after.words, ratio);
     } else {
       const count = inventory[check.inventory];
       const kind = check.kind as RevisionKind;
-      finding(check.loss, 'dropped', count.lost, label.fixes[kind], lostLocations.get(check.inventory));
+      finding(loss, 'dropped', count.lost, label.fixes[kind], lostLocations.get(check.inventory));
       finding('RISK', 'reworded', count.reworded.map((entry) => entry.key), label.fixes.reworded);
       finding('RISK', 'acknowledgement', shortOnes.filter((entry) => entry.kind === kind).map((entry) => entry.key), label.fixes.short);
       rationale = check.inventory === 'mustHaves' ? label.mustHaves(count.lost.length, count.before) : label.counts(label.inventory[check.inventory], count);

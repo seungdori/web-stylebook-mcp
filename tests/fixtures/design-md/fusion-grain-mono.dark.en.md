@@ -5,13 +5,13 @@ description: "Film grain darkroom aesthetic meets typewriter manuscript — vint
 colors:
   primary: "#f1eadf"
   on-primary: "#15100d"
-  secondary: "rgba(241, 234, 223, 0.58)"
+  secondary: "#f1eadf94"
   surface: "#15100d"
   surface-container: "#201915"
   surface-container-high: "#201915"
   surface-variant: "#201915"
   outline: "#f1eadf"
-  outline-variant: "rgba(241, 234, 223, 0.14)"
+  outline-variant: "#f1eadf24"
   accent: "#d2927b"
   on-accent: "#000000"
   accent-secondary: "#201915"
@@ -130,13 +130,13 @@ Token names follow DESIGN.md conventions; the name in parentheses is the compose
 
 - **primary** (text) `#f1eadf`: Body text and headings.
 - **on-primary** (textInverse) `#15100d`: Text on a primary (ink) fill.
-- **secondary** (textMuted) `rgba(241, 234, 223, 0.58)`: Secondary text: captions, metadata, helper text.
+- **secondary** (textMuted) `#f1eadf94`: Secondary text: captions, metadata, helper text.
 - **surface** (canvas) `#15100d`: Page background.
 - **surface-container** (surface) `#201915`: Panels and cards.
 - **surface-container-high** (surfaceRaised) `#201915`: Raised surfaces such as inputs, menus, and popovers.
 - **surface-variant** (surfaceMuted) `#201915`: Muted fills such as hover rows, wells, and disabled areas.
 - **outline** (borderStrong) `#f1eadf`: Control boundaries that must stay visible.
-- **outline-variant** (border) `rgba(241, 234, 223, 0.14)`: Dividers and decorative rules.
+- **outline-variant** (border) `#f1eadf24`: Dividers and decorative rules.
 - **accent** (accent) `#d2927b`: The style's identity accent.
 - **on-accent** (accentText) `#000000`: Text on the accent.
 - **accent-secondary** (accentSecondary) `#201915`: Secondary accent for selection and secondary surfaces, not the primary action.

@@ -35,7 +35,6 @@ function lines(map: YamlMap, indent: number, out: string[]): void {
   }
 }
 
-/** Block-style YAML for string-keyed maps of strings and numbers, in the given key order. */
 export function toYaml(map: YamlMap): string {
   const out: string[] = [];
   lines(map, 0, out);

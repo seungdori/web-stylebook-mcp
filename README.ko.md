@@ -396,7 +396,7 @@ MCP 설정에 추가:
 
 - `designMd.tokenPlacement`: `front-matter`(기본값)는 모든 토큰을 맨 위 YAML 블록 하나에 넣습니다. `interleaved`는 그 블록에 `name`과 `description`만 두고, 토큰 그룹은 각 섹션 안의 YAML 블록에 넣습니다.
 - `includeProse`, `includeDoDont`, `includeStructure`(모두 기본값 `true`)는 산문, 스타일 금지 항목과 금지 페이지 패턴으로 만든 Do's and Don'ts, Layout의 페이지 구조를 켜고 끕니다. `productType`을 주면 그 제품 유형의 필수 요소를 Layout에 적습니다.
-- 색 이름은 DESIGN.md 관례를 따릅니다. `primary`는 글자색, `surface`는 페이지 배경이고, 그다음 `accent`, `on-accent`, `surface-container`, `outline` 등이 옵니다. Colors 산문에 각 이름의 `compose_design_tokens` 역할을 적습니다. 컴포넌트는 `{colors.action-primary}`처럼 토큰을 참조합니다. 치수는 px, em, rem만 쓰고, 유동 크기 글자는 최댓값을 씁니다.
+- 색 이름은 DESIGN.md 관례를 따릅니다. `primary`는 글자색, `surface`는 페이지 배경이고, 그다음 `accent`, `on-accent`, `surface-container`, `outline` 등이 옵니다. Colors 산문에 각 이름의 `compose_design_tokens` 역할을 적습니다. 색 값은 hex이고, 반투명 색은 8자리 hex로 바꿉니다. 컴포넌트는 `{colors.action-primary}`처럼 토큰을 참조합니다. 치수는 px, em, rem만 쓰고, 유동 크기 글자는 최댓값을 씁니다.
 - 결과에는 `sections`, `omitted`(뺀 섹션과 이유), `lossy`(DESIGN.md에 키가 없는 값: 두 번째 색상 모드, 상태 색, 모션, 그림자 등), `specVersion`, `sourceHash`도 들어 있습니다. 입력이 같으면 출력 바이트도 같습니다.
 - `webstylebook://design-md/{id}`는 스타일 하나의 같은 파일을 고정한 시각 명세로 만들어 돌려줍니다. 선택 쿼리: `locale`, `mode`, `placement`.
 
@@ -464,7 +464,7 @@ webstylebook://design-md/{id}
 
 | 인벤토리 | 비교 대상 | 사라지면 |
 |---|---|---|
-| 링크 | `a[href]`. scheme과 host는 소문자로, 쿼리 인자는 정렬해 비교 | FIX_NOW, major |
+| 링크 | `a[href]`. scheme과 host는 소문자로 바꾸고, 끝의 슬래시는 떼고, 쿼리 인자는 정렬해 비교 | FIX_NOW, major |
 | 필드 | `input`, `select`, `textarea`를 `name`(없으면 `id`)으로 비교하고 라벨이 남았는지 확인 | FIX_NOW, major |
 | 핸들러 | 폼 action과 method, `formaction`, 인라인 `on*` 속성 | FIX_NOW, major |
 | 테스트 훅 | `data-testid`, `data-test`, `data-cy` | FIX_NOW, minor |

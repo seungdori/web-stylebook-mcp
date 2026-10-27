@@ -13,7 +13,6 @@ export interface ComposeDesignTokensInput {
   secondaryStyleId?: string;
   accentOverride?: string;
   format: TokenFormat | 'design-md';
-  /** Only with format "design-md". */
   designMd?: DesignMdOptions;
   density?: 'comfortable' | 'compact';
   colorMode?: 'light' | 'dark' | 'both';

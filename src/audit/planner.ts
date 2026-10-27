@@ -24,7 +24,6 @@ export const AUDIT_GROUP_IDS = [
 export type AuditGroupId = (typeof AUDIT_GROUP_IDS)[number];
 /** `structure` is opt-in so that plans requested without includeGroups keep their earlier checks and hash. */
 export const DEFAULT_AUDIT_GROUP_IDS: readonly AuditGroupId[] = AUDIT_GROUP_IDS.filter((group) => group !== 'structure');
-/** The groups the redesign-kept checks belong to; a revisionPreservation plan holds nothing else. */
 export const REVISION_GROUP_IDS: readonly AuditGroupId[] = ['structure', 'behavior'];
 
 export const AUDIT_VERDICTS = [
@@ -43,7 +42,6 @@ export interface DesignAuditPlanInput {
   domainSignals?: string[];
   includeGroups?: AuditGroupId[];
   includeDocumentation?: boolean;
-  /** A plan of only the redesign-kept checks that compare_page_revisions answers. */
   revisionPreservation?: boolean;
   locale?: Lang;
 }
@@ -127,7 +125,6 @@ export interface DesignAuditPlan {
     excludedChecks: number;
     /** Present only when the structure group is included; those checks come from the structure ruleset, not the catalog. */
     structureChecks?: number;
-    /** Present only in a revisionPreservation plan. */
     revisionChecks?: number;
   };
   resourceUris: string[];

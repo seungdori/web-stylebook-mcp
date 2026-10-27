@@ -165,11 +165,16 @@ describe('compare_page_revisions rules', () => {
     expect(result.inventory.mustHaves.before).toBeGreaterThan(0);
   });
 
-  it('normalizes hrefs: sorted query, lowercase scheme and host, fragment kept, relative and absolute distinct', () => {
+  it('normalizes hrefs: sorted query, lowercase scheme and host, no trailing slash, fragment kept, relative and absolute distinct', () => {
     expect(normalizeHref('/docs?v=2&section=api#auth')).toBe('/docs?section=api&v=2#auth');
     expect(normalizeHref('HTTPS://Example.COM/Path?b=1&a=2')).toBe('https://example.com/Path?a=2&b=1');
     expect(normalizeHref('https://example.com/pricing')).not.toBe(normalizeHref('/pricing'));
-    expect(normalizeHref('/pricing/')).not.toBe(normalizeHref('/pricing'));
+    expect(normalizeHref('/pricing/')).toBe('/pricing');
+    expect(normalizeHref('https://example.com/pricing/?b=1')).toBe('https://example.com/pricing?b=1');
+    expect(normalizeHref('/')).toBe('/');
+    expect(normalizeHref('https://Example.com/')).toBe('https://example.com/');
+    expect(normalizeHref('https://example.com')).toBe('https://example.com/');
+    expect(normalizeHref('https://example.com?a=1')).toBe('https://example.com/?a=1');
     for (const empty of ['', '  ', '#', 'javascript:void(0)', 'JavaScript:go()']) expect(normalizeHref(empty)).toBeNull();
     expect(normalizeHref('mailto:Team@Example.com')).toBe('mailto:Team@Example.com');
   });
@@ -184,6 +189,39 @@ describe('compare_page_revisions rules', () => {
     expect(result.inventory.handlers.lost).toEqual(['onclick: openDrawer()']);
     expect(result.inventory.testHooks.lost).toEqual(['data-testid=drawer']);
     expect(result.inventory.scriptHooks.lost).toEqual(['[data-testid="drawer"]']);
+  });
+
+  it('keeps a landmark whose aria-label was added or changed, and still reports one that was removed', () => {
+    const before = '<nav><a href="/">Home</a></nav><main><h1>Plan</h1></main><nav aria-label="Footer"><a href="/terms">Terms</a></nav>';
+    const relabeled = compare({ before: { html: before }, after: { html: before.replace('<nav>', '<nav aria-label="Primary">') } });
+    expect(relabeled.inventory.landmarks).toMatchObject({ kept: 3, lost: [] });
+    const removed = compare({ before: { html: before }, after: { html: before.replace(/<nav aria-label="Footer">.*<\/nav>$/, '<p><a href="/terms">Terms</a></p>') } });
+    expect(removed.inventory.landmarks.lost).toEqual(['nav "Footer"']);
+  });
+
+  it('reports a loss on a redesigned page that was only partly parsed as a risk, not a defect', () => {
+    const filler = '<i>x</i>'.repeat(40_010);
+    const before = page('<a href="/late">Late</a>');
+    const after = page(`${filler}<a href="/late">Late</a>`);
+    const result = compare({ before: { html: before }, after: { html: after } });
+    expect(result.results.find((r) => r.checkId === 'redesign-kept-links')!.verdict).toBe('NOT_VERIFIED');
+    expect(result.findings.find((f) => f.checkId === 'redesign-kept-links')).toMatchObject({ verdict: 'RISK', change: 'dropped', keys: ['/late'] });
+    expect(result.verdict).toBe('RISK');
+  });
+
+  it('lets a dropped acknowledgement clear a removed heading that was paired with a new one', () => {
+    const before = page('<h2>Testimonials</h2><p>a</p><h2>FAQ</h2><p>b</p>');
+    const after = page('<h2>FAQ</h2><p>b</p><h2>Integrations</h2><p>c</p>');
+    expect(compare({ before: { html: before }, after: { html: after } }).inventory.headings.reworded).toEqual([{ key: 'Testimonials', after: 'Integrations' }]);
+    const result = compare({ before: { html: before }, after: { html: after }, acknowledged: [{ kind: 'heading', key: 'Testimonials', change: 'dropped', reason: 'Testimonials were removed on purpose' }] });
+    expect(result.verdict).toBe('PASS');
+    expect(result.acknowledgements).toEqual({ applied: 1, rejected: [] });
+  });
+
+  it('reports a field whose label was replaced by a placeholder', () => {
+    const before = page('<form><label for="e">Email</label><input id="e" name="email"></form>');
+    const after = page('<form><input id="e" name="email" placeholder="Email"></form>');
+    expect(compare({ before: { html: before }, after: { html: after } }).inventory.fields.lost).toEqual(['name=email (label)']);
   });
 
   it('counts Korean, Chinese, and Japanese text by character and other text by word', () => {

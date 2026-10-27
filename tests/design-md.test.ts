@@ -13,7 +13,6 @@ const designMd = (input: Omit<ComposeDesignTokensInput, 'format'>) => composeDes
 
 type Tree = { [key: string]: string | number | Tree };
 
-/** Parses the block-map YAML subset the exporter writes; anything else throws. */
 function parseYaml(source: string): Tree {
   const root: Tree = {};
   const stack: Array<{ indent: number; map: Tree }> = [{ indent: -1, map: root }];
@@ -38,7 +37,6 @@ function parseYaml(source: string): Tree {
   return root;
 }
 
-/** Front matter and every ```yaml block merged into one tree, as the DESIGN.md spec reads them. */
 function readDesignMd(content: string) {
   const front = /^---\n([\s\S]*?)\n---\n/.exec(content);
   if (!front) throw new Error('missing front matter');
@@ -59,7 +57,7 @@ function leaves(tree: Tree, prefix = ''): Array<[string, string | number]> {
 }
 
 const DIMENSION = /^-?\d*\.?\d+(?:px|em|rem)$/;
-const COLOR = /^(?:#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})|rgba?\([^)]*\))$/i;
+const COLOR = /^#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
 
 function expectSpecShape(content: string, sections: readonly string[]) {
   const { tree, headings } = readDesignMd(content);
@@ -159,6 +157,13 @@ describe('DESIGN.md format', () => {
     expect(colors['on-accent']).toBe(spec.colors.accentText);
     expect(colors).not.toHaveProperty('positive');
     expect((tree.components as Tree)['button-primary']).toEqual({ backgroundColor: '{colors.action-primary}', textColor: '{colors.on-action-primary}' });
+  });
+
+  it('writes translucent rgba() colors as 8-digit hex', () => {
+    const spec = composeDesignTokens({ primaryStyleId: 'cyberpunk-glitch', contract, format: 'json' }, repo).visualContract as { colors: Record<string, string> };
+    expect(spec.colors.surface).toBe('rgba(217, 70, 239, 0.05)');
+    const colors = readDesignMd(designMd({ primaryStyleId: 'cyberpunk-glitch', contract }).content).tree.colors as Tree;
+    expect(colors['surface-container']).toBe('#d946ef0d');
   });
 
   it('keeps fluid type at its maximum and reports what DESIGN.md cannot hold', () => {
