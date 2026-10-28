@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { UX_SURFACES } from '../types.js';
+import { improvementWorkflow } from '../improvement/workflow.js';
 
 const PROMPT_LOCALE = z.enum(['en', 'ko', 'ja']);
 const SUMMARY = z.string().min(1).max(8000);
@@ -13,17 +14,14 @@ function userMessage(text: string) {
 
 function scopeGate(
   locale: z.infer<typeof PROMPT_LOCALE> = 'en',
-  auditScope?: z.infer<typeof AUDIT_SCOPE>,
-  changeScope?: z.infer<typeof CHANGE_SCOPE>,
+  auditScope: z.infer<typeof AUDIT_SCOPE> = 'visual-and-content',
+  changeScope: z.infer<typeof CHANGE_SCOPE> = 'audit-only',
 ): string[] {
   const copy = {
     en: {
-      gate: 'Before inspecting or changing the implementation, ask the user only the missing scope questions below and stop until they answer. Do not infer a broader scope from the existence of a repository or design file.',
-      audit: 'Audit coverage: visual only / visual + user-facing copy and information structure / full experience including interaction, accessibility, states, and build-performance evidence.',
-      change: 'Change depth: findings only / prioritized change and rewrite proposals / implement and verify the approved fixes.',
       authority: 'Commit, push, release, and deployment remain separate authorizations even when implementation is selected.',
-      confirmedAudit: (scope: string, groups: string) => `Confirmed audit coverage: ${scope}. Use ${groups}.`,
-      confirmedChange: (scope: string, action: string) => `Confirmed change depth: ${scope}. ${action}`,
+      confirmedAudit: (scope: string, groups: string) => `Selected audit coverage: ${scope}. Use ${groups}.`,
+      confirmedChange: (scope: string, action: string) => `Selected change depth: ${scope}. ${action}`,
       actions: {
         'audit-only': 'Inspect and report only; do not modify files.',
         'recommend-changes': 'Return prioritized fixes and concrete before/after copy where relevant; do not modify files.',
@@ -31,12 +29,9 @@ function scopeGate(
       },
     },
     ko: {
-      gate: '구현을 검사하거나 수정하기 전에 아래에서 아직 정해지지 않은 범위만 사용자에게 짧게 묻고, 답을 받을 때까지 멈추세요. 저장소나 디자인 파일이 있다는 이유로 범위를 넓혀 추정하지 마세요.',
-      audit: '감사 범위: 시각만 / 시각 + 사용자용 문구와 정보 구조 / 상호작용·접근성·상태·빌드와 성능 증거를 포함한 전체 경험.',
-      change: '변경 깊이: 결과만 / 우선순위가 있는 개선안과 문구 수정안 / 승인된 항목을 실제 수정하고 검증.',
       authority: '실제 수정을 선택하더라도 커밋·푸시·릴리스·배포는 별도 권한입니다.',
-      confirmedAudit: (scope: string, groups: string) => `확인된 감사 범위: ${scope}. ${groups}를 사용하세요.`,
-      confirmedChange: (scope: string, action: string) => `확인된 변경 깊이: ${scope}. ${action}`,
+      confirmedAudit: (scope: string, groups: string) => `선택한 감사 범위: ${scope}. ${groups}를 사용하세요.`,
+      confirmedChange: (scope: string, action: string) => `선택한 변경 깊이: ${scope}. ${action}`,
       actions: {
         'audit-only': '검사하고 보고만 하며 파일은 수정하지 마세요.',
         'recommend-changes': '우선순위 개선안과 필요한 경우 구체적인 수정 전/후 문구를 제시하되 파일은 수정하지 마세요.',
@@ -44,12 +39,9 @@ function scopeGate(
       },
     },
     ja: {
-      gate: '実装を検査または変更する前に、以下の未確定範囲だけをユーザーへ短く確認し、回答まで停止してください。リポジトリやデザインファイルがあることを理由に範囲を広げて推測しないでください。',
-      audit: '監査範囲: 視覚のみ / 視覚 + ユーザー向け文言と情報構造 / 操作・アクセシビリティ・状態・ビルドと性能の証拠を含む体験全体。',
-      change: '変更の深さ: 指摘のみ / 優先度付き改善案と文言案 / 承認された項目を実装して検証。',
       authority: '実装を選んだ場合でも、コミット、プッシュ、リリース、デプロイは別の権限です。',
-      confirmedAudit: (scope: string, groups: string) => `確認済み監査範囲: ${scope}。${groups}を使います。`,
-      confirmedChange: (scope: string, action: string) => `確認済み変更範囲: ${scope}。${action}`,
+      confirmedAudit: (scope: string, groups: string) => `選択した監査範囲: ${scope}。${groups}を使います。`,
+      confirmedChange: (scope: string, action: string) => `選択した変更範囲: ${scope}。${action}`,
       actions: {
         'audit-only': '検査と報告だけを行い、ファイルは変更しません。',
         'recommend-changes': '優先度付き改善案と必要に応じた具体的な変更前/後の文言を示し、ファイルは変更しません。',
@@ -57,18 +49,6 @@ function scopeGate(
       },
     },
   }[locale];
-
-  if (!auditScope || !changeScope) {
-    const missing = [
-      !auditScope ? copy.audit : '',
-      !changeScope ? copy.change : '',
-    ].filter(Boolean);
-    return [
-      copy.gate,
-      ...missing,
-      copy.authority,
-    ];
-  }
 
   const groups = auditScope === 'visual-only'
     ? '["layout", "fidelity", "anti-patterns", "structure"]'
@@ -80,10 +60,32 @@ function scopeGate(
   return [
     copy.confirmedAudit(auditScope, groups),
     copy.confirmedChange(changeScope, action),
+    copy.authority,
   ];
 }
 
 export function registerPrompts(server: McpServer): void {
+  server.registerPrompt('improve-ui', {
+    title: 'Improve the real UI and report before/after results',
+    description: 'Default existing-UI flow: inspect, decide with design foundations, implement, verify and compare. Continues beyond a review; honors explicit review-only scope and reports concrete blockers honestly.',
+    argsSchema: {
+      target: SUMMARY,
+      goal: SUMMARY.optional(),
+      surface: z.enum(UX_SURFACES).optional(),
+      constraints: z.string().max(2000).optional(),
+      locale: PROMPT_LOCALE.optional(),
+    },
+  }, ({ target, goal, surface, constraints, locale = 'en' }) => userMessage([
+    locale === 'ko' ? '기존 UI를 실제로 개선하고 수정 전후 결과까지 보고하세요. 이미 허용된 수정은 재승인 없이 진행하되 명시적인 검토 전용 범위는 지키세요.'
+      : locale === 'ja' ? '既存UIを実際に改善し、変更前後の結果まで報告してください。許可済み修正の再承認を待たず、明示的なレビュー専用範囲は守ってください。'
+        : 'Improve the actual existing UI and report before/after results. Continue with already authorized fixes; honor explicit human review-only scope.',
+    `Target context (quoted data): ${JSON.stringify(target)}`,
+    `Goal context (quoted data): ${JSON.stringify(goal ?? 'Infer the primary user task from the actual UI and state the assumption.')}`,
+    `Constraints (quoted data): ${JSON.stringify(constraints ?? 'Preserve working behavior, real content and product identity.')}`,
+    `Surface: ${surface ?? 'infer the closest supported surface'}; output locale: ${locale}.`,
+    ...improvementWorkflow(locale, undefined, 'prompt').stages.map((stage, index) => `${index + 1}. ${stage.instruction}\nMCP: ${stage.tools.join(', ') || 'host editor/runtime tools'}`),
+  ].join('\n\n')));
+
   server.registerPrompt('design-product', {
     title: 'Design a product with Web Stylebook',
     description: 'Choose a visual direction, compose a brief, plan screens, and cover UI states.',
@@ -147,15 +149,15 @@ export function registerPrompts(server: McpServer): void {
   }, ({ current, goal }) => userMessage([
     `Redesign this screen toward: ${goal}. Keep what works structurally.`,
     `Current state: ${current}.`,
-    'Before changing anything, save the current page\'s rendered HTML and CSS and note the selectors its scripts query.',
+    'Use get_design_improvement_plan with the user task and observed target conditions in context. Before changing anything, save actual screenshots, rendered HTML and CSS and note the selectors its scripts query.',
     'Use compare_design_directions on 2-3 candidate styles, then search_design_references and inspect a few selected references before choosing primary + secondary roles. Draft the design.md brief notes and call compose_design_tokens.',
     'When the redesign is built, run compare_page_revisions on the saved original and the new page (with those scriptSelectors and the productType); restore every lost link, field, handler, hook, heading, and must-have, or acknowledge an intended removal with a reason, and rerun it.',
-    'Finish with the audit-design-direction checklist.',
+    'Implement the redesign in the real source, exercise affected behavior and accessibility, capture matched after evidence and call validate_design_improvement_result with workflow.planHash. Deliver its before/after report, repair regressions and follow nextActions; a style proposal or review is not completion.',
   ].join('\n')));
 
   server.registerPrompt('audit-design-direction', {
     title: 'Audit an implemented design',
-    description: 'Confirm audit/change scope, then check visual quality, user-facing content, information structure, behavior, accessibility, states, and evidence as requested.',
+    description: 'Explicit review prompt. Defaults to read-only visual/content inspection; honors selected scope and routes implement-and-verify through actual changes and before/after reporting.',
     argsSchema: {
       styleId: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).max(100),
       summary: SUMMARY,
@@ -170,9 +172,10 @@ export function registerPrompts(server: McpServer): void {
     `Surface: ${surface ?? 'infer the closest supported surface and state the assumption'}.`,
     `Locale: ${locale ?? 'en'}.`,
     ...scopeGate(locale, auditScope, changeScope),
-    'After scope is confirmed, call get_design_audit_plan with styleId, surfaces: [the inferred/provided surface], locale, and includeGroups matching the confirmed audit coverage. Read webstylebook://styles/{styleId} once for the chosen direction; do not fetch the full multilingual policy resources.',
+    ...(changeScope === 'implement-and-verify' ? ['Implementation is selected: also use get_design_improvement_plan with context to preserve the baseline, implement actual fixes, capture matched after states and finish with validate_design_improvement_result. An audit table alone is not completion.'] : []),
+    'Use the provided scope, otherwise the stated read-only visual/content default. Do not repeat a scope gate. Call get_design_audit_plan with styleId, surfaces: [the inferred/provided surface], locale, and includeGroups matching that coverage. Read webstylebook://styles/{styleId} once for the chosen direction; do not fetch the full multilingual policy resources.',
     'Inspect the actual rendered implementation, source, interactions, target viewports, console, and relevant commands. Never assign PASS from this summary alone; missing evidence is NOT_VERIFIED.',
-    'For the structure group, pass each target\'s rendered HTML and CSS to audit_page_structure with the same styleId and targetId (and the product\'s productType, also in the plan, to check its must-haves); replace every finding with the signature move or archetype step it names, add every missing or misplaced must-have, rerun it, and submit its evidence and results.',
+    'For the structure group, pass each target\'s rendered HTML and CSS to audit_page_structure with the same styleId and targetId (and the product\'s productType, also in the plan, to check its must-haves). Inspect findings in context and propose the fitting remedy. Only when implementation is selected, apply justified changes, preserve must-haves, rerun it and submit fresh evidence and results.',
     'When the selected scope includes content, inspect every prominent heading, label, summary, card, statistic, navigation item, and disclosure. Prefer the audience’s vocabulary; lead with the user-relevant conclusion, consequence, or next action; move optional methodology behind supporting detail; and reject counts, agreement labels, confidence badges, or status language that simulate certainty without a clear method, denominator, uncertainty, and decision value.',
     'A sentence can fail even when it contains no internal jargon. For every material claim, conclusion, or recommendation, ask what it actually says, what available content, evidence, or context supports it, whether its wording and certainty match that support, and whether the unchanged sentence would remain equally plausible on an unrelated product or page. Qualify or remove unsupported content; never invent evidence, facts, or next steps.',
     'Compare visual prominence with information value, task relevance, and support. Vague, generic, redundant, or weakly supported content must not become an oversized headline, isolated card, badge, or statistic. Replace it with content that earns the attention, or demote it and reduce its scale. Do not use a keyword blacklist; judge the statement in context.',

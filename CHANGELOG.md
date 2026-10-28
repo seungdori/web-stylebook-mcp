@@ -6,6 +6,33 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Existing-UI judgment now explicitly preserves baseline strengths and compares gains with losses
+  in grouping, visible information, continuity and reading comfort. Known regression feedback
+  reopens prior improvement claims; working boundaries and subdued reading surfaces are not
+  removed by default, and redundant visible speaker labels are not treated as added clarity.
+- Default existing-UI execution workflow in `get_design_improvement_plan`: recorded user task and
+  target conditions, immutable baseline capture, conditional design judgment, real host edits,
+  matched verification and before/after reporting. Existing knowledge-only queries remain supported.
+- `validate_design_improvement_result` checks the submitted implementation, capture and verification
+  contract and returns `complete`, `needs-work` or `no-change`, actionable remaining work and a
+  localized Markdown report. Proposals, missing diffs/captures, mismatched conditions, skipped targets,
+  unsupported passes and regressions cannot complete. It does not open artifacts or certify quality.
+- `improve-ui` prompt and `webstylebook://workflows/improve-ui` resource; execution/result schemas and
+  cross-UI examples ship with the skill. Server instructions and fallback agent fragments default
+  improvement requests to actual implementation. Explicit audits remain read-only by default without
+  a compulsory questionnaire; new-direction guidance is a separate skill reference.
+- Research-backed design foundations for improving existing interfaces: 24 entries across 8 categories,
+  48 illustrative applications across 11 UI surfaces, and 30 attributed sources, localized in English,
+  Korean, and Japanese. Each entry includes conditional changes, counterexamples, preservation requirements,
+  and comparison checks. Source-supported concepts, authored applications, and WCAG criterion levels are distinct.
+- `get_design_improvement_plan` retrieves a bounded, deterministic selection with complete text fallback,
+  sources, explicit omitted matches, and a matched before/after implementation protocol. New foundation
+  index, source, and localized detail resources are exposed through `manifest.designFoundations` with a
+  separate content hash. The canonical website catalog remains unchanged. Companion instructions start
+  existing-UI improvements from observed tasks and preserve product identity instead of requiring a new style.
+
 ## [0.14.0] — 2026-10-28
 
 ### Added

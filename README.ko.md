@@ -2,8 +2,8 @@
 
 # web-stylebook-mcp
 
-**AI 코딩 에이전트를 위한 디자인 인텔리전스.** 매번 똑같은 히어로 + 카드 3개는 그만.
-에이전트가 점수화된 디자인 *계약*(방향·인터페이스 디자인 계획·UX 원칙 계획·UI 상태 계획·토큰·근거 기반 감사 계획)을 받아, 근거를 바탕으로 코드를 쓰고 검증합니다.
+**기존 UI를 판단하고, 실제로 고치고, 전후 결과까지 보고하는 디자인 MCP.**
+호스트 AI가 조사된 디자인 지식을 적용해 실제 인터페이스를 수정하고, 영향을 받는 동작을 검증한 뒤 결과를 보고합니다.
 
 [![npm version](https://img.shields.io/npm/v/web-stylebook-mcp?logo=npm&color=cb3837)](https://www.npmjs.com/package/web-stylebook-mcp)
 [![downloads](https://img.shields.io/npm/dm/web-stylebook-mcp?color=cb3837)](https://www.npmjs.com/package/web-stylebook-mcp)
@@ -17,7 +17,7 @@
 
 ---
 
-코딩 에이전트는 *무엇이 어떻게 생겨야 하는지*를 정하지 못해서 매번 똑같은 UI로 도망칩니다 — 히어로 + 카드 3개 + 그라데이션. `web-stylebook-mcp`는 에이전트에게 **디자인 계약**(점수화된 시각 방향, 배치 중심 인터페이스 디자인 계획, 근거 수준이 표시된 UX 원칙 계획, UI 상태 계획, 디자인 토큰)을 건네는 Model Context Protocol 서버이고, [webstylebook.com](https://webstylebook.com)과 동일한 큐레이션 카탈로그에서 가져옵니다. **코드가 아니라 근거**를 돌려줍니다. 코드는 여전히 에이전트가 쓰지만, 이제 무엇을 만들고 무엇을 검증할지 알고 씁니다.
+`web-stylebook-mcp`는 디자인 지식을 실제 수정과 결과 보고로 연결합니다. 기존 화면에서는 원본을 보존하고, 상황에 맞는 수정법을 선택해 실제 소스를 고친 뒤 검증과 전후 비교까지 진행합니다. MCP는 조사된 원론과 제출 증거의 완료 검사를 제공하고, 편집·캡처·관찰은 호스트 AI가 수행합니다. 새 UI에는 [Web Stylebook](https://webstylebook.com)의 시각 방향·UX 원칙·상태 계획·토큰도 사용할 수 있습니다.
 
 API 키 없음. 모델 호출 없음. 네트워크 없음. 프로젝트 파일시스템 접근 없음. **결정적이고, 읽기 전용이며, 완전히 로컬.**
 
@@ -32,7 +32,82 @@ API 키 없음. 모델 호출 없음. 네트워크 없음. 프로젝트 파일�
 | **토큰** | 손으로 고른 hex, 대비는 거의 미확인 | 역할 기반 토큰 + WCAG 대비 경고 |
 | **구조** | 토큰이 기본 템플릿(히어로 + 로고 + 카드 3장)의 색만 바꿈 | 방향마다 레이아웃 아키타입과 시그니처 무브, 그리고 빌드한 페이지에서 템플릿을 잡아내는 감사 |
 | **감사** | 요약만 보고 "좋아 보임" 판정 | 안정적인 검사 ID·심각도·필요 증거·미검증 상태를 갖춘 화면별 감사 계획 |
-| **결과** | 천편일률 AI UI | 에이전트가 근거로 삼아 구현하는 디자인 계약 |
+| **결과** | 지적과 제안에서 끝나는 검토 | 실제 수정·검증·전후 비교를 포함한 결과 보고 |
+
+## 기존 UI를 실제로 개선하기 — 기본 흐름
+
+이제 개선 요청의 기본은 **현재 화면 확인 → 판단 → 실제 수정 → 검증 → 전후 비교·보고**입니다.
+호스트 AI가 실제 UI를 고치고 MCP는 판단 근거와 완료 검사를 제공합니다. 설명이나 리뷰만으로
+끝내지 않습니다. 사용자가 명시한 검토 전용 요청은 읽기만 하며, 새 UI나 새 시각 방향에는 기존
+방향 선택 도구를 사용합니다.
+
+진입점은 `get_design_improvement_plan`입니다. **원론 지식 24개·적용 예시 48개·출처 30개**를
+영어·한국어·일본어로 제공하고, 호스트가 실행할 흐름도 함께 반환합니다. 원본 UI를 캡처한 뒤
+실제 과업과 비교 대상의 조건을 `context`에 기록합니다:
+
+```jsonc
+// → get_design_improvement_plan
+{
+  "surface": "data-table",
+  "concerns": [
+    "scanability",
+    "hierarchy",
+    "consistency"
+  ],
+  "limit": 6,
+  "locale": "ko",
+  "context": {
+    "userTask": "장애 목록에서 먼저 확인할 항목을 찾는다.",
+    "targets": [
+      {
+        "id": "incidents-desktop",
+        "surface": "data-table",
+        "route": "/incidents",
+        "conditions": {
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "theme": "light",
+          "locale": "ko-KR",
+          "state": "populated",
+          "dataKey": "incident-fixture-v1@fixed-clock",
+          "scrollAnchor": "first-row",
+          "zoom": 1,
+          "deviceScaleFactor": 1
+        }
+      }
+    ]
+  }
+}
+```
+
+각 지식은 관찰할 문제, 조건에 맞는 수정, 반례, 보존할 내용, 확인할 결과를 연결합니다.
+맞는 규칙을 적용해 실제 소스를 고치고 제품 정체성과 정상 동작을 보존합니다. 새 스타일 선택은
+필수가 아닙니다. 기본 6개·최대 12개를 반환하며 나머지는 `coverage.omittedIds`로 알려 줍니다.
+`category`·`foundationIds`로 좁힐 수 있고 필터 간에는 AND, 관심사 내부에는 OR를 적용합니다.
+목록은 `webstylebook://foundations`에서 볼 수 있습니다.
+
+수정 후 **`validate_design_improvement_result`**에 반환된 `query`,
+`expectedPlanHash: workflow.planHash`, 실제 캡처·변경 파일과 diff·관찰한 검사·대상별 결과·한계를
+제출합니다. 다음 결과를 반환합니다.
+
+- `complete`: 계획한 모든 대상에 구현과 전후 검증 증거가 갖춰졌습니다.
+- `needs-work`: `nextActions`를 따라 계속 작업합니다. 원본 캡처 누락, 데이터·폰트·화면 크기
+  불일치, 수정 없는 제안, 대상 누락, 근거 없는 통과 판정, 퇴행은 완료로 처리하지 않습니다.
+- `no-change`: 실제 변경·미완료 제안 없이 변화 없음을 검증한 결과입니다. 개선했다고 표현하지 않습니다.
+- `reportMarkdown`: 전후 링크, 무엇을 왜 고쳤는지, 검증·상충점·남은 미검증 항목을 담습니다.
+  호스트가 실제 이미지로 나란히 보기나 전환형 보고서를 만들 수 있습니다.
+
+대상마다 시각·동작·보존·관련 접근성 검사가 필요하며 정적 마크업 비교만으로는 충분하지 않습니다.
+MCP는 제출된 증거의 범위와 일관성을 검사하고 **실제 파일 내용이나 디자인 품질을 독립 인증하지
+않습니다**. 편집·캡처·관찰은 호스트가 수행하며 사용자 조사 결과나 사용성 점수를 꾸며내지 않습니다.
+`context` 없는 지식 조회도 지원하지만 개선 완료로 처리할 수는 없습니다. 커밋·푸시·릴리스·배포에는
+별도 권한이 필요합니다.
+
+[결과 계약과 서로 다른 UI 예시](./skill/web-stylebook-design/references/improvement-result.md),
+[조사 기록](./docs/research/design-foundations.md)을 참고하세요. 기계가 읽는 실행 흐름은
+`webstylebook://workflows/improve-ui`에 있고 `manifest.improvementWorkflow`에서도 찾을 수 있습니다.
 
 ## 직접 판단하는 걸 보세요
 
@@ -234,25 +309,12 @@ API 키 없음. 모델 호출 없음. 네트워크 없음. 프로젝트 파일�
 
 ```mermaid
 flowchart LR
-    A[AI 코딩 에이전트] -->|제품·톤·<br/>밀도·사용빈도| B(web-stylebook-mcp)
-    B --> C{번들된 카탈로그<br/>읽기 전용 · 오프라인}
-    C --> D[recommend_design_direction]
-    C --> E[compare_design_directions]
-    C --> F[get_design_principle_plan]
-    C --> G[get_ux_principle_plan]
-    C --> H[get_ui_state_plan]
-    C --> I[compose_design_tokens]
-    C --> J[get_design_audit_plan]
-    C --> K[search_design_references]
-    C --> L[get_design_reference]
-    C --> M[validate_design_audit_result]
-    C --> N[audit_page_structure]
-    D & E & F & G & H & I & J & K & L -->|디자인 계약<br/>관찰 · 점수 · 사유<br/>배치 · 증거 · 토큰 · 구조| A
-    A -->|빌드한 페이지 HTML · CSS| N
-    N -->|금지 패턴 · 대체 무브<br/>빠진 필수 요소<br/>구조 검사용 증거| A
-    A -->|대상 행렬 · 증거 참조<br/>검사/대상별 판정| M
-    M -->|범위 · 정규화 판정<br/>plan/evidence/result hash| A
-    A -->|근거로<br/>코드 작성| Z[당신의 UI]
+    A[기존 UI + 사용자 과업] --> B[호스트가 원본 캡처]
+    B --> C[get_design_improvement_plan]
+    C --> D[호스트가 실제 수정·검증]
+    D --> E[validate_design_improvement_result]
+    E -->|needs-work| D
+    E -->|complete / no-change| F[전후 비교·결과 보고]
 ```
 
 에이전트가 제품을 설명하면, 서버가 큐레이션 카탈로그를 점수화해 구조화된 근거를 돌려줍니다. 빌드한 뒤에는 에이전트가 페이지 마크업을 구조 감사에 넘깁니다. 구조 감사는 스스로 파일을 읽지 않습니다. 검사 후 validator는 참조된 artifact를 직접 열거나 시각 품질을 판단하지 않고 결과 계약만 검증합니다. 코드는 생성하지 않고, 어떤 것도 기기를 벗어나지 않습니다.
@@ -336,6 +398,8 @@ MCP 설정에 추가:
 
 | 툴 | 받는 것 | 정직한 점 |
 |------|--------------|-----------------|
+| **`get_design_improvement_plan`** | 선택한 원론 지식과 캡처 → 판단 → 구현 → 검증 → 보고 흐름, 대상 조건과 workflow hash | 실제 수정은 호스트가 수행하며 context 없는 호출은 지식 탐색용입니다 |
+| **`validate_design_improvement_result`** | 실제 변경·캡처·검사 참조로 완료 상태, 남은 작업, 정규화 결과와 전후 보고서 반환 | 제출 증거의 범위·일관성을 검사하며 파일 내용이나 디자인 품질을 독립 인증하지 않습니다 |
 | **`recommend_design_direction`** | 사유 코드가 붙은 점수화 스타일 후보, 1위가 2위를 이긴 이유(또는 동점)를 알리는 `ranking`, *이유*가 붙은 **탈락** 스타일, 보조 페어링, 신뢰도, 후보별 페이지 `structure`, 제품 유형의 필수 요소와 각 위치를 담은 `mustHaves` | 최종 선택은 모델이 — 이건 근거 제공자입니다 |
 | **`compare_design_directions`** | 2~4개 방향을 제품 적합성·반복 사용·밀도·신뢰·차별성·접근성 리스크·모션·유지보수로 비교 | 정답 하나를 선언하지 않습니다 |
 | **`search_design_references`** | 실제 디자인 레퍼런스를 텍스트·카테고리·태그로 제한 검색하고 간결한 다국어 관찰 결과 제공 | 스크린샷이나 브랜드 자산 복제가 아니라 출처가 붙은 연구 요약을 반환합니다 |
@@ -421,25 +485,30 @@ webstylebook://motion · /motion/{id}
 webstylebook://components · /components/{id}
 webstylebook://principles · /principles/{id}
 webstylebook://design-principles · /design-principles/{id}
+webstylebook://foundations · /foundations/{id}?locale=ko · /foundations/sources
 webstylebook://states/surfaces · /states/{surface} · /states/{surface}/{state}
 webstylebook://products · /products/{id}
 webstylebook://references · /references/{id}
 webstylebook://policies/anti-patterns · /policies/verification · /policies/audit-checks
 webstylebook://structure/banned-patterns · /structure/must-haves
 webstylebook://design-md/{id}
+webstylebook://workflows/improve-ui
 ```
 
 스타일 상세에는 `locale`, `mode`, 기대하는 `revision`을 쿼리로 지정할 수 있습니다. 예: `webstylebook://styles/brutalist-grid?locale=ko&mode=light`. 선택한 언어와 모드 1개의 명세를 반환하며, 지원하지 않는 값·중복 인자·알 수 없는 쿼리 이름은 명확한 오류로 반환합니다.
+
+원론 상세는 `locale=en|ko|ja` 쿼리 하나를 선택적으로 받습니다. `manifest.designFoundations`는 독립 버전으로 관리하는 MCP 지식층을 설명하며, 웹사이트 정본 카탈로그와 그 content hash는 별도로 유지됩니다.
 
 ## 프롬프트
 
 자주 쓰는 워크플로우용 MCP 프롬프트:
 
-`design-product` · `design-screen` · `complete-ui-states` · `redesign-with-style` · `audit-design-direction` · `audit-design-principles` · `audit-ux-principles`
+`improve-ui` · `design-product` · `design-screen` · `complete-ui-states` · `redesign-with-style` · `audit-design-direction` · `audit-design-principles` · `audit-ux-principles`
 
-`audit-design-direction`에 범위가 명시되지 않으면 검사 전에 두 가지를 짧게 묻습니다.
-감사 범위(시각 / 시각 + 문구·정보 구조 / 전체 경험)와 변경 깊이(결과만 / 개선안 / 실제
-수정·검증)입니다. 감사 요청만으로 파일 수정·커밋·릴리스·배포 권한을 추정하지 않습니다.
+`improve-ui`는 기존 화면의 구현·전후 비교 흐름을 시작합니다. 일상적인 재승인 대신 실행을
+막는 정보만 질문합니다. `audit-design-direction`은 명시적인 검토용이며 범위를 생략하면
+시각·콘텐츠를 읽기 전용으로 검사합니다. `auditScope`·`changeScope`로 더 좁은 검토, 제안,
+실제 수정을 지정할 수 있고 `implement-and-verify`는 개선 흐름으로 이어집니다.
 
 콘텐츠 감사는 내부 용어만 검사하지 않습니다. 중요한 주장·결론·권고의 강도와 확신이
 근거에 맞는지, 눈에 띄는 문구가 구체적이고 해당 맥락에 필요한 정보를 전달하는지,

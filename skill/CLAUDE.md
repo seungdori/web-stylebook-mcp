@@ -6,14 +6,45 @@
 Before writing JSX/HTML/CSS for any new or redesigned UI surface (page, screen, component,
 dashboard, form, checkout, chat, developer console), call the **`web-stylebook`** MCP server:
 
-For an audit or redesign, if the user has not already set the scope, first ask two short questions
-and wait: (1) audit coverage — visual only; visual + user-facing copy/information structure; or full
-experience including interaction, accessibility, states, and build/performance evidence; (2) change
-depth — findings only; prioritized proposals; or implement and verify. Do not ask again when both are
-already explicit. Commit, push, release, and deployment remain separate authorizations. Map the
-coverage to `get_design_audit_plan.includeGroups`: visual = `layout`, `fidelity`, `anti-patterns`, `structure`;
-visual + content = add `content`, `behavior`; full = every matching group plus principle, docs, and
-state coverage.
+For existing-UI improvement or fix requests, default to **inspect → decide → implement → verify →
+compare/report**. Infer bounded coverage from the task and inspect available source before asking;
+ask only for information that actually blocks execution. Do not impose a scope questionnaire or
+stop at a review. Explicit review-only or no-edit requests remain read-only and use the audit tools.
+Commit, push, release, deployment and external messages require their own authorization.
+
+- Save immutable before screenshots, rendered HTML/CSS or semantic structure, source identity and
+  the content/interaction inventory. Record route, viewport, resolved theme, locale, state, input
+  data/clock, semantic scroll anchor, zoom, device scale and font readiness.
+- Call `get_design_improvement_plan` with relevant `surface`/`concerns` or `foundationIds`/`category`,
+  `locale`, and `context` containing the user task and target matrix. Save its `query` and
+  `workflow.planHash`. The default is 6 foundations, maximum 12; retrieve relevant omitted entries.
+  `webstylebook://workflows/improve-ui` describes the default workflow.
+- Apply conditional remedies and counterexamples to observed obstacles; edit the actual UI source
+  and record changed files plus a diff. Keep working behavior and product identity. A new catalog
+  style or candidate-approval round is not required for already authorized fixes.
+- Re-render and capture the after state under matching conditions. Inspect visuals and exercise
+  affected behavior, keyboard/focus, accessibility, recovery and narrow layouts; run appropriate
+  build/tests. Use `compare_page_revisions` for DOM preservation and validate it under a separate
+  `revisionPreservation` audit plan. Static preservation cannot replace real interaction evidence.
+- Call `validate_design_improvement_result` with the exact plan query, `workflow.planHash`, actual
+  captures, implemented changes, checks, per-target outcomes and limitations. Follow `nextActions`
+  for `needs-work`, repair/revert regressions, and never count proposals as completed changes.
+- Deliver paired before/after artifacts, what changed and why, verification, tradeoffs and remaining
+  unverified work. Use `reportMarkdown` as a starting point. `complete` means the submitted evidence
+  contract is satisfied, not an independent quality certification. A verified `no-change` outcome
+  must not be described as an improvement. Missing source/runtime access is a concrete blocker.
+
+Record the baseline strengths in context.constraints and compare gains against losses in group
+membership, useful visible information, continuity and reading comfort. Keep the original as a valid
+alternative. If the user identifies a regression, reopen the claim, correct the report and restore
+rejected changes while keeping justified gains. Technical passes do not override that feedback.
+
+The host performs edits and captures; the offline MCP does not access the repository. Familiar
+patterns are contextual choices, not automatic defects. Source-supported concepts, authored remedies
+and illustrative examples remain distinct. This path takes precedence over the new-direction
+composition rules below, which apply only when a new build or visual direction is requested.
+
+**For a new visual direction:**
 
 1. `recommend_design_direction` with the product context (productType, tone, density,
    usageFrequency, trustSensitivity, constraints, avoid). Use the scored `candidates` as

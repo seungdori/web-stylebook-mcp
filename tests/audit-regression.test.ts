@@ -75,9 +75,10 @@ describe('audit M7 — unknown secondaryStyleId is rejected, not silently ignore
   });
 });
 
-describe('audit L12 — all seven workflow prompts render a non-empty user message', () => {
+describe('audit L12 — all workflow prompts render a non-empty user message', () => {
   let client: Client;
   const args: Record<string, Record<string, string>> = {
+    'improve-ui': { target: 'a cluttered form', goal: 'make errors recoverable' },
     'design-product': { product: 'a billing dashboard' },
     'design-screen': { screenType: 'data-table', goal: 'triage incidents' },
     'complete-ui-states': { surfaceId: 'form' },
@@ -142,16 +143,16 @@ describe('audit L12 — all seven workflow prompts render a non-empty user messa
     }
   });
 
-  it('the general design audit asks for coverage and change depth before inspection when omitted', async () => {
+  it('the explicit audit prompt defaults to read-only inspection without a compulsory questionnaire', async () => {
     const res = await client.getPrompt({
       name: 'audit-design-direction',
       arguments: args['audit-design-direction']!,
     });
     const text = (res.messages[0]?.content as { text?: string }).text ?? '';
-    expect(text).toContain('Before inspecting or changing the implementation');
-    expect(text).toContain('Audit coverage: visual only');
-    expect(text).toContain('Change depth: findings only');
-    expect(text).toContain('stop until they answer');
+    expect(text).toContain('Selected audit coverage: visual-and-content');
+    expect(text).toContain('Selected change depth: audit-only');
+    expect(text).toContain('do not modify files');
+    expect(text).not.toContain('stop until they answer');
     expect(text).toContain('separate authorizations');
 
     const koRes = await client.getPrompt({
@@ -159,8 +160,8 @@ describe('audit L12 — all seven workflow prompts render a non-empty user messa
       arguments: { ...args['audit-design-direction']!, locale: 'ko' },
     });
     const koText = (koRes.messages[0]?.content as { text?: string }).text ?? '';
-    expect(koText).toContain('감사 범위: 시각만');
-    expect(koText).toContain('변경 깊이: 결과만');
+    expect(koText).toContain('선택한 감사 범위: visual-and-content');
+    expect(koText).toContain('선택한 변경 깊이: audit-only');
     expect(koText).toContain('커밋·푸시·릴리스·배포는 별도 권한');
   });
 
@@ -304,9 +305,9 @@ describe('the closing gate checks that principles were applied, not just selecte
     expect(JSON.stringify(entry)).toMatch(/never verified|검증하지 않음/);
   });
 
-  it('the skill and both fragments route the self-audit through the structured principles checks', () => {
+  it('the conditional new-direction guide and both fragments route the self-audit through the structured principles checks', () => {
     for (const rel of [
-      'skill/web-stylebook-design/SKILL.md',
+      'skill/web-stylebook-design/references/new-direction.md',
       'skill/CLAUDE.md',
       'skill/AGENTS.md',
     ]) {
@@ -451,8 +452,9 @@ describe('anti-formulaic-opening guidance targets generic furniture (not column 
     expect(SERVER_INSTRUCTIONS).toMatch(/bespoke demonstration/i);
     expect(SERVER_INSTRUCTIONS).toMatch(/differ in opening STRUCTURE/i);
   });
-  it('SKILL.md encodes the forcing function + the furniture-check (not a buried prohibition, not a blunt two-column ban)', () => {
-    const skill = read('skill/web-stylebook-design/SKILL.md');
+  it('the discoverable new-direction reference retains composition guidance without imposing it on fixes', () => {
+    expect(read('skill/web-stylebook-design/SKILL.md')).toContain('(references/new-direction.md)');
+    const skill = read('skill/web-stylebook-design/references/new-direction.md');
     expect(skill).toContain('the one thing, not a hero');
     expect(skill).toContain('generic furniture');
     expect(skill).toContain('bespoke demonstration of THIS product');
@@ -480,8 +482,8 @@ describe('anti-AI-headline-cadence guidance is present and example-free', () => 
     expect(SERVER_INSTRUCTIONS).toMatch(/AI headline cadence/i);
     expect(SERVER_INSTRUCTIONS).toMatch(/paste-test/i);
   });
-  it('SKILL.md and both fragments encode the "kill the AI headline cadence" rule', () => {
-    expect(read('skill/web-stylebook-design/SKILL.md')).toMatch(/Kill the AI headline cadence/i);
+  it('the new-direction reference and both fragments retain headline guidance', () => {
+    expect(read('skill/web-stylebook-design/references/new-direction.md')).toMatch(/Kill the AI headline cadence/i);
     for (const rel of ['skill/CLAUDE.md', 'skill/AGENTS.md']) {
       expect(read(rel), rel).toMatch(/Kill the AI headline cadence/i);
     }
@@ -489,6 +491,7 @@ describe('anti-AI-headline-cadence guidance is present and example-free', () => 
   it('the guidance describes the cliché abstractly — no baked example headline phrases', () => {
     const corpus = [
       'skill/web-stylebook-design/SKILL.md',
+      'skill/web-stylebook-design/references/new-direction.md',
       'skill/CLAUDE.md',
       'skill/AGENTS.md',
       'src/server-info.ts',

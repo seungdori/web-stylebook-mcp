@@ -30,16 +30,17 @@ describe('MCP contract', () => {
     expect(instructions).toContain('read-only');
   });
 
-  it('exposes exactly the 12 compute tools, all read-only and without an outputSchema', async () => {
+  it('exposes exactly the 14 compute tools, all read-only and without an outputSchema', async () => {
     const { tools } = await client.listTools();
     expect(tools.map((t) => t.name).sort()).toEqual([
       'audit_page_structure',
       'compare_design_directions', 'compare_page_revisions', 'compose_design_tokens', 'get_design_audit_plan',
-      'get_design_principle_plan', 'get_design_reference', 'get_ui_state_plan',
+      'get_design_improvement_plan', 'get_design_principle_plan', 'get_design_reference', 'get_ui_state_plan',
       'get_ux_principle_plan',
       'recommend_design_direction',
       'search_design_references',
       'validate_design_audit_result',
+      'validate_design_improvement_result',
     ]);
     for (const t of tools) {
       expect(t.annotations).toMatchObject({ readOnlyHint: true, destructiveHint: false, openWorldHint: false });
@@ -76,7 +77,7 @@ describe('MCP contract', () => {
     expect(body.domains).toContain('design-principles');
     expect(body.domains).toContain('principles');
     expect(body.domains).toContain('references');
-    expect(body.tools).toHaveLength(12);
+    expect(body.tools).toHaveLength(14);
     expect(body.structure).toMatchObject({ schema: 'webstylebook.structure.v1', styles: 48, catalogStyles: 48, globalBannedPatterns: 9 });
     expect(body.structure.rulesetHash).toMatch(/^sha256:[0-9a-f]{64}$/);
     expect(body.resourceUriTemplates).toContain('webstylebook://design-principles/{id}');
@@ -591,11 +592,11 @@ describe('MCP contract', () => {
     }
   });
 
-  it('lists 7 prompts and renders one', async () => {
+  it('lists 8 prompts and renders one', async () => {
     const { prompts } = await client.listPrompts();
     expect(prompts.map((p) => p.name).sort()).toEqual([
       'audit-design-direction', 'audit-design-principles', 'audit-ux-principles',
-      'complete-ui-states', 'design-product', 'design-screen', 'redesign-with-style',
+      'complete-ui-states', 'design-product', 'design-screen', 'improve-ui', 'redesign-with-style',
     ]);
     const got = await client.getPrompt({ name: 'design-product', arguments: { product: 'SRE dashboard' } });
     expect(got.messages[0]!.content.type).toBe('text');

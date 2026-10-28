@@ -59,9 +59,24 @@ import {
 } from '../references/search.js';
 import { ok, errorResult, type ToolResult } from './result.js';
 import { ToolError, nearestIds } from './errors.js';
+import { FOUNDATIONS } from '../foundations/catalog.js';
+import { FOUNDATION_CATEGORIES } from '../foundations/types.js';
+import { FoundationPlanError, planDesignImprovement, renderImprovementPlan } from '../foundations/planner.js';
+import { improvementContextSchema, improvementSubmissionSchema } from '../improvement/schema.js';
+import { ImprovementResultError, validateDesignImprovementResult } from '../improvement/evaluator.js';
 
 const READ_ONLY = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false } as const;
 const LOCALE = z.enum(['en', 'ko', 'ja']);
+
+const improvementPlanInputShape = {
+  foundationIds: z.array(z.string().min(1).max(100)).max(12).optional(),
+  concerns: z.array(z.enum(DESIGN_CONCERNS)).max(10).optional(),
+  surface: z.enum(UX_SURFACES).optional(),
+  category: z.enum(FOUNDATION_CATEGORIES).optional(),
+  limit: z.number().int().min(1).max(12).optional(),
+  locale: LOCALE.optional(),
+  context: improvementContextSchema.optional().describe('Observed task and target matrix for implementation and matched before/after verification; required before completion validation'),
+};
 
 const productContextShape = {
   productDescription: z.string().min(1).max(2000),
@@ -173,6 +188,9 @@ const submittedAuditResultShape = {
 // the result shape is documented in the README/types instead of an outputSchema.
 
 function toToolError(e: unknown, repo: CatalogRepository): ToolError {
+  if (e instanceof FoundationPlanError) return new ToolError(e.unknownId ? 'FOUNDATION_NOT_FOUND' : 'INVALID_INPUT', e.message,
+    e.unknownId ? nearestIds(e.unknownId, FOUNDATIONS.map((entry) => entry.id)) : undefined);
+  if (e instanceof ImprovementResultError) return new ToolError('INVALID_INPUT', e.message);
   if (e instanceof ToolError) return e;
   if (e instanceof StatePlanError) {
     return new ToolError('STATE_SURFACE_NOT_FOUND', e.message, repo.listSurfaces().map((s) => s.id));
@@ -331,6 +349,34 @@ export function registerTools(server: McpServer, repo: CatalogRepository): void 
         referenceLabels[locale].resources,
       );
     } catch (e) { return errorResult(toToolError(e, repo)); }
+  });
+
+  server.registerTool('get_design_improvement_plan', {
+    title: 'Improve an existing UI: decide, implement, compare and report',
+    description: 'Default entry point for an existing-UI improvement request. Returns selected source-backed design foundations plus an executable host workflow: capture before, decide using conditional remedies and counterexamples, edit real source, verify matched after states, and report. Include context with the user task and observed target conditions; use workflow.planHash with validate_design_improvement_result to finish. Omitting context permits knowledge discovery, not completion. Select by foundationIds, concerns, surface or category (AND across dimensions, OR within concerns); bounded to 12 entries with omitted matches listed. The host AI performs edits and captures; this offline read-only MCP cannot edit files or certify visual quality. Preserve behavior and product identity; do not require a new style or stop at a review unless the user requested review only.',
+    inputSchema: improvementPlanInputShape,
+    annotations: READ_ONLY,
+  }, async (args): Promise<ToolResult> => {
+    try {
+      const plan = planDesignImprovement(args);
+      return ok(plan, renderImprovementPlan(plan), plan.foundations.map((entry) => entry.resourceUri));
+    } catch (error) { return errorResult(toToolError(error, repo)); }
+  });
+
+  server.registerTool('validate_design_improvement_result', {
+    title: 'Check implementation evidence and compose a before/after improvement report',
+    description: 'Finish the existing-UI improvement workflow. Supply the exact get_design_improvement_plan query and its workflow.planHash, immutable before/fresh after captures under the planned conditions, source identities, changes with real file/diff references, observed visual/behavior/preservation/accessibility checks, per-target outcomes and limitations. Returns completion.status complete/needs-work/no-change, normalized unsupported claims, nextActions and a localized reportMarkdown with paired artifact links. Proposals, missing implementation evidence, mismatched captures, skipped targets, unsupported PASS and regressions cannot complete. Static preservation alone is insufficient. This offline tool validates host-supplied coverage and consistency only: it does not read artifacts or judge pixels, interactions, aesthetics or usability independently. Complete means the submitted evidence contract is satisfied, not independently certified improvement. Follow nextActions instead of stopping at findings.',
+    inputSchema: {
+      plan: z.object(improvementPlanInputShape).strict(),
+      expectedPlanHash: z.string().regex(/^sha256:[0-9a-f]{64}$/).describe('workflow.planHash from get_design_improvement_plan'),
+      submission: improvementSubmissionSchema,
+    },
+    annotations: READ_ONLY,
+  }, async (args): Promise<ToolResult> => {
+    try {
+      const result = validateDesignImprovementResult(args);
+      return ok(result, JSON.stringify(result, null, 2));
+    } catch (error) { return errorResult(toToolError(error, repo)); }
   });
 
   server.registerTool('get_design_principle_plan', {

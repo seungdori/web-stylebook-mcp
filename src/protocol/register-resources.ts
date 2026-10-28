@@ -9,6 +9,10 @@ import { MUST_HAVE_RESOURCE_URI, mustHaveCatalog } from '../structure/must-haves
 import { composeDesignTokens } from '../tokens/compile.js';
 import { DESIGN_MD_PLACEMENTS } from '../tokens/design-md.js';
 import { VISUAL_SCHEMA } from '../catalog/visual.js';
+import { FOUNDATIONS, FOUNDATION_IDENTITY, foundationManifest } from '../foundations/catalog.js';
+import { FOUNDATION_SOURCES } from '../foundations/sources.js';
+import { localizeFoundation, localizeProtocol, localizeSources } from '../foundations/planner.js';
+import { IMPROVEMENT_WORKFLOW_SCHEMA, IMPROVEMENT_WORKFLOW_URI, improvementWorkflow } from '../improvement/workflow.js';
 
 const JSON_MIME = 'application/json';
 function json(uri: string, value: unknown) {
@@ -29,6 +33,12 @@ export function registerResources(server: McpServer, repo: CatalogRepository): v
     schema: repo.envelope.schema,
     visualContract: repo.visualContractMetadata,
     structure: structureManifest(repo),
+    designFoundations: foundationManifest(),
+    improvementWorkflow: {
+      schema: IMPROVEMENT_WORKFLOW_SCHEMA, resourceUri: IMPROVEMENT_WORKFLOW_URI,
+      entryTool: 'get_design_improvement_plan', completionTool: 'validate_design_improvement_result',
+      defaultIntent: 'implement-verify-report', executor: 'host-agent',
+    },
     languages: repo.envelope.languages,
     counts: {
       styles: repo.allStyles().length,
@@ -54,6 +64,7 @@ export function registerResources(server: McpServer, repo: CatalogRepository): v
       'webstylebook://motion/{id}',
       'webstylebook://components/{id}',
       'webstylebook://design-principles/{id}',
+      'webstylebook://foundations/{id}',
       'webstylebook://principles/{id}',
       'webstylebook://states/{surface}',
       'webstylebook://states/{surface}/{state}',
@@ -64,8 +75,51 @@ export function registerResources(server: McpServer, repo: CatalogRepository): v
   }));
 
   fixed('styles', 'webstylebook://styles', 'Compact list of visual directions', () => repo.listStyles());
+  fixed('improve-ui-workflow', IMPROVEMENT_WORKFLOW_URI, 'Default existing-UI workflow: host implementation, matched comparison and evidence-backed report; localized in en/ko/ja', () => ({
+    schema: IMPROVEMENT_WORKFLOW_SCHEMA,
+    entryTool: 'get_design_improvement_plan', completionTool: 'validate_design_improvement_result',
+    localized: Object.fromEntries((['en', 'ko', 'ja'] as const).map((locale) => [locale, improvementWorkflow(locale, undefined, FOUNDATION_IDENTITY.contentHash)])),
+    notice: 'This resource explains the workflow. Obtain an execution plan with context from the entry tool before validating completion.',
+  }));
   fixed('motion', 'webstylebook://motion', 'Compact list of motion patterns', () => repo.listMotion());
   fixed('components', 'webstylebook://components', 'Component vocabulary', () => repo.listComponents());
+  fixed('design-foundations', 'webstylebook://foundations', 'Compact index of actionable design foundations; retrieve selected localized guidance with get_design_improvement_plan', () => ({
+    ...foundationManifest(),
+    entries: FOUNDATIONS.map((entry) => ({
+      id: entry.id, category: entry.category, name: entry.name, concerns: entry.concerns,
+      surfaces: entry.surfaces, relatedPrincipleIds: entry.relatedPrincipleIds,
+      resourceUri: `webstylebook://foundations/${entry.id}`,
+    })),
+  }));
+  fixed('design-foundation-sources', 'webstylebook://foundations/sources', 'Research provenance: reviewed sources, bounded supported claims and standard levels; external publications retain their rights', () => ({
+    ...FOUNDATION_IDENTITY,
+    sources: FOUNDATION_SOURCES,
+    notice: 'Source summaries and application guidance are independently authored. No upstream articles, screenshots or assets are bundled. Review dates are point-in-time; the runtime does not fetch these URLs.',
+  }));
+  server.registerResource('design-foundation-detail', new ResourceTemplate('webstylebook://foundations/{foundationId}', {
+    list: async () => ({ resources: FOUNDATIONS.map((entry) => ({ uri: `webstylebook://foundations/${entry.id}`, name: entry.id, mimeType: JSON_MIME })) }),
+  }), {
+    title: 'Design foundation with conditional improvements',
+    description: 'One localized foundation, its cited sources and comparison protocol. Optional query: locale=en|ko|ja. Examples are illustrative, not observed outcomes.',
+    mimeType: JSON_MIME,
+  }, async (u, v) => {
+    const id = String(v.foundationId).split('?')[0] ?? '';
+    const entry = FOUNDATIONS.find((foundation) => foundation.id === id);
+    if (!entry) return notFound(u.href, 'design foundation', id);
+    for (const key of new Set(u.searchParams.keys())) {
+      if (key !== 'locale' || u.searchParams.getAll(key).length !== 1) {
+        return json(u.href, { error: { code: 'INVALID_INPUT', message: 'only one locale query parameter is supported' } });
+      }
+    }
+    const locale = u.searchParams.get('locale') ?? 'en';
+    if (locale !== 'en' && locale !== 'ko' && locale !== 'ja') {
+      return json(u.href, { error: { code: 'INVALID_INPUT', message: 'locale must be en, ko or ja' } });
+    }
+    return json(u.href, {
+      identity: FOUNDATION_IDENTITY, foundation: localizeFoundation(entry, locale),
+      sources: localizeSources(entry.sourceIds, locale), protocol: localizeProtocol(locale),
+    });
+  });
   fixed(
     'design-principles',
     'webstylebook://design-principles',

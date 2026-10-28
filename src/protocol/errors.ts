@@ -6,6 +6,7 @@ export type ErrorCode =
   | 'MOTION_NOT_FOUND'
   | 'COMPONENT_NOT_FOUND'
   | 'DESIGN_PRINCIPLE_NOT_FOUND'
+  | 'FOUNDATION_NOT_FOUND'
   | 'UX_PRINCIPLE_NOT_FOUND'
   | 'STATE_SURFACE_NOT_FOUND'
   | 'STATE_RECIPE_NOT_FOUND'
@@ -24,6 +25,7 @@ export const ERROR_CODES: Record<ErrorCode, string> = {
   MOTION_NOT_FOUND: 'unknown motion id',
   COMPONENT_NOT_FOUND: 'unknown component id',
   DESIGN_PRINCIPLE_NOT_FOUND: 'unknown design principle id (near-miss suggestions provided)',
+  FOUNDATION_NOT_FOUND: 'unknown design foundation id (near-miss suggestions provided)',
   UX_PRINCIPLE_NOT_FOUND: 'unknown UX principle id (near-miss suggestions provided)',
   STATE_SURFACE_NOT_FOUND: 'unknown surface id (suggestions provided)',
   STATE_RECIPE_NOT_FOUND: 'unknown surface/state recipe',

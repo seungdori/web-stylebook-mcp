@@ -6,6 +6,8 @@ import { runStdio } from './server.js';
 import { CatalogRepository } from './catalog/repository.js';
 import { validateLoaded } from './catalog/validate.js';
 import { SERVER_NAME, SERVER_VERSION, TOOL_NAMES } from './server-info.js';
+import { foundationManifest, validateFoundations } from './foundations/catalog.js';
+import { IMPROVEMENT_WORKFLOW_SCHEMA, IMPROVEMENT_WORKFLOW_URI } from './improvement/workflow.js';
 
 const HELP = `${SERVER_NAME}-mcp v${SERVER_VERSION}
 Usage: web-stylebook-mcp [options]
@@ -30,13 +32,18 @@ async function main(): Promise<void> {
     process.stdout.write(`${JSON.stringify({
       server: SERVER_VERSION, catalogVersion: r.catalogVersion, contentHash: r.contentHash,
       visualContract: r.visualContractMetadata,
+      designFoundations: foundationManifest(),
+      improvementWorkflow: { schema: IMPROVEMENT_WORKFLOW_SCHEMA, resourceUri: IMPROVEMENT_WORKFLOW_URI, entryTool: 'get_design_improvement_plan', completionTool: 'validate_design_improvement_result' },
       tools: TOOL_NAMES, counts: validateLoaded(r).summary,
     }, null, 2)}\n`);
     return;
   }
 
   if (has('--validate-catalog')) {
-    const report = validateLoaded(CatalogRepository.load());
+    const repo = CatalogRepository.load();
+    const report = validateLoaded(repo);
+    report.errors.push(...validateFoundations(repo));
+    report.ok = report.errors.length === 0;
     if (report.ok) {
       process.stderr.write(`[${SERVER_NAME}-mcp] catalog OK ${JSON.stringify(report.summary)}\n`);
     } else {

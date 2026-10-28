@@ -1,0 +1,340 @@
+{
+  "plan": {
+    "foundationIds": [
+      "action-affordance",
+      "grid-alignment"
+    ],
+    "locale": "ko",
+    "context": {
+      "userTask": "문의 오류를 고쳐 전송하고, 장애 목록에서 우선 확인할 항목을 찾는다.",
+      "constraints": [
+        "기존 입력값과 장애 데이터, 링크 및 키보드 동작을 보존한다."
+      ],
+      "targets": [
+        {
+          "id": "contact-mobile",
+          "surface": "form",
+          "route": "/contact",
+          "conditions": {
+            "viewport": {
+              "width": 390,
+              "height": 844
+            },
+            "theme": "light",
+            "locale": "ko-KR",
+            "state": "validation-error",
+            "dataKey": "example-contact-invalid-v1@fixed-clock",
+            "scrollAnchor": "form-start",
+            "zoom": 1,
+            "deviceScaleFactor": 1
+          }
+        },
+        {
+          "id": "incidents-desktop",
+          "surface": "data-table",
+          "route": "/incidents",
+          "conditions": {
+            "viewport": {
+              "width": 1280,
+              "height": 900
+            },
+            "theme": "dark",
+            "locale": "en-US",
+            "state": "populated",
+            "dataKey": "example-incidents-v1@fixed-clock",
+            "scrollAnchor": "first-row",
+            "zoom": 1,
+            "deviceScaleFactor": 1
+          }
+        }
+      ]
+    }
+  },
+  "submission": {
+    "captures": [
+      {
+        "id": "contact-mobile-before",
+        "targetId": "contact-mobile",
+        "phase": "before",
+        "screenshotRef": "/example-evidence/contact-mobile-before.png",
+        "structureRef": "/example-evidence/contact-mobile-before.html",
+        "stylesRef": "/example-evidence/contact-mobile-before.css",
+        "sourceRef": "example-source-v1",
+        "conditions": {
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "theme": "light",
+          "locale": "ko-KR",
+          "state": "validation-error",
+          "dataKey": "example-contact-invalid-v1@fixed-clock",
+          "scrollAnchor": "form-start",
+          "zoom": 1,
+          "deviceScaleFactor": 1
+        },
+        "fontsReady": true
+      },
+      {
+        "id": "contact-mobile-after",
+        "targetId": "contact-mobile",
+        "phase": "after",
+        "screenshotRef": "/example-evidence/contact-mobile-after.png",
+        "structureRef": "/example-evidence/contact-mobile-after.html",
+        "stylesRef": "/example-evidence/contact-mobile-after.css",
+        "sourceRef": "example-source-v2",
+        "conditions": {
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "theme": "light",
+          "locale": "ko-KR",
+          "state": "validation-error",
+          "dataKey": "example-contact-invalid-v1@fixed-clock",
+          "scrollAnchor": "form-start",
+          "zoom": 1,
+          "deviceScaleFactor": 1
+        },
+        "fontsReady": true
+      },
+      {
+        "id": "incidents-desktop-before",
+        "targetId": "incidents-desktop",
+        "phase": "before",
+        "screenshotRef": "/example-evidence/incidents-desktop-before.png",
+        "structureRef": "/example-evidence/incidents-desktop-before.html",
+        "stylesRef": "/example-evidence/incidents-desktop-before.css",
+        "sourceRef": "example-source-v1",
+        "conditions": {
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "theme": "dark",
+          "locale": "en-US",
+          "state": "populated",
+          "dataKey": "example-incidents-v1@fixed-clock",
+          "scrollAnchor": "first-row",
+          "zoom": 1,
+          "deviceScaleFactor": 1
+        },
+        "fontsReady": true
+      },
+      {
+        "id": "incidents-desktop-after",
+        "targetId": "incidents-desktop",
+        "phase": "after",
+        "screenshotRef": "/example-evidence/incidents-desktop-after.png",
+        "structureRef": "/example-evidence/incidents-desktop-after.html",
+        "stylesRef": "/example-evidence/incidents-desktop-after.css",
+        "sourceRef": "example-source-v2",
+        "conditions": {
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "theme": "dark",
+          "locale": "en-US",
+          "state": "populated",
+          "dataKey": "example-incidents-v1@fixed-clock",
+          "scrollAnchor": "first-row",
+          "zoom": 1,
+          "deviceScaleFactor": 1
+        },
+        "fontsReady": true
+      }
+    ],
+    "changes": [
+      {
+        "id": "clarify-form",
+        "targetIds": [
+          "contact-mobile"
+        ],
+        "foundationIds": [
+          "action-affordance"
+        ],
+        "observation": "The invalid field cannot be located from the generic error.",
+        "action": "Associate the field error and focus the invalid input.",
+        "reason": "Make correction discoverable without losing entered data.",
+        "status": "implemented",
+        "files": [
+          "/example-project/src/ContactForm.tsx"
+        ],
+        "diffRef": "/example-evidence/contact-mobile.patch"
+      },
+      {
+        "id": "align-table",
+        "targetIds": [
+          "incidents-desktop"
+        ],
+        "foundationIds": [
+          "grid-alignment"
+        ],
+        "observation": "Numeric values lack a stable comparison axis.",
+        "action": "Align numeric values by their place value while preserving all columns.",
+        "reason": "Support comparison of the same measure across rows.",
+        "status": "implemented",
+        "files": [
+          "/example-project/src/IncidentTable.css"
+        ],
+        "diffRef": "/example-evidence/incidents-desktop.patch"
+      }
+    ],
+    "checks": [
+      {
+        "id": "contact-mobile-visual",
+        "targetId": "contact-mobile",
+        "kind": "visual",
+        "verdict": "pass",
+        "summary": "Compared the same state and observed the intended hierarchy/alignment change.",
+        "captureIds": [
+          "contact-mobile-before",
+          "contact-mobile-after"
+        ],
+        "evidenceRefs": [
+          "/example-evidence/contact-mobile-visual.json"
+        ]
+      },
+      {
+        "id": "contact-mobile-behavior",
+        "targetId": "contact-mobile",
+        "kind": "behavior",
+        "verdict": "pass",
+        "summary": "Exercised the affected task and observed the expected resulting state.",
+        "captureIds": [
+          "contact-mobile-after"
+        ],
+        "evidenceRefs": [
+          "/example-evidence/contact-mobile-behavior.json"
+        ],
+        "steps": [
+          "Open the recorded target and reproduce its fixed state.",
+          "Use the affected control with keyboard input and inspect its result."
+        ]
+      },
+      {
+        "id": "contact-mobile-preservation",
+        "targetId": "contact-mobile",
+        "kind": "preservation",
+        "verdict": "pass",
+        "summary": "Compared original content, fields, links and semantic inventory without unexplained losses.",
+        "captureIds": [
+          "contact-mobile-after"
+        ],
+        "evidenceRefs": [
+          "/example-evidence/contact-mobile-preservation.json"
+        ]
+      },
+      {
+        "id": "contact-mobile-accessibility",
+        "targetId": "contact-mobile",
+        "kind": "accessibility",
+        "verdict": "pass",
+        "summary": "Checked affected focus, labels and keyboard actions without clipping.",
+        "captureIds": [
+          "contact-mobile-after"
+        ],
+        "evidenceRefs": [
+          "/example-evidence/contact-mobile-accessibility.json"
+        ],
+        "steps": [
+          "Open the recorded target and reproduce its fixed state.",
+          "Use the affected control with keyboard input and inspect its result."
+        ]
+      },
+      {
+        "id": "incidents-desktop-visual",
+        "targetId": "incidents-desktop",
+        "kind": "visual",
+        "verdict": "pass",
+        "summary": "Compared the same state and observed the intended hierarchy/alignment change.",
+        "captureIds": [
+          "incidents-desktop-before",
+          "incidents-desktop-after"
+        ],
+        "evidenceRefs": [
+          "/example-evidence/incidents-desktop-visual.json"
+        ]
+      },
+      {
+        "id": "incidents-desktop-behavior",
+        "targetId": "incidents-desktop",
+        "kind": "behavior",
+        "verdict": "pass",
+        "summary": "Exercised the affected task and observed the expected resulting state.",
+        "captureIds": [
+          "incidents-desktop-after"
+        ],
+        "evidenceRefs": [
+          "/example-evidence/incidents-desktop-behavior.json"
+        ],
+        "steps": [
+          "Open the recorded target and reproduce its fixed state.",
+          "Use the affected control with keyboard input and inspect its result."
+        ]
+      },
+      {
+        "id": "incidents-desktop-preservation",
+        "targetId": "incidents-desktop",
+        "kind": "preservation",
+        "verdict": "pass",
+        "summary": "Compared original content, fields, links and semantic inventory without unexplained losses.",
+        "captureIds": [
+          "incidents-desktop-after"
+        ],
+        "evidenceRefs": [
+          "/example-evidence/incidents-desktop-preservation.json"
+        ]
+      },
+      {
+        "id": "incidents-desktop-accessibility",
+        "targetId": "incidents-desktop",
+        "kind": "accessibility",
+        "verdict": "pass",
+        "summary": "Checked affected focus, labels and keyboard actions without clipping.",
+        "captureIds": [
+          "incidents-desktop-after"
+        ],
+        "evidenceRefs": [
+          "/example-evidence/incidents-desktop-accessibility.json"
+        ],
+        "steps": [
+          "Open the recorded target and reproduce its fixed state.",
+          "Use the affected control with keyboard input and inspect its result."
+        ]
+      }
+    ],
+    "outcomes": [
+      {
+        "targetId": "contact-mobile",
+        "outcome": "improved",
+        "beforeCaptureId": "contact-mobile-before",
+        "afterCaptureId": "contact-mobile-after",
+        "changeIds": [
+          "clarify-form"
+        ],
+        "summary": "The correction target is visible beside its field.",
+        "tradeoffs": [
+          "The observation is an expert comparison, not a measured user-study result."
+        ]
+      },
+      {
+        "targetId": "incidents-desktop",
+        "outcome": "improved",
+        "beforeCaptureId": "incidents-desktop-before",
+        "afterCaptureId": "incidents-desktop-after",
+        "changeIds": [
+          "align-table"
+        ],
+        "summary": "The same numeric measure now aligns consistently across rows.",
+        "tradeoffs": [
+          "The observation is an expert comparison, not a measured user-study result."
+        ]
+      }
+    ],
+    "limitations": [
+      "This is an illustrative contract fixture, not evidence of a real UI improvement. Every /example-* reference must be replaced with actual observed artifacts."
+    ]
+  }
+}

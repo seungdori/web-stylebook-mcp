@@ -2,8 +2,8 @@
 
 # web-stylebook-mcp
 
-**Design intelligence for AI coding agents.** Stop shipping the same hero-plus-three-cards.
-Your agent gets scored design *contracts* — directions, interface-design plans, UX-principle plans, UI-state plans, tokens, evidence-backed audit plans — then writes and verifies the code from evidence.
+**Improve existing UI with design judgment, real changes, and before/after evidence.**
+The host agent applies researched design knowledge, edits the actual interface, verifies affected behavior, and reports the result.
 
 [![npm version](https://img.shields.io/npm/v/web-stylebook-mcp?logo=npm&color=cb3837)](https://www.npmjs.com/package/web-stylebook-mcp)
 [![downloads](https://img.shields.io/npm/dm/web-stylebook-mcp?color=cb3837)](https://www.npmjs.com/package/web-stylebook-mcp)
@@ -17,7 +17,7 @@ Your agent gets scored design *contracts* — directions, interface-design plans
 
 ---
 
-Coding agents default to the same generic UI because they can't *decide* what it should look like — so they fall back to hero + 3 cards + a gradient. `web-stylebook-mcp` is a Model Context Protocol server that hands the agent **design contracts** — scored visual directions, placement-aware interface-design plans, evidence-labeled UX-principle plans, UI-state plans, and design tokens — drawn from the same curated catalog as [webstylebook.com](https://webstylebook.com). It returns **evidence, not code**. Your agent still writes the code — now it knows what to build and what to verify.
+`web-stylebook-mcp` connects design knowledge to an execution and reporting workflow. For an existing interface, the agent preserves the original, chooses a context-appropriate remedy, changes the real source, verifies the result and shows the before/after difference. The server supplies researched foundations and checks the submitted evidence contract; the host agent performs the edits and observations. New builds can also use the visual directions, UX principles, UI states and tokens from the curated [Web Stylebook](https://webstylebook.com) catalog.
 
 No API key. No model call. No network. No project filesystem access. **Deterministic, read-only, fully local.**
 
@@ -32,7 +32,85 @@ No API key. No model call. No network. No project filesystem access. **Determini
 | **Tokens** | Hand-picked hexes, contrast rarely checked | Role-based tokens with WCAG contrast warnings |
 | **Structure** | Tokens recolor the default hero + logos + 3 cards template | A layout archetype and signature moves per direction, and an audit that flags the template in the built page |
 | **Audit** | "Looks good" from a summary | Surface-aware checks with stable ids, severity, required evidence, and explicit unverified states |
-| **Result** | Generic AI UI | A defensible design contract the agent builds from |
+| **Result** | Findings without a changed UI | Actual implementation, matched comparison and an evidence-linked report |
+
+## Improve an existing UI — the default workflow
+
+An improvement request now means **inspect → decide → implement → verify → compare/report**.
+The host agent edits the actual UI and uses the MCP to guide its decisions and check completion.
+It does not stop at a critique. Explicit review-only requests still stay read-only; a new build or
+new visual direction uses the existing direction tools.
+
+`get_design_improvement_plan` is the entry point. It supplies **24 researched foundations, 48
+illustrative applications and 30 attributed sources** in English, Korean and Japanese, plus a
+structured host workflow. Capture the original UI first, then record the actual task and target
+conditions in `context`:
+
+```jsonc
+// → get_design_improvement_plan
+{
+  "surface": "data-table",
+  "concerns": [
+    "scanability",
+    "hierarchy",
+    "consistency"
+  ],
+  "limit": 6,
+  "locale": "en",
+  "context": {
+    "userTask": "Find the incident that needs attention first.",
+    "targets": [
+      {
+        "id": "incidents-desktop",
+        "surface": "data-table",
+        "route": "/incidents",
+        "conditions": {
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          },
+          "theme": "light",
+          "locale": "en-US",
+          "state": "populated",
+          "dataKey": "incident-fixture-v1@fixed-clock",
+          "scrollAnchor": "first-row",
+          "zoom": 1,
+          "deviceScaleFactor": 1
+        }
+      }
+    ]
+  }
+}
+```
+
+Each foundation connects observations, conditional remedies, counterexamples, preservation and
+observable checks. Apply the relevant rules and edit real source. Preserve product identity and
+working behavior; a new style is optional. The default is 6 entries, maximum 12, with omitted matches
+listed in `coverage.omittedIds`. Use `category` or explicit `foundationIds` to narrow retrieval.
+Filters combine with AND, concerns within a filter with OR. Browse `webstylebook://foundations`.
+
+After implementation, call **`validate_design_improvement_result`** with the returned `query`,
+`expectedPlanHash: workflow.planHash`, and actual captures, changed files/diffs, observed checks,
+target outcomes and limitations. It returns:
+
+- `complete`: submitted implementation and comparison evidence covers every planned target.
+- `needs-work`: follow `nextActions`; missing before images, mismatched data/fonts/viewports,
+  proposals without edits, skipped targets, unsupported passes and regressions cannot complete.
+- `no-change`: fully verified unchanged UI with no implemented/proposed changes; never present it
+  as an improvement.
+- `reportMarkdown`: paired before/after links, changes and reasons, verification, tradeoffs and
+  remaining unverified work. The host can present the real screenshots in a side-by-side/toggle viewer.
+
+Each target needs visual, behavior, preservation and affected-accessibility checks. Static markup
+preservation alone is insufficient. The MCP validates supplied coverage and consistency, **not**
+artifact contents or design quality. The host performs edits, captures and observations; no claimed
+user-study results or numerical usability gains are invented. A query without context remains valid
+for knowledge discovery but cannot complete an improvement. Commit/push/release/deployment need
+separate authorization.
+
+See the [result contract and cross-UI example](./skill/web-stylebook-design/references/improvement-result.md)
+and [research record](./docs/research/design-foundations.md). The machine-readable workflow is
+`webstylebook://workflows/improve-ui`, also advertised by `manifest.improvementWorkflow`.
 
 ## Watch it decide
 
@@ -223,25 +301,12 @@ A different brief — *"a marketing landing page for **Throughline**, a B2B SaaS
 
 ```mermaid
 flowchart LR
-    A[AI coding agent] -->|product, tone,<br/>density, usage| B(web-stylebook-mcp)
-    B --> C{Bundled catalog<br/>read-only · offline}
-    C --> D[recommend_design_direction]
-    C --> E[compare_design_directions]
-    C --> F[get_design_principle_plan]
-    C --> G[get_ux_principle_plan]
-    C --> H[get_ui_state_plan]
-    C --> I[compose_design_tokens]
-    C --> J[get_design_audit_plan]
-    C --> K[search_design_references]
-    C --> L[get_design_reference]
-    C --> M[validate_design_audit_result]
-    C --> N[audit_page_structure]
-    D & E & F & G & H & I & J & K & L -->|design contracts<br/>observations · scores · reasons<br/>placement · evidence · tokens · structure| A
-    A -->|built page HTML · CSS| N
-    N -->|banned patterns · replacement moves<br/>missing must-haves<br/>evidence for the structure checks| A
-    A -->|target matrix · evidence refs<br/>one verdict per check/target| M
-    M -->|coverage · normalized verdicts<br/>plan/evidence/result hashes| A
-    A -->|writes code<br/>from evidence| Z[Your UI]
+    A[Existing UI + user task] --> B[Host captures before]
+    B --> C[get_design_improvement_plan]
+    C --> D[Host edits and verifies]
+    D --> E[validate_design_improvement_result]
+    E -->|needs-work| D
+    E -->|complete / no-change| F[Before/after report]
 ```
 
 The agent describes the product; the server scores its curated catalog and returns structured evidence. After building, the agent passes the page markup to the structure audit, which never reads files on its own. After inspection, the validator checks the result contract without opening the referenced artifacts or judging visual quality. No code is generated and nothing leaves your machine.
@@ -325,6 +390,8 @@ Add the same block to your `claude_desktop_config.json`, then restart:
 
 | Tool | What you get | The honest part |
 |------|--------------|-----------------|
+| **`get_design_improvement_plan`** | Selected foundations plus the capture → decide → implement → verify → report workflow, target context and workflow hash | The host edits the actual UI; context-free calls are discovery only |
+| **`validate_design_improvement_result`** | Completion state, missing-work actions, normalized outcomes and a before/after report from actual change/capture/check references | Checks submitted evidence coverage and consistency, not artifact contents or independently measured design quality |
 | **`recommend_design_direction`** | Scored style candidates with reason codes, a `ranking` that says why #1 beat #2 (or reports a tie), **rejected** styles with *why*, secondary pairings, confidence, each candidate's page `structure`, and the product type's `mustHaves` with the zone each must sit in | The model makes the final pick — this is the evidence provider |
 | **`compare_design_directions`** | 2–4 directions compared across product-fit, repeated-use, density, trust, distinctiveness, accessibility-risk, motion, maintenance | No single winner is declared |
 | **`search_design_references`** | Bounded search across real-world references by text, category, and tags, with concise localized observations | Returns attributed research summaries, not copied screenshots or brand assets |
@@ -410,26 +477,31 @@ webstylebook://motion · /motion/{id}
 webstylebook://components · /components/{id}
 webstylebook://principles · /principles/{id}
 webstylebook://design-principles · /design-principles/{id}
+webstylebook://foundations · /foundations/{id}?locale=ko · /foundations/sources
 webstylebook://states/surfaces · /states/{surface} · /states/{surface}/{state}
 webstylebook://products · /products/{id}
 webstylebook://references · /references/{id}
 webstylebook://policies/anti-patterns · /policies/verification · /policies/audit-checks
 webstylebook://structure/banned-patterns · /structure/must-haves
 webstylebook://design-md/{id}
+webstylebook://workflows/improve-ui
 ```
 
 Style detail accepts optional `locale`, `mode`, and expected `revision` query parameters, for example `webstylebook://styles/brutalist-grid?locale=ko&mode=light`. It returns one resolved locale and mode; unsupported values, duplicate parameters, and unknown query names return an explicit error.
+
+Foundation detail accepts one optional `locale=en|ko|ja` parameter. `manifest.designFoundations` describes this independently versioned MCP knowledge layer; the website's canonical catalog and its content hash remain separate.
 
 ## Prompts
 
 Ready-made MCP prompts for common workflows:
 
-`design-product` · `design-screen` · `complete-ui-states` · `redesign-with-style` · `audit-design-direction` · `audit-design-principles` · `audit-ux-principles`
+`improve-ui` · `design-product` · `design-screen` · `complete-ui-states` · `redesign-with-style` · `audit-design-direction` · `audit-design-principles` · `audit-ux-principles`
 
-When `audit-design-direction` is invoked without an explicit scope, it asks two short questions
-before inspection: audit coverage (visual / visual + copy and information structure / full
-experience) and change depth (findings / proposals / implement and verify). File edits, commits,
-releases, and deployment are never inferred from an audit request.
+`improve-ui` starts the implementation/comparison workflow for existing interfaces. It asks only for
+missing information that blocks execution, not routine reapproval. `audit-design-direction` is an
+explicit review prompt: omitted scope defaults to read-only visual/content inspection. Its
+`auditScope` and `changeScope` parameters still allow narrower reviews, proposals or implementation;
+`implement-and-verify` continues through the improvement workflow.
 
 Content coverage checks more than jargon: it tests whether material claims, conclusions, and
 recommendations match their support and expressed certainty, whether prominent copy conveys concrete

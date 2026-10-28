@@ -1,7 +1,7 @@
 {
   "name": "web-stylebook-mcp",
   "version": "0.14.0",
-  "description": "Design intelligence for coding agents — choose a direction, apply interface-design and UX principles, cover real UI states, and compose design tokens.",
+  "description": "Design intelligence for coding agents — improve real UIs with design foundations, implementation, verification and before/after reports.",
   "type": "module",
   "license": "MIT",
   "author": { "name": "Web Stylebook", "url": "https://webstylebook.com" },
@@ -14,6 +14,7 @@
     "dist",
     "generated",
     "skill",
+    "docs/research/design-foundations.md",
     "README.md",
     "README.ko.md"
   ],
