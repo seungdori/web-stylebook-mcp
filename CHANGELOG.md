@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.14.0] — 2026-10-28
+
 ### Added
 
 - DESIGN.md export (#17). `compose_design_tokens` takes `format: "design-md"` and returns the direction as a
