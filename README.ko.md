@@ -3,7 +3,7 @@
 # web-stylebook-mcp
 
 **기존 UI를 판단하고, 실제로 고치고, 전후 결과까지 보고하는 디자인 MCP.**
-호스트 AI가 조사된 디자인 지식을 적용해 실제 인터페이스를 수정하고, 영향을 받는 동작을 검증한 뒤 결과를 보고합니다.
+코딩 에이전트(Codex, Claude Code, Cursor 및 모든 MCP 클라이언트)용 MCP 서버입니다. 에이전트가 조사된 디자인 지식을 적용해 실제 인터페이스를 수정하고, 영향을 받는 동작을 검증한 뒤 결과를 보고합니다.
 
 [![npm version](https://img.shields.io/npm/v/web-stylebook-mcp?logo=npm&color=cb3837)](https://www.npmjs.com/package/web-stylebook-mcp)
 [![downloads](https://img.shields.io/npm/dm/web-stylebook-mcp?color=cb3837)](https://www.npmjs.com/package/web-stylebook-mcp)
@@ -17,9 +17,20 @@
 
 ---
 
-`web-stylebook-mcp`는 디자인 지식을 실제 수정과 결과 보고로 연결합니다. 기존 화면에서는 원본을 보존하고, 상황에 맞는 수정법을 선택해 실제 소스를 고친 뒤 검증과 전후 비교까지 진행합니다. MCP는 조사된 원론과 제출 증거의 완료 검사를 제공하고, 편집·캡처·관찰은 호스트 AI가 수행합니다. 새 UI에는 [Web Stylebook](https://webstylebook.com)의 시각 방향·UX 원칙·상태 계획·토큰도 사용할 수 있습니다.
+`web-stylebook-mcp`는 코딩 에이전트에게 디자인 지식과, 작업 결과를 증명할 방법을 줍니다. 기존 화면에서는 이미 잘 되는 부분을 지키고, 상황에 맞는 수정법을 골라 실제 소스를 고친 뒤 검증과 전후 비교까지 진행합니다. 서버는 조사된 디자인 원론을 제공하고 에이전트가 제출한 증거를 검사하며, 수정과 캡처는 에이전트가 직접 합니다. 새 UI에는 [Web Stylebook](https://webstylebook.com)의 시각 방향·UX 원칙·상태 계획·토큰도 사용할 수 있습니다.
 
 API 키 없음. 모델 호출 없음. 네트워크 없음. 프로젝트 파일시스템 접근 없음. **결정적이고, 읽기 전용이며, 완전히 로컬.**
+
+## 빠른 시작
+
+1. 에이전트에 서버를 추가합니다(Node 20 이상, 다른 클라이언트는 [설치](#설치) 참고).
+   ```bash
+   claude mcp add web-stylebook -- npx -y web-stylebook-mcp@latest
+   ```
+2. 이미 있는 화면의 개선을 요청합니다. 예: *"인시던트 표에서 먼저 처리할 인시던트가 눈에 띄게 개선해 줘."* 에이전트는 `get_design_improvement_plan`으로 시작해 코드를 고치고, `validate_design_improvement_result`로 마무리합니다.
+3. 새 제품이나 페이지라면 대신 무엇을 만드는지 설명합니다. 에이전트는 `recommend_design_direction`으로 시작합니다.
+
+어느 순간에 어떤 툴을 부를지는 [동반 스킬](#동반-스킬)이 에이전트에게 알려 줍니다.
 
 ## 없을 때 / 있을 때
 
@@ -36,7 +47,7 @@ API 키 없음. 모델 호출 없음. 네트워크 없음. 프로젝트 파일�
 
 ## 기존 UI를 실제로 개선하기 — 기본 흐름
 
-이제 개선 요청의 기본은 **현재 화면 확인 → 판단 → 실제 수정 → 검증 → 전후 비교·보고**입니다.
+개선 요청의 기본은 **현재 화면 확인 → 판단 → 실제 수정 → 검증 → 전후 비교·보고**입니다.
 호스트 AI가 실제 UI를 고치고 MCP는 판단 근거와 완료 검사를 제공합니다. 설명이나 리뷰만으로
 끝내지 않습니다. 사용자가 명시한 검토 전용 요청은 읽기만 하며, 새 UI나 새 시각 방향에는 기존
 방향 선택 도구를 사용합니다.
@@ -51,7 +62,7 @@ API 키 없음. 모델 호출 없음. 네트워크 없음. 프로젝트 파일�
   "surface": "data-table",
   "concerns": [
     "scanability",
-    "hierarchy",
+    "focus",
     "consistency"
   ],
   "limit": 6,
@@ -88,9 +99,20 @@ API 키 없음. 모델 호출 없음. 네트워크 없음. 프로젝트 파일�
 `category`·`foundationIds`로 좁힐 수 있고 필터 간에는 AND, 관심사 내부에는 OR를 적용합니다.
 목록은 `webstylebook://foundations`에서 볼 수 있습니다.
 
-수정 후 **`validate_design_improvement_result`**에 반환된 `query`,
-`expectedPlanHash: workflow.planHash`, 실제 캡처·변경 파일과 diff·관찰한 검사·대상별 결과·한계를
-제출합니다. 다음 결과를 반환합니다.
+수정 후 **`validate_design_improvement_result`**에 `plan`(`get_design_improvement_plan`에 보낸
+입력 그대로), `expectedPlanHash`(반환된 `workflow.planHash`), 그리고 실제 캡처·변경 파일과 diff·
+관찰한 검사·대상별 결과·한계를 담은 `submission`을 제출합니다.
+
+```jsonc
+// → validate_design_improvement_result
+{
+  "plan": { "surface": "data-table", "concerns": ["scanability", "focus", "consistency"], "context": { … } },
+  "expectedPlanHash": "sha256:…",
+  "submission": { "captures": […], "changes": […], "checks": […], "outcomes": […], "limitations": […] }
+}
+```
+
+다음 결과를 반환합니다.
 
 - `complete`: 계획한 모든 대상에 구현과 전후 검증 증거가 갖춰졌습니다.
 - `needs-work`: `nextActions`를 따라 계속 작업합니다. 원본 캡처 누락, 데이터·폰트·화면 크기
@@ -173,7 +195,7 @@ MCP는 제출된 증거의 범위와 일관성을 검사하고 **실제 파일 �
 그다음 고른 방향을 실제 토큰으로:
 
 ```jsonc
-// → compose_design_tokens(style: "quiet-utility", format: "css-variables", theme: "light")
+// → compose_design_tokens({ primaryStyleId: "quiet-utility", format: "css-variables" })
 // WCAG 대비 경고 0건
 :root {
   --color-canvas: #ffffff;
@@ -184,7 +206,7 @@ MCP는 제출된 증거의 범위와 일관성을 검사하고 **실제 파일 �
 }
 ```
 
-요청 한 번에 — 에이전트는 방향을 고르고, 무엇이 왜 탈락했는지 보고, WCAG를 통과하는 토큰까지 받았습니다. 코드 한 줄 생성하지 않고.
+호출 두 번으로 에이전트는 방향을 고르고, 무엇이 왜 탈락했는지 보고, WCAG를 통과하는 토큰까지 받았습니다. 코드 한 줄 생성하지 않고.
 
 ## 토큰이 아니라 구조
 
@@ -236,7 +258,7 @@ MCP는 제출된 증거의 범위와 일관성을 검사하고 **실제 파일 �
 
 ### 스타일이 뺄 수 없는 필수 요소
 
-디자인 방향 때문에 페이지가 제 기능을 잃으면 안 됩니다. 보류된 쇼케이스 실험(#7)에서 MCP로 만든 럭셔리 스킨케어 페이지는 첫 화면에 구매 버튼 하나만 남겼습니다. 대조군 페이지는 용량, 하룻밤 기준 가격, 장바구니 담기, 배송·보증 안내를 보여 줬습니다. 그래서 `recommend_design_direction`은 `mustHaves`도 반환합니다. 판단한 제품 유형에 꼭 필요한 요소와 각 요소가 있어야 할 위치(zone)입니다. 스타일은 이 요소의 모양을 바꿀 수 있지만, 빼거나 정해진 위치 밖으로 옮기면 안 됩니다. 이 요소는 첫 화면에 대한 아키타입의 제한("행동 하나, 짧은 문장 하나")보다 우선합니다. 첫 화면 항목은 모두 히어로에 넣으세요. 후보마다 `structure.mustHaves`가 같은 역할을 하는 그 스타일의 시그니처 무브를 알려 줍니다. 예를 들어 배송·보증 안내를 담을 수 있는 근거 무브입니다.
+디자인 방향 때문에 페이지가 제 기능을 잃으면 안 됩니다. 앞선 쇼케이스 실험([#7](https://github.com/seungdori/web-stylebook-mcp/issues/7))에서 MCP로 만든 럭셔리 스킨케어 페이지는 첫 화면에 구매 버튼 하나만 남겼습니다. 대조군 페이지는 용량, 하룻밤 기준 가격, 장바구니 담기, 배송·보증 안내를 보여 줬습니다. 그래서 `recommend_design_direction`은 `mustHaves`도 반환합니다. 판단한 제품 유형에 꼭 필요한 요소와 각 요소가 있어야 할 위치(zone)입니다. 스타일은 이 요소의 모양을 바꿀 수 있지만, 빼거나 정해진 위치 밖으로 옮기면 안 됩니다. 이 요소는 첫 화면에 대한 아키타입의 제한("행동 하나, 짧은 문장 하나")보다 우선합니다. 첫 화면 항목은 모두 히어로에 넣으세요. 후보마다 `structure.mustHaves`가 같은 역할을 하는 그 스타일의 시그니처 무브를 알려 줍니다. 예를 들어 배송·보증 안내를 담을 수 있는 근거 무브입니다.
 
 | 제품 유형 | 페이지 | 첫 화면 | 페이지 어디든 |
 |---|---|---|---|
@@ -293,7 +315,7 @@ MCP는 제출된 증거의 범위와 일관성을 검사하고 **실제 파일 �
 }
 ```
 
-필수 요소의 상태는 `present`(있음), `missing`(없음), `misplaced`(페이지에는 있지만 첫 화면에는 없음), `not-verified`(확인 못 함) 중 하나입니다. `not-verified`는 스타일시트가 선택자 한도를 넘었거나, 페이지 끝까지 분석하지 못했거나, 첫 화면을 정할 섹션이 없을 때입니다. 필수 요소마다 `structure-must-have-<id>` 검사도 있습니다. `get_design_audit_plan`에 `structure` 그룹과 `productType`을 함께 넘기면, 감사가 돌려준 evidence와 results를 그대로 검증할 수 있습니다. 탐지는 마크업, ARIA role, 영어·한국어·일본어로 된 보이는 텍스트를 읽습니다. 숨긴 요소(`hidden`, `display: none`, 시각적으로 숨긴 `sr-only` 상자, `aria-hidden="true"`)는 세지 않습니다. 기본 컨트롤은 안정적으로 찾습니다. 옵션은 `select`나 라디오 그룹, 검색은 `input type="search"`, 날짜는 `time` 요소를 쓰세요.
+필수 요소의 상태는 `present`(있음), `missing`(없음), `misplaced`(페이지에는 있지만 첫 화면에는 없음), `not-verified`(확인 못 함) 중 하나입니다. `not-verified`는 스타일시트가 선택자 한도를 넘었거나, 페이지 끝까지 분석하지 못했거나, 첫 화면을 정할 섹션이 없을 때입니다. 필수 요소마다 `structure-must-have-<id>` 검사도 있습니다. `get_design_audit_plan`에 `structure` 그룹과 `productType`을 함께 넘기면, 감사가 돌려준 evidence와 results를 그대로 검증할 수 있습니다. 탐지는 마크업, ARIA role, 영어·한국어·일본어로 된 보이는 텍스트를 읽습니다. 숨긴 요소(`hidden`, `display: none`, 시각적으로 숨긴 `sr-only` 상자, `aria-hidden="true"`)는 세지 않습니다. 기본 컨트롤은 안정적으로 찾습니다. 옵션 선택은 `select`나 라디오 그룹, 검색은 `input type="search"`, 날짜는 `time` 요소로 찾습니다.
 
 ## 에이전트가 이걸로 만든 결과물
 
@@ -317,7 +339,7 @@ flowchart LR
     E -->|complete / no-change| F[전후 비교·결과 보고]
 ```
 
-에이전트가 제품을 설명하면, 서버가 큐레이션 카탈로그를 점수화해 구조화된 근거를 돌려줍니다. 빌드한 뒤에는 에이전트가 페이지 마크업을 구조 감사에 넘깁니다. 구조 감사는 스스로 파일을 읽지 않습니다. 검사 후 validator는 참조된 artifact를 직접 열거나 시각 품질을 판단하지 않고 결과 계약만 검증합니다. 코드는 생성하지 않고, 어떤 것도 기기를 벗어나지 않습니다.
+위 그림은 기존 UI를 개선하는 흐름입니다. validator는 참조된 artifact를 직접 열거나 시각 품질을 판단하지 않고, 제출된 증거만 검증합니다. 새로 만들 때는 에이전트가 제품을 설명하면 서버가 큐레이션 카탈로그를 점수화해 구조화된 근거를 돌려주고, 빌드한 뒤에는 에이전트가 페이지 마크업을 구조 감사에 넘깁니다. 구조 감사는 스스로 파일을 읽지 않습니다. 코드는 생성하지 않고, 어떤 것도 기기를 벗어나지 않습니다.
 
 ## 설치
 
@@ -394,6 +416,28 @@ MCP 설정에 추가:
 
 </details>
 
+## 동반 스킬
+
+[`skill/`](./skill)에 동반 스킬이 함께 들어있어, 에이전트가 적절한 순간에 이 툴들을 꺼내 쓰고 결과를 제대로 활용하게 합니다(색만 바꾸지 말 것, 후보를 여러 개 제시할 것, 신뢰는 지어내지 말 것, 재사용 컴포넌트로 떨어뜨릴 것). 스킬은 이 저장소와 npm 패키지 양쪽에 들어 있습니다. 저장소를 clone하지 않으려면 `npm pack web-stylebook-mcp`로 받은 tarball에서 `package/skill/`을 꺼내세요.
+
+**Codex**
+
+- `skill/web-stylebook-design/`를 저장소의 `.agents/skills/web-stylebook-design/` 또는
+  사용자 범위 `~/.agents/skills/web-stylebook-design/` 같은 Codex 스킬 위치로 복사하거나
+  심볼릭 링크하세요.
+- 스킬을 설치하지 않을 경우 `skill/AGENTS.md`를 프로젝트의 `AGENTS.md`에 복사하세요.
+
+**Claude Code**
+
+- `skill/web-stylebook-design/`를 프로젝트의 `.claude/skills/web-stylebook-design/`이나, 모든
+  프로젝트에 쓰려면 `~/.claude/skills/web-stylebook-design/`에 복사하거나,
+- `skill/CLAUDE.md`를 프로젝트의 `CLAUDE.md`에 복사하세요.
+
+**기타 에이전트**
+
+- 에이전트의 스킬 디렉터리를 `skill/web-stylebook-design/`로 지정하거나, `skill/CLAUDE.md`를
+  해당 에이전트의 rules 파일에 복사하세요.
+
 ## 툴
 
 | 툴 | 받는 것 | 정직한 점 |
@@ -440,7 +484,7 @@ MCP 설정에 추가:
 
 `overrides`는 역할별 색상, 타이포그래피, 간격, 밀도, 폰트 정보를 받습니다. 다른 스타일에서 가져온 요소도 이 명시적 값으로 전달합니다. 기존 `secondaryStyleId`는 강조색만 겹치는 옵션이므로 공통 명세와 함께 사용하면 거절합니다. 알 수 없는 필드, `density` 또는 `accentOverride`와 충돌하는 편집값도 거절합니다. `overrides`나 `acceptedRepairs`를 보낼 때는 `contract`가 필요합니다.
 
-응답에는 선택한 `visualContract`, 원본 식별 정보인 `contract`, 대비 수정안인 `repairProposals`가 들어 있습니다. 수정안의 객체를 그대로 `acceptedRepairs`에 담아 다시 보내야 적용되며, 현재 값과 맞지 않는 이전 수정안은 거절합니다. CSS를 전달할 때도 `visualContract`를 함께 보존하세요. 여기에는 컴포넌트별 색상 조합, 폰트 로딩·라이선스 정보, 사용 규칙, 출처, 적용한 수정이 남습니다. 테마 출력은 `roleStyles`와 전체 명세인 `metadata`도 포함합니다. 실제 폰트 로딩과 화면 표현은 적용하는 앱에서 확인해야 합니다.
+응답에는 선택한 `visualContract`, 원본 식별 정보인 `contract`, 대비 수정안인 `repairProposals`가 들어 있습니다. 수정안의 객체를 그대로 `acceptedRepairs`에 담아 다시 보내야 적용되며, 현재 값과 맞지 않는 이전 수정안은 거절합니다. CSS를 전달할 때도 `visualContract`를 함께 보존하세요. 여기에는 컴포넌트별 색상 조합, 폰트 로딩·라이선스 정보, 사용 규칙, 출처, 적용한 수정이 남습니다. 테마 출력은 `roleStyles`와 전체 명세인 `metadata`도 포함합니다. 실제 폰트 로딩과 화면 표현은 적용하는 앱에서 확인해야 합니다. 공통 런타임에는 한국어·일본어 굵은 디스플레이 대체 글꼴 정보(`fontSources.ts`)를 포함한 MIT 소스 7개가 들어 있지만, 브라우저 폰트 로더나 폰트 파일은 없습니다.
 
 수정안을 수락할 때는 `light` 또는 `dark`를 각각 요청합니다. `both`는 모드별 제안만 반환하며, 수락한 수정안을 두 모드에 일괄 적용하지 않습니다.
 
@@ -548,7 +592,7 @@ webstylebook://workflows/improve-ui
 
 ## 감사 결과 계약
 
-`get_design_audit_plan`은 이제 catalog version/hash와 결정론적 `planHash`를 담은 `identity`를
+`get_design_audit_plan`은 catalog version/hash와 결정론적 `planHash`를 담은 `identity`를
 반환합니다. 실제 구현을 검사한 뒤 같은 plan query와 함께 다음을 제출합니다.
 
 - 검사한 route 또는 screen·state·viewport·theme·locale·role별 target;
@@ -580,28 +624,14 @@ npm run eval:audit-contract
 
 ## CLI
 
+서버는 MCP 클라이언트가 실행합니다. 인자 없이(또는 `--stdio`로) 실행하면 stdio로 서버를 띄우고 클라이언트를 기다립니다. 나머지 옵션은 출력 후 종료합니다.
+
 ```bash
-web-stylebook-mcp                 # stdio로 서버 실행 (기본)
-web-stylebook-mcp --version
-web-stylebook-mcp --catalog-info
-web-stylebook-mcp --validate-catalog
+npx -y web-stylebook-mcp --help
+npx -y web-stylebook-mcp --version
+npx -y web-stylebook-mcp --catalog-info       # 카탈로그 버전·해시·개수
+npx -y web-stylebook-mcp --validate-catalog   # 실패하면 0이 아닌 종료 코드
 ```
-
-## 동반 스킬
-
-[`skill/`](./skill)에 동반 스킬이 함께 들어있어, 에이전트가 적절한 순간에 이 툴들을 꺼내 쓰고 결과를 제대로 활용하게 합니다(색만 바꾸지 말 것, 후보를 여러 개 제시할 것, 신뢰는 지어내지 말 것, 재사용 컴포넌트로 떨어뜨릴 것):
-
-**Codex**
-
-- `skill/web-stylebook-design/`를 저장소의 `.agents/skills/web-stylebook-design/` 또는
-  사용자 범위 `~/.agents/skills/web-stylebook-design/` 같은 Codex 스킬 위치로 복사하거나
-  심볼릭 링크하세요.
-- 스킬을 설치하지 않을 경우 `skill/AGENTS.md`를 프로젝트의 `AGENTS.md`에 복사하세요.
-
-**Claude Code 및 기타 에이전트**
-
-- 에이전트의 스킬 디렉터리를 `skill/web-stylebook-design/`로 지정하거나,
-- `skill/CLAUDE.md`를 프로젝트의 `CLAUDE.md` 또는 해당 에이전트의 rules 파일에 복사하세요.
 
 ## 프라이버시 · 보안
 
@@ -613,21 +643,7 @@ web-stylebook-mcp --validate-catalog
 | 프로젝트 파일시스템 접근 | 없음 — 서버는 번들된 카탈로그 스냅샷만 읽음 |
 | 동작 | 결정적, 읽기 전용 |
 
-서버는 패키지에 번들된 카탈로그 스냅샷만 읽습니다. 어디로도 전송하지 않으며, 같은 입력은 항상 같은 계약을 냅니다.
-
-## 카탈로그 원본 동기화
-
-카탈로그 원본은
-[`web-stylebook`](https://github.com/seungdori/web-stylebook) 저장소에서 작성합니다. 그 저장소에서
-로컬 MCP 전달용 스냅샷을 생성한 뒤, 이 패키지를 릴리스하기 전에 바이트 단위 일치를 확인하세요.
-
-```bash
-npm run catalog:check-canonical -- /absolute/path/to/web-stylebook/packages/mcp/generated
-```
-
-인자를 생략하면 `WEB_STYLEBOOK_CANONICAL_CATALOG_DIR` 또는 로컬 형제 경로
-`../showcase/packages/mcp/generated`를 사용합니다. 일반 테스트는 번들 아티팩트 내부의 해시,
-enum, 개수, 런타임 계약을 검증하고, 이 명령은 두 저장소 사이의 원본 일치를 명시적으로 검증합니다.
+서버는 패키지에 번들된 카탈로그 스냅샷만 읽습니다. 어디로도 전송하지 않으며, 같은 입력은 항상 같은 계약을 냅니다. 보안 취약점은 [SECURITY.md](./SECURITY.md)에 따라 제보해 주세요.
 
 ## 호환성
 
@@ -635,7 +651,17 @@ enum, 개수, 런타임 계약을 검증하고, 이 명령은 두 저장소 사�
 - **전송:** stdio (Model Context Protocol)
 - **클라이언트:** Codex CLI / IDE 확장 · Claude Code · Claude Desktop · Cursor · Windsurf, 그리고 모든 MCP 호환 클라이언트
 
-도구 입력은 새 선택값이 생긴 것 말고는 그대로이고, `structure`는 출력에 추가된 필드입니다. `structure` 그룹은 직접 지정할 때만 들어가므로, `includeGroups` 없이 요청한 plan의 검사 목록과 hash는 바뀌지 않습니다. `contract`를 생략한 호출은 같은 토큰 형식과 라이트 모드 기본값을 유지합니다. 0.11.0부터 이 호출은 일반 소프트 섀도 대신 핀된 스타일의 작성 섀도를 내고, 에디토리얼·모노스페이스 스타일은 계열 글꼴 대신 작성된 글꼴을 냅니다. 색, 타입 스케일, 행간, 간격, 반지름, 모션, 밀도를 생략했을 때의 값은 이전 레거시 경로입니다. 명시한 밀도는 여전히 계열의 row·gutter보다 우선하고, CSS·테마 출력에 줄간격 토큰이 포함됩니다. 작성값 전체가 필요하면 `contract`를 넘깁니다. 공통 명세는 기존 도구에 추가한 옵션이므로 새 도구가 필요하지 않습니다.
+도구 입력은 새 선택값이 생긴 것 말고는 그대로이고, `structure`는 출력에 추가된 필드입니다. `structure` 그룹은 직접 지정할 때만 들어가므로, `includeGroups` 없이 요청한 plan의 검사 목록과 hash는 바뀌지 않습니다. `contract`를 생략한 호출은 같은 토큰 형식과 라이트 모드 기본값을 유지합니다. 0.11.1부터(0.11.0은 태그만 있고 배포되지 않았습니다) 이 호출은 일반 소프트 섀도 대신 핀된 스타일의 작성 섀도를 내고, 에디토리얼·모노스페이스 스타일은 계열 글꼴 대신 작성된 글꼴을 냅니다. 색, 타입 스케일, 행간, 간격, 반지름, 모션, 밀도를 생략했을 때의 값은 이전 레거시 경로입니다. 명시한 밀도는 여전히 계열의 row·gutter보다 우선하고, CSS·테마 출력에 줄간격 토큰이 포함됩니다. 작성값 전체가 필요하면 `contract`를 넘깁니다. 공통 명세는 기존 도구에 추가한 옵션이므로 새 도구가 필요하지 않습니다.
+
+## 개발
+
+```bash
+npm ci
+npm test       # 빌드 후 테스트 실행
+npm run dev    # 소스에서 바로 stdio 서버 실행
+```
+
+변경 내역은 [CHANGELOG.md](./CHANGELOG.md)에 있습니다. [`web-stylebook`](https://github.com/seungdori/web-stylebook) 저장소와의 카탈로그 동기화를 포함한 릴리스 절차는 [RELEASING.md](./RELEASING.md)에 있습니다.
 
 ## 라이선스
 

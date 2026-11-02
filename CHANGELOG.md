@@ -33,6 +33,17 @@ All notable changes to this project are documented here. The format follows
   separate content hash. The canonical website catalog remains unchanged. Companion instructions start
   existing-UI improvements from observed tasks and preserve product identity instead of requiring a new style.
 
+### Fixed
+
+- README examples now match the tool schemas: the improvement plan example used `hierarchy`, which is
+  not a design concern, the token example used parameter names the strict schema rejects, and the
+  validator call now shows its real `plan` / `expectedPlanHash` / `submission` shape. A new test parses
+  both examples in both READMEs against the real code.
+- README: added a quick start, Claude Code skill paths, how to get the skill from the npm package, a
+  development section, and links to CHANGELOG and SECURITY. Release-only catalog sync steps moved to
+  RELEASING.md.
+- CHANGELOG compare links now point at tags that exist.
+
 ## [0.14.0] — 2026-10-28
 
 ### Added
@@ -307,6 +318,8 @@ All notable changes to this project are documented here. The format follows
   it as typography or full-style mixing.
 
 ## [0.9.0] — 2026-08-31
+
+Not tagged or published to npm; these changes first shipped in 0.10.0.
 
 ### Added
 
@@ -584,8 +597,15 @@ All notable changes to this project are documented here. The format follows
 - Output localization in English, Korean, and Japanese.
 - Fully offline at runtime: no API key, no model call, no network, no filesystem access.
 
-[Unreleased]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.9.0...HEAD
-[0.9.0]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.8.0...v0.9.0
+[Unreleased]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.14.0...HEAD
+[0.14.0]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.13.0...v0.14.0
+[0.13.0]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.12.1...v0.13.0
+[0.12.1]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.12.0...v0.12.1
+[0.12.0]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.11.1...v0.12.0
+[0.11.1]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.11.0...v0.11.1
+[0.11.0]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.10.1...v0.11.0
+[0.10.1]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.10.0...v0.10.1
+[0.10.0]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.8.0...v0.10.0
 [0.8.0]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.5.1...v0.6.0
@@ -593,5 +613,5 @@ All notable changes to this project are documented here. The format follows
 [0.5.0]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.1.1...v0.3.0
-[0.1.1]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.1.0...v0.1.1
-[0.1.0]: https://github.com/seungdori/web-stylebook-mcp/releases/tag/v0.1.0
+[0.1.1]: https://github.com/seungdori/web-stylebook-mcp/releases/tag/v0.1.1
+[0.1.0]: https://www.npmjs.com/package/web-stylebook-mcp/v/0.1.0

@@ -25,7 +25,19 @@ access to require 2FA and disallow traditional tokens.
    npm run mcp:catalog:validate # sanity-check the new snapshot
    ```
    Then copy the regenerated `generated/catalog.v1.json` + `generated/manifest.v1.json` into this
-   repo's `generated/`.
+   repo's `generated/`, and verify byte-for-byte parity with the source:
+   ```bash
+   npm run catalog:check-canonical -- /absolute/path/to/web-stylebook/packages/mcp/generated
+   ```
+   Without an argument, the command uses `WEB_STYLEBOOK_CANONICAL_CATALOG_DIR` or the local sibling
+   path `../showcase/packages/mcp/generated`. The regular test suite verifies the bundled artifact's
+   internal hash, enums, counts, and runtime contract; this command is the explicit cross-repository
+   source check.
+
+   Regenerate and synchronize `catalog.v1.json`, `manifest.v1.json`, and the visual artifact
+   together. `npm run visual:sync` preflights the source import closure and license declarations
+   before writing, and `npm run visual:check` verifies the source hashes and artifact bytes. Update
+   the exact source pin in `.github/workflows/publish.yml` as well.
 2. **Bump** the version in `package.json` and move CHANGELOG `[Unreleased]` → the new version.
 3. **Tag and push** — the version tag triggers the publish and must match `package.json`:
    ```bash

@@ -3,7 +3,7 @@
 # web-stylebook-mcp
 
 **Improve existing UI with design judgment, real changes, and before/after evidence.**
-The host agent applies researched design knowledge, edits the actual interface, verifies affected behavior, and reports the result.
+An MCP server for coding agents (Codex, Claude Code, Cursor, and any MCP client): the agent applies researched design knowledge, edits the actual interface, verifies affected behavior, and reports the result.
 
 [![npm version](https://img.shields.io/npm/v/web-stylebook-mcp?logo=npm&color=cb3837)](https://www.npmjs.com/package/web-stylebook-mcp)
 [![downloads](https://img.shields.io/npm/dm/web-stylebook-mcp?color=cb3837)](https://www.npmjs.com/package/web-stylebook-mcp)
@@ -17,9 +17,20 @@ The host agent applies researched design knowledge, edits the actual interface, 
 
 ---
 
-`web-stylebook-mcp` connects design knowledge to an execution and reporting workflow. For an existing interface, the agent preserves the original, chooses a context-appropriate remedy, changes the real source, verifies the result and shows the before/after difference. The server supplies researched foundations and checks the submitted evidence contract; the host agent performs the edits and observations. New builds can also use the visual directions, UX principles, UI states and tokens from the curated [Web Stylebook](https://webstylebook.com) catalog.
+`web-stylebook-mcp` gives a coding agent design knowledge and a way to show its work. For an existing interface, the agent keeps what already works, picks a fix that fits the context, edits the real source, verifies the result, and shows the before/after difference. The server supplies researched design foundations and checks the evidence the agent submits; the agent itself makes the edits and takes the captures. New builds can also use the visual directions, UX principles, UI states and tokens from the curated [Web Stylebook](https://webstylebook.com) catalog.
 
 No API key. No model call. No network. No project filesystem access. **Deterministic, read-only, fully local.**
+
+## Quick start
+
+1. Add the server to your agent (Node ≥ 20; other clients are under [Install](#install)):
+   ```bash
+   claude mcp add web-stylebook -- npx -y web-stylebook-mcp@latest
+   ```
+2. Ask for a change to a screen you already have, for example *"Improve the incidents table so the incident that needs attention first stands out."* The agent starts with `get_design_improvement_plan`, edits your code, and finishes with `validate_design_improvement_result`.
+3. For a new product or page, describe it instead. The agent starts with `recommend_design_direction`.
+
+The [companion skill](#companion-skill) tells the agent when to call which tool.
 
 ## Without it / with it
 
@@ -36,7 +47,7 @@ No API key. No model call. No network. No project filesystem access. **Determini
 
 ## Improve an existing UI — the default workflow
 
-An improvement request now means **inspect → decide → implement → verify → compare/report**.
+An improvement request means **inspect → decide → implement → verify → compare/report**.
 The host agent edits the actual UI and uses the MCP to guide its decisions and check completion.
 It does not stop at a critique. Explicit review-only requests still stay read-only; a new build or
 new visual direction uses the existing direction tools.
@@ -52,7 +63,7 @@ conditions in `context`:
   "surface": "data-table",
   "concerns": [
     "scanability",
-    "hierarchy",
+    "focus",
     "consistency"
   ],
   "limit": 6,
@@ -89,9 +100,20 @@ working behavior; a new style is optional. The default is 6 entries, maximum 12,
 listed in `coverage.omittedIds`. Use `category` or explicit `foundationIds` to narrow retrieval.
 Filters combine with AND, concerns within a filter with OR. Browse `webstylebook://foundations`.
 
-After implementation, call **`validate_design_improvement_result`** with the returned `query`,
-`expectedPlanHash: workflow.planHash`, and actual captures, changed files/diffs, observed checks,
-target outcomes and limitations. It returns:
+After implementation, call **`validate_design_improvement_result`** with `plan` (the exact input you
+sent to `get_design_improvement_plan`), `expectedPlanHash` (the returned `workflow.planHash`), and a
+`submission` of actual captures, changed files/diffs, observed checks, target outcomes and limitations:
+
+```jsonc
+// → validate_design_improvement_result
+{
+  "plan": { "surface": "data-table", "concerns": ["scanability", "focus", "consistency"], "context": { … } },
+  "expectedPlanHash": "sha256:…",
+  "submission": { "captures": […], "changes": […], "checks": […], "outcomes": […], "limitations": […] }
+}
+```
+
+It returns:
 
 - `complete`: submitted implementation and comparison evidence covers every planned target.
 - `needs-work`: follow `nextActions`; missing before images, mismatched data/fonts/viewports,
@@ -109,7 +131,7 @@ for knowledge discovery but cannot complete an improvement. Commit/push/release/
 separate authorization.
 
 See the [result contract and cross-UI example](./skill/web-stylebook-design/references/improvement-result.md)
-and [research record](./docs/research/design-foundations.md). The machine-readable workflow is
+and [research record](./docs/research/design-foundations.md) (in Korean). The machine-readable workflow is
 `webstylebook://workflows/improve-ui`, also advertised by `manifest.improvementWorkflow`.
 
 ## Watch it decide
@@ -165,7 +187,7 @@ Notice what it does: the top candidates get clearly different scores (0.93, 0.89
 Then turn the chosen direction into real tokens:
 
 ```jsonc
-// → compose_design_tokens(style: "quiet-utility", format: "css-variables", theme: "light")
+// → compose_design_tokens({ primaryStyleId: "quiet-utility", format: "css-variables" })
 // 0 WCAG contrast warnings
 :root {
   --color-canvas: #ffffff;
@@ -176,7 +198,7 @@ Then turn the chosen direction into real tokens:
 }
 ```
 
-One request in — and the agent chose a direction, saw what was rejected and why, and got tokens that pass WCAG, without generating a line of code.
+Two calls, and the agent chose a direction, saw what was rejected and why, and got tokens that pass WCAG, without generating a line of code.
 
 ## Structure, not just tokens
 
@@ -228,7 +250,7 @@ Each finding names where the pattern is, what was observed, and what to put ther
 
 ### Must-haves a style can't remove
 
-A direction must not cost the page its function. In the shelved showcase run (#7), the luxury skincare page built with the MCP kept a single buy button above the fold, while the control page showed sizes, a per-night price, add to bag, and delivery and guarantee details. So `recommend_design_direction` also returns `mustHaves`: the elements the resolved product type requires and the zone each one must sit in. A style restyles them but never removes them or moves them out of their zone, and they come before the archetype's limits on the opening ("one action, one short line"): every first-screen item goes in the hero. Each candidate's `structure.mustHaves` names that style's signature moves that do the same job, for example the proof move that can carry delivery and guarantee details.
+A direction must not cost the page its function. In an earlier showcase run ([#7](https://github.com/seungdori/web-stylebook-mcp/issues/7)), the luxury skincare page built with the MCP kept a single buy button above the fold, while the control page showed sizes, a per-night price, add to bag, and delivery and guarantee details. So `recommend_design_direction` also returns `mustHaves`: the elements the resolved product type requires and the zone each one must sit in. A style restyles them but never removes them or moves them out of their zone, and they come before the archetype's limits on the opening ("one action, one short line"): every first-screen item goes in the hero. Each candidate's `structure.mustHaves` names that style's signature moves that do the same job, for example the proof move that can carry delivery and guarantee details.
 
 | Product type | Page | First screen | Anywhere on the page |
 |---|---|---|---|
@@ -309,7 +331,7 @@ flowchart LR
     E -->|complete / no-change| F[Before/after report]
 ```
 
-The agent describes the product; the server scores its curated catalog and returns structured evidence. After building, the agent passes the page markup to the structure audit, which never reads files on its own. After inspection, the validator checks the result contract without opening the referenced artifacts or judging visual quality. No code is generated and nothing leaves your machine.
+That is the flow for an existing UI: the validator checks the submitted evidence without opening the referenced artifacts or judging visual quality. For a new build, the agent describes the product, the server scores its curated catalog and returns structured evidence, and after building, the agent passes the page markup to the structure audit, which never reads files on its own. No code is generated and nothing leaves your machine.
 
 ## Install
 
@@ -386,6 +408,28 @@ Add the same block to your `claude_desktop_config.json`, then restart:
 
 </details>
 
+## Companion skill
+
+A companion skill ships in [`skill/`](./skill) so your agent reaches for these tools at the right moment — and uses the results well (compose, don't recolor; offer multiple candidates; earn trust, don't fake it; land on reusable components). It is in this repository and in the npm package; to get a copy without cloning, run `npm pack web-stylebook-mcp` and extract `package/skill/` from the tarball.
+
+**Codex**
+
+- Copy or symlink `skill/web-stylebook-design/` into a Codex skill location such as
+  `.agents/skills/web-stylebook-design/` in your repo, or `~/.agents/skills/web-stylebook-design/`
+  for your user profile.
+- If you do not want to install the skill, copy `skill/AGENTS.md` into your project's `AGENTS.md`.
+
+**Claude Code**
+
+- Copy `skill/web-stylebook-design/` to `.claude/skills/web-stylebook-design/` in your project, or
+  `~/.claude/skills/web-stylebook-design/` for every project, **or**
+- Copy `skill/CLAUDE.md` into your project's `CLAUDE.md`.
+
+**Other agents**
+
+- Point your agent's skills directory at `skill/web-stylebook-design/`, or copy `skill/CLAUDE.md`
+  into its rules file.
+
 ## Tools
 
 | Tool | What you get | The honest part |
@@ -432,9 +476,7 @@ Read `webstylebook://manifest` for `visualContract.contractSchema` and the bundl
 
 `overrides` accepts semantic colors, typography roles, spacing, density, and font metadata. Use these explicit values for selections taken from another style; `secondaryStyleId` remains the legacy accent overlay and is rejected in contract mode. Unknown fields and conflicting `density` / `accentOverride` aliases are rejected. Supply `contract` whenever using `overrides` or `acceptedRepairs`.
 
-The result includes the selected `visualContract`, source identity in `contract`, and `repairProposals`. Repairs stay unapplied until their exact proposal objects are sent back in `acceptedRepairs`; stale proposals are rejected. Apply accepted repairs with a single `light` or `dark` request; `both` requests return separate mode proposals. Keep `visualContract` alongside exported CSS: it carries component color pairs, font loading and license metadata, usage rules, provenance, and accepted repairs. Theme output also includes `roleStyles` and a complete `metadata` companion. Font loading and rendered appearance still require checks in the consuming app.
-
-The shared runtime includes seven portable MIT sources, including `fontSources.ts` metadata for Korean/Japanese heavy display fallbacks. It includes no browser font loader or font binaries. `visual:sync` preflights the source import closure and license declarations before writing, and `visual:check` verifies the source hashes and artifact bytes. When updating the website revision, regenerate and synchronize `catalog.v1.json`, `manifest.v1.json`, and the visual artifact together; update the exact source pin in `.github/workflows/publish.yml` as well.
+The result includes the selected `visualContract`, source identity in `contract`, and `repairProposals`. Repairs stay unapplied until their exact proposal objects are sent back in `acceptedRepairs`; stale proposals are rejected. Apply accepted repairs with a single `light` or `dark` request; `both` requests return separate mode proposals. Keep `visualContract` alongside exported CSS: it carries component color pairs, font loading and license metadata, usage rules, provenance, and accepted repairs. Theme output also includes `roleStyles` and a complete `metadata` companion. Font loading and rendered appearance still require checks in the consuming app. The shared runtime includes seven portable MIT sources, including `fontSources.ts` metadata for Korean/Japanese heavy display fallbacks, but no browser font loader or font binaries.
 
 ## Export a DESIGN.md
 
@@ -542,7 +584,7 @@ The result has `verdict` (`PASS`, `FIX_NOW`, or `RISK`), an `inventory` with kep
 
 ## Audit result contract
 
-`get_design_audit_plan` now returns an `identity` with the catalog version/hash and a deterministic
+`get_design_audit_plan` returns an `identity` with the catalog version/hash and a deterministic
 `planHash`. After inspecting the actual implementation, submit the same plan query plus:
 
 - one target per inspected route or screen, state, viewport, theme, locale, and role;
@@ -574,28 +616,14 @@ correctness; it does not claim that subjective visual judgment itself is 100% ac
 
 ## CLI
 
+Your MCP client starts the server for you. With no arguments (or `--stdio`), the command runs the server over stdio and waits for a client. The other options print and exit:
+
 ```bash
-web-stylebook-mcp                 # run the server over stdio (default)
-web-stylebook-mcp --version
-web-stylebook-mcp --catalog-info
-web-stylebook-mcp --validate-catalog
+npx -y web-stylebook-mcp --help
+npx -y web-stylebook-mcp --version
+npx -y web-stylebook-mcp --catalog-info       # catalog version, hash and counts
+npx -y web-stylebook-mcp --validate-catalog   # non-zero exit on failure
 ```
-
-## Companion skill
-
-A companion skill ships in [`skill/`](./skill) so your agent reaches for these tools at the right moment — and uses the results well (compose, don't recolor; offer multiple candidates; earn trust, don't fake it; land on reusable components):
-
-**Codex**
-
-- Copy or symlink `skill/web-stylebook-design/` into a Codex skill location such as
-  `.agents/skills/web-stylebook-design/` in your repo, or `~/.agents/skills/web-stylebook-design/`
-  for your user profile.
-- If you do not want to install the skill, copy `skill/AGENTS.md` into your project's `AGENTS.md`.
-
-**Claude Code and other agents**
-
-- Point your agent's skills directory at `skill/web-stylebook-design/`, **or**
-- Copy `skill/CLAUDE.md` into your project's `CLAUDE.md` or equivalent rules file.
 
 ## Privacy & security
 
@@ -607,22 +635,7 @@ A companion skill ships in [`skill/`](./skill) so your agent reaches for these t
 | Project filesystem access | None — the server only reads its bundled catalog snapshot |
 | Behavior | Deterministic, read-only |
 
-The server reads from a catalog snapshot bundled in the package. Nothing is sent anywhere; the same inputs always yield the same contracts.
-
-## Catalog source sync
-
-The canonical catalog is authored in the
-[`web-stylebook`](https://github.com/seungdori/web-stylebook) repository. After generating its
-local MCP handoff snapshot, verify byte-for-byte parity before releasing this package:
-
-```bash
-npm run catalog:check-canonical -- /absolute/path/to/web-stylebook/packages/mcp/generated
-```
-
-Without an argument, the command uses `WEB_STYLEBOOK_CANONICAL_CATALOG_DIR` or the local sibling
-path `../showcase/packages/mcp/generated`. The regular test suite verifies the bundled artifact's
-internal hash, enums, counts, and runtime contract; this command is the explicit cross-repository
-source check.
+The server reads from a catalog snapshot bundled in the package. Nothing is sent anywhere; the same inputs always yield the same contracts. To report a vulnerability, follow [SECURITY.md](./SECURITY.md).
 
 ## Compatibility
 
@@ -630,7 +643,17 @@ source check.
 - **Transport:** stdio (Model Context Protocol)
 - **Clients:** Codex CLI / IDE extension, Claude Code, Claude Desktop, Cursor, Windsurf, and any MCP-compatible client
 
-Tool inputs are unchanged apart from new optional values, and `structure` is an added output field. Plans requested without `includeGroups` keep their checks and hash, because `structure` is opt-in. Calls without `contract` keep the same token shape and light-mode default. As of 0.11.0, those calls emit the pinned style's authored shadows instead of the generic soft shadow, and editorial or monospace-led styles emit authored font families instead of the style-family fonts. Color, type scale, line-height, spacing, radius, motion, and omitted density stay on the previous legacy path. An explicit `density` still takes precedence over a family's row and gutter, and CSS / theme output retains line-height tokens. Pass `contract` for the full authored specification. The shared contract is additive; no new tool is required.
+Tool inputs are unchanged apart from new optional values, and `structure` is an added output field. Plans requested without `includeGroups` keep their checks and hash, because `structure` is opt-in. Calls without `contract` keep the same token shape and light-mode default. Since 0.11.1 (0.11.0 was tagged but never published), those calls emit the pinned style's authored shadows instead of the generic soft shadow, and editorial or monospace-led styles emit authored font families instead of the style-family fonts. Color, type scale, line-height, spacing, radius, motion, and omitted density stay on the previous legacy path. An explicit `density` still takes precedence over a family's row and gutter, and CSS / theme output retains line-height tokens. Pass `contract` for the full authored specification. The shared contract is additive; no new tool is required.
+
+## Development
+
+```bash
+npm ci
+npm test       # builds, then runs the test suite
+npm run dev    # runs the server from source over stdio
+```
+
+Changes are listed in [CHANGELOG.md](./CHANGELOG.md). Release steps, including the catalog sync with the [`web-stylebook`](https://github.com/seungdori/web-stylebook) repository, are in [RELEASING.md](./RELEASING.md).
 
 ## License
 

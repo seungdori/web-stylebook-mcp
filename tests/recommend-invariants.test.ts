@@ -293,7 +293,7 @@ describe('5. README claims match the real tool', () => {
     expect(res.structuredContent.warnings).toEqual([]);
     for (const doc of [readme, readmeKo]) {
       for (const name of ['canvas', 'text', 'accent', 'border']) {
-        const shown = new RegExp(`--color-${name}:\\s+(#[0-9a-f]{6})`).exec(doc.slice(doc.indexOf('compose_design_tokens(style: "quiet-utility"')))?.[1];
+        const shown = new RegExp(`--color-${name}:\\s+(#[0-9a-f]{6})`).exec(doc.slice(doc.indexOf('compose_design_tokens({ primaryStyleId: "quiet-utility", format: "css-variables" })')))?.[1];
         const real = new RegExp(`--color-${name}:\\s+(#[0-9a-f]{6})`).exec(css)?.[1];
         expect(shown, `${name} in README`).toBeDefined();
         expect(shown).toBe(real);
