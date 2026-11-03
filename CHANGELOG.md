@@ -35,6 +35,28 @@ All notable changes to this project are documented here. The format follows
 
 ### Fixed
 
+- `validate_design_audit_result` checks the target matrix against the plan (#22). A check that names a
+  viewport counts only on a target inside it (`mobile-renders-cleanly` ≤390px, `desktop-composition-holds`
+  ≥1280px; answer `NOT_APPLICABLE` elsewhere), and `no-horizontal-scroll` needs narrow, medium, and wide
+  targets. Planned surfaces and required states without a verified target are reported as warnings.
+  `coverage.state` is `full` only when both the submitted slots (`coverage.reportingState`) and the planned
+  scope (`coverage.scope`) are; record deliberate gaps in the optional `scopeExclusions` with a reason.
+  Plan hashes are unchanged.
+- `validate_design_audit_result` rejects verdicts that disagree with their evidence (#23). `NOT_APPLICABLE`
+  citing passed, failed, or indeterminate evidence, behavior checks without an `after`-phase outcome, and
+  static or `before` evidence from another route become `NOT_VERIFIED`. Route transitions stay valid in
+  `input`/`after`/`recovery` evidence, and the optional evidence field `supersedes` records a re-run or
+  correction with a reason.
+- `compare_page_revisions` compares form fields per form (matched by method and action, then shared
+  fields and position) and reports lost radio, checkbox, and select options (RISK) and form buttons
+  (FIX_NOW when a form is left without a submit button, otherwise RISK), so dropping them no longer
+  passes (#21). Acknowledge intended removals with kind `option` or `control`. The revision ruleset hash
+  changes.
+- `compose_design_tokens` without `contract` keeps an 8-digit `accentOverride`'s alpha in the contrast
+  math: `accentText`, the focus repair, and the warnings use the accent as painted on the returned
+  `canvas`, and any other backdrop is flagged for a rendered contrast review instead of a made-up 21:1.
+  Hex without `#` is emitted as valid CSS hex (`000000` → `#000000`) (#24). Opaque accents produce
+  identical output.
 - README examples now match the tool schemas: the improvement plan example used `hierarchy`, which is
   not a design concern, the token example used parameter names the strict schema rejects, and the
   validator call now shows its real `plan` / `expectedPlanHash` / `submission` shape. A new test parses
