@@ -200,6 +200,8 @@ Then turn the chosen direction into real tokens:
 
 Two calls, and the agent chose a direction, saw what was rejected and why, and got tokens that pass WCAG, without generating a line of code.
 
+The contrast checks are computed from the token values, not measured on a rendered page. `accentOverride` takes 3-, 6-, or 8-digit hex with or without `#` and returns it with `#`. A translucent 8-digit accent keeps its alpha and is checked as painted on the returned `canvas`; on any other backdrop, the warnings say it needs a rendered contrast review. Confirm final contrast where the page renders.
+
 ## Structure, not just tokens
 
 Tokens only recolor a page, so every candidate also carries `structure`: a layout archetype (hero composition, grid rhythm, section order, density, and how the type scale is used), two or three signature moves with the job each one does, and the patterns the page must not ship. `webstylebook://styles/{id}` adds each move's build steps and each ban's detection criteria, and `compose_design_tokens` points back to it (style id, resource URI, and move ids) and prints the hero and moves in its text output. Where an archetype breaks from the style's specimen page, its `basis` is `authored` and `departure` says why.

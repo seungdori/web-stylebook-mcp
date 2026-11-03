@@ -6,7 +6,7 @@ import type { ResolvedVisualContract, VisualOverrides } from '../visual-canonica
 import { assessContrast, proposeContrastRepairs, parseVisualColor } from '../visual-canonical/contrast.js';
 import { serializeVisualJson, visualContractToCss, visualContractToTheme } from '../visual-canonical/export.js';
 import { zVisualOverrides } from '../visual-canonical/schema.js';
-import { parseHex } from './contrast.js';
+import { normalizeHexColor } from './contrast.js';
 
 /** Backward token aliases project the same resolved values; the companion is lossless. */
 export function visualToLegacyTokens(spec: ResolvedVisualContract): DesignTokens {
@@ -38,8 +38,8 @@ function resolveOverrides(input: ComposeDesignTokensInput): VisualOverrides {
     overrides.density = input.density;
   }
   if (input.accentOverride !== undefined) {
-    if (!parseHex(input.accentOverride)) throw new TokenError(`accentOverride '${input.accentOverride}' is not a valid hex color`);
-    const normalizedAccent = input.accentOverride.startsWith('#') ? input.accentOverride : `#${input.accentOverride}`;
+    const normalizedAccent = normalizeHexColor(input.accentOverride);
+    if (normalizedAccent === null) throw new TokenError(`accentOverride '${input.accentOverride}' is not a valid hex color (use 3, 6 or 8 hex digits)`);
     if (overrides.colors?.accent !== undefined && JSON.stringify(parseVisualColor(overrides.colors.accent)) !== JSON.stringify(parseVisualColor(normalizedAccent))) throw new TokenError('accentOverride conflicts with overrides.colors.accent; send one agreed value');
     overrides.colors = { ...overrides.colors, accent: normalizedAccent };
   }

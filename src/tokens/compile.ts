@@ -2,7 +2,7 @@ import type { DesignTokens, DesignTokenColor, Lang } from '../types.js';
 import type { CatalogRepository } from '../catalog/repository.js';
 import { composeContractTokens } from './visual.js';
 import type { ResolvedVisualContract, VisualContract, VisualOverrides, VisualRepair } from '../visual-canonical/types.js';
-import { parseHex, luminanceOf, contrastRatio, checkContrast, type Rgb } from './contrast.js';
+import { parseHex, luminanceOf, contrastRatio, checkContrast, compositeOver, normalizeHexColor, type Rgb } from './contrast.js';
 import { hasStructureGuide, structureReference, type StructureReference } from '../structure/guidance.js';
 import { tokenSetToDesignMd, type DesignMd, type DesignMdOptions } from './design-md.js';
 
@@ -57,15 +57,31 @@ function toHex(rgb: Rgb): string {
   const h = (n: number) => Math.max(0, Math.min(255, Math.round(n))).toString(16).padStart(2, '0');
   return `#${h(rgb.r)}${h(rgb.g)}${h(rgb.b)}`;
 }
+function mix(a: Rgb, b: Rgb, t: number): string {
+  return toHex({ r: a.r + (b.r - a.r) * t, g: a.g + (b.g - a.g) * t, b: a.b + (b.b - a.b) * t });
+}
 function blend(a: string, b: string, t: number): string {
   const ra = parseHex(a); const rb = parseHex(b);
   if (!ra || !rb) return a;
-  return toHex({ r: ra.r + (rb.r - ra.r) * t, g: ra.g + (rb.g - ra.g) * t, b: ra.b + (rb.b - ra.b) * t });
+  return mix(ra, rb, t);
 }
-function bestTextOn(bg: string): string {
+
+type ContrastOn = (fg: string, bg?: string) => number;
+/**
+ * Contrast where these tokens place colors: on the canvas. A translucent background (an 8-digit
+ * accentOverride) is measured as it shows on the canvas, never as its opaque RGB (#24).
+ */
+function contrastOn(canvas: string): ContrastOn {
+  return (fg, bg = canvas) => {
+    const ratio = contrastRatio(fg, bg, canvas);
+    if (ratio === null) throw new Error(`canvas '${canvas}' must be opaque to measure contrast on it`);
+    return ratio;
+  };
+}
+function bestTextOn(bg: string, contrast: ContrastOn): string {
   // true black/white maximize contrast; #111 silently lost ~0.4 ratio and pushed
   // mid-tone accents (e.g. #ab6b49) below AA on the primary-action label.
-  return contrastRatio('#ffffff', bg) >= contrastRatio('#000000', bg) ? '#ffffff' : '#000000';
+  return contrast('#ffffff', bg) >= contrast('#000000', bg) ? '#ffffff' : '#000000';
 }
 
 const STATUS = {
@@ -109,7 +125,8 @@ function authoredFontFamilies(contract: VisualContract, mode: 'light' | 'dark') 
 // (dark mode) — the lightest *available* neutral can still be near-black. If none
 // qualifies, return null so the caller synthesizes a proper tinted-neutral.
 function pickNeutralAnchor(palette: string[], want: 'light' | 'dark'): string | null {
-  const neutrals = palette.filter((p) => parseHex(p) && chromaOf(p) <= NEUTRAL_CHROMA);
+  // only an opaque color can be the canvas every other color is measured on
+  const neutrals = palette.filter((p) => parseHex(p)?.a === 1 && chromaOf(p) <= NEUTRAL_CHROMA);
   if (want === 'light') {
     const light = neutrals.filter((p) => luminanceOf(p) >= 0.45).sort((a, b) => luminanceOf(b) - luminanceOf(a));
     return light[0] ?? null;
@@ -124,11 +141,14 @@ function mostSaturated(palette: string[]): string {
 }
 
 /** Shift accent toward black/white until it clears 3:1 on canvas; fall back to ink. */
-function repairFocus(accent: string, canvas: string, ink: string, mode: 'light' | 'dark'): string {
-  const target = mode === 'light' ? '#000000' : '#ffffff';
+function repairFocus(accent: string, canvas: string, ink: string, mode: 'light' | 'dark', contrast: ContrastOn): string {
+  const target = parseHex(mode === 'light' ? '#000000' : '#ffffff')!;
+  // start from the accent as it shows on the canvas; a translucent accent's raw RGB is not what users see
+  const shown = compositeOver(accent, canvas);
+  if (!shown) return ink;
   for (let t = 0.15; t <= 0.85; t += 0.15) {
-    const shifted = blend(accent, target, t);
-    if (contrastRatio(shifted, canvas) >= 3) return shifted;
+    const shifted = mix(shown, target, t);
+    if (contrast(shifted) >= 3) return shifted;
   }
   return ink;
 }
@@ -147,15 +167,16 @@ function buildColor(palette: string[], accent: string, mode: 'light' | 'dark', s
     repairs.push(`canvas synthesized as a tinted-neutral — palette had no low-chroma ${mode} anchor`);
   }
 
+  const contrast = contrastOn(canvas);
   let ink = pickNeutralAnchor(valid, mode === 'light' ? 'dark' : 'light');
-  if (!ink || contrastRatio(ink, canvas) < 4.5) {
-    if (ink && contrastRatio(ink, canvas) < 4.5) repairs.push('text replaced with a neutral — palette text candidate failed AA on canvas');
+  if (!ink || contrast(ink) < 4.5) {
+    if (ink && contrast(ink) < 4.5) repairs.push('text replaced with a neutral — palette text candidate failed AA on canvas');
     ink = mode === 'light' ? '#0a0a0b' : '#fafafa';
   }
 
   let focus = accent;
-  if (contrastRatio(accent, canvas) < 3) {
-    focus = repairFocus(accent, canvas, ink, mode);
+  if (contrast(accent) < 3) {
+    focus = repairFocus(accent, canvas, ink, mode, contrast);
     repairs.push(`focus derived from ${focus === ink ? 'text ink' : 'a darkened/lightened accent'} — raw accent was <3:1 on canvas`);
   }
 
@@ -172,8 +193,8 @@ function buildColor(palette: string[], accent: string, mode: 'light' | 'dark', s
       border: blend(canvas, ink, 0.22),       // >=22% — borders must be visibly visible
       borderStrong: blend(canvas, ink, 0.4),
       accent,
-      accentText: bestTextOn(accent),
-      ...(secondaryAccent ? { accentSecondary: secondaryAccent, accentSecondaryText: bestTextOn(secondaryAccent) } : {}),
+      accentText: bestTextOn(accent, contrast),
+      ...(secondaryAccent ? { accentSecondary: secondaryAccent, accentSecondaryText: bestTextOn(secondaryAccent, contrast) } : {}),
       positive: status.positive,
       caution: status.caution,
       critical: status.critical,
@@ -229,10 +250,11 @@ function warningsFor(t: DesignTokens, mode: string, accentOverridden: boolean): 
   const notes: string[] = [];
   const body = checkContrast(t.color.text, t.color.canvas, `body text (${mode})`, 4.5);
   if (body) warnings.push(body.message);
-  const acc = checkContrast(t.color.accentText, t.color.accent, `accent text (${mode})`, 4.5);
+  // accent fills are measured on the canvas, the backdrop accentText was chosen on
+  const acc = checkContrast(t.color.accentText, t.color.accent, `accent text (${mode})`, 4.5, t.color.canvas);
   if (acc) warnings.push(acc.message);
   if (t.color.accentSecondary && t.color.accentSecondaryText) {
-    const sec = checkContrast(t.color.accentSecondaryText, t.color.accentSecondary, `accent-secondary text (${mode})`, 4.5);
+    const sec = checkContrast(t.color.accentSecondaryText, t.color.accentSecondary, `accent-secondary text (${mode})`, 4.5, t.color.canvas);
     if (sec) warnings.push(sec.message);
   }
   const focus = checkContrast(t.color.focus, t.color.canvas, `focus ring (${mode})`, 3);
@@ -241,6 +263,15 @@ function warningsFor(t: DesignTokens, mode: string, accentOverridden: boolean): 
   const accentOnCanvas = checkContrast(t.color.accent, t.color.canvas, `accent on canvas (${mode})`, 3);
   if (accentOnCanvas) warnings.push(accentOnCanvas.message);
   else notes.push(`Accent on canvas passes for large fills/icons/borders (>=3:1); if you use the accent as TEXT, verify >=4.5:1 first.`);
+  // The canvas is the only backdrop these tokens know; on any other one a translucent fill is unmeasured.
+  for (const [name, fill] of [['accent', t.color.accent], ['accent-secondary', t.color.accentSecondary]] as const) {
+    if (fill === undefined) continue;
+    const alpha = parseHex(fill)?.a ?? 1;
+    const shown = alpha < 1 ? compositeOver(fill, t.color.canvas) : null;
+    if (shown) {
+      warnings.push(`${name} (${mode}) ${fill} is not opaque (alpha ${Math.round(alpha * 1000) / 10}%): its contrast is measured as painted on canvas ${t.color.canvas}, where it shows as ${toHex(shown)}; on any other backdrop it is unknown — requires rendered contrast review.`);
+    }
+  }
   if (accentOverridden) notes.push(`Accent was overridden — verify accent/status color distinction and contrast in context.`);
   notes.push(`Status colors are accessible defaults, not brand-derived — confirm they fit the product.`);
   return { warnings, notes };
@@ -278,10 +309,10 @@ function composeTokenSet(input: ComposeDesignTokensInput & { format: TokenFormat
   // presence, not truthiness: '' must be rejected, not silently fall through to style.accent
   let accent: string;
   if (input.accentOverride !== undefined) {
-    if (!parseHex(input.accentOverride)) {
-      throw new TokenError(`accentOverride '${input.accentOverride}' is not a valid hex color`);
-    }
-    accent = input.accentOverride;
+    // one value for the output and the math: a bare hex gains its '#', an 8-digit alpha is kept (#24)
+    const normalized = normalizeHexColor(input.accentOverride);
+    if (normalized === null) throw new TokenError(`accentOverride '${input.accentOverride}' is not a valid hex color (use 3, 6 or 8 hex digits)`);
+    accent = normalized;
   } else {
     accent = style.accent;
   }

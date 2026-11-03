@@ -41,6 +41,7 @@ import {
 import {
   composeDesignTokens, TokenError, type ComposeDesignTokensResult, type DesignMdTokensResult,
 } from '../tokens/compile.js';
+import { HEX_COLOR_INPUT } from '../tokens/contrast.js';
 import { DESIGN_MD_PLACEMENTS } from '../tokens/design-md.js';
 import {
   auditPageStructure, PAGE_LIMITS, StructureAuditError, type StructureAuditResult,
@@ -555,7 +556,8 @@ export function registerTools(server: McpServer, repo: CatalogRepository): void 
     inputSchema: z.object({
       primaryStyleId: z.string(),
       secondaryStyleId: z.string().optional(),
-      accentOverride: z.string().regex(/^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/, 'must be a 3/6/8-digit hex color').optional(),
+      accentOverride: z.string().regex(HEX_COLOR_INPUT, 'must be a 3/6/8-digit hex color')
+        .describe('3, 6 or 8 hex digits; a missing # is added and an 8-digit alpha is kept. Without contract, a translucent accent is contrast-checked as painted on the returned canvas; any other backdrop needs a rendered review.').optional(),
       format: z.enum(['json', 'css-variables', 'tailwind', 'typescript', 'design-md']),
       designMd: z.object({
         tokenPlacement: z.enum(DESIGN_MD_PLACEMENTS).optional(),
