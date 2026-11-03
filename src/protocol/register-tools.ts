@@ -481,7 +481,7 @@ export function registerTools(server: McpServer, repo: CatalogRepository): void 
   }).strict();
   server.registerTool('compare_page_revisions', {
     title: 'Check that a redesign kept the original page\'s content and behavior',
-    description: `Compare the original page (before) with its redesign (after), offline and deterministically, and list what the redesign kept and what it dropped: links (normalized href), form fields with their labels, form actions and inline handlers, test hooks (data-testid, data-test, data-cy), the scriptSelectors your scripts query, h1-h3 headings, images and figures, main/nav/footer landmarks, the visible word count (Korean, Chinese, and Japanese by character), and, with productType, the must-haves audit_page_structure finds. A lost link, field, handler, script hook, or must-have is FIX_NOW (major), a lost test hook FIX_NOW (minor), and lost headings, figures, landmarks, reworded headings or links, and a redesign that keeps under ${REVISION_LIMITS.wordsMinRatio * 100}% of more than ${REVISION_LIMITS.wordsMinBefore} words are RISK. Put intended removals in acknowledged with a reason of at least ${REVISION_LIMITS.reasonMinChars} characters. Keep the original's rendered HTML and CSS before redesigning. Returns redesign-kept-<inventory> evidence and results that validate_design_audit_result accepts with a get_design_audit_plan query of revisionPreservation: true. Static markup, not a browser. Limits per page: html ${PAGE_LIMITS.htmlChars} characters, ${PAGE_LIMITS.cssFiles} stylesheets, ${PAGE_LIMITS.cssTotalChars} CSS characters in total.`,
+    description: `Compare the original page (before) with its redesign (after), offline and deterministically, and list what the redesign kept and what it dropped: links (normalized href), form fields per form with their labels, the radio, checkbox, and select option values each field offers, the buttons each form owns, form actions and inline handlers, test hooks (data-testid, data-test, data-cy), the scriptSelectors your scripts query, h1-h3 headings, images and figures, main/nav/footer landmarks, the visible word count (Korean, Chinese, and Japanese by character), and, with productType, the must-haves audit_page_structure finds. A lost link, field, handler, script hook, or must-have, or a form left without any submit button, is FIX_NOW (major), a lost test hook FIX_NOW (minor), and lost headings, figures, landmarks, options, or other form buttons, reworded headings, links, options, or buttons, and a redesign that keeps under ${REVISION_LIMITS.wordsMinRatio * 100}% of more than ${REVISION_LIMITS.wordsMinBefore} words are RISK. Put intended removals in acknowledged (kind option or control for options and form buttons) with a reason of at least ${REVISION_LIMITS.reasonMinChars} characters. Keep the original's rendered HTML and CSS before redesigning. Returns redesign-kept-<inventory> evidence and results that validate_design_audit_result accepts with a get_design_audit_plan query of revisionPreservation: true. Static markup, not a browser. Limits per page: html ${PAGE_LIMITS.htmlChars} characters, ${PAGE_LIMITS.cssFiles} stylesheets, ${PAGE_LIMITS.cssTotalChars} CSS characters in total.`,
     inputSchema: {
       before: revisionSide,
       after: revisionSide,
@@ -1037,9 +1037,9 @@ function renderStructureAudit(r: StructureAuditResult, locale: Lang): string {
 }
 
 const revisionLabels: Record<Lang, { title: string; verdict: string; findings: string; none: string; words: string; limits: string }> = {
-  en: { title: 'Redesign preservation', verdict: 'Verdict', findings: 'Findings', none: 'Nothing the original page had was lost.', words: 'Visible words', limits: 'Limits' },
-  ko: { title: '리디자인 보존 검사', verdict: '판정', findings: '발견 항목', none: '원래 페이지에 있던 것 중 사라진 항목이 없습니다.', words: '보이는 단어', limits: '한계' },
-  ja: { title: 'リデザイン保持チェック', verdict: '判定', findings: '検出項目', none: '元のページにあったもので失われた項目はありません。', words: '表示される単語', limits: '限界' },
+  en: { title: 'Redesign preservation', verdict: 'Verdict', findings: 'Findings', none: 'No loss was found in the inventories compared above. This static comparison does not show that every behavior was kept; see the limits below.', words: 'Visible words', limits: 'Limits' },
+  ko: { title: '리디자인 보존 검사', verdict: '판정', findings: '발견 항목', none: '위에서 비교한 인벤토리에서는 손실을 찾지 못했습니다. 정적 비교이므로 모든 동작이 보존됐다는 뜻은 아닙니다. 아래 한계를 확인하세요.', words: '보이는 단어', limits: '한계' },
+  ja: { title: 'リデザイン保持チェック', verdict: '判定', findings: '検出項目', none: '上で比較したインベントリでは損失は見つかりませんでした。静的な比較のため、すべての動作が保たれたことを示すものではありません。下の限界を確認してください。', words: '表示される単語', limits: '限界' },
 };
 
 function renderRevisions(r: ComparePageRevisionsResult, locale: Lang): string {
@@ -1053,7 +1053,9 @@ function renderRevisions(r: ComparePageRevisionsResult, locale: Lang): string {
   ];
   if (!r.findings.length) lines.push('', labels.none);
   for (const finding of r.findings) {
-    lines.push('', `- [${finding.verdict}] ${finding.checkId} (${finding.change}): ${finding.keys.slice(0, 10).join(', ')}${finding.keys.length > 10 ? ` (+${finding.keys.length - 10})` : ''}`, `  ${finding.fix}`);
+    // The fields check also reports options and form buttons; name them so their lines are not read as fields.
+    const kind = finding.kind === 'option' || finding.kind === 'control' ? ` ${finding.kind}` : '';
+    lines.push('', `- [${finding.verdict}] ${finding.checkId} (${finding.change}${kind}): ${finding.keys.slice(0, 10).join(', ')}${finding.keys.length > 10 ? ` (+${finding.keys.length - 10})` : ''}`, `  ${finding.fix}`);
   }
   lines.push('', `${labels.limits}:`, ...r.limits.map((limit) => `- ${limit}`), '', ...r.guidance);
   return lines.join('\n');

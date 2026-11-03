@@ -3,7 +3,7 @@
     "schema": "webstylebook.page-revisions.v1",
     "catalogVersion": "<catalog version>",
     "catalogContentHash": "<catalog hash>",
-    "rulesetHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce",
+    "rulesetHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec",
     "beforeHash": "sha256:cb77ababffee5c497230c1a0b2fc0a663f16969ace24d3fc9f138d3e31c3ae21",
     "afterHash": "sha256:aa153fe671bf9edc01c8f9d8885c91b2300d1d756cebe92a8dcb63ec3d62ad30"
   },
@@ -31,6 +31,22 @@
       "reworded": []
     },
     "fields": {
+      "before": 0,
+      "after": 0,
+      "kept": 0,
+      "acknowledged": 0,
+      "lost": [],
+      "reworded": []
+    },
+    "options": {
+      "before": 0,
+      "after": 0,
+      "kept": 0,
+      "acknowledged": 0,
+      "lost": [],
+      "reworded": []
+    },
+    "controls": {
       "before": 0,
       "after": 0,
       "kept": 0,
@@ -137,7 +153,7 @@
       "producer": {
         "name": "web-stylebook-mcp compare_page_revisions",
         "version": "<server version>",
-        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -158,7 +174,7 @@
       "producer": {
         "name": "web-stylebook-mcp compare_page_revisions",
         "version": "<server version>",
-        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -169,12 +185,14 @@
       "summary": "Form fields: 0",
       "contentHash": "sha256:cb77ababffee5c497230c1a0b2fc0a663f16969ace24d3fc9f138d3e31c3ae21",
       "actual": {
-        "count": 0
+        "count": 0,
+        "options": 0,
+        "controls": 0
       },
       "producer": {
         "name": "web-stylebook-mcp compare_page_revisions",
         "version": "<server version>",
-        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -190,12 +208,16 @@
         "kept": 0,
         "lost": 0,
         "acknowledged": 0,
-        "reworded": 0
+        "reworded": 0,
+        "options": 0,
+        "optionsLost": 0,
+        "controls": 0,
+        "controlsLost": 0
       },
       "producer": {
         "name": "web-stylebook-mcp compare_page_revisions",
         "version": "<server version>",
-        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -211,7 +233,7 @@
       "producer": {
         "name": "web-stylebook-mcp compare_page_revisions",
         "version": "<server version>",
-        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -232,7 +254,7 @@
       "producer": {
         "name": "web-stylebook-mcp compare_page_revisions",
         "version": "<server version>",
-        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -248,7 +270,7 @@
       "producer": {
         "name": "web-stylebook-mcp compare_page_revisions",
         "version": "<server version>",
-        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -269,7 +291,7 @@
       "producer": {
         "name": "web-stylebook-mcp compare_page_revisions",
         "version": "<server version>",
-        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -285,7 +307,7 @@
       "producer": {
         "name": "web-stylebook-mcp compare_page_revisions",
         "version": "<server version>",
-        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -306,7 +328,7 @@
       "producer": {
         "name": "web-stylebook-mcp compare_page_revisions",
         "version": "<server version>",
-        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -322,7 +344,7 @@
       "producer": {
         "name": "web-stylebook-mcp compare_page_revisions",
         "version": "<server version>",
-        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -343,7 +365,7 @@
       "producer": {
         "name": "web-stylebook-mcp compare_page_revisions",
         "version": "<server version>",
-        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -359,7 +381,7 @@
       "producer": {
         "name": "web-stylebook-mcp compare_page_revisions",
         "version": "<server version>",
-        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -380,7 +402,7 @@
       "producer": {
         "name": "web-stylebook-mcp compare_page_revisions",
         "version": "<server version>",
-        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -396,7 +418,7 @@
       "producer": {
         "name": "web-stylebook-mcp compare_page_revisions",
         "version": "<server version>",
-        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -417,7 +439,7 @@
       "producer": {
         "name": "web-stylebook-mcp compare_page_revisions",
         "version": "<server version>",
-        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -433,7 +455,7 @@
       "producer": {
         "name": "web-stylebook-mcp compare_page_revisions",
         "version": "<server version>",
-        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -451,7 +473,7 @@
       "producer": {
         "name": "web-stylebook-mcp compare_page_revisions",
         "version": "<server version>",
-        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     }
   ],
@@ -550,7 +572,8 @@
   ],
   "limits": [
     "A static comparison of the submitted HTML and CSS, not a browser: content that JavaScript adds later and stylesheets that were not submitted are not seen.",
-    "Links, headings, figures, landmarks, word counts, and must-haves count visible elements only. Fields, handlers, test hooks, and script hooks count every element, hidden or not, because forms, scripts, and tests still use hidden ones."
+    "Links, headings, figures, landmarks, word counts, and must-haves count visible elements only. Fields, options, form buttons, handlers, test hooks, and script hooks count every element, hidden or not, because forms, scripts, and tests still use hidden ones.",
+    "Fields, options, and buttons are compared per form: forms are matched by method and action, then by the fields and buttons they share, then by position. Buttons outside a form are compared only through their handlers, test hooks, and script selectors. Whether a form still submits without a submit button (Enter in a field, a script) and what a script does on click are not verified."
   ],
   "guidance": [
     "Keep the original page's rendered HTML and CSS before a redesign, and pass both here when the redesign is built.",

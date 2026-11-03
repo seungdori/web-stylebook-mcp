@@ -3,7 +3,7 @@
     "schema": "webstylebook.page-revisions.v1",
     "catalogVersion": "<catalog version>",
     "catalogContentHash": "<catalog hash>",
-    "rulesetHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce",
+    "rulesetHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec",
     "beforeHash": "sha256:c9ec70d33973c489e678c5eaabdea4fea2c6d1785a7a9ab7952219fe101166cb",
     "afterHash": "sha256:028669618a464ee712b4fc1120445d44a5704b51aa37f90d7206b91288848b13"
   },
@@ -37,6 +37,22 @@
         "name=team_size",
         "name=email (label)"
       ],
+      "reworded": []
+    },
+    "options": {
+      "before": 0,
+      "after": 0,
+      "kept": 0,
+      "acknowledged": 0,
+      "lost": [],
+      "reworded": []
+    },
+    "controls": {
+      "before": 1,
+      "after": 1,
+      "kept": 1,
+      "acknowledged": 0,
+      "lost": [],
       "reworded": []
     },
     "handlers": {
@@ -123,7 +139,7 @@
         "select#team-size",
         "input#work-email"
       ],
-      "fix": "Restore the field with the same name or id and its label, or acknowledge why it is gone."
+      "fix": "Restore the field in the same form with the same name or id and its label, or acknowledge why it is gone."
     }
   ],
   "evidence": [
@@ -140,7 +156,7 @@
       "producer": {
         "name": "web-stylebook-mcp compare_page_revisions",
         "version": "<server version>",
-        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -161,7 +177,7 @@
       "producer": {
         "name": "web-stylebook-mcp compare_page_revisions",
         "version": "<server version>",
-        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -172,12 +188,14 @@
       "summary": "Form fields: 5",
       "contentHash": "sha256:c9ec70d33973c489e678c5eaabdea4fea2c6d1785a7a9ab7952219fe101166cb",
       "actual": {
-        "count": 5
+        "count": 5,
+        "options": 0,
+        "controls": 1
       },
       "producer": {
         "name": "web-stylebook-mcp compare_page_revisions",
         "version": "<server version>",
-        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -185,7 +203,7 @@
       "targetId": "page",
       "type": "dom",
       "phase": "after",
-      "summary": "Form fields: 3 of 5 kept, 3 lost, 0 acknowledged.",
+      "summary": "Form fields: 3 of 5 kept, 3 lost, 0 acknowledged. Form buttons: 1 of 1 kept, 0 lost, 0 acknowledged.",
       "outcome": "failed",
       "contentHash": "sha256:028669618a464ee712b4fc1120445d44a5704b51aa37f90d7206b91288848b13",
       "actual": {
@@ -193,12 +211,16 @@
         "kept": 3,
         "lost": 3,
         "acknowledged": 0,
-        "reworded": 0
+        "reworded": 0,
+        "options": 0,
+        "optionsLost": 0,
+        "controls": 1,
+        "controlsLost": 0
       },
       "producer": {
         "name": "web-stylebook-mcp compare_page_revisions",
         "version": "<server version>",
-        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -214,7 +236,7 @@
       "producer": {
         "name": "web-stylebook-mcp compare_page_revisions",
         "version": "<server version>",
-        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -235,7 +257,7 @@
       "producer": {
         "name": "web-stylebook-mcp compare_page_revisions",
         "version": "<server version>",
-        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -251,7 +273,7 @@
       "producer": {
         "name": "web-stylebook-mcp compare_page_revisions",
         "version": "<server version>",
-        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -272,7 +294,7 @@
       "producer": {
         "name": "web-stylebook-mcp compare_page_revisions",
         "version": "<server version>",
-        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -288,7 +310,7 @@
       "producer": {
         "name": "web-stylebook-mcp compare_page_revisions",
         "version": "<server version>",
-        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -309,7 +331,7 @@
       "producer": {
         "name": "web-stylebook-mcp compare_page_revisions",
         "version": "<server version>",
-        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -325,7 +347,7 @@
       "producer": {
         "name": "web-stylebook-mcp compare_page_revisions",
         "version": "<server version>",
-        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -346,7 +368,7 @@
       "producer": {
         "name": "web-stylebook-mcp compare_page_revisions",
         "version": "<server version>",
-        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -362,7 +384,7 @@
       "producer": {
         "name": "web-stylebook-mcp compare_page_revisions",
         "version": "<server version>",
-        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -383,7 +405,7 @@
       "producer": {
         "name": "web-stylebook-mcp compare_page_revisions",
         "version": "<server version>",
-        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -399,7 +421,7 @@
       "producer": {
         "name": "web-stylebook-mcp compare_page_revisions",
         "version": "<server version>",
-        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -420,7 +442,7 @@
       "producer": {
         "name": "web-stylebook-mcp compare_page_revisions",
         "version": "<server version>",
-        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -436,7 +458,7 @@
       "producer": {
         "name": "web-stylebook-mcp compare_page_revisions",
         "version": "<server version>",
-        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -454,7 +476,7 @@
       "producer": {
         "name": "web-stylebook-mcp compare_page_revisions",
         "version": "<server version>",
-        "configHash": "sha256:2e2e85da68bd71aacea096555af991375e4fcdbfb66119254778a5c6d9d683ce"
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     }
   ],
@@ -477,8 +499,8 @@
         "revision:page:redesign-kept-fields:before",
         "revision:page:redesign-kept-fields:after"
       ],
-      "rationale": "Form fields: 3 of 5 kept, 3 lost, 0 acknowledged.",
-      "remediation": "Restore the field with the same name or id and its label, or acknowledge why it is gone."
+      "rationale": "Form fields: 3 of 5 kept, 3 lost, 0 acknowledged. Form buttons: 1 of 1 kept, 0 lost, 0 acknowledged.",
+      "remediation": "Restore the field in the same form with the same name or id and its label, or acknowledge why it is gone."
     },
     {
       "checkId": "redesign-kept-handlers",
@@ -553,7 +575,8 @@
   ],
   "limits": [
     "A static comparison of the submitted HTML and CSS, not a browser: content that JavaScript adds later and stylesheets that were not submitted are not seen.",
-    "Links, headings, figures, landmarks, word counts, and must-haves count visible elements only. Fields, handlers, test hooks, and script hooks count every element, hidden or not, because forms, scripts, and tests still use hidden ones."
+    "Links, headings, figures, landmarks, word counts, and must-haves count visible elements only. Fields, options, form buttons, handlers, test hooks, and script hooks count every element, hidden or not, because forms, scripts, and tests still use hidden ones.",
+    "Fields, options, and buttons are compared per form: forms are matched by method and action, then by the fields and buttons they share, then by position. Buttons outside a form are compared only through their handlers, test hooks, and script selectors. Whether a form still submits without a submit button (Enter in a field, a script) and what a script does on click are not verified."
   ],
   "guidance": [
     "Keep the original page's rendered HTML and CSS before a redesign, and pass both here when the redesign is built.",
