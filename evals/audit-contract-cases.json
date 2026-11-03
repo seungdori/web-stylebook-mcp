@@ -1,6 +1,6 @@
 {
   "schema": "webstylebook.audit-contract-benchmark.v1",
-  "description": "Human-labeled contract cases comparing legacy pass-through verdicts with deterministic audit-result validation.",
+  "description": "Labeled contract cases (14 human-labeled; 10 labeled from the expected results in issues #22 and #23) comparing legacy pass-through verdicts with deterministic audit-result validation.",
   "cases": [
     {
       "id": "complete-pass",
@@ -124,6 +124,98 @@
       "id": "honest-not-applicable",
       "group": "content",
       "checkId": "meaning-precedes-method",
+      "submittedVerdict": "NOT_APPLICABLE",
+      "expectedVerdict": "NOT_APPLICABLE",
+      "expectedContractValid": true,
+      "mutation": "none"
+    },
+    {
+      "id": "not-applicable-cites-failed-evidence",
+      "group": "behavior",
+      "checkId": "navigation-and-route-behavior-works",
+      "submittedVerdict": "NOT_APPLICABLE",
+      "expectedVerdict": "NOT_VERIFIED",
+      "expectedContractValid": false,
+      "mutation": "not-applicable-cites-failed"
+    },
+    {
+      "id": "not-applicable-cites-inapplicable-evidence",
+      "group": "behavior",
+      "checkId": "navigation-and-route-behavior-works",
+      "submittedVerdict": "NOT_APPLICABLE",
+      "expectedVerdict": "NOT_APPLICABLE",
+      "expectedContractValid": true,
+      "mutation": "not-applicable-cites-inapplicable"
+    },
+    {
+      "id": "before-only-interaction-pass",
+      "group": "behavior",
+      "checkId": "keyboard-focus-is-visible",
+      "submittedVerdict": "PASS",
+      "expectedVerdict": "NOT_VERIFIED",
+      "expectedContractValid": false,
+      "mutation": "interaction-before-only"
+    },
+    {
+      "id": "after-phase-route-transition",
+      "group": "behavior",
+      "checkId": "navigation-and-route-behavior-works",
+      "submittedVerdict": "PASS",
+      "expectedVerdict": "PASS",
+      "expectedContractValid": true,
+      "mutation": "after-phase-route-transition"
+    },
+    {
+      "id": "static-evidence-from-another-route",
+      "group": "fidelity",
+      "checkId": "body-text-meets-contrast",
+      "submittedVerdict": "PASS",
+      "expectedVerdict": "NOT_VERIFIED",
+      "expectedContractValid": false,
+      "mutation": "static-route-mismatch"
+    },
+    {
+      "id": "superseded-failure-after-fix",
+      "group": "build",
+      "checkId": "build-succeeds",
+      "submittedVerdict": "PASS",
+      "expectedVerdict": "PASS",
+      "expectedContractValid": true,
+      "mutation": "superseded-failure"
+    },
+    {
+      "id": "desktop-target-mobile-pass",
+      "group": "layout",
+      "checkId": "mobile-renders-cleanly",
+      "submittedVerdict": "PASS",
+      "expectedVerdict": "NOT_VERIFIED",
+      "expectedContractValid": false,
+      "mutation": "none"
+    },
+    {
+      "id": "mobile-target-desktop-pass",
+      "group": "layout",
+      "checkId": "desktop-composition-holds",
+      "targetId": "narrow",
+      "submittedVerdict": "PASS",
+      "expectedVerdict": "NOT_VERIFIED",
+      "expectedContractValid": false,
+      "mutation": "none"
+    },
+    {
+      "id": "mobile-target-mobile-pass",
+      "group": "layout",
+      "checkId": "mobile-renders-cleanly",
+      "targetId": "narrow",
+      "submittedVerdict": "PASS",
+      "expectedVerdict": "PASS",
+      "expectedContractValid": true,
+      "mutation": "none"
+    },
+    {
+      "id": "desktop-target-mobile-not-applicable",
+      "group": "layout",
+      "checkId": "mobile-renders-cleanly",
       "submittedVerdict": "NOT_APPLICABLE",
       "expectedVerdict": "NOT_APPLICABLE",
       "expectedContractValid": true,

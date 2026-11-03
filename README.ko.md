@@ -599,15 +599,31 @@ webstylebook://workflows/improve-ui
 `get_design_audit_plan`은 catalog version/hash와 결정론적 `planHash`를 담은 `identity`를
 반환합니다. 실제 구현을 검사한 뒤 같은 plan query와 함께 다음을 제출합니다.
 
-- 검사한 route 또는 screen·state·viewport·theme·locale·role별 target;
-- 지속 가능한 artifact reference, content hash 또는 정확한 route/selector/file/region이 있는 evidence;
-- interaction evidence의 before/input/after/recovery phase;
-- 모든 계획된 check/target 쌍에 대한 결과 1건.
+- 검사한 route 또는 screen·state·viewport·theme·locale·role별 target. 기준에 viewport가 적힌
+  검사는 그 범위의 target에서만 인정되며(`mobile-renders-cleanly` ≤390px,
+  `desktop-composition-holds` ≥1280px, 다른 target에서는 `NOT_APPLICABLE`),
+  `no-horizontal-scroll`은 narrow(≤390px)·medium(391–1439px)·wide(≥1440px) target이 모두 있어야
+  범위 전체가 검증됩니다;
+- 지속 가능한 artifact reference, content hash 또는 정확한 route/selector/file/region이 있는 evidence.
+  static과 `before` evidence는 target의 `route`와 같아야 하고, `input`·`after`·`recovery` evidence는
+  상호작용으로 이동한 route를 기록할 수 있습니다(예: `/checkout` → `/confirmation`);
+- interaction evidence의 before/input/after/recovery phase. 동작의 결과를 보는 검사(키보드 포커스,
+  reduced motion, 폼 오류, 내비게이션)에는 `passed` 또는 `failed` outcome이 있는 `after` 관찰;
+- 모든 계획된 check/target 쌍에 대한 결과 1건. 선택적으로, 이전 항목을 대체하는 evidence(수정 후
+  재실행이나 오탐 정정)에는 `supersedes`를, 일부러 감사하지 않은 계획 surface·필수 상태·viewport
+  범위에는 `scopeExclusions`를 이유와 함께 붙입니다.
 
 `validate_design_audit_result`는 plan을 다시 생성해 오래된 plan hash, 누락·중복 결과,
-끊어진 evidence reference, 다른 target의 evidence, 잘못된 region, 부당한
-`NOT_APPLICABLE`, 필수 증거가 없거나 실패 증거와 모순되는 `PASS`를 거부합니다. 누락된
-결과는 숨기지 않고 `NOT_VERIFIED`로 구체화합니다. `includeGroups`에 `structure`를 넣고 `styleId`를 주면,
+끊어진 evidence reference, 다른 target의 evidence, 다른 route의 evidence, 잘못된 region, 부당한
+`NOT_APPLICABLE`(통과·실패·판정 불가 evidence를 인용한 경우 포함), 필수 증거나 동작 후 결과가
+없거나, 검사가 지정한 viewport 밖이거나, 실패 증거와 모순되는 `PASS`를 거부합니다. 누락된
+결과는 숨기지 않고 `NOT_VERIFIED`로 구체화합니다. `coverage.reportingState`는 제출한 target의
+모든 슬롯에 결과가 있는지를, `coverage.scope`는 plan의 surface·필수 상태(`stateCoverage`)·viewport
+범위를 검증된 결과가 있는 target과 비교해 빠진 것을 경고로 알려 줍니다. `coverage.state`는 둘 다
+충족될 때만 `full`입니다. `global`만 지정한 plan의 기준은 `submitted-targets-only`입니다. 이
+viewport·phase·범위 규칙은 validator에 있고 `planHash`에 들어가지 않습니다. `supersedes`와
+`scopeExclusions`는 선택 사항이며, result hash는 `scopeExclusions`를 줬을 때만 그것을 포함합니다.
+`includeGroups`에 `structure`를 넣고 `styleId`를 주면,
 plan에 금지 패턴마다 자동 검사가 1개씩 붙고, `productType`을 주면 필수 요소마다 1개씩 더 붙습니다. `audit_page_structure`는 이 검사 id에 맞는 evidence와
 results를 돌려주고, validator는 그대로 받습니다. `revisionPreservation: true`를 주면 plan에는 `compare_page_revisions`가 답하는 `redesign-kept-*` 검사만 들어갑니다. 재검증 가능한 비교를 위해 plan,
 evidence bundle, 정규화된 result의 content-addressed hash도 반환합니다. 이 툴은 artifact를
@@ -619,11 +635,14 @@ evidence bundle, 정규화된 result의 content-addressed hash도 반환합니�
 npm run eval:audit-contract
 ```
 
-사람이 라벨링한 정상·adversarial 사례 14건에서 기존 pass-through 판정은 4/14(28.57%)와
-잘못된 `PASS` 9건을 기록했습니다. 새 validator는 14/14, 잘못된 `PASS` 0건이며 계약의
-유효/무효도 14건 모두 올바르게 분류했습니다. 증거 누락·서술뿐인 증거·알 수 없는 증거·
+정상·adversarial 사례 24건(사람이 라벨링한 14건과, #22·#23의 기대 결과로 라벨을 붙인 10건)에서 기존 pass-through 판정은 9/24(37.5%)와
+잘못된 `PASS` 13건을 기록했습니다. 새 validator는 24/24, 잘못된 `PASS` 0건이며 계약의
+유효/무효도 24건 모두 올바르게 분류했습니다. 증거 누락·서술뿐인 증거·알 수 없는 증거·
 다른 target의 증거·판정 불가·interaction phase 누락·blocker/major/minor 실패·정직한
-`NOT_VERIFIED`·유효/무효 `NOT_APPLICABLE`을 포함합니다. 이는 결과 계약의 정확도 개선을
+`NOT_VERIFIED`·유효/무효 `NOT_APPLICABLE`에 더해, 실패 증거를 인용한 `NOT_APPLICABLE`·before만
+있는 상호작용·다른 route의 증거·잘못된 viewport에서의 판정과 각각의 정상 대조 사례(inapplicable
+증거, route 전환, 대체된 실패, 범위 안 viewport)를 포함합니다. 슬롯별 판정과 계약 유효성을
+채점하며, 계획 범위 coverage는 채점하지 않습니다. 이는 결과 계약의 정확도 개선을
 증명하며, 주관적 시각 판단 자체가 100% 정확하다고 주장하는 수치는 아닙니다.
 
 ## CLI

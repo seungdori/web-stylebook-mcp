@@ -591,15 +591,33 @@ The result has `verdict` (`PASS`, `FIX_NOW`, or `RISK`), an `inventory` with kep
 `get_design_audit_plan` returns an `identity` with the catalog version/hash and a deterministic
 `planHash`. After inspecting the actual implementation, submit the same plan query plus:
 
-- one target per inspected route or screen, state, viewport, theme, locale, and role;
-- evidence with a durable artifact reference, content hash, or exact route/selector/file/region;
-- a before/input/after/recovery phase for interaction evidence; and
-- one result for every planned check/target pair.
+- one target per inspected route or screen, state, viewport, theme, locale, and role. A check whose
+  criterion names a viewport counts only on a target in it (`mobile-renders-cleanly` ≤390px,
+  `desktop-composition-holds` ≥1280px; answer `NOT_APPLICABLE` on other targets), and
+  `no-horizontal-scroll` covers its range only with narrow (≤390px), medium (391–1439px), and wide
+  (≥1440px) targets;
+- evidence with a durable artifact reference, content hash, or exact route/selector/file/region.
+  Static and `before` evidence must match its target's `route`; `input`, `after`, and `recovery`
+  evidence may record the route an interaction led to (for example `/checkout` → `/confirmation`);
+- a before/input/after/recovery phase for interaction evidence, and for checks about the result of an
+  action (keyboard focus, reduced motion, form errors, navigation) an `after` observation with a
+  `passed` or `failed` outcome;
+- one result for every planned check/target pair; and, optionally, `supersedes` on evidence that
+  replaces an earlier item (a re-run after a fix or a corrected false positive) and `scopeExclusions`
+  for planned surfaces, required states, or viewport ranges left out on purpose, each with a reason.
 
 `validate_design_audit_result` regenerates the plan and rejects stale plan hashes, missing or duplicate
-result slots, broken evidence references, cross-target evidence, invalid regions, unsupported
-`NOT_APPLICABLE`, and `PASS` that lacks required evidence or contradicts failed evidence. Missing result
-slots are materialized as `NOT_VERIFIED`, never hidden. With `includeGroups` containing `structure` and a
+result slots, broken evidence references, cross-target evidence, evidence from another route, invalid
+regions, unsupported `NOT_APPLICABLE` (including one that cites passed, failed, or indeterminate
+evidence), and `PASS` that lacks required evidence or an after-action outcome, sits outside the
+viewport its check names, or contradicts failed evidence. Missing result
+slots are materialized as `NOT_VERIFIED`, never hidden. `coverage.reportingState` says whether every
+slot of the submitted targets has a result; `coverage.scope` compares the plan's surfaces, required
+states (`stateCoverage`), and viewport ranges with the targets that have verified results, and lists
+what is missing as warnings; `coverage.state` is `full` only when both are. A plan that names only
+`global` reports the basis `submitted-targets-only`. These viewport, phase, and scope rules live in the
+validator and do not feed `planHash`; `supersedes` and `scopeExclusions` are optional, and the result
+hash includes `scopeExclusions` only when given. With `includeGroups` containing `structure` and a
 `styleId`, the plan adds one automated check per banned pattern, and `productType` adds one per must-have;
 `audit_page_structure` returns evidence and results for those check ids that the validator accepts as they are. With `revisionPreservation: true`, the plan holds only the `redesign-kept-*` checks that `compare_page_revisions` answers. The result carries content-addressed plan,
 evidence-bundle, and normalized-result hashes for comparable rechecks. The tool never opens the
@@ -611,12 +629,16 @@ The repository includes a reproducible contract-quality benchmark:
 npm run eval:audit-contract
 ```
 
-Across 14 human-labeled normal and adversarial cases, legacy pass-through verdicts score 4/14
-(28.57%) with 9 false `PASS` results. The validator scores 14/14 with 0 false `PASS` results and
+Across 24 labeled normal and adversarial cases (14 human-labeled; the 10 added for #22 and #23 take their labels from those issues), legacy pass-through verdicts score 9/24
+(37.5%) with 13 false `PASS` results. The validator scores 24/24 with 0 false `PASS` results and
 classifies every contract-valid/invalid case correctly. The corpus covers missing, narrative-only,
 unknown, cross-target, indeterminate, phase-less, blocker/major/minor failure, honest
-`NOT_VERIFIED`, and valid/invalid `NOT_APPLICABLE` cases. This demonstrates result-contract
-correctness; it does not claim that subjective visual judgment itself is 100% accurate.
+`NOT_VERIFIED`, and valid/invalid `NOT_APPLICABLE` cases, plus `NOT_APPLICABLE` citing failed evidence,
+before-only interaction, evidence from another route, and checks judged at the wrong viewport, each
+with a valid control (inapplicable evidence, a route transition, a superseded failure, an in-range
+viewport). It scores per-slot verdicts and contract validity, not planned-scope coverage. This
+demonstrates result-contract correctness; it does not claim that subjective visual judgment itself
+is 100% accurate.
 
 ## CLI
 

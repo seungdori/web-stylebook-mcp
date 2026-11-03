@@ -38,6 +38,7 @@ import {
   type ValidateDesignAuditResultInput,
   type ValidatedDesignAuditResult,
 } from '../audit/evaluator.js';
+import { viewportWidthLabel } from '../audit/check-scope.js';
 import {
   composeDesignTokens, TokenError, type ComposeDesignTokensResult, type DesignMdTokensResult,
 } from '../tokens/compile.js';
@@ -167,6 +168,18 @@ const auditEvidenceShape = {
     version: z.string().trim().min(1).max(100).optional(),
     configHash: z.string().regex(/^sha256:[0-9a-f]{64}$/).optional(),
   }).optional(),
+  supersedes: z.object({
+    evidenceId: z.string().trim().min(1).max(160),
+    reason: z.string().trim().min(1).max(1000),
+  }).describe('replaces an earlier evidence item of the same target and type (a re-run after a fix, or a corrected false positive); the earlier item stays in the bundle but its outcome no longer counts. The reason needs at least 12 characters')
+    .optional(),
+};
+
+const auditScopeExclusionShape = {
+  surface: z.enum(UX_SURFACES).optional(),
+  stateId: z.string().trim().min(1).max(160).optional(),
+  checkId: z.string().trim().min(1).max(160).optional(),
+  reason: z.string().trim().min(1).max(1000),
 };
 
 const submittedAuditResultShape = {
@@ -507,13 +520,16 @@ export function registerTools(server: McpServer, repo: CatalogRepository): void 
 
   server.registerTool('validate_design_audit_result', {
     title: 'Validate a design audit result contract',
-    description: 'Regenerate the requested audit plan, then deterministically validate target coverage, evidence references, required evidence types, verdict applicability, and contradictions. This tool does not inspect artifacts or judge visual quality. It normalizes unsupported PASS/FIX_NOW/RISK claims to NOT_VERIFIED, preserves honest NOT_VERIFIED results, and returns stable plan/evidence/result hashes for comparable rechecks.',
+    description: 'Regenerate the requested audit plan, then deterministically validate target coverage, evidence references, required evidence types, verdict applicability, and contradictions between verdicts and evidence outcomes. This tool does not inspect artifacts or judge visual quality. It normalizes unsupported PASS/FIX_NOW/RISK claims to NOT_VERIFIED, preserves honest NOT_VERIFIED results, and returns stable plan/evidence/result hashes for comparable rechecks. A check that names a viewport counts only on a target in that range (mobile-renders-cleanly ≤390px, desktop-composition-holds ≥1280px; answer NOT_APPLICABLE on other targets), and no-horizontal-scroll is verified across its range only with narrow (≤390px), medium (391–1439px), and wide (≥1440px) targets. Checks about the result of an action (keyboard focus, reduced motion, form errors, navigation) need after-phase interaction evidence with a passed or failed outcome. Static and before-phase evidence must match its target route; input, after, and recovery evidence may record the route an interaction led to. NOT_APPLICABLE that cites passed, failed, or indeterminate evidence is NOT_VERIFIED; record a correction or re-run as new evidence that supersedes the old item with a reason. coverage.state is full only when every slot was reported and the plan\'s surfaces, required states, and viewport ranges were verified or listed in scopeExclusions with a reason; coverage.reportingState covers the submitted slots alone.',
     inputSchema: {
       plan: z.object(auditPlanInputShape),
       expectedPlanHash: z.string().regex(/^sha256:[0-9a-f]{64}$/).optional(),
       targets: z.array(z.object(auditTargetShape)).min(1).max(20),
       evidence: z.array(z.object(auditEvidenceShape)).max(500),
       results: z.array(z.object(submittedAuditResultShape)).max(1200),
+      scopeExclusions: z.array(z.object(auditScopeExclusionShape)).max(100)
+        .describe('justified gaps in the planned scope: {surface} for a whole planned surface, {surface, stateId} for one required state, or {checkId} for the viewport range of mobile-renders-cleanly, desktop-composition-holds, or no-horizontal-scroll; each needs a reason of at least 12 characters')
+        .optional(),
     },
     annotations: READ_ONLY,
   }, async (args): Promise<ToolResult> => {
@@ -794,26 +810,72 @@ const auditResultLabels: Record<Lang, {
   planHash: string;
   evidenceHash: string;
   resultHash: string;
+  reporting: string;
+  scope: string;
+  scopeTitle: string;
+  basis: Record<'planned-scope' | 'submitted-targets-only', string>;
+  surfaces: string;
+  states: string;
+  viewports: string;
+  excluded: string;
+  notVerified: string;
 }> = {
   en: {
     title: 'Design audit result validation', contract: 'Contract', valid: 'valid', invalid: 'invalid',
     coverage: 'Coverage', reported: 'reported', verified: 'verified', missing: 'missing',
     verdicts: 'Verdicts', issues: 'Contract issues', none: 'none',
     planHash: 'Plan hash', evidenceHash: 'Evidence hash', resultHash: 'Result hash',
+    reporting: 'reporting', scope: 'planned scope', scopeTitle: 'Planned scope',
+    basis: { 'planned-scope': 'planned surfaces and states', 'submitted-targets-only': 'submitted targets only' },
+    surfaces: 'Planned surfaces', states: 'Required states', viewports: 'Viewport ranges',
+    excluded: 'excluded', notVerified: 'not verified',
   },
   ko: {
     title: '디자인 감사 결과 검증', contract: '계약', valid: '유효', invalid: '무효',
     coverage: '범위', reported: '제출', verified: '검증', missing: '누락',
     verdicts: '판정', issues: '계약 문제', none: '없음',
     planHash: '계획 해시', evidenceHash: '증거 해시', resultHash: '결과 해시',
+    reporting: '보고', scope: '계획 범위', scopeTitle: '계획 범위',
+    basis: { 'planned-scope': '계획한 surface·상태 기준', 'submitted-targets-only': '제출한 대상만 기준' },
+    surfaces: '계획한 surface', states: '필수 상태', viewports: 'Viewport 범위',
+    excluded: '제외', notVerified: '미검증',
   },
   ja: {
     title: 'デザイン監査結果の検証', contract: '契約', valid: '有効', invalid: '無効',
     coverage: '範囲', reported: '提出', verified: '検証', missing: '不足',
     verdicts: '判定', issues: '契約上の問題', none: 'なし',
     planHash: 'プランハッシュ', evidenceHash: '証拠ハッシュ', resultHash: '結果ハッシュ',
+    reporting: '報告', scope: '計画範囲', scopeTitle: '計画範囲',
+    basis: { 'planned-scope': '計画したsurface・状態が基準', 'submitted-targets-only': '提出した対象のみが基準' },
+    surfaces: '計画したsurface', states: '必須状態', viewports: 'Viewport範囲',
+    excluded: '除外', notVerified: '未検証',
   },
 };
+
+function renderAuditScope(result: ValidatedDesignAuditResult, labels: (typeof auditResultLabels)[Lang]): string[] {
+  const scope = result.coverage.scope;
+  if (scope.basis === 'submitted-targets-only' && !scope.viewports.length) return [];
+  const lines = [`${labels.scopeTitle} (${labels.basis[scope.basis]}): ${scope.state}`];
+  const list = (values: string[]): string => values.join(', ') || labels.none;
+  if (scope.surfaces.planned.length) {
+    lines.push(`- ${labels.surfaces}: ${labels.verified} ${list(scope.surfaces.verified)}; ${labels.excluded} ${list(scope.surfaces.excluded)}; ${labels.notVerified} ${list(scope.surfaces.notVerified)}`);
+  }
+  if (scope.states.required) {
+    const notVerified = scope.states.items
+      .filter((item) => item.status === 'not-verified')
+      .map((item) => `${item.surfaceId}/${item.stateId}`);
+    lines.push(`- ${labels.states}: ${labels.verified} ${scope.states.verified}/${scope.states.required}; ${labels.excluded} ${scope.states.excluded}; ${labels.notVerified} ${scope.states.notVerified}${notVerified.length ? ` (${notVerified.join(', ')})` : ''}`);
+  }
+  if (scope.viewports.length) {
+    const entries = scope.viewports.map((item) => {
+      const missing = item.ranges.filter((range) => !range.targetIds.length);
+      return `${item.checkId} ${item.status}${item.status === 'partial' || item.status === 'not-verified'
+        ? ` (${labels.missing} ${missing.map((range) => `${range.id} ${viewportWidthLabel(range)}`).join(', ')})` : ''}`;
+    });
+    lines.push(`- ${labels.viewports}: ${entries.join('; ')}`);
+  }
+  return lines;
+}
 
 function renderAuditResultValidation(result: ValidatedDesignAuditResult, locale: Lang): string {
   const labels = auditResultLabels[locale];
@@ -823,7 +885,8 @@ function renderAuditResultValidation(result: ValidatedDesignAuditResult, locale:
   const lines = [
     `# ${labels.title}`,
     `${labels.contract}: ${result.valid ? labels.valid : labels.invalid}`,
-    `${labels.coverage}: ${result.coverage.state} — ${labels.reported} ${result.coverage.reportedSlots}/${result.coverage.expectedSlots}; ${labels.verified} ${result.coverage.verifiedSlots}; ${labels.missing} ${result.coverage.missingSlots}`,
+    `${labels.coverage}: ${result.coverage.state} (${labels.reporting} ${result.coverage.reportingState}; ${labels.scope} ${result.coverage.scope.state}) — ${labels.reported} ${result.coverage.reportedSlots}/${result.coverage.expectedSlots}; ${labels.verified} ${result.coverage.verifiedSlots}; ${labels.missing} ${result.coverage.missingSlots}`,
+    ...renderAuditScope(result, labels),
     `${labels.verdicts}: ${verdicts}`,
     `${labels.planHash}: ${result.identity.planHash}`,
     `${labels.evidenceHash}: ${result.identity.evidenceBundleHash}`,
