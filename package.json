@@ -1,6 +1,6 @@
 {
   "name": "web-stylebook-mcp",
-  "version": "0.14.0",
+  "version": "0.15.0",
   "description": "Design intelligence for coding agents — improve real UIs with design foundations, implementation, verification and before/after reports.",
   "type": "module",
   "license": "MIT",

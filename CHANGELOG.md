@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.15.0] — 2026-11-03
+
 ### Added
 
 - Existing-UI judgment now explicitly preserves baseline strengths and compares gains with losses
@@ -619,7 +621,8 @@ Not tagged or published to npm; these changes first shipped in 0.10.0.
 - Output localization in English, Korean, and Japanese.
 - Fully offline at runtime: no API key, no model call, no network, no filesystem access.
 
-[Unreleased]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.14.0...HEAD
+[Unreleased]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.15.0...HEAD
+[0.15.0]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.12.1...v0.13.0
 [0.12.1]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.12.0...v0.12.1
