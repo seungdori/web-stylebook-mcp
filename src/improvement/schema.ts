@@ -30,6 +30,8 @@ export const improvementContextSchema = z.object({
 }).strict();
 
 export const IMPROVEMENT_CHECKS = ['visual', 'behavior', 'preservation', 'accessibility'] as const;
+// Bind plans and results to the completion rules, independently of the wire schema.
+export const IMPROVEMENT_VALIDATION_VERSION = 2;
 export const improvementSubmissionSchema = z.object({
   captures: z.array(z.object({
     id, targetId: id, phase: z.enum(['before', 'after']),
@@ -52,7 +54,7 @@ export const improvementSubmissionSchema = z.object({
     id, targetId: id, kind: z.enum([...IMPROVEMENT_CHECKS, 'build']),
     verdict: z.enum(['pass', 'fail', 'not-verified', 'not-applicable']),
     summary: explanation,
-    captureIds: z.array(id).max(48),
+    captureIds: z.array(id).max(48).describe('Visual and preservation checks reference both outcome captures; other checks reference the after capture. Captures must satisfy the recorded conditions.'),
     evidenceRefs: z.array(artifactReference).max(20),
     steps: z.array(explanation).max(20).optional().describe('Observed interaction/accessibility procedure, not a proposed test'),
   }).strict()).max(120),

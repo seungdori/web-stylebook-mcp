@@ -2,7 +2,7 @@ import { stableHashOf } from '../catalog/stable-hash.js';
 import { FOUNDATIONS } from '../foundations/catalog.js';
 import { planDesignImprovement } from '../foundations/planner.js';
 import type { FoundationPlanInput } from '../foundations/types.js';
-import { IMPROVEMENT_CHECKS, improvementSubmissionSchema, type ImprovementSubmission } from './schema.js';
+import { IMPROVEMENT_CHECKS, IMPROVEMENT_VALIDATION_VERSION, improvementSubmissionSchema, type ImprovementSubmission } from './schema.js';
 import { renderImprovementResult } from './render.js';
 import { localizeImprovementAction } from './actions.js';
 
@@ -45,6 +45,7 @@ export function evaluateDesignImprovement(input: ImprovementResultInput) {
   unique(submission.checks.map((check) => check.id), 'check id');
   unique(submission.outcomes.map((outcome) => outcome.targetId), 'outcome target');
   const captures = new Map(submission.captures.map((capture) => [capture.id, capture]));
+  const targetsById = new Map(targets.map((target) => [target.id, target]));
   const changes = new Map(submission.changes.map((change) => [change.id, change]));
   const outcomes = new Map(submission.outcomes.map((outcome) => [outcome.targetId, outcome]));
   const unknownTarget = (targetId: string, label: string) => {
@@ -52,6 +53,23 @@ export function evaluateDesignImprovement(input: ImprovementResultInput) {
   };
   for (const capture of submission.captures) unknownTarget(capture.targetId, `Capture ${capture.id}`);
   for (const outcome of submission.outcomes) unknownTarget(outcome.targetId, 'Outcome');
+  const screenshotUses = new Map<string, Array<{ capture: ImprovementSubmission['captures'][number]; identity: string }>>();
+  for (const capture of submission.captures) {
+    const target = targetsById.get(capture.targetId);
+    if (!target) continue;
+    const identity = stableHashOf({ route: target.route, conditions: capture.conditions, sourceRef: capture.sourceRef });
+    const uses = screenshotUses.get(capture.screenshotRef) ?? [];
+    uses.push({ capture, identity });
+    screenshotUses.set(capture.screenshotRef, uses);
+  }
+  const conflictingCaptures = new Set<string>();
+  for (const uses of screenshotUses.values()) {
+    if (new Set(uses.map((use) => use.identity)).size <= 1) continue;
+    for (const { capture } of uses) conflictingCaptures.add(capture.id);
+    for (const targetId of new Set(uses.map(({ capture }) => capture.targetId))) {
+      issue('CAPTURE_ARTIFACT_CONFLICT', 'contract', 'One screenshot artifact is assigned to different routes, comparison conditions or source snapshots.', 'Capture separate immutable screenshots for different routes, conditions and source snapshots; share a whole-page screenshot only when those identities agree.', targetId);
+    }
+  }
   for (const change of submission.changes) {
     unique(change.targetIds, `targets for ${change.id}`);
     unique(change.foundationIds, `foundations for ${change.id}`);
@@ -66,6 +84,8 @@ export function evaluateDesignImprovement(input: ImprovementResultInput) {
   }
 
   let matchedPairs = 0;
+  const usableAfterTargets = new Set<string>();
+  const matchedPairTargets = new Set<string>();
   for (const target of targets) {
     const outcome = outcomes.get(target.id);
     if (!outcome) {
@@ -85,6 +105,7 @@ export function evaluateDesignImprovement(input: ImprovementResultInput) {
     const before = outcome.beforeCaptureId ? captures.get(outcome.beforeCaptureId) : undefined;
     const after = outcome.afterCaptureId ? captures.get(outcome.afterCaptureId) : undefined;
     let pairMatches = true;
+    let afterUsable = false;
     for (const [phase, capture] of [['before', before], ['after', after]] as const) {
       if (!capture) {
         issue('CAPTURE_MISSING', 'incomplete', `Missing ${phase} capture.`, phase === 'before' ? 'Recover and capture an immutable baseline; never synthesize a before image from the edited UI.' : 'Render and capture the actual edited UI.', target.id);
@@ -101,17 +122,25 @@ export function evaluateDesignImprovement(input: ImprovementResultInput) {
           issue('FONTS_NOT_READY', 'incomplete', `The ${phase} capture was taken before fonts were ready.`, 'Wait for the intended fonts and recapture; do not compare a fallback font to the intended font.', target.id);
           pairMatches = false;
         }
+        if (conflictingCaptures.has(capture.id)) pairMatches = false;
+        if (phase === 'after') afterUsable = stableHashOf(capture.conditions) === stableHashOf(target.conditions) && capture.fontsReady && !conflictingCaptures.has(capture.id);
       }
     }
     if (before && after && before.screenshotRef === after.screenshotRef) {
       issue('REUSED_SCREENSHOT', 'contract', 'Before and after point to the same screenshot artifact.', 'Keep separate immutable before and fresh after artifacts, even when the UI is unchanged.', target.id);
       pairMatches = false;
+      afterUsable = false;
     }
     if (before && after && outcome.outcome === 'improved' && before.sourceRef === after.sourceRef) {
       issue('SOURCE_NOT_DISTINGUISHED', 'contract', 'The claimed improvement uses the same source identity on both captures.', 'Record the original and edited source/build snapshots, including uncommitted content hashes when needed.', target.id);
       pairMatches = false;
+      afterUsable = false;
     }
-    if (pairMatches) matchedPairs++;
+    if (afterUsable) usableAfterTargets.add(target.id);
+    if (pairMatches) {
+      matchedPairs++;
+      matchedPairTargets.add(target.id);
+    }
   }
 
   const checks = submission.checks.map((check) => {
@@ -120,15 +149,17 @@ export function evaluateDesignImprovement(input: ImprovementResultInput) {
     unique(check.captureIds, `capture references for ${check.id}`, check.targetId);
     const outcome = outcomes.get(check.targetId);
     const invalidReferences = check.captureIds.some((id) => !captures.has(id) || captures.get(id)!.targetId !== check.targetId);
-    if (invalidReferences) issue('CHECK_CAPTURE_MISMATCH', 'contract', `Check ${check.id} references unknown or unrelated captures.`, 'Bind verification to the actual after capture and the before capture for a visual comparison.', check.targetId);
+    if (invalidReferences) issue('CHECK_CAPTURE_MISMATCH', 'contract', `Check ${check.id} references unknown or unrelated captures.`, 'Bind verification to the actual after capture and both outcome captures for visual or preservation comparisons.', check.targetId);
     if (check.verdict === 'pass' || check.verdict === 'not-applicable') {
       const afterLinked = outcome?.afterCaptureId && check.captureIds.includes(outcome.afterCaptureId);
       const beforeLinked = outcome?.beforeCaptureId && check.captureIds.includes(outcome.beforeCaptureId);
-      const visualPair = check.kind !== 'visual' || beforeLinked;
+      const needsPair = check.kind === 'visual' || check.kind === 'preservation';
+      const comparisonLinked = !needsPair || beforeLinked;
+      const usableCaptures = usableAfterTargets.has(check.targetId) && (!needsPair || matchedPairTargets.has(check.targetId));
       const observedSteps = !['behavior', 'accessibility'].includes(check.kind) || check.verdict === 'not-applicable' || Boolean(check.steps?.length);
-      if (!check.evidenceRefs.length || !afterLinked || !visualPair || !observedSteps || invalidReferences) {
+      if (!check.evidenceRefs.length || !afterLinked || !comparisonLinked || !observedSteps || invalidReferences || !usableCaptures) {
         normalized.verdict = 'not-verified';
-        issue('CHECK_EVIDENCE_MISSING', 'incomplete', `Check ${check.id} lacks durable evidence, the compared capture(s), or observed interaction steps.`, `Run and record the ${check.kind} check on the edited target; keep unsupported claims not-verified.`, check.targetId);
+        issue('CHECK_EVIDENCE_MISSING', 'incomplete', `Check ${check.id} lacks durable evidence, valid compared capture(s), or observed interaction steps.`, `Run and record the ${check.kind} check against valid outcome captures; visual and preservation checks require both before and after. Keep unsupported claims not-verified.`, check.targetId);
       }
       if (check.verdict === 'not-applicable' && !['behavior', 'build'].includes(check.kind)) {
         normalized.verdict = 'not-verified';
@@ -154,7 +185,7 @@ export function evaluateDesignImprovement(input: ImprovementResultInput) {
   const status = issues.length ? 'needs-work' as const : noChange ? 'no-change' as const : 'complete' as const;
   return {
     schema: 'webstylebook.improvement-result.v1' as const,
-    identity: { planHash: plan.workflow.planHash, resultHash: stableHashOf({ planHash: plan.workflow.planHash, expectedPlanHash: input.expectedPlanHash, submission }) },
+    identity: { validationVersion: IMPROVEMENT_VALIDATION_VERSION, planHash: plan.workflow.planHash, resultHash: stableHashOf({ validationVersion: IMPROVEMENT_VALIDATION_VERSION, planHash: plan.workflow.planHash, expectedPlanHash: input.expectedPlanHash, submission }) },
     valid: !issues.some((item) => item.kind === 'contract'),
     completion: { status, ready: status !== 'needs-work' },
     coverage: { plannedTargets: targets.length, reportedTargets: outcomes.size, matchedPairs, implementedChanges: implementedChanges.length, requiredChecksPerTarget: [...IMPROVEMENT_CHECKS] },

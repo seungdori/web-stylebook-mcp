@@ -41,7 +41,7 @@ const result = await callTool("validate_design_improvement_result", {
 |---|---|
 | `captures` | Unique `id`, `targetId`, `phase: before/after`, immutable `screenshotRef`, `sourceRef`, `conditions`, `fontsReady`. Add `structureRef` (rendered HTML/native hierarchy) and `stylesRef` when available. Before and after must be distinct artifacts. For an improvement claim, source identities must distinguish original and edited snapshots; use a diff/content hash for uncommitted changes. |
 | `changes` | `id`, affected `targetIds`, known `foundationIds`, observed problem, chosen action, reason, `status: implemented/proposed/reverted`, changed `files`, and a `diffRef` for implementation. A proposed change cannot complete. Record reverted attempts so the outcome remains understandable. |
-| `checks` | `id`, `targetId`, `kind`, `verdict`, actual-result `summary`, related `captureIds`, durable `evidenceRefs`; `steps` for observed behavior/accessibility checks. Every target needs `visual`, `behavior`, `preservation`, `accessibility`. Add `build` when applicable. Visual checks reference both captures; other checks reference the after capture. |
+| `checks` | `id`, `targetId`, `kind`, `verdict`, actual-result `summary`, related `captureIds`, durable `evidenceRefs`; `steps` for observed behavior/accessibility checks. Every target needs `visual`, `behavior`, `preservation`, `accessibility`. Add `build` when applicable. Visual and preservation checks reference both outcome captures; other checks reference the after capture. |
 | `outcomes` | One per planned target: `targetId`, `outcome: improved/unchanged/regressed/not-verified`, `beforeCaptureId`, `afterCaptureId`, every affecting `changeId`, concrete `summary` and `tradeoffs`. An improvement requires an implemented change affecting that target. |
 | `limitations` | Actual limits, including unavailable environments, local/fixed-data evidence, untested browsers, absent user studies and deployment status where relevant. |
 
@@ -56,6 +56,16 @@ not applicable, with a concrete summary and evidence (for example a truly static
 surface). Visual comparison, preservation and affected accessibility still apply to static UI.
 Failures remain blocking even when another check of the same kind passes. Missing artifacts,
 unrelated captures or absent observed steps normalize unsupported pass claims to not-verified.
+This also applies when the required outcome captures have mismatched conditions, unloaded fonts,
+reused before/after screenshots or conflicting identities. An invalid before capture blocks visual
+and preservation passes; a valid after capture may still support behavior and accessibility checks.
+One screenshot reference cannot represent different routes, conditions or source snapshots.
+Surfaces on the same page may share a whole-page capture when those identities agree.
+
+`workflow.validationVersion` and result `identity.validationVersion` identify the completion rules
+and participate in their hashes. Version 2 adds these capture checks and the preservation-pair
+requirement. After upgrading, retrieve a fresh plan, use its `workflow.planHash`, and link both
+outcome captures to preservation checks; an old plan hash is not accepted as current evidence.
 
 ## Continue, then report
 

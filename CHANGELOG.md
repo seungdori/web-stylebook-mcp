@@ -6,6 +6,20 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- `validate_design_improvement_result` rejects screenshot references assigned to different routes,
+  comparison conditions or source snapshots, including reuse across mobile and desktop targets.
+  Whole-page screenshots can still be shared by surfaces with matching identities. Invalid outcome
+  captures now normalize dependent passing checks to `not-verified` in both JSON and the report;
+  visual and preservation checks need both valid outcome captures. A valid after capture can still
+  support behavior/accessibility checks when only the baseline is invalid. Failed checks stay failed.
+- Improvement reports use the same normalized target ids as validation, so surrounding whitespace
+  no longer turns a completed target into a row with missing captures and an unverified outcome.
+- Improvement validation version 2 participates in workflow and result hashes. Retrieve a fresh
+  plan after upgrading and include both outcome captures in preservation checks. Wire schemas stay
+  at v1; unrelated audit plan hashes and the canonical catalog are unchanged.
+
 ## [0.15.0] — 2026-11-03
 
 ### Added
