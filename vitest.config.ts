@@ -6,5 +6,7 @@ export default defineConfig({
   test: {
     include: ['tests/**/*.test.ts'],
     environment: 'node',
+    // CPU-heavy suites include wall-clock limits; concurrent workers compete for that budget.
+    maxWorkers: 1,
   },
 });
