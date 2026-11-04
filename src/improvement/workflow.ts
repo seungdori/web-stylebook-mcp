@@ -2,7 +2,7 @@ import { stableHashOf } from '../catalog/stable-hash.js';
 import { text } from '../localization.js';
 import { L } from '../foundations/types.js';
 import type { Lang } from '../types.js';
-import { IMPROVEMENT_CHECKS, type ImprovementContext } from './schema.js';
+import { IMPROVEMENT_CHECKS, IMPROVEMENT_VALIDATION_VERSION, type ImprovementContext } from './schema.js';
 
 export const IMPROVEMENT_WORKFLOW_SCHEMA = 'webstylebook.improvement-workflow.v1';
 export const IMPROVEMENT_WORKFLOW_URI = 'webstylebook://workflows/improve-ui';
@@ -54,13 +54,18 @@ export function improvementWorkflow(locale: Lang, context: ImprovementContext | 
   return {
     schema: IMPROVEMENT_WORKFLOW_SCHEMA,
     resourceUri: IMPROVEMENT_WORKFLOW_URI,
-    planHash: stableHashOf({ schema: IMPROVEMENT_WORKFLOW_SCHEMA, stages, requiredChecks: IMPROVEMENT_CHECKS, foundationPlanHash, context: context ?? null }),
+    validationVersion: IMPROVEMENT_VALIDATION_VERSION,
+    planHash: stableHashOf({ schema: IMPROVEMENT_WORKFLOW_SCHEMA, validationVersion: IMPROVEMENT_VALIDATION_VERSION, stages, requiredChecks: IMPROVEMENT_CHECKS, foundationPlanHash, context: context ?? null }),
     defaultIntent: 'implement-verify-report' as const,
     executor: 'host-agent' as const,
     context: context ?? null,
     nextStage: 'capture-before' as const,
     stages: stages.map((stage) => ({ ...stage, instruction: text(stage.instruction, locale) })),
     requiredChecksPerTarget: [...IMPROVEMENT_CHECKS],
+    captureRequirements: text(L(
+      'Visual and preservation checks must reference both outcome captures; all other checks must reference the after capture. Referenced outcome captures must match the planned conditions and have loaded fonts. One screenshot artifact cannot represent different routes, conditions or source snapshots. Sharing a whole-page capture between surfaces is valid only when those identities agree. After upgrading validation rules, retrieve a fresh plan and use its workflow.planHash.',
+      '시각·보존 검사는 결과에 연결한 전후 캡처를 모두 참조하고, 다른 검사는 수정 후 캡처를 참조해야 합니다. 해당 캡처는 계획 조건과 일치하고 폰트 로딩이 끝나야 합니다. 하나의 스크린샷을 서로 다른 경로·조건·소스의 증거로 사용할 수 없습니다. 같은 페이지의 여러 영역에서 캡처를 공유하려면 이 식별 정보가 같아야 합니다. 검증 규칙을 업데이트한 뒤에는 계획을 다시 받아 workflow.planHash를 사용하세요.',
+      '視覚・保存検査は結果の前後両画像を参照し、他の検査は変更後画像を参照します。対象画像は計画条件と一致し、フォント読込済みである必要があります。同じ画像を異なる経路・条件・ソースの証拠として使えません。同じページの複数領域で画像を共有する場合も識別情報の一致が必要です。検証規則の更新後は計画を再取得しworkflow.planHashを使ってください。'), locale),
     completionTool: 'validate_design_improvement_result' as const,
     completionRequiresContext: true,
     acceptance: text(L(

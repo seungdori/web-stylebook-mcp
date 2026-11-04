@@ -220,6 +220,7 @@
         "verdict": "pass",
         "summary": "Compared original content, fields, links and semantic inventory without unexplained losses.",
         "captureIds": [
+          "contact-mobile-before",
           "contact-mobile-after"
         ],
         "evidenceRefs": [
@@ -281,6 +282,7 @@
         "verdict": "pass",
         "summary": "Compared original content, fields, links and semantic inventory without unexplained losses.",
         "captureIds": [
+          "incidents-desktop-before",
           "incidents-desktop-after"
         ],
         "evidenceRefs": [

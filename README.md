@@ -124,7 +124,11 @@ It returns:
   remaining unverified work. The host can present the real screenshots in a side-by-side/toggle viewer.
 
 Each target needs visual, behavior, preservation and affected-accessibility checks. Static markup
-preservation alone is insufficient. The MCP validates supplied coverage and consistency, **not**
+preservation alone is insufficient. Visual and preservation checks must reference both outcome
+captures. Invalid comparison conditions or unloaded fonts prevent dependent checks from passing;
+one screenshot cannot represent different routes, conditions or source snapshots. After upgrading
+validation rules, retrieve a fresh plan and use its `workflow.planHash` (`validationVersion: 2`).
+The MCP validates supplied coverage and consistency, **not**
 artifact contents or design quality. The host performs edits, captures and observations; no claimed
 user-study results or numerical usability gains are invented. A query without context remains valid
 for knowledge discovery but cannot complete an improvement. Commit/push/release/deployment need

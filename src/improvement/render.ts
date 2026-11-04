@@ -1,5 +1,5 @@
 import type { ImprovementResult, ImprovementResultInput } from './evaluator.js';
-import { improvementSubmissionSchema } from './schema.js';
+import { improvementContextSchema, improvementSubmissionSchema } from './schema.js';
 
 const labels = {
   en: {
@@ -34,9 +34,10 @@ const link = (label: string, reference: string) => `[${escape(label)}](<${refere
 export function renderImprovementResult(input: ImprovementResultInput, result: ImprovementResult): string {
   const t = labels[input.plan.locale ?? 'en'];
   const submission = improvementSubmissionSchema.parse(input.submission);
+  const context = improvementContextSchema.optional().parse(input.plan.context);
   const captures = new Map(submission.captures.map((capture) => [capture.id, capture]));
-  const rows = [`# ${t.title}`, '', `**${t[result.completion.status]}**`, '', t.boundary, '', `${t.task}: ${escape(input.plan.context?.userTask ?? t.missing)}`, '', `## ${t.comparison}`, '', `| ${t.target} | ${t.before} | ${t.after} | ${t.outcome} |`, '|---|---|---|---|'];
-  for (const target of input.plan.context?.targets ?? []) {
+  const rows = [`# ${t.title}`, '', `**${t[result.completion.status]}**`, '', t.boundary, '', `${t.task}: ${escape(context?.userTask ?? t.missing)}`, '', `## ${t.comparison}`, '', `| ${t.target} | ${t.before} | ${t.after} | ${t.outcome} |`, '|---|---|---|---|'];
+  for (const target of context?.targets ?? []) {
     const outcome = result.outcomes.find((item) => item.targetId === target.id);
     const beforeCandidate = outcome?.beforeCaptureId ? captures.get(outcome.beforeCaptureId) : undefined;
     const afterCandidate = outcome?.afterCaptureId ? captures.get(outcome.afterCaptureId) : undefined;
