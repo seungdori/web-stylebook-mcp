@@ -1,0 +1,252 @@
+{
+  "file": "wsm/docs/demo/before.html",
+  "conditions": {
+    "browser": "Chrome (playwright-core)",
+    "viewport": "1280x800",
+    "deviceScaleFactor": 1,
+    "colorScheme": "light",
+    "locale": "en-US"
+  },
+  "layout": {
+    "degradedService": {
+      "text": "Degraded",
+      "top": 1375,
+      "onFirstScreen": false
+    },
+    "openIncident": {
+      "text": "INC-231",
+      "top": 1550,
+      "onFirstScreen": false
+    },
+    "lastDeploy": {
+      "text": "#4812",
+      "top": 1606,
+      "onFirstScreen": false
+    },
+    "recentActivity": {
+      "text": "Recent activity",
+      "top": 1465,
+      "onFirstScreen": false
+    },
+    "pageHeight": 1871
+  },
+  "contrast": {
+    "textRunsOnFirstScreen": 30,
+    "measured": 23,
+    "belowAA": [
+      {
+        "text": "Dashboard",
+        "ratio": 4.47,
+        "need": 4.5
+      },
+      {
+        "text": "Services",
+        "ratio": 2.54,
+        "need": 4.5
+      },
+      {
+        "text": "Deploys",
+        "ratio": 2.54,
+        "need": 4.5
+      },
+      {
+        "text": "Incidents",
+        "ratio": 2.54,
+        "need": 4.5
+      },
+      {
+        "text": "Settings",
+        "ratio": 2.54,
+        "need": 4.5
+      },
+      {
+        "text": "AI Health Score",
+        "ratio": 2.56,
+        "need": 4.5
+      },
+      {
+        "text": "Looking great!",
+        "ratio": 1.85,
+        "need": 4.5
+      },
+      {
+        "text": "Uptime",
+        "ratio": 2.56,
+        "need": 4.5
+      },
+      {
+        "text": "Keep it up",
+        "ratio": 1.85,
+        "need": 4.5
+      },
+      {
+        "text": "Deploys",
+        "ratio": 2.56,
+        "need": 4.5
+      },
+      {
+        "text": "Ship it!",
+        "ratio": 1.85,
+        "need": 4.5
+      },
+      {
+        "text": "Incidents",
+        "ratio": 2.56,
+        "need": 4.5
+      },
+      {
+        "text": "Stay vigilant",
+        "ratio": 1.85,
+        "need": 4.5
+      },
+      {
+        "text": "Everything you need to monitor, deploy a",
+        "ratio": 2.34,
+        "need": 4.5
+      }
+    ],
+    "notComputable": [
+      {
+        "text": "✦ Acme Cloud",
+        "ratio": null,
+        "note": "gradient-clipped text: contrast not computable"
+      },
+      {
+        "text": "Welcome back, Jordan 👋",
+        "ratio": null,
+        "note": "text over gradient: contrast not computable"
+      },
+      {
+        "text": "Empower your team with seamless, AI-driv",
+        "ratio": null,
+        "note": "text over gradient: contrast not computable"
+      },
+      {
+        "text": "94/100",
+        "ratio": null,
+        "note": "gradient-clipped text: contrast not computable"
+      },
+      {
+        "text": "99.98%",
+        "ratio": null,
+        "note": "gradient-clipped text: contrast not computable"
+      },
+      {
+        "text": "6",
+        "ratio": null,
+        "note": "gradient-clipped text: contrast not computable"
+      },
+      {
+        "text": "1",
+        "ratio": null,
+        "note": "gradient-clipped text: contrast not computable"
+      }
+    ]
+  },
+  "focus": [
+    {
+      "text": "✦ Acme Cloud",
+      "href": "/",
+      "outline": true,
+      "top": 23
+    },
+    {
+      "text": "Dashboard",
+      "href": "/dashboard",
+      "outline": true,
+      "top": 27
+    },
+    {
+      "text": "Services",
+      "href": "/services",
+      "outline": true,
+      "top": 27
+    },
+    {
+      "text": "Deploys",
+      "href": "/deploys",
+      "outline": true,
+      "top": 27
+    },
+    {
+      "text": "Incidents",
+      "href": "/incidents",
+      "outline": true,
+      "top": 27
+    },
+    {
+      "text": "Settings",
+      "href": "/settings",
+      "outline": true,
+      "top": 27
+    },
+    {
+      "text": "✨ Get AI insights →",
+      "href": "/insights",
+      "outline": true,
+      "top": 304
+    },
+    {
+      "text": "checkout-web",
+      "href": "/services/checkout-web",
+      "outline": true,
+      "top": 391
+    },
+    {
+      "text": "auth-service",
+      "href": "/services/auth-service",
+      "outline": true,
+      "top": 457
+    },
+    {
+      "text": "notifications",
+      "href": "/services/notifications",
+      "outline": true,
+      "top": 523
+    },
+    {
+      "text": "search-indexer",
+      "href": "/services/search-indexer",
+      "outline": true,
+      "top": 589
+    },
+    {
+      "text": "payments-api",
+      "href": "/services/payments-api",
+      "outline": true,
+      "top": 655
+    },
+    {
+      "text": "INC-231",
+      "href": "/incidents/INC-231",
+      "outline": true,
+      "top": 479
+    },
+    {
+      "text": "#4812",
+      "href": "/deploys/4812",
+      "outline": true,
+      "top": 535
+    }
+  ],
+  "links": [
+    "/",
+    "/dashboard",
+    "/deploys",
+    "/deploys/4809",
+    "/deploys/4811",
+    "/deploys/4812",
+    "/docs",
+    "/incidents",
+    "/incidents/INC-231",
+    "/insights",
+    "/services",
+    "/services/auth-service",
+    "/services/checkout-web",
+    "/services/notifications",
+    "/services/payments-api",
+    "/services/search-indexer",
+    "/settings",
+    "/status"
+  ]
+}

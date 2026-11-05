@@ -13,7 +13,7 @@ function codeBlockAfter(text: string, marker: string): string {
   return text.slice(text.indexOf('{', start), text.indexOf('\n```', start));
 }
 
-describe.each(['README.md', 'README.ko.md'])('%s improvement workflow example', (file) => {
+describe.each(['docs/reference.md', 'docs/reference.ko.md'])('%s improvement workflow example', (file) => {
   const text = readFileSync(join(root, file), 'utf8');
 
   it('plan input is accepted by get_design_improvement_plan', () => {

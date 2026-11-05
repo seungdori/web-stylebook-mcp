@@ -1,0 +1,662 @@
+{
+  "identity": {
+    "schema": "webstylebook.design-foundations.v1",
+    "version": "1.0.0",
+    "contentHash": "sha256:2437f81caa3ade850924fa725c00877a3f8445a5b9a56f94a7c59849246c0257",
+    "planHash": "sha256:94d98d2def39514cd63eba2debce5fbd5b1ef8a5ef60edcf550808bb8cf0ddda"
+  },
+  "query": {
+    "foundationIds": [],
+    "concerns": [
+      "focus",
+      "scanability",
+      "readability",
+      "restraint"
+    ],
+    "context": {
+      "userTask": "An on-call engineer opens the production dashboard to learn whether anything is broken right now, what changed just before it, and what to do next.",
+      "constraints": [
+        "Keep every navigation route, service link, deploy link, incident link and footer link working.",
+        "Keep the data-testid hooks services-table and insights-cta.",
+        "Keep the existing facts and numbers; do not invent new metrics or events.",
+        "Working qualities to keep: the five-item navigation is short and clear; the services table already has the right columns; recent activity is specific (who, what, which ID, when)."
+      ],
+      "targets": [
+        {
+          "id": "dashboard-desktop",
+          "surface": "global",
+          "route": "/dashboard",
+          "conditions": {
+            "viewport": {
+              "width": 1280,
+              "height": 800
+            },
+            "theme": "light",
+            "locale": "en-US",
+            "state": "one degraded service (payments-api) and one open incident (INC-231)",
+            "dataKey": "demo fixture, clock 2026-11-05 14:31 UTC",
+            "scrollAnchor": "top of page (first screen)",
+            "zoom": 1,
+            "deviceScaleFactor": 1
+          }
+        }
+      ]
+    },
+    "limit": 6,
+    "locale": "en"
+  },
+  "workflow": {
+    "schema": "webstylebook.improvement-workflow.v1",
+    "resourceUri": "webstylebook://workflows/improve-ui",
+    "validationVersion": 2,
+    "planHash": "sha256:e5646507cdc6aa609efaf112f6021781625e4b0eae461deec82ec25b784dfa3d",
+    "defaultIntent": "implement-verify-report",
+    "executor": "host-agent",
+    "context": {
+      "userTask": "An on-call engineer opens the production dashboard to learn whether anything is broken right now, what changed just before it, and what to do next.",
+      "constraints": [
+        "Keep every navigation route, service link, deploy link, incident link and footer link working.",
+        "Keep the data-testid hooks services-table and insights-cta.",
+        "Keep the existing facts and numbers; do not invent new metrics or events.",
+        "Working qualities to keep: the five-item navigation is short and clear; the services table already has the right columns; recent activity is specific (who, what, which ID, when)."
+      ],
+      "targets": [
+        {
+          "id": "dashboard-desktop",
+          "surface": "global",
+          "route": "/dashboard",
+          "conditions": {
+            "viewport": {
+              "width": 1280,
+              "height": 800
+            },
+            "theme": "light",
+            "locale": "en-US",
+            "state": "one degraded service (payments-api) and one open incident (INC-231)",
+            "dataKey": "demo fixture, clock 2026-11-05 14:31 UTC",
+            "scrollAnchor": "top of page (first screen)",
+            "zoom": 1,
+            "deviceScaleFactor": 1
+          }
+        }
+      ]
+    },
+    "nextStage": "capture-before",
+    "stages": [
+      {
+        "id": "capture-before",
+        "instruction": "Inspect the actual UI and primary user task. Preserve an immutable before screenshot, rendered HTML/CSS or native structure inventory, source identity and interaction inventory. Record route, viewport, resolved theme, locale, state, input data/clock, semantic scroll anchor, zoom, device scale and loaded fonts. Infer bounded targets from the authorized task; ask only for a missing fact that prevents execution. If the UI has already changed, recover the baseline from version control in isolation; never recreate a supposed before image by restyling the after image.",
+        "tools": [
+          "get_design_improvement_plan"
+        ]
+      },
+      {
+        "id": "decide",
+        "instruction": "Use the selected foundations to connect an observed task obstacle to a conditional remedy and an observable success check. Record baseline strengths in context.constraints and compare each gain against losses in group membership, useful visible information, continuity and reading comfort. Keep the original as a valid alternative. Consider counterexamples, working behavior and product identity. Prioritize task completion, information hierarchy and legibility before decoration. Do not force a new style, wider spacing, fewer cards or a font change without evidence. Retrieve omitted relevant foundations as needed.",
+        "tools": [
+          "get_design_improvement_plan",
+          "get_design_principle_plan",
+          "get_ux_principle_plan",
+          "get_ui_state_plan"
+        ]
+      },
+      {
+        "id": "implement",
+        "instruction": "The host agent edits the real UI source using its available editor tools, preserves unrelated work and records changed files plus a diff. A diagnosis, proposed CSS, mock image or report is not implementation. Continue without another approval of already authorized fixes. Explicit review-only requests remain read-only; commit, push, release and deployment require their own authorization. Missing source or execution access is a concrete blocker, not a completed improvement.",
+        "tools": []
+      },
+      {
+        "id": "verify",
+        "instruction": "Render the edited UI under the recorded conditions and capture fresh after evidence. Visually compare both versions; exercise affected behavior, keyboard/focus, accessibility, recovery and relevant narrow/error states. Run appropriate build/tests. For DOM-based UIs, run compare_page_revisions and validate its preservation results with a separate revisionPreservation audit plan; for other UIs, compare the saved semantic/interaction inventory. Static preservation and contract validity are not visual or behavioral proof. Repair or revert regressions, then recapture and recheck the affected targets. User feedback that identifies a regression reopens prior improvement claims; correct superseded reports and keep only supported gains. Passing tests cannot override that feedback.",
+        "tools": [
+          "compare_page_revisions",
+          "get_design_audit_plan",
+          "validate_design_audit_result"
+        ]
+      },
+      {
+        "id": "report",
+        "instruction": "Call validate_design_improvement_result with this plan query and workflow.planHash, actual captures, implemented changes, observed checks, per-target outcomes and limitations. Follow nextActions until in-scope work is done or a concrete blocker remains. Deliver the before/after artifact links, what changed and why, measured or expert-observed differences, verification, tradeoffs and remaining unverified work. A side-by-side or toggle viewer helps when many screenshots are involved. Never invent scores, time savings or user-study results. complete describes submitted evidence coverage, not an independent quality certification; no-change must never be marketed as an improvement.",
+        "tools": [
+          "validate_design_improvement_result"
+        ]
+      }
+    ],
+    "requiredChecksPerTarget": [
+      "visual",
+      "behavior",
+      "preservation",
+      "accessibility"
+    ],
+    "captureRequirements": "Visual and preservation checks must reference both outcome captures; all other checks must reference the after capture. Referenced outcome captures must match the planned conditions and have loaded fonts. One screenshot artifact cannot represent different routes, conditions or source snapshots. Sharing a whole-page capture between surfaces is valid only when those identities agree. After upgrading validation rules, retrieve a fresh plan and use its workflow.planHash.",
+    "completionTool": "validate_design_improvement_result",
+    "completionRequiresContext": true,
+    "acceptance": "Every planned target needs a matched, font-ready before/after pair; actual implemented diffs for claimed improvements; visual, behavior, preservation and affected-accessibility checks; explicit outcomes and a before/after report. Proposals, missing evidence or regressions cannot complete an improvement. Honest unchanged targets may accompany improved ones. With no implemented or proposed changes, fully verified unchanged targets produce no-change."
+  },
+  "selection": {
+    "mode": "all-selector-dimensions",
+    "explanation": "OR within concerns, AND across filters; cross-surface entries also apply. Explicit ids retain their order. Otherwise matched concerns, exact surface, then catalog order determine selection; this is not a design quality score."
+  },
+  "coverage": {
+    "catalogTotal": 24,
+    "matching": 18,
+    "selected": 6,
+    "omittedIds": [
+      "task-density",
+      "type-roles",
+      "contrast-legibility",
+      "purposeful-motion",
+      "relational-grouping",
+      "reading-measure",
+      "language-resilience",
+      "semantic-color",
+      "data-encoding",
+      "navigation-scent",
+      "labels-instructions",
+      "error-recovery"
+    ],
+    "filteredRequestedIds": []
+  },
+  "protocol": {
+    "purpose": "Use the knowledge to implement justified improvements, compare the result, and report completed changes. A retrieved plan is not an inspection or proof of improvement.",
+    "evidenceBoundary": "Sources support the stated concepts. Decision rules and examples are independently authored applications, not experimentally validated universal laws. W3C Understanding pages explain criteria; apply the normative criterion, level and exceptions when claiming conformance.",
+    "decisionOrder": [
+      "Identify the user task, existing intent and observed obstacle before choosing a remedy. Preserve well-working design and product identity.",
+      "Check conditions and counterexamples; fix content/interaction/structure before polishing tokens where those are the cause. Address access, task failure and truthful consequences before aesthetic preferences.",
+      "Make a coherent reversible change, verify it, then keep, revise or revert. Do not force a catalog style or diagnose an AI origin from appearance."
+    ],
+    "captureBefore": "Save actual rendered before screenshots plus HTML/CSS and interaction/content inventory. Record route, viewport, zoom, theme, locale, data, UI state and loaded fonts. Work on authorized surfaces; keep original artifacts separate from illustrative examples.",
+    "comparisonConditions": "Capture after artifacts with the same route, viewport, zoom, theme, locale, data, state and font readiness. If conditions differ, disclose the mismatch and do not attribute all differences to the change. Compare the full frame and affected region at the same scale.",
+    "verification": "Run relevant tasks, keyboard paths, responsive/zoom/localization cases, loading/empty/error/recovery states and existing regression checks. Use compare_page_revisions for submitted markup preservation, while verifying live behavior separately. Structural cleanliness or a valid audit contract does not prove better usability.",
+    "report": "Deliver actual before/after references, implemented changes and their intended effect, observed comparison outcomes (improved/unchanged/regressed/not verified), preserved behavior, tests and unresolved limits. Label expert judgement, functional evidence and participant measurements separately; never invent user testing or a quality score."
+  },
+  "foundations": [
+    {
+      "id": "priority-hierarchy",
+      "category": "perception",
+      "name": "Attention follows task priority",
+      "principle": "Allocate visual emphasis to the next meaningful decision, then to supporting context.",
+      "concerns": [
+        "focus",
+        "scanability",
+        "restraint"
+      ],
+      "surfaces": [
+        "global"
+      ],
+      "relatedPrincipleIds": [
+        "attention-budget",
+        "contrast-before-scale",
+        "core-task-first"
+      ],
+      "sourceIds": [
+        "visual-hierarchy",
+        "heuristics"
+      ],
+      "applicationBasis": "authored-contextual-guidance",
+      "observe": [
+        "Identify what the user needs next; compare its prominence with logos, metrics, navigation and secondary actions."
+      ],
+      "decisions": [
+        {
+          "when": "Several unrelated elements compete equally.",
+          "change": "Choose the task anchor; lower competing fill, weight or ornament before enlarging everything.",
+          "instead": "Parallel comparison may need equal emphasis; do not invent a single winner."
+        },
+        {
+          "when": "Urgency or consequences are visually subordinate.",
+          "change": "Move the state and consequence near its object and action, with a distinct readable treatment.",
+          "instead": "Use actual severity; do not manufacture alerts to attract attention."
+        }
+      ],
+      "preserve": "Keep secondary information legible and all meaningful choices reachable.",
+      "compare": [
+        {
+          "evidence": "rendered",
+          "test": "At identical content and size, compare which elements dominate before reading their words; record the intended order."
+        },
+        {
+          "evidence": "user-task",
+          "test": "Observe whether a person identifies the next task; an agent’s salience judgement alone does not prove faster use."
+        }
+      ],
+      "examples": [
+        {
+          "surface": "checkout",
+          "before": "Coupon promotion dominates the total.",
+          "after": "Total and payment consequence lead; the coupon stays available."
+        },
+        {
+          "surface": "developer-console",
+          "before": "Healthy summaries outweigh a blocked job.",
+          "after": "The blocked job and recovery action become the anchor."
+        }
+      ],
+      "examplesAre": "illustrative-not-observed-results",
+      "resourceUri": "webstylebook://foundations/priority-hierarchy?locale=en",
+      "match": {
+        "concerns": [
+          "focus",
+          "scanability",
+          "restraint"
+        ],
+        "exactSurface": false
+      }
+    },
+    {
+      "id": "scannable-content",
+      "category": "information",
+      "name": "Scanning and reading serve different tasks",
+      "principle": "An overview should expose distinctions needed to choose; detail should retain the information needed to understand.",
+      "concerns": [
+        "scanability",
+        "readability",
+        "focus"
+      ],
+      "surfaces": [
+        "search",
+        "data-table",
+        "content",
+        "chat",
+        "developer-console"
+      ],
+      "relatedPrincipleIds": [
+        "core-task-first",
+        "attention-budget"
+      ],
+      "sourceIds": [
+        "information-scent",
+        "recognition"
+      ],
+      "applicationBasis": "authored-contextual-guidance",
+      "observe": [
+        "Identify the attributes that distinguish items; check repeated prefixes, raw prose, ambiguous truncation and remote status labels."
+      ],
+      "decisions": [
+        {
+          "when": "Rows require reading paragraphs just to identify the item.",
+          "change": "Expose a faithful concise name, discriminating attributes and current state in stable positions.",
+          "instead": "Do not invent summaries or remove the original; some legal or quoted text must remain exact."
+        },
+        {
+          "when": "Clamping hides the only distinguishing words.",
+          "change": "Preserve the distinctive portion, permit useful wrapping and provide an accessible full-text route.",
+          "instead": "A hover-only tooltip does not solve touch or keyboard access."
+        }
+      ],
+      "preserve": "Keep exact identity, full content and meaningful differences between similar records.",
+      "compare": [
+        {
+          "evidence": "user-task",
+          "test": "Find the same item among similar distractors before/after, including long titles; separately verify full content remains reachable."
+        }
+      ],
+      "examples": [
+        {
+          "surface": "search",
+          "before": "Results repeat the same opening words and truncate the product variant.",
+          "after": "Variant and relevant distinguishing attributes remain visible."
+        },
+        {
+          "surface": "chat",
+          "before": "A conversation list exposes full requests but hides current status.",
+          "after": "Concise identity and status lead; the full conversation remains intact."
+        }
+      ],
+      "examplesAre": "illustrative-not-observed-results",
+      "resourceUri": "webstylebook://foundations/scannable-content?locale=en",
+      "match": {
+        "concerns": [
+          "focus",
+          "scanability",
+          "readability"
+        ],
+        "exactSurface": false
+      }
+    },
+    {
+      "id": "truthful-evidence",
+      "category": "information",
+      "name": "Prominence matches meaning and evidence",
+      "principle": "Give space to concrete, supported information that helps a decision; do not decorate uncertainty into certainty.",
+      "concerns": [
+        "focus",
+        "readability",
+        "restraint"
+      ],
+      "surfaces": [
+        "landing-page",
+        "content",
+        "checkout",
+        "chat",
+        "onboarding"
+      ],
+      "relatedPrincipleIds": [
+        "evidence-near-claim",
+        "opening-earns-its-frame"
+      ],
+      "sourceIds": [
+        "heuristics",
+        "information-scent"
+      ],
+      "applicationBasis": "authored-contextual-guidance",
+      "observe": [
+        "For each prominent claim, identify its meaning, source, limitations and relation to the user’s decision."
+      ],
+      "decisions": [
+        {
+          "when": "A generic slogan occupies space needed for concrete information.",
+          "change": "Use verified product facts or an actual demonstration; retain the proposition and necessary explanation.",
+          "instead": "Expressive branding can have a purpose; do not ban heroes, photographs, centered text or cards by appearance alone."
+        },
+        {
+          "when": "A number or claim appears more certain than its support.",
+          "change": "Place relevant qualifications and evidence near it, or remove the unsupported assertion.",
+          "instead": "Do not fabricate testimonials, measurements or results to complete a layout."
+        }
+      ],
+      "preserve": "Keep material limitations, price, consent, provenance and the original factual meaning.",
+      "compare": [
+        {
+          "evidence": "rendered",
+          "test": "Compare visible statements and their prominence against the same evidence inventory; check that shortening has not changed certainty or omitted consequences."
+        }
+      ],
+      "examples": [
+        {
+          "surface": "landing-page",
+          "before": "Unsupported growth metrics dominate the opening.",
+          "after": "A verified capability and a usable demonstration take their place."
+        },
+        {
+          "surface": "chat",
+          "before": "A partial check is styled as complete success.",
+          "after": "Confirmed results and unverified areas are distinguishable."
+        }
+      ],
+      "examplesAre": "illustrative-not-observed-results",
+      "resourceUri": "webstylebook://foundations/truthful-evidence?locale=en",
+      "match": {
+        "concerns": [
+          "focus",
+          "readability",
+          "restraint"
+        ],
+        "exactSurface": false
+      }
+    },
+    {
+      "id": "surface-hierarchy",
+      "category": "perception",
+      "name": "Boundaries and figure–ground",
+      "principle": "A surface should explain containment, interaction or layering; repeated frames can obscure those distinctions.",
+      "concerns": [
+        "grouping",
+        "restraint",
+        "focus"
+      ],
+      "surfaces": [
+        "global"
+      ],
+      "relatedPrincipleIds": [
+        "depth-explains-structure"
+      ],
+      "sourceIds": [
+        "common-region",
+        "color-roles"
+      ],
+      "applicationBasis": "authored-contextual-guidance",
+      "observe": [
+        "Inventory each background, border and shadow and name the relationship it contributes."
+      ],
+      "decisions": [
+        {
+          "when": "Several nested frames repeat the same grouping.",
+          "change": "Remove one redundant boundary and use spacing or a heading to retain membership.",
+          "instead": "Retain a boundary needed to distinguish selectable objects or scrolling layers."
+        },
+        {
+          "when": "A popover or sticky region merges into its backdrop.",
+          "change": "Add a meaningful surface or edge and correct stacking, clipping and focus behavior.",
+          "instead": "Do not apply floating-card elevation to every persistent section."
+        }
+      ],
+      "preserve": "Keep useful header fills and enclosing borders when they identify group membership. Removing a frame is not a gain if the group becomes harder to see. Keep selection, keyboard focus and active state distinguishable.",
+      "compare": [
+        {
+          "evidence": "rendered",
+          "test": "Compare item membership and active-layer visibility after each removed boundary, in both themes."
+        }
+      ],
+      "examples": [
+        {
+          "surface": "settings",
+          "before": "A fieldset sits inside three similarly outlined cards.",
+          "after": "One meaningful group boundary and a clear heading remain."
+        },
+        {
+          "surface": "navigation",
+          "before": "A menu blends with content scrolling beneath it.",
+          "after": "A distinct menu plane preserves its separate interaction context."
+        }
+      ],
+      "examplesAre": "illustrative-not-observed-results",
+      "resourceUri": "webstylebook://foundations/surface-hierarchy?locale=en",
+      "match": {
+        "concerns": [
+          "focus",
+          "restraint"
+        ],
+        "exactSurface": false
+      }
+    },
+    {
+      "id": "visual-balance",
+      "category": "perception",
+      "name": "Balance and visual weight",
+      "principle": "Size, darkness, detail and isolation contribute to visual weight; balanced composition need not be symmetrical.",
+      "concerns": [
+        "balance",
+        "focus",
+        "restraint"
+      ],
+      "surfaces": [
+        "global"
+      ],
+      "relatedPrincipleIds": [
+        "attention-budget",
+        "contrast-before-scale",
+        "opening-earns-its-frame"
+      ],
+      "sourceIds": [
+        "visual-hierarchy"
+      ],
+      "applicationBasis": "authored-contextual-guidance",
+      "observe": [
+        "Compare the mass of text, imagery and controls, not just their bounding-box dimensions."
+      ],
+      "decisions": [
+        {
+          "when": "One incidental region overwhelms the task area.",
+          "change": "Reduce its area, contrast or detail, or reposition the task anchor to establish a deliberate balance.",
+          "instead": "A deliberately dominant image or alert may be justified by the task."
+        },
+        {
+          "when": "Symmetry forces unequal content into identical boxes.",
+          "change": "Allocate space by content role and test a purposeful asymmetry.",
+          "instead": "Retain symmetry where it supports fair side-by-side comparison."
+        }
+      ],
+      "preserve": "Keep product identity and useful information capacity. Before shrinking navigation, compare readable title distinctions and truncation; unused main-area space is not a reason to take width from an information-dense sidebar. Keep a comfortable prose measure instead of filling every available pixel.",
+      "compare": [
+        {
+          "evidence": "rendered",
+          "test": "Compare the whole frame at the same scale, then inspect text at actual size; a thumbnail judgement does not establish legibility."
+        }
+      ],
+      "examples": [
+        {
+          "surface": "landing-page",
+          "before": "A decorative illustration outweighs the service explanation.",
+          "after": "The illustration supports the offer without hiding the next action."
+        },
+        {
+          "surface": "data-table",
+          "before": "Large identical metric cards compete with the comparison table.",
+          "after": "Summaries become compact; comparison receives sufficient space."
+        }
+      ],
+      "examplesAre": "illustrative-not-observed-results",
+      "resourceUri": "webstylebook://foundations/visual-balance?locale=en",
+      "match": {
+        "concerns": [
+          "focus",
+          "restraint"
+        ],
+        "exactSurface": false
+      }
+    },
+    {
+      "id": "rhythm-consistency",
+      "category": "composition",
+      "name": "Repetition with meaningful variation",
+      "principle": "Repeat treatment for repeated roles; use variation to reveal differences that matter.",
+      "concerns": [
+        "consistency",
+        "scanability",
+        "restraint"
+      ],
+      "surfaces": [
+        "global"
+      ],
+      "relatedPrincipleIds": [
+        "bounded-choice-system",
+        "deliberate-type-scale"
+      ],
+      "sourceIds": [
+        "spacing",
+        "heuristics"
+      ],
+      "applicationBasis": "authored-contextual-guidance",
+      "observe": [
+        "Compare repeated roles across screens: row height, label position, state styling and spacing, including long values."
+      ],
+      "decisions": [
+        {
+          "when": "Equivalent roles accumulate incidental style differences.",
+          "change": "Consolidate to role-based tokens or a shared primitive, then check every affected context.",
+          "instead": "Do not unify two roles merely because they happen to share today’s numeric value."
+        },
+        {
+          "when": "Everything repeats despite important differences.",
+          "change": "Introduce a deliberate group break or state distinction where meaning changes.",
+          "instead": "Keep equivalent comparison items consistent; variety alone is not an improvement."
+        }
+      ],
+      "preserve": "Retain semantic differences between primary, destructive, selected and disabled states.",
+      "compare": [
+        {
+          "evidence": "rendered",
+          "test": "Compare several routes and every component state after a token change; a single polished screen is insufficient."
+        }
+      ],
+      "examples": [
+        {
+          "surface": "settings",
+          "before": "Each section uses a different label gap.",
+          "after": "The same field relationship uses one token."
+        },
+        {
+          "surface": "data-table",
+          "before": "A critical row looks like every healthy row.",
+          "after": "State is distinct while the comparison columns stay aligned."
+        }
+      ],
+      "examplesAre": "illustrative-not-observed-results",
+      "resourceUri": "webstylebook://foundations/rhythm-consistency?locale=en",
+      "match": {
+        "concerns": [
+          "scanability",
+          "restraint"
+        ],
+        "exactSurface": false
+      }
+    }
+  ],
+  "sources": [
+    {
+      "id": "visual-hierarchy",
+      "title": "5 Principles of Visual Design in UX",
+      "publisher": "Nielsen Norman Group",
+      "url": "https://www.nngroup.com/articles/principles-visual-design/",
+      "kind": "design-guidance",
+      "supports": "Relative size, contrast, balance and grouping influence the order in which a composition is read.",
+      "reviewedAt": "2026-10-28"
+    },
+    {
+      "id": "common-region",
+      "title": "The Principle of Common Region: Containers Create Groupings",
+      "publisher": "Nielsen Norman Group",
+      "url": "https://www.nngroup.com/articles/common-region/",
+      "kind": "design-guidance",
+      "supports": "A shared boundary implies membership; excessive containers can clutter the hierarchy.",
+      "reviewedAt": "2026-10-28"
+    },
+    {
+      "id": "spacing",
+      "title": "Spacing: Overview",
+      "publisher": "IBM Carbon",
+      "url": "https://www.carbondesignsystem.com/building-blocks/foundations/spacing/overview",
+      "kind": "design-guidance",
+      "supports": "A reusable spacing scale supports relationships at both component and page levels; its exact values belong to that system.",
+      "reviewedAt": "2026-10-28"
+    },
+    {
+      "id": "recognition",
+      "title": "Memory Recognition and Recall in User Interfaces",
+      "publisher": "Nielsen Norman Group",
+      "url": "https://www.nngroup.com/articles/recognition-and-recall/",
+      "kind": "usability-heuristic",
+      "supports": "Visible contextual cues can support recognition instead of requiring users to remember information from another place.",
+      "reviewedAt": "2026-10-28"
+    },
+    {
+      "id": "information-scent",
+      "title": "Information Scent: How Users Decide Where to Go Next",
+      "publisher": "Nielsen Norman Group",
+      "url": "https://www.nngroup.com/articles/information-scent/",
+      "kind": "usability-heuristic",
+      "supports": "Labels and surrounding context help users predict a destination relative to their current question.",
+      "reviewedAt": "2026-10-28"
+    },
+    {
+      "id": "heuristics",
+      "title": "10 Usability Heuristics for User Interface Design",
+      "publisher": "Nielsen Norman Group",
+      "url": "https://www.nngroup.com/articles/ten-usability-heuristics/",
+      "kind": "usability-heuristic",
+      "supports": "Feedback, familiar language, consistency, user control and recovery are broad evaluation prompts, not universal prescriptions.",
+      "reviewedAt": "2026-10-28"
+    },
+    {
+      "id": "color-roles",
+      "title": "Color: Guidelines",
+      "publisher": "IBM Carbon",
+      "url": "https://www.carbondesignsystem.com/building-blocks/foundations/color/guidelines",
+      "kind": "design-guidance",
+      "supports": "Layer and contextual tokens preserve color relationships when components move across surfaces and themes.",
+      "reviewedAt": "2026-10-28"
+    }
+  ],
+  "relatedPrincipleIds": [
+    "attention-budget",
+    "contrast-before-scale",
+    "core-task-first",
+    "evidence-near-claim",
+    "opening-earns-its-frame",
+    "depth-explains-structure",
+    "bounded-choice-system",
+    "deliberate-type-scale"
+  ],
+  "notice": "Inspect the actual UI and apply only rules whose conditions hold. The host performs edits, captures and verification; this offline tool retrieves knowledge only."
+}

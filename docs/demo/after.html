@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Acme Cloud — Dashboard</title>
+<!-- Demo fixture: before.html after one pass of the web-stylebook-design skill. Same fictional
+     data and clock (2026-11-05 14:31 UTC). See docs/demo/README.md for how it was made. -->
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --canvas: #f7f7f8; --surface: #ffffff; --text: #18181b; --muted: #52525b; --border: #e4e4e7;
+    --accent: #4f46e5; --accent-ink: #ffffff; --bad: #b42318; --bad-bg: #fef3f2; --bad-border: #fecdca; --ok: #067647;
+  }
+  body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--canvas); color: var(--text); font-size: 14px; line-height: 1.45; }
+  a { color: inherit; }
+  a:focus-visible, .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+  .nav { display: flex; align-items: center; gap: 32px; height: 56px; padding: 0 32px; background: var(--surface); border-bottom: 1px solid var(--border); }
+  .logo { font-weight: 800; font-size: 16px; color: var(--accent); text-decoration: none; }
+  .nav-links { display: flex; gap: 4px; flex: 1; }
+  .nav-links a { padding: 6px 10px; border-radius: 6px; color: var(--muted); text-decoration: none; }
+  .nav-links a.active { color: var(--text); font-weight: 600; background: #f0f0f2; }
+  .nav-links a.insights { margin-left: auto; color: var(--accent); }
+  .avatar { width: 28px; height: 28px; border-radius: 50%; background: #c7d2fe; }
+  main { max-width: 1216px; margin: 0 auto; padding: 20px 32px 32px; }
+  .page-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px; }
+  .page-head h1 { font-size: 20px; font-weight: 700; letter-spacing: -.01em; }
+  .page-head p { color: var(--muted); }
+  .alert { display: flex; align-items: center; gap: 24px; padding: 14px 18px; border: 1px solid var(--bad-border); border-left: 4px solid var(--bad); border-radius: 8px; background: var(--bad-bg); }
+  .alert-body { flex: 1; }
+  .alert h2 { font-size: 16px; font-weight: 700; color: var(--bad); }
+  .alert p { margin-top: 2px; color: #3f3f46; }
+  .alert .num { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--text); }
+  .btn { display: inline-block; padding: 8px 14px; border-radius: 6px; font-weight: 600; text-decoration: none; white-space: nowrap; border: 1px solid var(--border); background: var(--surface); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .summary { display: grid; grid-template-columns: repeat(4, 1fr); margin: 14px 0 20px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
+  .summary div { padding: 12px 18px; border-left: 1px solid var(--border); }
+  .summary div:first-child { border-left: 0; }
+  .summary dt { color: var(--muted); font-size: 13px; }
+  .summary dd { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .summary dd small { font-size: 13px; font-weight: 500; color: var(--bad); }
+  .grid { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; }
+  .panel h2 { font-size: 14px; font-weight: 700; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; font-size: 12px; font-weight: 600; color: var(--muted); padding: 8px 16px; border-bottom: 1px solid var(--border); }
+  td { padding: 10px 16px; border-bottom: 1px solid var(--border); font-variant-numeric: tabular-nums; }
+  tr:last-child td { border-bottom: 0; }
+  th.n, td.n { text-align: right; }
+  td a { font-weight: 600; text-decoration: none; }
+  td a:hover { text-decoration: underline; }
+  tr.degraded td { background: #fffbfa; }
+  tr.degraded td.err { color: var(--bad); font-weight: 700; }
+  .status { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
+  .status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--ok); }
+  .status.ok { color: var(--ok); }
+  .status.bad { color: var(--bad); }
+  .status.bad::before { border-radius: 0; width: 0; height: 0; background: none; border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 9px solid var(--bad); }
+  .feed { list-style: none; }
+  .feed li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--border); }
+  .feed li:last-child { border-bottom: 0; }
+  .feed time { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .feed a { font-weight: 600; }
+  footer { max-width: 1216px; margin: 0 auto; padding: 0 32px 32px; color: var(--muted); font-size: 13px; }
+  footer a { margin-left: 12px; }
+</style>
+</head>
+<body>
+  <nav class="nav" aria-label="Main">
+    <a class="logo" href="/">✦ Acme Cloud</a>
+    <div class="nav-links">
+      <a class="active" href="/dashboard" aria-current="page">Dashboard</a>
+      <a href="/services">Services</a>
+      <a href="/deploys">Deploys</a>
+      <a href="/incidents">Incidents</a>
+      <a href="/settings">Settings</a>
+      <a class="insights" href="/insights" data-testid="insights-cta">✨ Get AI insights</a>
+    </div>
+    <div class="avatar" aria-label="Jordan Lee" role="img"></div>
+  </nav>
+
+  <main>
+    <header class="page-head">
+      <h1>Production</h1>
+      <p>Welcome back, Jordan</p>
+    </header>
+
+    <section class="alert" aria-labelledby="alert-title">
+      <div class="alert-body">
+        <h2 id="alert-title">payments-api is degraded</h2>
+        <p>Error rate <span class="num">4.2%</span> · p95 <span class="num">840 ms</span> · last deploy <a href="/deploys/4812">#4812</a> at 14:02 · <a href="/incidents/INC-231">INC-231</a> opened by Priya at 14:05</p>
+      </div>
+      <a class="btn primary" href="/incidents/INC-231">Open INC-231</a>
+      <a class="btn" href="/services/payments-api">View payments-api</a>
+    </section>
+
+    <dl class="summary">
+      <div><dt>Services</dt><dd>5 <small>1 degraded</small></dd></div>
+      <div><dt>Incidents</dt><dd>1 <small>open</small></dd></div>
+      <div><dt>Deploys</dt><dd>6</dd></div>
+      <div><dt>Uptime</dt><dd>99.98%</dd></div>
+    </dl>
+
+    <div class="grid">
+      <section class="panel" aria-labelledby="services-title">
+        <h2 id="services-title">Your services</h2>
+        <table data-testid="services-table">
+          <thead><tr><th>Service</th><th>Status</th><th class="n">Error rate</th><th class="n">p95 latency</th><th>Last deploy</th></tr></thead>
+          <tbody>
+            <tr class="degraded"><td><a href="/services/payments-api">payments-api</a></td><td><span class="status bad">Degraded</span></td><td class="n err">4.2%</td><td class="n">840 ms</td><td>#4812 · 14:02</td></tr>
+            <tr><td><a href="/services/notifications">notifications</a></td><td><span class="status ok">Healthy</span></td><td class="n">0.2%</td><td class="n">160 ms</td><td>#4811 · 13:20</td></tr>
+            <tr><td><a href="/services/checkout-web">checkout-web</a></td><td><span class="status ok">Healthy</span></td><td class="n">0.1%</td><td class="n">210 ms</td><td>#4809 · 11:40</td></tr>
+            <tr><td><a href="/services/search-indexer">search-indexer</a></td><td><span class="status ok">Healthy</span></td><td class="n">0.3%</td><td class="n">1.2 s</td><td>#4805 · 09:15</td></tr>
+            <tr><td><a href="/services/auth-service">auth-service</a></td><td><span class="status ok">Healthy</span></td><td class="n">0.0%</td><td class="n">95 ms</td><td>#4790 · yesterday</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="panel" aria-labelledby="activity-title">
+        <h2 id="activity-title">Recent activity</h2>
+        <ul class="feed">
+          <li><span><b>Priya</b> opened <a href="/incidents/INC-231">INC-231</a></span><time>14:05</time></li>
+          <li><span><b>Sam</b> deployed <a href="/deploys/4812">#4812</a> to payments-api</span><time>14:02</time></li>
+          <li><span><b>Alex</b> deployed <a href="/deploys/4811">#4811</a> to notifications</span><time>13:20</time></li>
+          <li><span><b>Sam</b> deployed <a href="/deploys/4809">#4809</a> to checkout-web</span><time>11:40</time></li>
+        </ul>
+      </section>
+    </div>
+  </main>
+
+  <footer>Acme Cloud <a href="/status">Status</a> <a href="/docs">Docs</a></footer>
+</body>
+</html>

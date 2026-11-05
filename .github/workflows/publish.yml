@@ -51,4 +51,6 @@ jobs:
           npm install "$GITHUB_WORKSPACE/$TARBALL"
           npx web-stylebook-mcp --version
           npx web-stylebook-mcp --validate-catalog
+          npx web-stylebook-mcp call compose_design_tokens '{"primaryStyleId":"quiet-utility","format":"json"}' > /dev/null
+          test -f node_modules/web-stylebook-mcp/skills/web-stylebook-design/SKILL.md
       - run: npm publish --access public

@@ -27,8 +27,8 @@ function shownResult(file: string, marker: string): ShownExample {
 }
 
 describe.each([
-  { file: 'README.md', marker: '// ← result', locale: 'en' as const },
-  { file: 'README.ko.md', marker: '// ← 결과', locale: 'ko' as const },
+  { file: 'docs/reference.md', marker: '// ← result', locale: 'en' as const },
+  { file: 'docs/reference.ko.md', marker: '// ← 결과', locale: 'ko' as const },
 ])('$file headline example', ({ file, marker, locale }) => {
   it('is the real output of the headline brief', () => {
     const shown = shownResult(file, marker);

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "web-stylebook",
+  "description": "Web Stylebook: design judgment for coding agents.",
+  "owner": { "name": "seungdori", "url": "https://github.com/seungdori" },
+  "plugins": [
+    {
+      "name": "web-stylebook",
+      "description": "Improve existing web UIs with researched design judgment, real edits, verification and an honest before/after report. Skill plus the offline Web Stylebook MCP server.",
+      "source": "./",
+      "category": "design",
+      "homepage": "https://github.com/seungdori/web-stylebook-mcp#readme"
+    }
+  ]
+}

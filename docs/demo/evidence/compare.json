@@ -1,0 +1,625 @@
+{
+  "identity": {
+    "schema": "webstylebook.page-revisions.v1",
+    "catalogVersion": "0.10.1",
+    "catalogContentHash": "sha256:33f3638c2fec095af63918f11e2c06d37127dd590bc5fdcc09ec6d66d0df4327",
+    "rulesetHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec",
+    "beforeHash": "sha256:40ad60b6d93c5952ff350e5696b15f52d4de6de272e72b17bf4bea507ed05e03",
+    "afterHash": "sha256:6311c4d5932a5df50d96e8691052ad44299ea7d9b44fd29b5b1701b55859c35d"
+  },
+  "target": {
+    "id": "dashboard-desktop",
+    "viewportWidth": 1280
+  },
+  "verdict": "PASS",
+  "summary": {
+    "findings": 0,
+    "fixNow": 0,
+    "risk": 0,
+    "notVerified": 0
+  },
+  "inventory": {
+    "links": {
+      "before": 18,
+      "after": 18,
+      "kept": 18,
+      "acknowledged": 0,
+      "lost": [],
+      "reworded": []
+    },
+    "fields": {
+      "before": 0,
+      "after": 0,
+      "kept": 0,
+      "acknowledged": 0,
+      "lost": [],
+      "reworded": []
+    },
+    "options": {
+      "before": 0,
+      "after": 0,
+      "kept": 0,
+      "acknowledged": 0,
+      "lost": [],
+      "reworded": []
+    },
+    "controls": {
+      "before": 0,
+      "after": 0,
+      "kept": 0,
+      "acknowledged": 0,
+      "lost": [],
+      "reworded": []
+    },
+    "handlers": {
+      "before": 0,
+      "after": 0,
+      "kept": 0,
+      "acknowledged": 0,
+      "lost": [],
+      "reworded": []
+    },
+    "testHooks": {
+      "before": 2,
+      "after": 2,
+      "kept": 2,
+      "acknowledged": 0,
+      "lost": [],
+      "reworded": []
+    },
+    "scriptHooks": {
+      "before": 0,
+      "after": 0,
+      "kept": 0,
+      "acknowledged": 0,
+      "lost": [],
+      "reworded": []
+    },
+    "headings": {
+      "before": 7,
+      "after": 4,
+      "kept": 2,
+      "acknowledged": 5,
+      "lost": [],
+      "reworded": []
+    },
+    "figures": {
+      "before": 1,
+      "after": 1,
+      "kept": 1,
+      "acknowledged": 0,
+      "lost": [],
+      "reworded": []
+    },
+    "landmarks": {
+      "before": 2,
+      "after": 3,
+      "kept": 2,
+      "acknowledged": 0,
+      "lost": [],
+      "reworded": []
+    },
+    "mustHaves": {
+      "before": 2,
+      "after": 1,
+      "kept": 1,
+      "acknowledged": 1,
+      "lost": [],
+      "reworded": []
+    }
+  },
+  "wordCount": {
+    "before": 218,
+    "after": 151,
+    "ratio": 0.69
+  },
+  "mustHaves": {
+    "productType": "operational-saas",
+    "items": [
+      {
+        "id": "current-status",
+        "name": "Current status",
+        "before": "present",
+        "after": "present"
+      },
+      {
+        "id": "recent-changes",
+        "name": "What changed",
+        "before": "present",
+        "after": "misplaced"
+      }
+    ]
+  },
+  "acknowledgements": {
+    "applied": 7,
+    "rejected": []
+  },
+  "findings": [],
+  "evidence": [
+    {
+      "id": "revision:dashboard-desktop:redesign-kept-links:before",
+      "targetId": "dashboard-desktop",
+      "type": "dom",
+      "phase": "before",
+      "summary": "Links: 18",
+      "contentHash": "sha256:40ad60b6d93c5952ff350e5696b15f52d4de6de272e72b17bf4bea507ed05e03",
+      "actual": {
+        "count": 18
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "0.15.0",
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
+      }
+    },
+    {
+      "id": "revision:dashboard-desktop:redesign-kept-links:after",
+      "targetId": "dashboard-desktop",
+      "type": "dom",
+      "phase": "after",
+      "summary": "Links: 18 of 18 kept, 0 lost, 0 acknowledged.",
+      "outcome": "passed",
+      "contentHash": "sha256:6311c4d5932a5df50d96e8691052ad44299ea7d9b44fd29b5b1701b55859c35d",
+      "actual": {
+        "count": 18,
+        "kept": 18,
+        "lost": 0,
+        "acknowledged": 0,
+        "reworded": 0
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "0.15.0",
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
+      }
+    },
+    {
+      "id": "revision:dashboard-desktop:redesign-kept-fields:before",
+      "targetId": "dashboard-desktop",
+      "type": "dom",
+      "phase": "before",
+      "summary": "Form fields: 0",
+      "contentHash": "sha256:40ad60b6d93c5952ff350e5696b15f52d4de6de272e72b17bf4bea507ed05e03",
+      "actual": {
+        "count": 0,
+        "options": 0,
+        "controls": 0
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "0.15.0",
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
+      }
+    },
+    {
+      "id": "revision:dashboard-desktop:redesign-kept-fields:after",
+      "targetId": "dashboard-desktop",
+      "type": "dom",
+      "phase": "after",
+      "summary": "Form fields: 0 of 0 kept, 0 lost, 0 acknowledged.",
+      "outcome": "passed",
+      "contentHash": "sha256:6311c4d5932a5df50d96e8691052ad44299ea7d9b44fd29b5b1701b55859c35d",
+      "actual": {
+        "count": 0,
+        "kept": 0,
+        "lost": 0,
+        "acknowledged": 0,
+        "reworded": 0,
+        "options": 0,
+        "optionsLost": 0,
+        "controls": 0,
+        "controlsLost": 0
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "0.15.0",
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
+      }
+    },
+    {
+      "id": "revision:dashboard-desktop:redesign-kept-handlers:before",
+      "targetId": "dashboard-desktop",
+      "type": "dom",
+      "phase": "before",
+      "summary": "Handlers: 0",
+      "contentHash": "sha256:40ad60b6d93c5952ff350e5696b15f52d4de6de272e72b17bf4bea507ed05e03",
+      "actual": {
+        "count": 0
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "0.15.0",
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
+      }
+    },
+    {
+      "id": "revision:dashboard-desktop:redesign-kept-handlers:after",
+      "targetId": "dashboard-desktop",
+      "type": "dom",
+      "phase": "after",
+      "summary": "Handlers: 0 of 0 kept, 0 lost, 0 acknowledged.",
+      "outcome": "passed",
+      "contentHash": "sha256:6311c4d5932a5df50d96e8691052ad44299ea7d9b44fd29b5b1701b55859c35d",
+      "actual": {
+        "count": 0,
+        "kept": 0,
+        "lost": 0,
+        "acknowledged": 0,
+        "reworded": 0
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "0.15.0",
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
+      }
+    },
+    {
+      "id": "revision:dashboard-desktop:redesign-kept-test-hooks:before",
+      "targetId": "dashboard-desktop",
+      "type": "dom",
+      "phase": "before",
+      "summary": "Test hooks: 2",
+      "contentHash": "sha256:40ad60b6d93c5952ff350e5696b15f52d4de6de272e72b17bf4bea507ed05e03",
+      "actual": {
+        "count": 2
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "0.15.0",
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
+      }
+    },
+    {
+      "id": "revision:dashboard-desktop:redesign-kept-test-hooks:after",
+      "targetId": "dashboard-desktop",
+      "type": "dom",
+      "phase": "after",
+      "summary": "Test hooks: 2 of 2 kept, 0 lost, 0 acknowledged.",
+      "outcome": "passed",
+      "contentHash": "sha256:6311c4d5932a5df50d96e8691052ad44299ea7d9b44fd29b5b1701b55859c35d",
+      "actual": {
+        "count": 2,
+        "kept": 2,
+        "lost": 0,
+        "acknowledged": 0,
+        "reworded": 0
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "0.15.0",
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
+      }
+    },
+    {
+      "id": "revision:dashboard-desktop:redesign-kept-script-hooks:before",
+      "targetId": "dashboard-desktop",
+      "type": "dom",
+      "phase": "before",
+      "summary": "Script hooks: 0",
+      "contentHash": "sha256:40ad60b6d93c5952ff350e5696b15f52d4de6de272e72b17bf4bea507ed05e03",
+      "actual": {
+        "count": 0
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "0.15.0",
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
+      }
+    },
+    {
+      "id": "revision:dashboard-desktop:redesign-kept-script-hooks:after",
+      "targetId": "dashboard-desktop",
+      "type": "dom",
+      "phase": "after",
+      "summary": "Script hooks: 0 of 0 kept, 0 lost, 0 acknowledged. No scriptSelectors were passed.",
+      "outcome": "inapplicable",
+      "contentHash": "sha256:6311c4d5932a5df50d96e8691052ad44299ea7d9b44fd29b5b1701b55859c35d",
+      "actual": {
+        "count": 0,
+        "kept": 0,
+        "lost": 0,
+        "acknowledged": 0,
+        "reworded": 0
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "0.15.0",
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
+      }
+    },
+    {
+      "id": "revision:dashboard-desktop:redesign-kept-headings:before",
+      "targetId": "dashboard-desktop",
+      "type": "dom",
+      "phase": "before",
+      "summary": "Headings: 7",
+      "contentHash": "sha256:40ad60b6d93c5952ff350e5696b15f52d4de6de272e72b17bf4bea507ed05e03",
+      "actual": {
+        "count": 7
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "0.15.0",
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
+      }
+    },
+    {
+      "id": "revision:dashboard-desktop:redesign-kept-headings:after",
+      "targetId": "dashboard-desktop",
+      "type": "dom",
+      "phase": "after",
+      "summary": "Headings: 2 of 7 kept, 0 lost, 5 acknowledged.",
+      "outcome": "passed",
+      "contentHash": "sha256:6311c4d5932a5df50d96e8691052ad44299ea7d9b44fd29b5b1701b55859c35d",
+      "actual": {
+        "count": 4,
+        "kept": 2,
+        "lost": 0,
+        "acknowledged": 5,
+        "reworded": 0
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "0.15.0",
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
+      }
+    },
+    {
+      "id": "revision:dashboard-desktop:redesign-kept-figures:before",
+      "targetId": "dashboard-desktop",
+      "type": "dom",
+      "phase": "before",
+      "summary": "Figures: 1",
+      "contentHash": "sha256:40ad60b6d93c5952ff350e5696b15f52d4de6de272e72b17bf4bea507ed05e03",
+      "actual": {
+        "count": 1
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "0.15.0",
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
+      }
+    },
+    {
+      "id": "revision:dashboard-desktop:redesign-kept-figures:after",
+      "targetId": "dashboard-desktop",
+      "type": "dom",
+      "phase": "after",
+      "summary": "Figures: 1 of 1 kept, 0 lost, 0 acknowledged.",
+      "outcome": "passed",
+      "contentHash": "sha256:6311c4d5932a5df50d96e8691052ad44299ea7d9b44fd29b5b1701b55859c35d",
+      "actual": {
+        "count": 1,
+        "kept": 1,
+        "lost": 0,
+        "acknowledged": 0,
+        "reworded": 0
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "0.15.0",
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
+      }
+    },
+    {
+      "id": "revision:dashboard-desktop:redesign-kept-landmarks:before",
+      "targetId": "dashboard-desktop",
+      "type": "dom",
+      "phase": "before",
+      "summary": "Landmarks: 2",
+      "contentHash": "sha256:40ad60b6d93c5952ff350e5696b15f52d4de6de272e72b17bf4bea507ed05e03",
+      "actual": {
+        "count": 2
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "0.15.0",
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
+      }
+    },
+    {
+      "id": "revision:dashboard-desktop:redesign-kept-landmarks:after",
+      "targetId": "dashboard-desktop",
+      "type": "dom",
+      "phase": "after",
+      "summary": "Landmarks: 2 of 2 kept, 0 lost, 0 acknowledged.",
+      "outcome": "passed",
+      "contentHash": "sha256:6311c4d5932a5df50d96e8691052ad44299ea7d9b44fd29b5b1701b55859c35d",
+      "actual": {
+        "count": 3,
+        "kept": 2,
+        "lost": 0,
+        "acknowledged": 0,
+        "reworded": 0
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "0.15.0",
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
+      }
+    },
+    {
+      "id": "revision:dashboard-desktop:redesign-kept-words:before",
+      "targetId": "dashboard-desktop",
+      "type": "dom",
+      "phase": "before",
+      "summary": "words: 218",
+      "contentHash": "sha256:40ad60b6d93c5952ff350e5696b15f52d4de6de272e72b17bf4bea507ed05e03",
+      "actual": {
+        "words": 218
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "0.15.0",
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
+      }
+    },
+    {
+      "id": "revision:dashboard-desktop:redesign-kept-words:after",
+      "targetId": "dashboard-desktop",
+      "type": "dom",
+      "phase": "after",
+      "summary": "Visible words: 218 before, 151 after (69%).",
+      "outcome": "passed",
+      "contentHash": "sha256:6311c4d5932a5df50d96e8691052ad44299ea7d9b44fd29b5b1701b55859c35d",
+      "actual": {
+        "words": 151,
+        "ratio": 0.69
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "0.15.0",
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
+      }
+    },
+    {
+      "id": "revision:dashboard-desktop:redesign-kept-must-haves:before",
+      "targetId": "dashboard-desktop",
+      "type": "dom",
+      "phase": "before",
+      "summary": "Must-haves: 2",
+      "contentHash": "sha256:40ad60b6d93c5952ff350e5696b15f52d4de6de272e72b17bf4bea507ed05e03",
+      "actual": {
+        "count": 2
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "0.15.0",
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
+      }
+    },
+    {
+      "id": "revision:dashboard-desktop:redesign-kept-must-haves:after",
+      "targetId": "dashboard-desktop",
+      "type": "dom",
+      "phase": "after",
+      "summary": "0 of the 2 must-haves present before are missing or off the first screen after.",
+      "outcome": "passed",
+      "contentHash": "sha256:6311c4d5932a5df50d96e8691052ad44299ea7d9b44fd29b5b1701b55859c35d",
+      "actual": {
+        "count": 1,
+        "kept": 1,
+        "lost": 0,
+        "acknowledged": 1,
+        "reworded": 0
+      },
+      "producer": {
+        "name": "web-stylebook-mcp compare_page_revisions",
+        "version": "0.15.0",
+        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
+      }
+    }
+  ],
+  "results": [
+    {
+      "checkId": "redesign-kept-links",
+      "targetId": "dashboard-desktop",
+      "verdict": "PASS",
+      "evidenceRefs": [
+        "revision:dashboard-desktop:redesign-kept-links:before",
+        "revision:dashboard-desktop:redesign-kept-links:after"
+      ],
+      "rationale": "Links: 18 of 18 kept, 0 lost, 0 acknowledged."
+    },
+    {
+      "checkId": "redesign-kept-fields",
+      "targetId": "dashboard-desktop",
+      "verdict": "PASS",
+      "evidenceRefs": [
+        "revision:dashboard-desktop:redesign-kept-fields:before",
+        "revision:dashboard-desktop:redesign-kept-fields:after"
+      ],
+      "rationale": "Form fields: 0 of 0 kept, 0 lost, 0 acknowledged."
+    },
+    {
+      "checkId": "redesign-kept-handlers",
+      "targetId": "dashboard-desktop",
+      "verdict": "PASS",
+      "evidenceRefs": [
+        "revision:dashboard-desktop:redesign-kept-handlers:before",
+        "revision:dashboard-desktop:redesign-kept-handlers:after"
+      ],
+      "rationale": "Handlers: 0 of 0 kept, 0 lost, 0 acknowledged."
+    },
+    {
+      "checkId": "redesign-kept-test-hooks",
+      "targetId": "dashboard-desktop",
+      "verdict": "PASS",
+      "evidenceRefs": [
+        "revision:dashboard-desktop:redesign-kept-test-hooks:before",
+        "revision:dashboard-desktop:redesign-kept-test-hooks:after"
+      ],
+      "rationale": "Test hooks: 2 of 2 kept, 0 lost, 0 acknowledged."
+    },
+    {
+      "checkId": "redesign-kept-script-hooks",
+      "targetId": "dashboard-desktop",
+      "verdict": "NOT_APPLICABLE",
+      "evidenceRefs": [
+        "revision:dashboard-desktop:redesign-kept-script-hooks:before",
+        "revision:dashboard-desktop:redesign-kept-script-hooks:after"
+      ],
+      "rationale": "No scriptSelectors were passed."
+    },
+    {
+      "checkId": "redesign-kept-headings",
+      "targetId": "dashboard-desktop",
+      "verdict": "PASS",
+      "evidenceRefs": [
+        "revision:dashboard-desktop:redesign-kept-headings:before",
+        "revision:dashboard-desktop:redesign-kept-headings:after"
+      ],
+      "rationale": "Headings: 2 of 7 kept, 0 lost, 5 acknowledged."
+    },
+    {
+      "checkId": "redesign-kept-figures",
+      "targetId": "dashboard-desktop",
+      "verdict": "PASS",
+      "evidenceRefs": [
+        "revision:dashboard-desktop:redesign-kept-figures:before",
+        "revision:dashboard-desktop:redesign-kept-figures:after"
+      ],
+      "rationale": "Figures: 1 of 1 kept, 0 lost, 0 acknowledged."
+    },
+    {
+      "checkId": "redesign-kept-landmarks",
+      "targetId": "dashboard-desktop",
+      "verdict": "PASS",
+      "evidenceRefs": [
+        "revision:dashboard-desktop:redesign-kept-landmarks:before",
+        "revision:dashboard-desktop:redesign-kept-landmarks:after"
+      ],
+      "rationale": "Landmarks: 2 of 2 kept, 0 lost, 0 acknowledged."
+    },
+    {
+      "checkId": "redesign-kept-words",
+      "targetId": "dashboard-desktop",
+      "verdict": "PASS",
+      "evidenceRefs": [
+        "revision:dashboard-desktop:redesign-kept-words:before",
+        "revision:dashboard-desktop:redesign-kept-words:after"
+      ],
+      "rationale": "Visible words: 218 before, 151 after (69%)."
+    },
+    {
+      "checkId": "redesign-kept-must-haves",
+      "targetId": "dashboard-desktop",
+      "verdict": "PASS",
+      "evidenceRefs": [
+        "revision:dashboard-desktop:redesign-kept-must-haves:before",
+        "revision:dashboard-desktop:redesign-kept-must-haves:after"
+      ],
+      "rationale": "0 of the 2 must-haves present before are missing or off the first screen after."
+    }
+  ],
+  "limits": [
+    "A static comparison of the submitted HTML and CSS, not a browser: content that JavaScript adds later and stylesheets that were not submitted are not seen.",
+    "Links, headings, figures, landmarks, word counts, and must-haves count visible elements only. Fields, options, form buttons, handlers, test hooks, and script hooks count every element, hidden or not, because forms, scripts, and tests still use hidden ones.",
+    "Fields, options, and buttons are compared per form: forms are matched by method and action, then by the fields and buttons they share, then by position. Buttons outside a form are compared only through their handlers, test hooks, and script selectors. Whether a form still submits without a submit button (Enter in a field, a script) and what a script does on click are not verified."
+  ],
+  "guidance": [
+    "Keep the original page's rendered HTML and CSS before a redesign, and pass both here when the redesign is built.",
+    "Restore each lost item, or add it to acknowledged with a reason of at least 12 characters, then run compare_page_revisions again.",
+    "To record the outcome, call get_design_audit_plan with revisionPreservation: true (and the same productType), then submit these evidence and results to validate_design_audit_result under the same targetId."
+  ]
+}

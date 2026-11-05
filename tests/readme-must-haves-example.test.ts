@@ -11,8 +11,8 @@ const repo = CatalogRepository.load();
 const fixture = readFileSync(join(root, 'tests', 'fixtures', 'must-haves', 'commerce-buy-button-only.html'), 'utf8');
 
 describe.each([
-  { file: 'README.md', marker: '// ← must-have audit (trimmed)', locale: 'en' as const, counts: /(\d+) must-haves across (\d+) product types/ },
-  { file: 'README.ko.md', marker: '// ← 필수 요소 감사 결과 (일부)', locale: 'ko' as const, counts: /제품 유형 (\d+)개의 필수 요소 (\d+)종/ },
+  { file: 'docs/reference.md', marker: '// ← must-have audit (trimmed)', locale: 'en' as const, counts: /(\d+) must-haves across (\d+) product types/ },
+  { file: 'docs/reference.ko.md', marker: '// ← 필수 요소 감사 결과 (일부)', locale: 'ko' as const, counts: /제품 유형 (\d+)개의 필수 요소 (\d+)종/ },
 ])('$file must-haves', ({ file, marker, locale, counts }) => {
   const text = readFileSync(join(root, file), 'utf8');
 

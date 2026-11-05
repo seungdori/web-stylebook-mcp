@@ -1,0 +1,245 @@
+{
+  "identity": {
+    "schema": "webstylebook.audit-result.v1",
+    "catalogVersion": "0.10.1",
+    "catalogContentHash": "sha256:33f3638c2fec095af63918f11e2c06d37127dd590bc5fdcc09ec6d66d0df4327",
+    "planHash": "sha256:2160f5d4dae4ce16911dd4a72cfd2ab3547537ace9cbf80e6b9f414c0e8b5b25",
+    "evidenceBundleHash": "sha256:b535a68c2c3b0c9dfbe9a090e2a7d856a316ce7ab5cd55a12b74d39b2bc9f1ed",
+    "resultHash": "sha256:8892b7c5e431d8ce861674b3151e5f9b68076ad4a9cc9857aaa18c8514aa08de"
+  },
+  "valid": true,
+  "coverage": {
+    "state": "full",
+    "reportingState": "full",
+    "targets": 1,
+    "plannedChecks": 10,
+    "expectedSlots": 10,
+    "reportedSlots": 10,
+    "verifiedSlots": 10,
+    "missingSlots": 0,
+    "scope": {
+      "basis": "submitted-targets-only",
+      "state": "full",
+      "surfaces": {
+        "planned": [],
+        "verified": [],
+        "excluded": [],
+        "notVerified": []
+      },
+      "states": {
+        "required": 0,
+        "verified": 0,
+        "excluded": 0,
+        "notVerified": 0,
+        "items": []
+      },
+      "viewports": []
+    }
+  },
+  "verdictCounts": {
+    "PASS": 9,
+    "FIX_NOW": 0,
+    "RISK": 0,
+    "NOT_APPLICABLE": 1,
+    "NOT_VERIFIED": 0
+  },
+  "issues": [],
+  "results": [
+    {
+      "checkId": "redesign-kept-links",
+      "targetId": "dashboard-desktop",
+      "submittedVerdict": "PASS",
+      "verdict": "PASS",
+      "severity": "major",
+      "requiredEvidenceTypes": [
+        "dom"
+      ],
+      "observedEvidenceTypes": [
+        "dom"
+      ],
+      "evidenceRefs": [
+        "revision:dashboard-desktop:redesign-kept-links:before",
+        "revision:dashboard-desktop:redesign-kept-links:after"
+      ],
+      "rationale": "Links: 18 of 18 kept, 0 lost, 0 acknowledged.",
+      "synthesized": false
+    },
+    {
+      "checkId": "redesign-kept-fields",
+      "targetId": "dashboard-desktop",
+      "submittedVerdict": "PASS",
+      "verdict": "PASS",
+      "severity": "major",
+      "requiredEvidenceTypes": [
+        "dom"
+      ],
+      "observedEvidenceTypes": [
+        "dom"
+      ],
+      "evidenceRefs": [
+        "revision:dashboard-desktop:redesign-kept-fields:before",
+        "revision:dashboard-desktop:redesign-kept-fields:after"
+      ],
+      "rationale": "Form fields: 0 of 0 kept, 0 lost, 0 acknowledged.",
+      "synthesized": false
+    },
+    {
+      "checkId": "redesign-kept-handlers",
+      "targetId": "dashboard-desktop",
+      "submittedVerdict": "PASS",
+      "verdict": "PASS",
+      "severity": "major",
+      "requiredEvidenceTypes": [
+        "dom"
+      ],
+      "observedEvidenceTypes": [
+        "dom"
+      ],
+      "evidenceRefs": [
+        "revision:dashboard-desktop:redesign-kept-handlers:before",
+        "revision:dashboard-desktop:redesign-kept-handlers:after"
+      ],
+      "rationale": "Handlers: 0 of 0 kept, 0 lost, 0 acknowledged.",
+      "synthesized": false
+    },
+    {
+      "checkId": "redesign-kept-test-hooks",
+      "targetId": "dashboard-desktop",
+      "submittedVerdict": "PASS",
+      "verdict": "PASS",
+      "severity": "minor",
+      "requiredEvidenceTypes": [
+        "dom"
+      ],
+      "observedEvidenceTypes": [
+        "dom"
+      ],
+      "evidenceRefs": [
+        "revision:dashboard-desktop:redesign-kept-test-hooks:before",
+        "revision:dashboard-desktop:redesign-kept-test-hooks:after"
+      ],
+      "rationale": "Test hooks: 2 of 2 kept, 0 lost, 0 acknowledged.",
+      "synthesized": false
+    },
+    {
+      "checkId": "redesign-kept-script-hooks",
+      "targetId": "dashboard-desktop",
+      "submittedVerdict": "NOT_APPLICABLE",
+      "verdict": "NOT_APPLICABLE",
+      "severity": "major",
+      "requiredEvidenceTypes": [
+        "dom"
+      ],
+      "observedEvidenceTypes": [
+        "dom"
+      ],
+      "evidenceRefs": [
+        "revision:dashboard-desktop:redesign-kept-script-hooks:before",
+        "revision:dashboard-desktop:redesign-kept-script-hooks:after"
+      ],
+      "rationale": "No scriptSelectors were passed.",
+      "synthesized": false
+    },
+    {
+      "checkId": "redesign-kept-headings",
+      "targetId": "dashboard-desktop",
+      "submittedVerdict": "PASS",
+      "verdict": "PASS",
+      "severity": "minor",
+      "requiredEvidenceTypes": [
+        "dom"
+      ],
+      "observedEvidenceTypes": [
+        "dom"
+      ],
+      "evidenceRefs": [
+        "revision:dashboard-desktop:redesign-kept-headings:before",
+        "revision:dashboard-desktop:redesign-kept-headings:after"
+      ],
+      "rationale": "Headings: 2 of 7 kept, 0 lost, 5 acknowledged.",
+      "synthesized": false
+    },
+    {
+      "checkId": "redesign-kept-figures",
+      "targetId": "dashboard-desktop",
+      "submittedVerdict": "PASS",
+      "verdict": "PASS",
+      "severity": "minor",
+      "requiredEvidenceTypes": [
+        "dom"
+      ],
+      "observedEvidenceTypes": [
+        "dom"
+      ],
+      "evidenceRefs": [
+        "revision:dashboard-desktop:redesign-kept-figures:before",
+        "revision:dashboard-desktop:redesign-kept-figures:after"
+      ],
+      "rationale": "Figures: 1 of 1 kept, 0 lost, 0 acknowledged.",
+      "synthesized": false
+    },
+    {
+      "checkId": "redesign-kept-landmarks",
+      "targetId": "dashboard-desktop",
+      "submittedVerdict": "PASS",
+      "verdict": "PASS",
+      "severity": "minor",
+      "requiredEvidenceTypes": [
+        "dom"
+      ],
+      "observedEvidenceTypes": [
+        "dom"
+      ],
+      "evidenceRefs": [
+        "revision:dashboard-desktop:redesign-kept-landmarks:before",
+        "revision:dashboard-desktop:redesign-kept-landmarks:after"
+      ],
+      "rationale": "Landmarks: 2 of 2 kept, 0 lost, 0 acknowledged.",
+      "synthesized": false
+    },
+    {
+      "checkId": "redesign-kept-words",
+      "targetId": "dashboard-desktop",
+      "submittedVerdict": "PASS",
+      "verdict": "PASS",
+      "severity": "minor",
+      "requiredEvidenceTypes": [
+        "dom"
+      ],
+      "observedEvidenceTypes": [
+        "dom"
+      ],
+      "evidenceRefs": [
+        "revision:dashboard-desktop:redesign-kept-words:before",
+        "revision:dashboard-desktop:redesign-kept-words:after"
+      ],
+      "rationale": "Visible words: 218 before, 151 after (69%).",
+      "synthesized": false
+    },
+    {
+      "checkId": "redesign-kept-must-haves",
+      "targetId": "dashboard-desktop",
+      "submittedVerdict": "PASS",
+      "verdict": "PASS",
+      "severity": "major",
+      "requiredEvidenceTypes": [
+        "dom"
+      ],
+      "observedEvidenceTypes": [
+        "dom"
+      ],
+      "evidenceRefs": [
+        "revision:dashboard-desktop:redesign-kept-must-haves:before",
+        "revision:dashboard-desktop:redesign-kept-must-haves:after"
+      ],
+      "rationale": "0 of the 2 must-haves present before are missing or off the first screen after.",
+      "synthesized": false
+    }
+  ],
+  "guidance": [
+    "valid describes the audit-result contract, not whether the UI passed the audit.",
+    "A normalized verdict may differ from the submitted verdict when evidence is missing or contradictory.",
+    "Compare runs only when their plan and evidence coverage fingerprints are compatible.",
+    "coverage.state is full only when every expected slot was reported and the planned surfaces, required states, and viewport ranges were verified or excluded with a reason; coverage.reportingState describes the submitted slots alone."
+  ]
+}

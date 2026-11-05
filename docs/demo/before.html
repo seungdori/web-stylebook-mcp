@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Acme Cloud — Dashboard</title>
+<!-- Demo fixture: a fictional ops dashboard written for the web-stylebook README in a common
+     generated-UI style. Fixed data, clock 2026-11-05 14:31 UTC. Not a real product. -->
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: #f5f3ff; color: #1f2937; }
+  a { color: inherit; text-decoration: none; }
+  .nav { display: flex; align-items: center; justify-content: space-between; padding: 18px 40px; background: #fff; box-shadow: 0 1px 12px rgba(99, 102, 241, .12); }
+  .logo { font-weight: 800; font-size: 20px; background: linear-gradient(90deg, #6366f1, #a855f7); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .nav-links { display: flex; gap: 28px; font-size: 14px; color: #9ca3af; }
+  .nav-links a.active { color: #6366f1; font-weight: 600; }
+  .avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #f472b6, #8b5cf6); }
+  .hero { margin: 32px 40px; padding: 56px 40px; border-radius: 24px; text-align: center; color: #fff;
+          background: radial-gradient(circle at 20% 20%, #c084fc 0, transparent 40%), linear-gradient(135deg, #6366f1, #8b5cf6 55%, #ec4899); }
+  .hero h1 { font-size: 40px; font-weight: 800; letter-spacing: -.02em; }
+  .hero p { margin: 14px auto 28px; max-width: 560px; font-size: 18px; opacity: .85; }
+  .btn { display: inline-block; padding: 14px 28px; border-radius: 999px; background: #fff; color: #6d28d9; font-weight: 700; box-shadow: 0 10px 30px rgba(0,0,0,.15); }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin: 0 40px; }
+  .card { background: #fff; border-radius: 20px; padding: 28px; box-shadow: 0 10px 30px rgba(99, 102, 241, .10); text-align: center; }
+  .card .icon { font-size: 32px; }
+  .card .label { margin-top: 10px; font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: #a1a1aa; }
+  .card .value { margin-top: 6px; font-size: 34px; font-weight: 800; background: linear-gradient(90deg, #6366f1, #a855f7); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .card .hint { margin-top: 6px; font-size: 13px; color: #c4b5fd; }
+  .section { margin: 40px; }
+  .section h2 { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+  .section .sub { color: #a1a1aa; font-size: 14px; margin-bottom: 18px; }
+  .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .feature { background: #fff; border-radius: 20px; padding: 28px; box-shadow: 0 10px 30px rgba(99, 102, 241, .08); }
+  .feature .icon { width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center; font-size: 22px; background: #ede9fe; }
+  .feature h3 { margin-top: 16px; font-size: 17px; }
+  .feature p { margin-top: 8px; font-size: 14px; color: #9ca3af; line-height: 1.6; }
+  table { width: 100%; border-collapse: separate; border-spacing: 0 10px; font-size: 14px; }
+  th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: #a1a1aa; padding: 0 20px; }
+  td { background: #fff; padding: 16px 20px; color: #9ca3af; }
+  td:first-child { border-radius: 14px 0 0 14px; color: #374151; font-weight: 600; }
+  td:last-child { border-radius: 0 14px 14px 0; }
+  .pill { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; background: #ede9fe; color: #7c3aed; }
+  .pill.warn { background: #fce7f3; color: #db2777; }
+  .feed li { list-style: none; background: #fff; border-radius: 14px; padding: 14px 20px; margin-bottom: 10px; color: #9ca3af; font-size: 14px; }
+  .feed li b { color: #4b5563; }
+  footer { text-align: center; padding: 32px; color: #c4b5fd; font-size: 13px; }
+</style>
+</head>
+<body>
+  <nav class="nav">
+    <a class="logo" href="/">✦ Acme Cloud</a>
+    <div class="nav-links">
+      <a class="active" href="/dashboard">Dashboard</a>
+      <a href="/services">Services</a>
+      <a href="/deploys">Deploys</a>
+      <a href="/incidents">Incidents</a>
+      <a href="/settings">Settings</a>
+    </div>
+    <div class="avatar" aria-label="Jordan Lee" role="img"></div>
+  </nav>
+
+  <header class="hero">
+    <h1>Welcome back, Jordan 👋</h1>
+    <p>Empower your team with seamless, AI-driven observability insights across your entire stack.</p>
+    <a class="btn" href="/insights" data-testid="insights-cta">✨ Get AI insights →</a>
+  </header>
+
+  <section class="stats">
+    <div class="card"><div class="icon">🧠</div><div class="label">AI Health Score</div><div class="value">94/100</div><div class="hint">Looking great!</div></div>
+    <div class="card"><div class="icon">🚀</div><div class="label">Uptime</div><div class="value">99.98%</div><div class="hint">Keep it up</div></div>
+    <div class="card"><div class="icon">⚡</div><div class="label">Deploys</div><div class="value">6</div><div class="hint">Ship it!</div></div>
+    <div class="card"><div class="icon">🛡️</div><div class="label">Incidents</div><div class="value">1</div><div class="hint">Stay vigilant</div></div>
+  </section>
+
+  <section class="section">
+    <h2>Supercharge your workflow</h2>
+    <p class="sub">Everything you need to monitor, deploy and scale — all in one place.</p>
+    <div class="features">
+      <div class="feature"><div class="icon">📊</div><h3>Real-time analytics</h3><p>Unlock actionable insights with beautiful dashboards that update instantly.</p></div>
+      <div class="feature"><div class="icon">🤖</div><h3>Smart alerts</h3><p>Our AI learns your patterns so you can focus on what matters most.</p></div>
+      <div class="feature"><div class="icon">🔒</div><h3>Enterprise security</h3><p>Bank-grade protection keeps your data safe, secure and compliant.</p></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Your services</h2>
+    <p class="sub">An overview of everything running in production.</p>
+    <table data-testid="services-table">
+      <thead><tr><th>Service</th><th>Status</th><th>Error rate</th><th>p95 latency</th><th>Last deploy</th></tr></thead>
+      <tbody>
+        <tr><td><a href="/services/checkout-web">checkout-web</a></td><td><span class="pill">Healthy</span></td><td>0.1%</td><td>210 ms</td><td>#4809 · 11:40</td></tr>
+        <tr><td><a href="/services/auth-service">auth-service</a></td><td><span class="pill">Healthy</span></td><td>0.0%</td><td>95 ms</td><td>#4790 · yesterday</td></tr>
+        <tr><td><a href="/services/notifications">notifications</a></td><td><span class="pill">Healthy</span></td><td>0.2%</td><td>160 ms</td><td>#4811 · 13:20</td></tr>
+        <tr><td><a href="/services/search-indexer">search-indexer</a></td><td><span class="pill">Healthy</span></td><td>0.3%</td><td>1.2 s</td><td>#4805 · 09:15</td></tr>
+        <tr><td><a href="/services/payments-api">payments-api</a></td><td><span class="pill warn">Degraded</span></td><td>4.2%</td><td>840 ms</td><td>#4812 · 14:02</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="section">
+    <h2>Recent activity</h2>
+    <p class="sub">Stay in the loop with what your team is up to.</p>
+    <ul class="feed">
+      <li><b>Priya</b> opened <a href="/incidents/INC-231">INC-231</a> · 14:05</li>
+      <li><b>Sam</b> deployed <a href="/deploys/4812">#4812</a> to payments-api · 14:02</li>
+      <li><b>Alex</b> deployed <a href="/deploys/4811">#4811</a> to notifications · 13:20</li>
+      <li><b>Sam</b> deployed <a href="/deploys/4809">#4809</a> to checkout-web · 11:40</li>
+    </ul>
+  </section>
+
+  <footer>Made with 💜 by the Acme Cloud team · <a href="/status">Status</a> · <a href="/docs">Docs</a></footer>
+</body>
+</html>

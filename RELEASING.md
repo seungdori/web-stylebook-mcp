@@ -38,7 +38,8 @@ access to require 2FA and disallow traditional tokens.
    together. `npm run visual:sync` preflights the source import closure and license declarations
    before writing, and `npm run visual:check` verifies the source hashes and artifact bytes. Update
    the exact source pin in `.github/workflows/publish.yml` as well.
-2. **Bump** the version in `package.json` and move CHANGELOG `[Unreleased]` → the new version.
+2. **Bump** the version in `package.json` and `.claude-plugin/plugin.json` (plugin users only receive
+   updates when it changes), and move CHANGELOG `[Unreleased]` → the new version.
 3. **Tag and push** — the version tag triggers the publish and must match `package.json`:
    ```bash
    git tag -a v0.4.0 -m "Release v0.4.0"

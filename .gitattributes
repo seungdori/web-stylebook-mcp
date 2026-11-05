@@ -1,0 +1,3 @@
+# Byte-hashed at runtime or in tests; never convert their line endings.
+generated/** -text
+src/visual-canonical/** -text

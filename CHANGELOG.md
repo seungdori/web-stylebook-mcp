@@ -6,7 +6,31 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- One-line skill install. The companion skill moved from `skill/` to `skills/`, where
+  `npx skills add seungdori/web-stylebook-mcp` finds it for Claude Code, Codex, Cursor and other
+  agents. The repository is also a Claude Code plugin marketplace: the `web-stylebook` plugin
+  bundles the skill and this MCP server.
+- Tool commands that need no MCP client: `tools`, `schema <tool>`, `call <tool>` (arguments as
+  JSON, `-` for stdin, or `--input <file>`, which also accepts the UTF-8 and UTF-16 byte-order-mark
+  files Windows PowerShell writes) and `read <uri>`. They run the same server in-process,
+  so results match MCP calls exactly. The skill and the `AGENTS.md`/`CLAUDE.md` blocks fall back to
+  them when the server is not connected.
+
+### Changed
+
+- Unknown positional arguments now exit with a usage error instead of starting the stdio server.
+- The npm package ships the skill under `skills/` instead of `skill/`.
+- The README is now a short page that leads with a measured before/after demo
+  ([docs/demo](docs/demo/README.md)). The previous full README moved to
+  [docs/reference.md](docs/reference.md) and [docs/reference.ko.md](docs/reference.ko.md), which
+  also ship in the npm package.
+
 ### Fixed
+
+- Windows checkouts with `core.autocrlf` no longer rewrite the byte-hashed `generated/` and
+  `src/visual-canonical/` files, which made visual contracts fail to load from a source build.
 
 - `validate_design_improvement_result` rejects screenshot references assigned to different routes,
   comparison conditions or source snapshots, including reuse across mobile and desktop targets.

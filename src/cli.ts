@@ -8,9 +8,11 @@ import { validateLoaded } from './catalog/validate.js';
 import { SERVER_NAME, SERVER_VERSION, TOOL_NAMES } from './server-info.js';
 import { foundationManifest, validateFoundations } from './foundations/catalog.js';
 import { IMPROVEMENT_WORKFLOW_SCHEMA, IMPROVEMENT_WORKFLOW_URI } from './improvement/workflow.js';
+import { TOOL_COMMANDS, TOOL_COMMANDS_HELP, runToolCommand } from './cli-tools.js';
 
 const HELP = `${SERVER_NAME}-mcp v${SERVER_VERSION}
 Usage: web-stylebook-mcp [options]
+       web-stylebook-mcp <tools|schema|call|read> ...
 
   (no args)            start the MCP server over stdio
   --stdio              same as no args
@@ -18,13 +20,19 @@ Usage: web-stylebook-mcp [options]
   --catalog-info       print catalog version, hash and counts
   --validate-catalog   validate the packaged catalog and exit (non-zero on failure)
   --help               this help
-`;
+
+${TOOL_COMMANDS_HELP}`;
 
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
   const has = (f: string) => args.includes(f);
 
   if (has('--help') || has('-h')) { process.stdout.write(HELP); return; }
+  const command = args[0];
+  if (command !== undefined && (TOOL_COMMANDS as readonly string[]).includes(command)) {
+    process.exitCode = await runToolCommand(command, args.slice(1));
+    return;
+  }
   if (has('--version')) { process.stdout.write(`${SERVER_VERSION}\n`); return; }
 
   if (has('--catalog-info')) {
@@ -53,9 +61,9 @@ async function main(): Promise<void> {
     return;
   }
 
-  const unknown = args.filter((a) => a.startsWith('-') && a !== '--stdio');
+  const unknown = args.filter((a) => a !== '--stdio');
   if (unknown.length) {
-    process.stderr.write(`unknown option(s): ${unknown.join(' ')}\n${HELP}`);
+    process.stderr.write(`unknown option(s) or command: ${unknown.join(' ')}\n${HELP}`);
     process.exit(2);
   }
 

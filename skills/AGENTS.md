@@ -1,10 +1,12 @@
-<!-- Web Stylebook MCP — copy this block into your project's CLAUDE.md or rules file
-     if your agent host does not support skills. For Codex, use skill/AGENTS.md instead. -->
+<!-- Web Stylebook MCP - copy this block into your project's AGENTS.md if you
+     want Codex to use the MCP even when the skill is not installed. -->
 
-## Designing UI — use Web Stylebook first
+## Designing UI - use Web Stylebook first
 
 Before writing JSX/HTML/CSS for any new or redesigned UI surface (page, screen, component,
-dashboard, form, checkout, chat, developer console), call the **`web-stylebook`** MCP server:
+dashboard, form, checkout, chat, developer console), call the **`web-stylebook`** MCP server.
+Without MCP, run the same tools from a shell: `npx -y web-stylebook-mcp@latest call <tool> --input
+args.json` (`tools` lists them, `schema <tool>` shows the arguments, `read <uri>` opens a resource):
 
 For existing-UI improvement or fix requests, default to **inspect → decide → implement → verify →
 compare/report**. Infer bounded coverage from the task and inspect available source before asking;
@@ -48,7 +50,7 @@ composition rules below, which apply only when a new build or visual direction i
 
 1. `recommend_design_direction` with the product context (productType, tone, density,
    usageFrequency, trustSensitivity, constraints, avoid). Use the scored `candidates` as
-   evidence and pick with product context — don't blindly take `candidates[0]`. Read `ranking` for why #1
+   evidence and pick with product context; don't blindly take `candidates[0]`. Read `ranking` for why #1
    beat #2, or that they tie, and list the most important tone first. Note the `rejected` styles and
    their reasons. Each candidate's `structure` (layout archetype, 2-3 signature moves, banned patterns)
    is the page to build; tokens only set its surface. The top-level `mustHaves` lists what the product
@@ -61,14 +63,14 @@ composition rules below, which apply only when a new build or visual direction i
    rights; borrow transferable structure and measured tokens, never upstream screenshots, brand
    assets, copy, typefaces, or visual identity.
    Do not finalize `design.md` before the visual-design, UX-principle, and UI-state contracts are available.
-3. Before composing previews, run a short intake: (a) assets — do they have images/brand assets
+3. Before composing previews, run a short intake: (a) assets - do they have images/brand assets
    (which), should you source **license-free** samples (e.g. Unsplash, free for commercial use), or
    is none needed; (b) anything to emphasize / any must-haves. Then, for open-ended UI requests, show
    2-3 distinct candidate directions or page previews with a concise critique and recommendation, and
    ask whether the feeling is right. Stop before final component/system implementation until the user
    approves a direction.
 4. After a direction is approved, before building: confirm scope and the open details with a short
-   checklist — full component library vs one page; framework + existing components/design system to
+   checklist - full component library vs one page; framework + existing components/design system to
    reuse; real brand/copy/data and must-have features (and what to leave out); target devices,
    light/dark, locales, a11y. Turn assumptions into confirmed facts; build only after the user
    answers or says to use your judgment. Don't silently assume.
@@ -86,7 +88,7 @@ composition rules below, which apply only when a new build or visual direction i
    for other agents and tools; save its `content` yourself and report what `lossy` lists.
 9. Write `design.md` using the confirmed decisions and returned design/UX/state/token contracts
    (intent, color *roles*, type roles, layout, motion use/avoid, UI-state coverage, a11y,
-   anti-patterns, assumptions, verification) — plus **selected visual-design principles**, each with
+   anti-patterns, assumptions, verification) - plus **selected visual-design principles**, each with
    the placement decision it produced and its observable verification check, and
    **selected UX principles**, each with its caution and evidence confidence label.
    No empty sections; then implement.
@@ -98,7 +100,7 @@ composition rules below, which apply only when a new build or visual direction i
    built UI and write down the outcome. When content is in scope, do not skip its `content` group or
    substitute component names for inspecting the visible strings. A principle
    name listed without a placement decision and an observed check is decoration; drop it or verify
-   it. Never restate a `contextual` or `contested` principle as a law. Do this inline yourself —
+   it. Never restate a `contextual` or `contested` principle as a law. Do this inline yourself -
    the `audit-design-direction`, `audit-design-principles`, and `audit-ux-principles` prompts are
    deeper audits the *user* invokes, not tools you can call.
 11. Run `audit_page_structure` on each built page's rendered HTML and CSS with the chosen `styleId` and
@@ -114,8 +116,8 @@ composition rules below, which apply only when a new build or visual direction i
    result per planned check/target. Fix contract errors or preserve normalized `NOT_VERIFIED`.
    `valid` describes contract validity, never overall design quality.
 
-**Compose, don't recolor.** Tokens are scalars, not a design — swapping a token block over one
-layout is a reskin and is not acceptable. The chosen style is a starting *tone*, not a layout mold:
+**Compose, don't recolor.** Tokens are scalars, not a design. Swapping a token block over one
+layout is a reskin and is not acceptable. The chosen style is a starting tone, not a layout mold:
 start from what THIS brief/content needs, compose the fitting components, and adapt the style
 (override fonts/grid/structure where it calls for it) so the result reads as "built for this product,"
 not "a page in style X." Give each direction its own composition. For open-ended
@@ -125,7 +127,7 @@ context-inappropriate styles even if high-scored (e.g. low-contrast for elderly/
 contracts), not a one-off HTML file.
 
 **Earn trust, don't fake it.** No invented metrics ("99.2% on-time") and no compliance/IT-jargon
-trust signals (TLS, AES-256, ISO 27001) — choose signals by what the real user weighs (for a patient:
+trust signals (TLS, AES-256, ISO 27001). Choose signals by what the real user weighs (for a patient:
 doctors, departments, hours, location, insurance, emergency care). Back every claim with browsable
 content (don't say "214 doctors" then show three).
 
@@ -136,7 +138,7 @@ details out of the primary path. Lead with the user-relevant conclusion, consequ
 Counts, scores, agreement labels, confidence badges, and status language need a clear method,
 denominator, uncertainty, and decision value; otherwise remove or qualify them. Make every prominent
 card, statistic, navigation link, section, and disclosure earn attention through the primary task.
-Keep useful instances — no content type is banned by default. Rewrite without inventing claims or
+Keep useful instances - no content type is banned by default. Rewrite without inventing claims or
 dropping material caveats, then re-check wrapping and hierarchy in target locales and viewports.
 Do not treat the absence of internal jargon as a pass. For every material claim, conclusion, or
 recommendation, ask what supports it and whether wording and certainty match that support. Qualify or
@@ -167,8 +169,8 @@ by swapping a noun), and its form + emphasis must vary per project (sentence vs 
 blunt, emphasis or none) — don't reflexively italic one accent word. No house voice; write what this
 product actually is.
 
-**Component states (hover/focus/active/disabled) are owned by the component** — never let context
+**Component states (hover/focus/active/disabled) are owned by the component** - never let context
 selectors (`nav a:hover`) bleed in and override a primitive's own states.
 
-The catalog is the single source of truth — read the live resources, don't cache them here.
+The catalog is the single source of truth. Read the live resources, don't cache them here.
 Output is deterministic and model-free; the server never sees your repo.

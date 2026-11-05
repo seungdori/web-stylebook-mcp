@@ -1,0 +1,145 @@
+{
+  "file": "wsm/docs/demo/after.html",
+  "conditions": {
+    "browser": "Chrome (playwright-core)",
+    "viewport": "1280x800",
+    "deviceScaleFactor": 1,
+    "colorScheme": "light",
+    "locale": "en-US"
+  },
+  "layout": {
+    "degradedService": {
+      "text": "Degraded",
+      "top": 394,
+      "onFirstScreen": true
+    },
+    "openIncident": {
+      "text": "INC-231",
+      "top": 160,
+      "onFirstScreen": true
+    },
+    "lastDeploy": {
+      "text": "#4812",
+      "top": 160,
+      "onFirstScreen": true
+    },
+    "recentActivity": {
+      "text": "Recent activity",
+      "top": 303,
+      "onFirstScreen": true
+    },
+    "pageHeight": 800
+  },
+  "contrast": {
+    "textRunsOnFirstScreen": 85,
+    "measured": 85,
+    "belowAA": [],
+    "notComputable": []
+  },
+  "focus": [
+    {
+      "text": "✦ Acme Cloud",
+      "href": "/",
+      "outline": true,
+      "top": 16
+    },
+    {
+      "text": "Dashboard",
+      "href": "/dashboard",
+      "outline": true,
+      "top": 11
+    },
+    {
+      "text": "Services",
+      "href": "/services",
+      "outline": true,
+      "top": 11
+    },
+    {
+      "text": "Deploys",
+      "href": "/deploys",
+      "outline": true,
+      "top": 11
+    },
+    {
+      "text": "Incidents",
+      "href": "/incidents",
+      "outline": true,
+      "top": 11
+    },
+    {
+      "text": "Settings",
+      "href": "/settings",
+      "outline": true,
+      "top": 11
+    },
+    {
+      "text": "✨ Get AI insights",
+      "href": "/insights",
+      "outline": true,
+      "top": 11
+    },
+    {
+      "text": "#4812",
+      "href": "/deploys/4812",
+      "outline": true,
+      "top": 160
+    },
+    {
+      "text": "INC-231",
+      "href": "/incidents/INC-231",
+      "outline": true,
+      "top": 160
+    },
+    {
+      "text": "Open INC-231",
+      "href": "/incidents/INC-231",
+      "outline": true,
+      "top": 138
+    },
+    {
+      "text": "View payments-api",
+      "href": "/services/payments-api",
+      "outline": true,
+      "top": 138
+    },
+    {
+      "text": "payments-api",
+      "href": "/services/payments-api",
+      "outline": true,
+      "top": 395
+    },
+    {
+      "text": "notifications",
+      "href": "/services/notifications",
+      "outline": true,
+      "top": 438
+    },
+    {
+      "text": "checkout-web",
+      "href": "/services/checkout-web",
+      "outline": true,
+      "top": 481
+    }
+  ],
+  "links": [
+    "/",
+    "/dashboard",
+    "/deploys",
+    "/deploys/4809",
+    "/deploys/4811",
+    "/deploys/4812",
+    "/docs",
+    "/incidents",
+    "/incidents/INC-231",
+    "/insights",
+    "/services",
+    "/services/auth-service",
+    "/services/checkout-web",
+    "/services/notifications",
+    "/services/payments-api",
+    "/services/search-indexer",
+    "/settings",
+    "/status"
+  ]
+}

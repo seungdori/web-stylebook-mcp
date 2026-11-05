@@ -22,8 +22,8 @@ function shownBlock(file: string, marker: string) {
 }
 
 describe.each([
-  { file: 'README.md', marker: '// ← structure audit (trimmed)', locale: 'en' as const, counts: /\*\*Structure:\*\* (\d+) layout archetypes · (\d+) signature moves · (\d+) banned generic patterns · (\d+) style-specific bans from (\d+) detectors/ },
-  { file: 'README.ko.md', marker: '// ← 구조 감사 결과 (일부)', locale: 'ko' as const, counts: /\*\*구조:\*\* 레이아웃 아키타입 (\d+) · 시그니처 무브 (\d+) · 일반 금지 패턴 (\d+) · 탐지기 (\d+)종으로 만든 스타일 전용 금지 항목 (\d+)/ },
+  { file: 'docs/reference.md', marker: '// ← structure audit (trimmed)', locale: 'en' as const, counts: /\*\*Structure:\*\* (\d+) layout archetypes · (\d+) signature moves · (\d+) banned generic patterns · (\d+) style-specific bans from (\d+) detectors/ },
+  { file: 'docs/reference.ko.md', marker: '// ← 구조 감사 결과 (일부)', locale: 'ko' as const, counts: /\*\*구조:\*\* 레이아웃 아키타입 (\d+) · 시그니처 무브 (\d+) · 일반 금지 패턴 (\d+) · 탐지기 (\d+)종으로 만든 스타일 전용 금지 항목 (\d+)/ },
 ])('$file structure example', ({ file, marker, locale, counts }) => {
   it('is the real audit_page_structure output for the fixture page', () => {
     const { shown, others } = shownBlock(file, marker);
