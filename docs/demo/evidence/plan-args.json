@@ -1,0 +1,30 @@
+{
+  "concerns": ["focus", "scanability", "readability", "restraint"],
+  "locale": "en",
+  "context": {
+    "userTask": "An on-call engineer opens the production dashboard to learn whether anything is broken right now, what changed just before it, and what to do next.",
+    "constraints": [
+      "Keep every navigation route, service link, deploy link, incident link and footer link working.",
+      "Keep the data-testid hooks services-table and insights-cta.",
+      "Keep the existing facts and numbers; do not invent new metrics or events.",
+      "Working qualities to keep: the five-item navigation is short and clear; the services table already has the right columns; recent activity is specific (who, what, which ID, when)."
+    ],
+    "targets": [
+      {
+        "id": "dashboard-desktop",
+        "surface": "global",
+        "route": "/dashboard",
+        "conditions": {
+          "viewport": { "width": 1280, "height": 800 },
+          "theme": "light",
+          "locale": "en-US",
+          "state": "one degraded service (payments-api) and one open incident (INC-231)",
+          "dataKey": "demo fixture, clock 2026-11-05 14:31 UTC",
+          "scrollAnchor": "top of page (first screen)",
+          "zoom": 1,
+          "deviceScaleFactor": 1
+        }
+      }
+    ]
+  }
+}
