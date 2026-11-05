@@ -13,7 +13,8 @@ All notable changes to this project are documented here. The format follows
   agents. The repository is also a Claude Code plugin marketplace: the `web-stylebook` plugin
   bundles the skill and this MCP server.
 - Tool commands that need no MCP client: `tools`, `schema <tool>`, `call <tool>` (arguments as
-  JSON, `-` for stdin, or `--input <file>`) and `read <uri>`. They run the same server in-process,
+  JSON, `-` for stdin, or `--input <file>`, which also accepts the UTF-8 and UTF-16 byte-order-mark
+  files Windows PowerShell writes) and `read <uri>`. They run the same server in-process,
   so results match MCP calls exactly. The skill and the `AGENTS.md`/`CLAUDE.md` blocks fall back to
   them when the server is not connected.
 

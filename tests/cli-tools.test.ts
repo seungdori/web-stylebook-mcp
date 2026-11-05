@@ -57,6 +57,17 @@ describe('CLI tool commands', { timeout: 60_000 }, () => {
       expect(r.status, r.stderr).toBe(0);
       expect(JSON.parse(r.stdout)).toEqual(viaMcp);
     }
+    // Windows PowerShell 5.1 writes UTF-8 files with a byte-order mark.
+    const bom = join(dir, 'args-bom.json');
+    writeFileSync(bom, `﻿${JSON.stringify(args)}`);
+    const withBom = run(['call', 'compose_design_tokens', '--input', bom]);
+    expect(withBom.status, withBom.stderr).toBe(0);
+    expect(JSON.parse(withBom.stdout)).toEqual(viaMcp);
+    const utf16 = join(dir, 'args-utf16.json');
+    writeFileSync(utf16, Buffer.concat([Buffer.from([0xff, 0xfe]), Buffer.from(JSON.stringify(args), 'utf16le')]));
+    const withUtf16 = run(['call', 'compose_design_tokens', '--input', utf16]);
+    expect(withUtf16.status, withUtf16.stderr).toBe(0);
+    expect(JSON.parse(withUtf16.stdout)).toEqual(viaMcp);
     const text = run(['call', 'compose_design_tokens', '--input', file, '--text']);
     expect(text.stdout).toContain('--color-canvas');
   });
@@ -77,7 +88,7 @@ describe('CLI tool commands', { timeout: 60_000 }, () => {
   });
 
   it('usage mistakes exit 2 with help on stderr and nothing on stdout', () => {
-    for (const args of [['call'], ['call', 'no_such_tool'], ['call', 'compose_design_tokens', '{bad'], ['call', 'compose_design_tokens', '[1]'], ['schema'], ['read']]) {
+    for (const args of [['call'], ['call', 'no_such_tool'], ['call', 'compose_design_tokens', '{bad'], ['call', 'compose_design_tokens', '[1]'], ['call', 'compose_design_tokens', '--input', join(dir, 'missing.json')], ['call', 'compose_design_tokens', '--input'], ['schema'], ['read']]) {
       const r = run(args);
       expect(r.status, args.join(' ')).toBe(2);
       expect(r.stdout).toBe('');

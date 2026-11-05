@@ -57,18 +57,32 @@ function parseArguments(raw: string, source: string): Record<string, unknown> {
   return value as Record<string, unknown>;
 }
 
+// Windows PowerShell 5.1 writes files with a byte-order mark: UTF-8 from Out-File in some setups,
+// UTF-16LE from `>` by default. Accept both so an agent's argument file parses as written.
+function decodeText(buf: Buffer): string {
+  if (buf[0] === 0xff && buf[1] === 0xfe) return buf.subarray(2).toString('utf16le');
+  const text = buf.toString('utf8');
+  return text.charCodeAt(0) === 0xfeff ? text.slice(1) : text;
+}
+
 function readArguments(rest: string[]): Record<string, unknown> {
   const inputAt = rest.indexOf('--input');
   if (inputAt !== -1) {
     const file = rest[inputAt + 1];
-    if (!file) throw new UsageError('--input needs a file path');
-    return parseArguments(readFileSync(file, 'utf8'), `--input ${file}`);
+    if (!file || file.startsWith('--')) throw new UsageError('--input needs a file path');
+    let raw: string;
+    try {
+      raw = decodeText(readFileSync(file));
+    } catch (err) {
+      throw new UsageError(`cannot read --input ${file}: ${err instanceof Error ? err.message : String(err)}`);
+    }
+    return parseArguments(raw, `--input ${file}`);
   }
   const positional = rest.filter((a) => !a.startsWith('--'));
   if (positional.length > 1) throw new UsageError('pass tool arguments as one JSON object (quote it), "-" or --input <file>');
   const [arg] = positional;
   if (arg === undefined) return {};
-  if (arg === '-') return parseArguments(readFileSync(0, 'utf8'), 'stdin');
+  if (arg === '-') return parseArguments(decodeText(readFileSync(0)), 'stdin');
   return parseArguments(arg, 'the arguments');
 }
 
