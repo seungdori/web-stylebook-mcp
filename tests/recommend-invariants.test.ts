@@ -274,8 +274,8 @@ describe('4. ranking explanations tell the truth about the catalog', () => {
 });
 
 describe('5. README claims match the real tool', () => {
-  const readme = readFileSync(join(root, 'README.md'), 'utf8');
-  const readmeKo = readFileSync(join(root, 'README.ko.md'), 'utf8');
+  const readme = readFileSync(join(root, 'docs/reference.md'), 'utf8');
+  const readmeKo = readFileSync(join(root, 'docs/reference.ko.md'), 'utf8');
 
   it('says "29 in total" / "모두 29개" and the real rejected count is 29', () => {
     const real = recommendDesignDirection(headline, repo).rejected.length;

@@ -21,6 +21,10 @@ All notable changes to this project are documented here. The format follows
 
 - Unknown positional arguments now exit with a usage error instead of starting the stdio server.
 - The npm package ships the skill under `skills/` instead of `skill/`.
+- The README is now a short page that leads with a measured before/after demo
+  ([docs/demo](docs/demo/README.md)). The previous full README moved to
+  [docs/reference.md](docs/reference.md) and [docs/reference.ko.md](docs/reference.ko.md), which
+  also ship in the npm package.
 
 ### Fixed
 

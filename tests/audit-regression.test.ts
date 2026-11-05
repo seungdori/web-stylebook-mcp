@@ -333,7 +333,7 @@ describe('audit result contracts cannot be mistaken for visual scoring', () => {
   });
 
   it('README files document normalized verdicts, durable evidence, and the non-scoring boundary', () => {
-    for (const rel of ['README.md', 'README.ko.md']) {
+    for (const rel of ['docs/reference.md', 'docs/reference.ko.md']) {
       const content = read(rel);
       expect(content, rel).toContain('validate_design_audit_result');
       expect(content, rel).toContain('planHash');
