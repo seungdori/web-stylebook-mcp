@@ -13,7 +13,7 @@
   "files": [
     "dist",
     "generated",
-    "skill",
+    "skills",
     "docs/research/design-foundations.md",
     "README.md",
     "README.ko.md"

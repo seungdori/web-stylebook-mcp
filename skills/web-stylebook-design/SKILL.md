@@ -1,14 +1,33 @@
 ---
 name: web-stylebook-design
-description: Improve existing frontend UIs using researched design judgment, actual edits, verification, and before/after reporting. Also supports explicitly requested reviews and new visual directions.
+description: Improve existing web UIs with researched design judgment, real source edits, verification, and an honest before/after report. Use when asked to improve, fix, polish, or redesign a page, screen, or component, or when a UI looks generic or AI-made. Also covers explicitly requested design reviews and new visual directions. Works with the Web Stylebook MCP server or, without it, its offline CLI.
 ---
 
 # Improve the UI, compare the result, then report
 
-Use the **Web Stylebook MCP** before changing an existing UI. The default for an improvement or
+Use **Web Stylebook** before changing an existing UI. The default for an improvement or
 fix request is **inspect → decide → implement → verify → compare/report**. The host agent edits
-and runs the product with its available tools. The MCP supplies knowledge and validates submitted
-evidence; it cannot access the repository, edit files, inspect pixels, or run interactions itself.
+and runs the product with its available tools. Web Stylebook supplies knowledge and validates
+submitted evidence; it cannot access the repository, edit files, inspect pixels, or run
+interactions itself.
+
+## Reach the tools
+
+Use the `web-stylebook` MCP tools when they are connected. Otherwise run the same tools from a
+shell. The results are identical, and nothing leaves the machine:
+
+```bash
+npx -y web-stylebook-mcp@latest tools                      # list the tools
+npx -y web-stylebook-mcp@latest schema get_design_improvement_plan
+npx -y web-stylebook-mcp@latest call get_design_improvement_plan --input plan-args.json > plan.json
+npx -y web-stylebook-mcp@latest read webstylebook://workflows/improve-ui
+```
+
+Write the arguments to a JSON file and pass `--input`; inline JSON breaks in some shells, notably
+Windows PowerShell. Output is JSON on stdout. Exit code 1 means the tool returned an `error`
+object, which says what to fix. `--text` prints the short summary instead. Keep each plan's output
+in a file, because the completion step needs its exact `query` and `workflow.planHash`. Wherever
+this skill names a tool or a `webstylebook://` resource, `call` or `read` reaches the same thing.
 
 ## Follow the human's intent
 
@@ -98,7 +117,8 @@ remedies are authored contextual guidance and examples are illustrative, not obs
 Inspect the actual UI, not only a summary. Do not claim numerical usability gains, timing savings,
 quality scores or user-research findings without corresponding measurements. A familiar pattern
 can be appropriate; evaluate its contribution to this task. Reuse the existing design system where
-it works. Keep the live MCP as the source of design knowledge rather than caching its catalog here.
+it works. Keep Web Stylebook (MCP or CLI) as the source of design knowledge rather than caching
+its catalog here.
 
 ## User-facing copy — meaning before machinery
 

@@ -214,9 +214,9 @@ describe('content audits reject unsupported claims and abstract consultancy fill
     expect(SERVER_INSTRUCTIONS).toMatch(/material claims, conclusions, and recommendations match their support/i);
     expect(SERVER_INSTRUCTIONS).toMatch(/visual prominence matches information value, task relevance, and support/i);
     for (const rel of [
-      'skill/web-stylebook-design/SKILL.md',
-      'skill/CLAUDE.md',
-      'skill/AGENTS.md',
+      'skills/web-stylebook-design/SKILL.md',
+      'skills/CLAUDE.md',
+      'skills/AGENTS.md',
     ]) {
       const content = read(rel);
       expect(content, rel).toMatch(/claims?,\s+conclusions?,\s+or\s+recommendations?.*what.*supports it/is);
@@ -236,9 +236,9 @@ describe('UX-principle guidance is wired through server, skill, and agent fragme
 
   it('the skill and both fragments carry the same safety boundary', () => {
     for (const rel of [
-      'skill/web-stylebook-design/SKILL.md',
-      'skill/CLAUDE.md',
-      'skill/AGENTS.md',
+      'skills/web-stylebook-design/SKILL.md',
+      'skills/CLAUDE.md',
+      'skills/AGENTS.md',
     ]) {
       const content = read(rel);
       expect(content, rel).toContain('get_ux_principle_plan');
@@ -256,9 +256,9 @@ describe('design-principle guidance is wired through server, skill, and agent fr
 
   it('the skill and both fragments name the planner and its placement/verification output', () => {
     for (const rel of [
-      'skill/web-stylebook-design/SKILL.md',
-      'skill/CLAUDE.md',
-      'skill/AGENTS.md',
+      'skills/web-stylebook-design/SKILL.md',
+      'skills/CLAUDE.md',
+      'skills/AGENTS.md',
     ]) {
       const content = read(rel);
       expect(content, rel).toContain('get_design_principle_plan');
@@ -269,9 +269,9 @@ describe('design-principle guidance is wired through server, skill, and agent fr
 
   it('the design.md brief in every layer carries the selected principles, not just the tool call', () => {
     for (const rel of [
-      'skill/web-stylebook-design/SKILL.md',
-      'skill/CLAUDE.md',
-      'skill/AGENTS.md',
+      'skills/web-stylebook-design/SKILL.md',
+      'skills/CLAUDE.md',
+      'skills/AGENTS.md',
     ]) {
       const content = read(rel);
       expect(content, rel).toMatch(/selected (visual-)?design principles/i);
@@ -307,9 +307,9 @@ describe('the closing gate checks that principles were applied, not just selecte
 
   it('the conditional new-direction guide and both fragments route the self-audit through the structured principles checks', () => {
     for (const rel of [
-      'skill/web-stylebook-design/references/new-direction.md',
-      'skill/CLAUDE.md',
-      'skill/AGENTS.md',
+      'skills/web-stylebook-design/references/new-direction.md',
+      'skills/CLAUDE.md',
+      'skills/AGENTS.md',
     ]) {
       const content = read(rel);
       expect(content, rel).toContain('get_design_audit_plan');
@@ -453,8 +453,8 @@ describe('anti-formulaic-opening guidance targets generic furniture (not column 
     expect(SERVER_INSTRUCTIONS).toMatch(/differ in opening STRUCTURE/i);
   });
   it('the discoverable new-direction reference retains composition guidance without imposing it on fixes', () => {
-    expect(read('skill/web-stylebook-design/SKILL.md')).toContain('(references/new-direction.md)');
-    const skill = read('skill/web-stylebook-design/references/new-direction.md');
+    expect(read('skills/web-stylebook-design/SKILL.md')).toContain('(references/new-direction.md)');
+    const skill = read('skills/web-stylebook-design/references/new-direction.md');
     expect(skill).toContain('the one thing, not a hero');
     expect(skill).toContain('generic furniture');
     expect(skill).toContain('bespoke demonstration of THIS product');
@@ -462,7 +462,7 @@ describe('anti-formulaic-opening guidance targets generic furniture (not column 
     expect(skill).toMatch(/no running-text column/i);
   });
   it('the CLAUDE.md and AGENTS.md fragments mirror the furniture-check (seam does not launder a generic visual)', () => {
-    for (const rel of ['skill/CLAUDE.md', 'skill/AGENTS.md']) {
+    for (const rel of ['skills/CLAUDE.md', 'skills/AGENTS.md']) {
       const frag = read(rel);
       expect(frag, rel).toContain('No formulaic opening');
       expect(frag, rel).toContain('generic furniture');
@@ -483,17 +483,17 @@ describe('anti-AI-headline-cadence guidance is present and example-free', () => 
     expect(SERVER_INSTRUCTIONS).toMatch(/paste-test/i);
   });
   it('the new-direction reference and both fragments retain headline guidance', () => {
-    expect(read('skill/web-stylebook-design/references/new-direction.md')).toMatch(/Kill the AI headline cadence/i);
-    for (const rel of ['skill/CLAUDE.md', 'skill/AGENTS.md']) {
+    expect(read('skills/web-stylebook-design/references/new-direction.md')).toMatch(/Kill the AI headline cadence/i);
+    for (const rel of ['skills/CLAUDE.md', 'skills/AGENTS.md']) {
       expect(read(rel), rel).toMatch(/Kill the AI headline cadence/i);
     }
   });
   it('the guidance describes the cliché abstractly — no baked example headline phrases', () => {
     const corpus = [
-      'skill/web-stylebook-design/SKILL.md',
-      'skill/web-stylebook-design/references/new-direction.md',
-      'skill/CLAUDE.md',
-      'skill/AGENTS.md',
+      'skills/web-stylebook-design/SKILL.md',
+      'skills/web-stylebook-design/references/new-direction.md',
+      'skills/CLAUDE.md',
+      'skills/AGENTS.md',
       'src/server-info.ts',
       'generated/catalog.v1.json',
     ].map(read).join('\n');

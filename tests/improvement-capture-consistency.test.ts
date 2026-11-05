@@ -6,7 +6,7 @@ import { createWebStylebookServer } from '../src/server.js';
 import { planDesignImprovement } from '../src/foundations/planner.js';
 import { validateDesignImprovementResult, type ImprovementResultInput } from '../src/improvement/evaluator.js';
 
-const example = JSON.parse(readFileSync(new URL('../skill/web-stylebook-design/references/example-result.json', import.meta.url), 'utf8')) as Omit<ImprovementResultInput, 'expectedPlanHash'>;
+const example = JSON.parse(readFileSync(new URL('../skills/web-stylebook-design/references/example-result.json', import.meta.url), 'utf8')) as Omit<ImprovementResultInput, 'expectedPlanHash'>;
 const input = (): ImprovementResultInput => {
   const value = structuredClone(example);
   return { ...value, expectedPlanHash: planDesignImprovement(value.plan).workflow.planHash };
