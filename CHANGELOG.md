@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.15.1] — 2026-11-07
+
 ### Added
 
 - One-line skill install. The companion skill moved from `skill/` to `skills/`, where
@@ -20,6 +22,9 @@ All notable changes to this project are documented here. The format follows
 
 ### Changed
 
+- Audit verdict precedence, improvement capture/completion eligibility, and CSS custom-property
+  resolution now use explicit internal states. Existing verdicts, evidence diagnostics and resolution
+  limits are preserved, with regression coverage for recovery and mixed constraints.
 - Unknown positional arguments now exit with a usage error instead of starting the stdio server.
 - The npm package ships the skill under `skills/` instead of `skill/`.
 - The README is now a short page that leads with a measured before/after demo

@@ -1,10 +1,13 @@
 {
   "name": "web-stylebook-mcp",
-  "version": "0.15.0",
+  "version": "0.15.1",
   "description": "Design intelligence for coding agents — improve real UIs with design foundations, implementation, verification and before/after reports.",
   "type": "module",
   "license": "MIT",
-  "author": { "name": "Web Stylebook", "url": "https://webstylebook.com" },
+  "author": {
+    "name": "Web Stylebook",
+    "url": "https://webstylebook.com"
+  },
   "bin": {
     "web-stylebook-mcp": "dist/cli.js"
   },
@@ -43,7 +46,14 @@
     "visual:check": "node scripts/sync-visual-contract.mjs --check",
     "visual:benchmark": "node scripts/benchmark-visual.mjs"
   },
-  "keywords": ["mcp", "model-context-protocol", "design", "ui", "design-system", "coding-agent"],
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "design",
+    "ui",
+    "design-system",
+    "coding-agent"
+  ],
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.30.0",
     "zod": "4.4.3"

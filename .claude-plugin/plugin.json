@@ -1,6 +1,6 @@
 {
   "name": "web-stylebook",
-  "version": "0.15.0",
+  "version": "0.15.1",
   "description": "Improve existing web UIs with researched design judgment, real edits, verification and an honest before/after report. Bundles the web-stylebook-design skill and the offline, read-only Web Stylebook MCP server.",
   "author": { "name": "seungdori", "url": "https://github.com/seungdori" },
   "homepage": "https://github.com/seungdori/web-stylebook-mcp#readme",
