@@ -118,6 +118,24 @@ describe('existing-UI completion across a mobile form and a desktop table', () =
     expect(codes(noGain)).toContain('NO_VERIFIED_IMPROVEMENT');
   });
 
+  it('reaches no-change after reverting changes, and reopens it when verification fails', () => {
+    const value = input();
+    value.submission.changes.forEach((change) => { change.status = 'reverted'; });
+    value.submission.outcomes.forEach((outcome) => { outcome.outcome = 'unchanged'; });
+    const unchanged = validateDesignImprovementResult(value);
+    expect(unchanged.completion).toEqual({ status: 'no-change', ready: true });
+    expect(unchanged.coverage.implementedChanges).toBe(0);
+
+    value.submission.checks[1]!.verdict = 'fail';
+    const failed = validateDesignImprovementResult(value);
+    expect(failed.valid).toBe(true);
+    expect(failed.completion).toEqual({ status: 'needs-work', ready: false });
+    expect(failed.outcomes[0]!.outcome).toBe('not-verified');
+
+    value.submission.checks[1]!.verdict = 'pass';
+    expect(validateDesignImprovementResult(value)).toEqual(unchanged);
+  });
+
   it('supports native/static preservation evidence without allowing visual or accessibility checks to be skipped', () => {
     const value = input();
     value.plan.context!.userTask = 'Read static information in a native viewer.';

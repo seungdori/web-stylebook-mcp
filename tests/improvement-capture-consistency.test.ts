@@ -15,6 +15,31 @@ const targetChecks = (result: ReturnType<typeof validateDesignImprovementResult>
   Object.fromEntries(result.checks.filter((check) => check.targetId === targetId).map((check) => [check.kind, check.verdict]));
 
 describe('UI improvement evidence belongs to the compared captures', () => {
+  it('reopens completed work for invalid captures and completes it again after recapturing', () => {
+    const value = input();
+    const completed = validateDesignImprovementResult(value);
+    const before = value.submission.captures[0]!;
+    const after = value.submission.captures[1]!;
+
+    before.fontsReady = false;
+    const afterOnly = validateDesignImprovementResult(value);
+    expect(afterOnly.completion).toEqual({ status: 'needs-work', ready: false });
+    expect(afterOnly.coverage.matchedPairs).toBe(1);
+    expect(targetChecks(afterOnly, 'contact-mobile')).toEqual({ visual: 'not-verified', behavior: 'pass', preservation: 'not-verified', accessibility: 'pass' });
+
+    after.fontsReady = false;
+    const unusable = validateDesignImprovementResult(value);
+    expect(Object.values(targetChecks(unusable, 'contact-mobile')).every((verdict) => verdict === 'not-verified')).toBe(true);
+
+    before.fontsReady = true;
+    const beforeOnly = validateDesignImprovementResult(value);
+    expect(beforeOnly.coverage.matchedPairs).toBe(1);
+    expect(Object.values(targetChecks(beforeOnly, 'contact-mobile')).every((verdict) => verdict === 'not-verified')).toBe(true);
+
+    after.fontsReady = true;
+    expect(validateDesignImprovementResult(value)).toEqual(completed);
+  });
+
   it('rejects one screenshot pair reused for a mobile form and a desktop table', () => {
     const value = input();
     value.submission.captures[2]!.screenshotRef = value.submission.captures[0]!.screenshotRef;
