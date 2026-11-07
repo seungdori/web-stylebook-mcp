@@ -8,6 +8,7 @@ import {
 } from '../src/audit/evaluator.js';
 import { planDesignAudit, type DesignAuditPlanInput } from '../src/audit/planner.js';
 import { CatalogRepository } from '../src/catalog/repository.js';
+import { wellFormedAudit } from './helpers/audit-fixture.js';
 
 const repo = CatalogRepository.load();
 const planInput: DesignAuditPlanInput = {
@@ -125,6 +126,51 @@ describe('design audit result validator', () => {
     const build = result.results.find((item) => item.checkId === 'build-succeeds')!;
     expect(build.verdict).toBe('FIX_NOW');
     expect(result.issues.map((entry) => entry.code)).toContain('PASS_CONTRADICTS_FAILED_EVIDENCE');
+  });
+
+  it('keeps an observed failure visible alongside missing references and indeterminate evidence', () => {
+    const input = completeInput();
+    input.evidence.find((item) => item.id === 'build-succeeds-command')!.outcome = 'failed';
+    input.evidence.push({
+      id: 'build-recheck', targetId: target.id, type: 'command', phase: 'static',
+      summary: 'The follow-up command could not run; it does not replace the failed observation.',
+      outcome: 'error', artifactRef: 'artifacts/build-recheck.json',
+    });
+    input.results.find((item) => item.checkId === 'build-succeeds')!.evidenceRefs!
+      .push('missing-artifact', 'build-recheck');
+
+    const result = validateDesignAuditResult(input, repo);
+    expect(result.results.find((item) => item.checkId === 'build-succeeds')?.verdict).toBe('FIX_NOW');
+    expect(result.issues.filter((entry) => entry.checkId === 'build-succeeds').map((entry) => entry.code)).toEqual([
+      'EVIDENCE_REF_NOT_FOUND', 'MISSING_REQUIRED_EVIDENCE',
+      'PASS_CONTRADICTS_FAILED_EVIDENCE', 'FIX_NOW_REMEDIATION_REQUIRED',
+    ]);
+    expect(result.valid).toBe(false);
+  });
+
+  it.each([
+    { width: 375, verdict: 'FIX_NOW', scopeIssue: undefined },
+    { width: 1440, verdict: 'NOT_VERIFIED', scopeIssue: 'TARGET_VIEWPORT_OUT_OF_RANGE' },
+    { width: undefined, verdict: 'NOT_VERIFIED', scopeIssue: 'TARGET_VIEWPORT_REQUIRED' },
+  ])('places a failed mobile observation in its recorded scope: $width px', ({ width, verdict, scopeIssue }) => {
+    const checkId = 'mobile-renders-cleanly';
+    const input = wellFormedAudit(repo, {
+      surfaces: ['global'], includeGroups: ['layout'], includeDocumentation: false, locale: 'en',
+    }, [{ ...target, viewport: { width: 375, height: 812 } }]);
+    input.evidence.find((item) => item.id.includes(checkId))!.outcome = 'failed';
+    if (width === undefined) delete input.targets[0]!.viewport;
+    else input.targets[0]!.viewport!.width = width;
+
+    const result = validateDesignAuditResult(input, repo);
+    expect(result.results.find((item) => item.checkId === checkId)?.verdict).toBe(verdict);
+    const codes = result.issues.filter((entry) => entry.checkId === checkId).map((entry) => entry.code);
+    expect(codes).toContain('PASS_CONTRADICTS_FAILED_EVIDENCE');
+    if (scopeIssue) {
+      expect(codes).toContain(scopeIssue);
+      expect(codes).not.toContain('FIX_NOW_REMEDIATION_REQUIRED');
+    } else {
+      expect(codes).toContain('FIX_NOW_REMEDIATION_REQUIRED');
+    }
   });
 
   it('keeps an evidenced FIX_NOW visible but invalidates a missing remediation', () => {

@@ -17,6 +17,10 @@ interface Entry {
 
 type Box = 'element' | 'before' | 'after';
 type Store = Map<string, Entry>;
+type CustomPropertyState =
+  | { status: 'resolving' }
+  | { status: 'resolved'; value: string }
+  | { status: 'invalid' };
 
 const INHERITED = new Set([
   'color', 'font-family', 'font-size', 'font-weight', 'font-style', 'text-align', 'text-transform',
@@ -67,8 +71,8 @@ export class StyledDocument {
   private readonly boxes = new Map<DomElement, Partial<Record<Box, Store>>>();
   private readonly reduced = new Map<DomElement, Store>();
   private readonly hasHtmlRoot: boolean;
-  private readonly customCache = new Map<DomElement, Map<string, string | null>>();
-  private readonly resolving = new Set<string>();
+  // Absence means unresolved. A property has exactly one in-progress or terminal state.
+  private readonly customStates = new Map<DomElement, Map<string, CustomPropertyState>>();
   private customDepth = 0;
   private readonly hiddenCache = new Map<DomElement, boolean>();
 
@@ -235,25 +239,26 @@ export class StyledDocument {
       if (entry) { owner = node; raw = entry.value; break; }
     }
     if (!owner) return undefined;
-    let cache = this.customCache.get(owner);
-    if (!cache) { cache = new Map(); this.customCache.set(owner, cache); }
-    if (cache.has(name)) return cache.get(name) ?? undefined;
-    const key = `${owner.order}:${name}`;
-    if (this.resolving.has(key) || this.customDepth >= MAX_CUSTOM_DEPTH) return undefined;
-    this.resolving.add(key);
+    let states = this.customStates.get(owner);
+    if (!states) { states = new Map(); this.customStates.set(owner, states); }
+    const state = states.get(name);
+    if (state) return state.status === 'resolved' ? state.value : undefined;
+    if (this.customDepth >= MAX_CUSTOM_DEPTH) return undefined;
+    states.set(name, { status: 'resolving' });
     this.customDepth++;
-    let resolved: string;
     try {
-      resolved = this.resolve(owner, raw);
+      const resolved = this.resolve(owner, raw);
+      const completed: CustomPropertyState = resolved.length > MAX_CUSTOM_VALUE
+        ? { status: 'invalid' } : { status: 'resolved', value: resolved };
+      // Cache completed resolutions, including fallbacks at the depth limit: retrying each reference above a
+      // deep chain would make fan-out exponential. Lookups run in a fixed order, keeping results deterministic.
+      states.set(name, completed);
+      return completed.status === 'resolved' ? completed.value : undefined;
     } finally {
       this.customDepth--;
-      this.resolving.delete(key);
+      // An exception leaves the property unresolved so a later lookup can retry it.
+      if (states.get(name)?.status === 'resolving') states.delete(name);
     }
-    const value = resolved.length > MAX_CUSTOM_VALUE ? null : resolved;
-    // Every value is cached, including one cut off by the depth limit: resolving it again per reference would make
-    // fan-out above a deep chain exponential. Lookups run in a fixed order, so the result stays deterministic.
-    cache.set(name, value);
-    return value ?? undefined;
   }
 
   /** Resolved value of the highest-ranked declaration among `props` (a longhand and its shorthands). */

@@ -23,6 +23,7 @@ import {
   widthInRange,
   type AuditCheckScope,
 } from './check-scope.js';
+import { isAssertedVerdict, resolveAuditVerdict, type ViewportFit } from './verdict.js';
 
 export const AUDIT_EVIDENCE_PHASES = [
   'static', 'before', 'input', 'after', 'recovery',
@@ -273,10 +274,6 @@ function conclusiveEvidence(evidence: AuditEvidence): boolean {
     || evidence.outcome === 'failed';
 }
 
-function failedVerdict(severity: AuditSeverity): AuditVerdict {
-  return severity === 'minor' ? 'RISK' : 'FIX_NOW';
-}
-
 function issue(
   issues: AuditContractIssue[],
   code: string,
@@ -329,8 +326,6 @@ function expectedSlots(plan: DesignAuditPlan, targets: AuditTarget[]): Array<{
 function showsStartingScreen(evidence: AuditEvidence): boolean {
   return evidence.phase === undefined || evidence.phase === 'static' || evidence.phase === 'before';
 }
-
-type ViewportFit = 'unscoped' | 'in-range' | 'out-of-range' | 'unknown';
 
 function viewportFit(scope: AuditCheckScope | undefined, target: AuditTarget): ViewportFit {
   const ranges = scope?.viewports;
@@ -845,7 +840,6 @@ export function validateDesignAuditResult(
       .filter((evidence) => evidence.outcome === 'cant-tell' || evidence.outcome === 'error');
     const scope = checkScopeOf(check.id);
     const fit = viewportFit(scope, target);
-    let verdict = submitted.verdict;
 
     if (submitted.verdict === 'NOT_APPLICABLE') {
       if (check.applicability === 'always' && fit !== 'out-of-range') {
@@ -856,7 +850,6 @@ export function validateDesignAuditResult(
             : ` on a target whose recorded viewport is not outside ${describeRanges(scope?.viewports)}`}`,
           slot,
         );
-        verdict = 'NOT_VERIFIED';
       }
       if (failedEvidence.length || passedEvidence.length) {
         const cited = [...failedEvidence, ...passedEvidence]
@@ -867,7 +860,6 @@ export function validateDesignAuditResult(
           `NOT_APPLICABLE for '${check.id}' cites evidence that evaluated the check: ${cited}. Evidence showing the check does not apply uses outcome 'inapplicable'; to correct a wrong observation, add evidence that supersedes it with a reason`,
           slot,
         );
-        verdict = 'NOT_VERIFIED';
       } else if (indeterminateEvidence.length) {
         issue(
           issues,
@@ -875,21 +867,18 @@ export function validateDesignAuditResult(
           `NOT_APPLICABLE for '${check.id}' cites evidence that could not be evaluated`,
           slot,
         );
-        verdict = 'NOT_VERIFIED';
       }
     }
 
-    const asserted = submitted.verdict === 'PASS'
-      || submitted.verdict === 'FIX_NOW'
-      || submitted.verdict === 'RISK';
-    if (asserted && (badEvidenceRef || evidenceRefs.length === 0 || missingEvidenceTypes.length > 0)) {
+    const asserted = isAssertedVerdict(submitted.verdict);
+    const missingEvidence = badEvidenceRef || evidenceRefs.length === 0 || missingEvidenceTypes.length > 0;
+    if (asserted && missingEvidence) {
       issue(
         issues,
         'MISSING_REQUIRED_EVIDENCE',
         `check '${check.id}' is missing required evidence: ${missingEvidenceTypes.join(', ') || 'valid evidence reference'}`,
         slot,
       );
-      verdict = 'NOT_VERIFIED';
     }
 
     const missingPhases = asserted
@@ -904,11 +893,9 @@ export function validateDesignAuditResult(
         `check '${check.id}' judges the result of an action; cite interaction evidence from the ${missingPhases.join(' and ')} phase with a passed or failed outcome`,
         slot,
       );
-      verdict = 'NOT_VERIFIED';
     }
 
     if (submitted.verdict === 'PASS' && failedEvidence.length) {
-      verdict = failedVerdict(check.severity);
       issue(
         issues,
         'PASS_CONTRADICTS_FAILED_EVIDENCE',
@@ -916,7 +903,6 @@ export function validateDesignAuditResult(
         slot,
       );
     } else if (submitted.verdict === 'PASS' && indeterminateEvidence.length) {
-      verdict = 'NOT_VERIFIED';
       issue(
         issues,
         'PASS_USES_INDETERMINATE_EVIDENCE',
@@ -933,7 +919,6 @@ export function validateDesignAuditResult(
         `check '${check.id}' applies to ${describeRanges(scope?.viewports)}, but target '${target.id}' is ${target.viewport!.width}px wide; judge it on a target in range and answer NOT_APPLICABLE here`,
         slot,
       );
-      verdict = 'NOT_VERIFIED';
     } else if (asserted && fit === 'unknown') {
       issue(
         issues,
@@ -941,8 +926,18 @@ export function validateDesignAuditResult(
         `check '${check.id}' applies to ${describeRanges(scope?.viewports)}; record the viewport of target '${target.id}' so its result can be placed in that range`,
         slot,
       );
-      verdict = 'NOT_VERIFIED';
     }
+
+    const verdict = resolveAuditVerdict({
+      submitted: submitted.verdict,
+      severity: check.severity,
+      applicability: check.applicability,
+      viewport: fit,
+      evidence: missingEvidence || missingPhases.length ? 'incomplete' : 'complete',
+      observation: failedEvidence.length ? 'failed'
+        : indeterminateEvidence.length ? 'indeterminate'
+          : passedEvidence.length ? 'passed' : 'none',
+    });
 
     if (verdict === 'FIX_NOW' && !submitted.remediation?.trim()) {
       issue(

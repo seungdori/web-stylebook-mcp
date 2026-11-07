@@ -136,6 +136,55 @@ describe('cascade', () => {
     expect(isCentered(page, title)).toBe(true);
   });
 
+  it('reuses resolved cycle fallbacks without blocking independent custom properties', () => {
+    const page = buildPage('<html><body><h1>Title</h1></body></html>', [
+      ':root { --a: var(--b); --b: var(--a, #123456); --self: var(--self, #654321); --plain: #abcdef; }',
+      'h1 { color: var(--a); background: var(--self); border-color: var(--plain); }',
+    ], ctx, 100);
+    const title = page.html.elements.find((element) => element.tag === 'h1')!;
+    for (let lookup = 0; lookup < 2; lookup++) {
+      expect(page.styles.get(title, 'color')).toBe('#123456');
+      expect(page.styles.get(title, 'background')).toBe('#654321');
+      expect(page.styles.get(title, 'border-color')).toBe('#abcdef');
+    }
+  });
+
+  it('inherits custom properties resolved at their declaration, including empty values', () => {
+    const page = buildPage('<html><body><h1>Title</h1></body></html>', [
+      ':root { --base: red; --alias: var(--base); --empty: ; }',
+      'h1 { --base: blue; color: var(--alias); background: var(--empty, green); }',
+    ], ctx, 100);
+    const title = page.html.elements.find((element) => element.tag === 'h1')!;
+    expect(page.styles.get(title, 'color')).toBe('red');
+    expect(page.styles.get(title, 'background')).toBe('');
+    expect(page.styles.get(title, '--base')).toBe('blue');
+  });
+
+  it('keeps oversized definitions invalid while allowing later independent lookups', () => {
+    const page = buildPage('<html><body><h1>Title</h1></body></html>', [
+      `:root { --large: ${'x'.repeat(10001)}; --plain: #abcdef; }`,
+      'h1 { color: var(--large, red); border-color: var(--plain); }',
+    ], ctx, 100);
+    const title = page.html.elements.find((element) => element.tag === 'h1')!;
+    for (let lookup = 0; lookup < 2; lookup++) {
+      expect(page.styles.get(title, '--large')).toBeUndefined();
+      expect(page.styles.get(title, 'color')).toBe('red');
+      expect(page.styles.get(title, 'border-color')).toBe('#abcdef');
+    }
+  });
+
+  it('releases the resolution depth budget after a capped chain completes', () => {
+    const chain = Array.from({ length: 64 }, (_, index) => `--v${index}: var(--v${index + 1});`).join('');
+    const page = buildPage('<html><body><h1>Title</h1></body></html>', [
+      `:root { ${chain} --v64: #123456; --plain: #abcdef; }`,
+    ], ctx, 100);
+    const title = page.html.elements.find((element) => element.tag === 'h1')!;
+    expect(page.styles.get(title, '--v0')).toBe('');
+    expect(page.styles.get(title, '--v64')).toBe('#123456');
+    expect(page.styles.get(title, '--plain')).toBe('#abcdef');
+    expect(page.styles.get(title, '--v0')).toBe('');
+  });
+
   it('applies Tailwind utilities with responsive variants, arbitrary values and gradient stops', () => {
     const page = buildPage(
       '<main><div class="text-center md:text-left absolute -z-10 h-[500px] rounded-full blur-3xl bg-gradient-to-r from-purple-500 to-pink-500/50"></div></main>',
