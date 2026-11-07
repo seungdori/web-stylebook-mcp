@@ -105,6 +105,7 @@ resources and prompts, and the CLI.
 
 - [Reference](./docs/reference.md): tool examples, contracts, CLI and compatibility
 - [Demo](./docs/demo/README.md): the before/after above, with every evidence file
+- [With/without showcase](./showcase/): ten paired builds, blind comparisons and recorded results
 - [Changelog](./CHANGELOG.md) · [Security](./SECURITY.md) · [Releasing](./RELEASING.md)
 
 ## License

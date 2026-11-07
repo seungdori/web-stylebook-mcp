@@ -1,0 +1,10 @@
+{
+  "name": "showcase-harness",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Runs the with/without MCP builds for issue #7. Not part of the published package.",
+  "dependencies": {
+    "playwright": "1.64.1"
+  }
+}

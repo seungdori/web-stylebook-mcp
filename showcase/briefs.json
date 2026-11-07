@@ -1,0 +1,58 @@
+{
+  "version": 1,
+  "writtenAt": "2026-10-18T12:02:00Z",
+  "masterSha": "5a783c9c71c049caf10c350e3d25bc346c5ccfbd",
+  "note": "Written before any build run. Product descriptions only, with no design guidance. Never edited after the first run started.",
+  "briefs": [
+    {
+      "id": "sre-incident-dashboard",
+      "title": "SRE incident dashboard",
+      "brief": "A monitoring dashboard for the site reliability engineers of a company that runs a consumer payments app. The on-call engineer keeps it open all day and during live outages to see which services are degraded, the active incidents with severity, owner, and age, recent deploys, and the key metrics (error rate, latency, traffic) for each service. It has to answer whether anything is broken and what changed within seconds of looking at it."
+    },
+    {
+      "id": "essay-blog",
+      "title": "Indie long-form essay blog",
+      "brief": "An independent writer's blog that publishes one long-form essay every week or two on cities, technology, and everyday life. The home page introduces the writer, features the newest essay with an excerpt, lists earlier essays with dates, reading times, and topics, and invites readers to subscribe by email. Readers are people who follow the writer and read each essay in full."
+    },
+    {
+      "id": "luxury-skincare-product",
+      "title": "Luxury skincare product page",
+      "brief": "A product page for a night serum from a small-batch luxury skincare house, priced at about 240 dollars for 30 ml. The page presents the product, its key ingredients and where they are sourced, how to use it, results from a clinical study and customer reviews, and a purchase area with size options and delivery information. Shoppers are comparing it with other premium serums before they buy."
+    },
+    {
+      "id": "kids-coding-landing",
+      "title": "Kids coding-education landing page",
+      "brief": "A landing page for an online coding school for children aged 7 to 12. Parents decide whether to sign up, and the children also look at the page. It explains the courses by age group, how a live class works, the projects children build, monthly pricing, and a free trial class sign-up."
+    },
+    {
+      "id": "api-docs-home",
+      "title": "Developer API docs homepage",
+      "brief": "The documentation homepage for a payments API that software developers integrate into their products. It lets a developer find the right starting point quickly: a quickstart with a copyable code sample, guides by use case, the API reference, client libraries for several languages, and the changelog and system status. Developers visit it many times a day while they are in the middle of a task."
+    },
+    {
+      "id": "budgeting-app-overview",
+      "title": "Personal budgeting app overview screen",
+      "brief": "The overview screen of a personal budgeting app for people with irregular income, such as freelancers. It shows this month's budget against spending by category, upcoming bills, progress toward savings goals, and recent transactions. People open it several times a week to check whether they are on track."
+    },
+    {
+      "id": "architecture-studio-portfolio",
+      "title": "Architecture studio portfolio",
+      "brief": "The portfolio website of a small architecture studio that designs houses, cultural buildings, and public spaces. It presents the studio's approach, a selection of six recent projects with location, year, and building type, a short team section, and contact details. Visitors are prospective clients, journalists, and people who might want to work there."
+    },
+    {
+      "id": "bakery-ordering",
+      "title": "Neighborhood bakery ordering site",
+      "brief": "An online ordering site for a neighborhood bakery that sells bread, pastries, and celebration cakes. Customers browse the menu by category, add items to a basket, choose a pickup day and time slot, and can see opening hours and the shop's address. Some items must be ordered a day or more ahead."
+    },
+    {
+      "id": "hr-saas-landing",
+      "title": "B2B HR SaaS landing page",
+      "brief": "A landing page for a B2B human resources platform that covers onboarding, time off, payroll sync, and performance reviews for companies with 50 to 500 employees. It is aimed at HR directors and operations leads who compare several vendors. The page needs to explain the product, show proof such as customer logos and results, list integrations and plans, and get visitors to book a demo."
+    },
+    {
+      "id": "music-festival",
+      "title": "Music festival event page",
+      "brief": "The event page for a three-day outdoor music festival in late summer, with about forty artists on three stages. It announces the dates and location, the lineup by day, ticket tiers with prices, how to get there and where to stay, and answers to common questions. The main goal is to sell tickets before they run out."
+    }
+  ]
+}

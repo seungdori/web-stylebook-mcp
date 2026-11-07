@@ -99,6 +99,7 @@ npx -y web-stylebook-mcp call get_design_improvement_plan --input plan-args.json
 
 - [레퍼런스](./docs/reference.ko.md): 툴 예시, 계약, CLI, 호환성
 - [데모](./docs/demo/README.md): 위 전후 비교와 모든 증거 파일(영문)
+- [MCP 사용·미사용 비교](./showcase/README.ko.md): 브리프 10개의 비교 화면과 실험 기록
 - [변경 기록](./CHANGELOG.md) · [보안](./SECURITY.md) · [릴리스](./RELEASING.md)
 
 ## 라이선스
