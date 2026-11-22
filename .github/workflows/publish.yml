@@ -24,33 +24,19 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm test
-      - name: Check out canonical catalog source
-        uses: actions/checkout@v6
-        with:
-          repository: seungdori/web-stylebook
-          # Exact reviewed website revision for the 0.10.1 package and catalog 0.10.1.
-          ref: b6771f98480eabbe3dc602ab7c5dfd665d338178
-          path: _canonical
-      - name: Generate and validate canonical catalog
-        working-directory: _canonical
+      - name: Pack release
         run: |
-          npm ci
-          npm run mcp:catalog
-          npm run mcp:catalog:validate
-      - name: Verify canonical catalog byte parity
-        run: npm run catalog:check-canonical -- "$GITHUB_WORKSPACE/_canonical/packages/mcp/generated"
-      - name: Verify portable visual resolver and artifact provenance
-        run: npm run visual:check -- "$GITHUB_WORKSPACE/_canonical"
-      - name: Package smoke
+          filename=$(npm pack --silent --pack-destination "$RUNNER_TEMP")
+          echo "PACKAGE_TARBALL=$RUNNER_TEMP/$filename" >> "$GITHUB_ENV"
+      - name: Test the packed CLI and skill in a clean project
         run: |
-          npm pack
-          TARBALL=$(ls -t web-stylebook-mcp-*.tgz | head -1)
           mkdir -p "$RUNNER_TEMP/web-stylebook-smoke"
           cd "$RUNNER_TEMP/web-stylebook-smoke"
           npm init -y >/dev/null
-          npm install "$GITHUB_WORKSPACE/$TARBALL"
-          npx web-stylebook-mcp --version
-          npx web-stylebook-mcp --validate-catalog
-          npx web-stylebook-mcp call compose_design_tokens '{"primaryStyleId":"quiet-utility","format":"json"}' > /dev/null
+          npm install "$PACKAGE_TARBALL"
+          cli=./node_modules/.bin/web-stylebook-mcp
+          "$cli" --version
+          "$cli" --validate-catalog
+          "$cli" call compose_design_tokens '{"primaryStyleId":"quiet-utility","contract":{"schema":"webstylebook.visual.v1"},"format":"json"}' > /dev/null
           test -f node_modules/web-stylebook-mcp/skills/web-stylebook-design/SKILL.md
-      - run: npm publish --access public
+      - run: npm publish "$PACKAGE_TARBALL" --access public

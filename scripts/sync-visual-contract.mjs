@@ -9,7 +9,7 @@ import ts from 'typescript';
 export const VISUAL_SOURCE_FILES = ['types.ts', 'hash.ts', 'schema.ts', 'resolve.ts', 'contrast.ts', 'export.ts', 'fontSources.ts'];
 const sha256 = (bytes) => `sha256:${createHash('sha256').update(bytes).digest('hex')}`;
 
-function validateDependencies(file, bytes) {
+export function validateDependencies(file, bytes) {
   const source = ts.createSourceFile(file, bytes.toString('utf8'), ts.ScriptTarget.Latest, true);
   function validate(specifier) {
     const dependency = /^\.\/([\w-]+)\.js$/.exec(specifier)?.[1];

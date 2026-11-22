@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { createHash } from 'node:crypto';
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
+import { VISUAL_SOURCE_FILES, validateDependencies } from '../scripts/sync-visual-contract.mjs';
 import { CatalogRepository } from '../src/catalog/repository.js';
 import { VisualContractRepository, type VisualLibrary } from '../src/catalog/visual.js';
 import { composeDesignTokens } from '../src/tokens/compile.js';
@@ -32,11 +33,15 @@ describe('pinned visual contract fidelity', () => {
     expect(repo.visualContractMetadata.styleCount).toBe(repo.allStyles().length);
     const provenance = JSON.parse(readFileSync(new URL('../generated/visual-contract-source.v1.json', import.meta.url), 'utf8'));
     expect(provenance.license).toBe('MIT');
-    for (const [file, digest] of Object.entries(provenance.files)) {
-      const name = String(file).split('/').pop();
+    const names = [...VISUAL_SOURCE_FILES, 'LICENSE'];
+    expect(Object.keys(provenance.files).sort()).toEqual(names.map((name) => `src/visual/${name}`).sort());
+    expect(readdirSync(new URL('../src/visual-canonical/', import.meta.url)).sort()).toEqual([...VISUAL_SOURCE_FILES].sort());
+    for (const name of names) {
+      const digest = provenance.files[`src/visual/${name}`];
       const bytes = readFileSync(new URL(name === 'LICENSE' ? '../generated/visual-contract-LICENSE' : `../src/visual-canonical/${name}`, import.meta.url));
       expect(`sha256:${createHash('sha256').update(bytes).digest('hex')}`).toBe(digest);
       expect(bytes.toString('utf8')).toContain(name === 'LICENSE' ? 'MIT License' : 'SPDX-License-Identifier: MIT');
+      if (name !== 'LICENSE') validateDependencies(name, bytes);
     }
   });
 

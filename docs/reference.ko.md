@@ -678,7 +678,7 @@ npm test       # 빌드 후 테스트 실행
 npm run dev    # 소스에서 바로 stdio 서버 실행
 ```
 
-변경 내역은 [CHANGELOG.md](../CHANGELOG.md)에 있습니다. [`web-stylebook`](https://github.com/seungdori/web-stylebook) 저장소와의 카탈로그 동기화를 포함한 릴리스 절차는 [RELEASING.md](../RELEASING.md)에 있습니다.
+변경 내역은 [CHANGELOG.md](../CHANGELOG.md)에 있습니다. 이 저장소에서 패키지를 배포하는 방법과 카탈로그 갱신 절차는 [릴리스 가이드](../RELEASING.md)에 있습니다.
 
 ## 라이선스
 

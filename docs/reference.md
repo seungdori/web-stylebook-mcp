@@ -683,7 +683,7 @@ npm test       # builds, then runs the test suite
 npm run dev    # runs the server from source over stdio
 ```
 
-Changes are listed in [CHANGELOG.md](../CHANGELOG.md). Release steps, including the catalog sync with the [`web-stylebook`](https://github.com/seungdori/web-stylebook) repository, are in [RELEASING.md](../RELEASING.md).
+Changes are listed in [CHANGELOG.md](../CHANGELOG.md). The [release guide](../RELEASING.md) covers publishing from this repository and updating the bundled catalog.
 
 ## License
 

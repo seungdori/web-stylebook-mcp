@@ -1,8 +1,8 @@
 # Releasing
 
-The published package bundles a **frozen catalog snapshot** (`generated/catalog.v1.json`). It does
-not fetch anything at runtime — so updating the Web Stylebook source does **not** automatically reach
-users. A release is deliberate: regenerate the snapshot, bump the version, tag → CI publishes.
+Builds, tests, and npm releases run from a checkout of `web-stylebook-mcp`. The package includes
+the reviewed catalog and visual contracts in `generated/` and the MIT resolver in
+`src/visual-canonical/`. Installing dependencies requires access to npm.
 
 ## One-time setup
 
@@ -19,35 +19,41 @@ access to require 2FA and disallow traditional tokens.
 
 ## Cut a release
 
-1. **Refresh the catalog** (only if the Web Stylebook source changed). In the source repo:
+1. From a clean checkout, run:
    ```bash
-   npm run mcp:catalog          # regenerate from src/catalog → packages/mcp/generated
-   npm run mcp:catalog:validate # sanity-check the new snapshot
+   npm ci
+   npm run build
+   npm test
    ```
-   Then copy the regenerated `generated/catalog.v1.json` + `generated/manifest.v1.json` into this
-   repo's `generated/`, and verify byte-for-byte parity with the source:
-   ```bash
-   npm run catalog:check-canonical -- /absolute/path/to/web-stylebook/packages/mcp/generated
-   ```
-   Without an argument, the command uses `WEB_STYLEBOOK_CANONICAL_CATALOG_DIR` or the local sibling
-   path `../showcase/packages/mcp/generated`. The regular test suite verifies the bundled artifact's
-   internal hash, enums, counts, and runtime contract; this command is the explicit cross-repository
-   source check.
-
-   Regenerate and synchronize `catalog.v1.json`, `manifest.v1.json`, and the visual artifact
-   together. `npm run visual:sync` preflights the source import closure and license declarations
-   before writing, and `npm run visual:check` verifies the source hashes and artifact bytes. Update
-   the exact source pin in `.github/workflows/publish.yml` as well.
-2. **Bump** the version in `package.json` and `.claude-plugin/plugin.json` (plugin users only receive
-   updates when it changes), and move CHANGELOG `[Unreleased]` → the new version.
-3. **Tag and push** — the version tag triggers the publish and must match `package.json`:
+   The suite verifies the catalog hash, counts and schema, visual artifact and resolver hashes,
+   license, import allowlist, and reference outputs against the committed fixtures.
+2. Bump the version in `package.json`, `package-lock.json`, and `.claude-plugin/plugin.json`.
+   Move the changelog's unreleased entries under the new version and commit the release.
+3. Tag the release commit and push the tag. For example, for version 0.4.0:
    ```bash
    git tag -a v0.4.0 -m "Release v0.4.0"
    git push origin v0.4.0
    ```
-4. The **`Publish`** workflow runs `build` + `test` + package smoke tests + `npm publish`.
-   npm automatically attaches provenance for trusted publishing. Verify with
-   `npm view web-stylebook-mcp version`.
+4. The `Publish` workflow checks that the version matches the tag, builds and tests, and packs
+   the release. It installs the tarball in a clean project, validates the catalog, composes design
+   tokens and checks the bundled skill. It publishes that same tarball to npm using OIDC.
+   Verify the public version with `npm view web-stylebook-mcp version`.
 
-> The runtime stays offline/deterministic by design; "freshness" means a fast, automated
-> regenerate-and-republish, not a live fetch.
+## Updating the website-authored snapshot
+
+Maintainers with access to the website source perform these steps when importing new catalog or
+visual data. Ordinary MCP releases reuse the checked-in snapshot.
+
+1. Check out the intended website revision and run `npm ci`, `npm run mcp:catalog`, and
+   `npm run mcp:catalog:validate` in that checkout.
+2. From the MCP checkout, import the catalog, manifest, visual artifact, license and portable
+   resolver. Set `website` to the path of the website checkout:
+   ```bash
+   cp "$website/packages/mcp/generated/catalog.v1.json" "$website/packages/mcp/generated/manifest.v1.json" generated/
+   npm run visual:sync -- "$website"
+   npm run catalog:check-canonical -- "$website/packages/mcp/generated"
+   npm run visual:check -- "$website"
+   ```
+3. Review the changes together, update the pinned expectations and website parity fixtures for
+   the new revision, and run the public build and test commands above. The current website parity
+   fixture records the reviewed source revision in `tests/fixtures/website-visual-parity.v1.json`.
