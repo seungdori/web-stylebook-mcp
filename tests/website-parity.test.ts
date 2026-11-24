@@ -45,7 +45,7 @@ describe('pinned website visual parity', () => {
   it('covers brutalist-grid, editorial, and mono styles from the published website revision', () => {
     expect(fixture.schema).toBe('webstylebook.website-parity-fixture.v1');
     expect(fixture.source).toBe('https://github.com/seungdori/web-stylebook');
-    expect(fixture.sourceRevision).toBe('b6771f98480eabbe3dc602ab7c5dfd665d338178');
+    expect(fixture.sourceRevision).toBe('a8515dd2821f4c9e265f924c43d67b83715ee4d4');
     expect(new Set(fixture.cases.map((item) => item.group))).toEqual(new Set(['brutalist-grid', 'editorial', 'mono', 'control']));
     expect(fixture.cases.some((item) => item.styleId === 'brutalist-grid')).toBe(true);
     expect(fixture.cases.some((item) => item.styleId === 'editorial-silence')).toBe(true);

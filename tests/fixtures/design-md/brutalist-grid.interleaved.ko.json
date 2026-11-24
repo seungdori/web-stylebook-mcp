@@ -19,17 +19,16 @@
   ],
   "lossy": [
     "상태 색(positive, caution, critical, info): 이 파일에 없습니다.",
-    "모션(0ms, ease): DESIGN.md에 모션 키가 없어 이 파일에 없습니다.",
+    "모션(120ms, linear): DESIGN.md에 모션 키가 없어 이 파일에 없습니다.",
     "타이포그래피 유동 크기 최솟값, 행 길이, 문단 간격, word-break, overflow-wrap: DESIGN.md에 키가 없습니다. Typography에 설명했습니다.",
     "테두리 두께와 스타일: DESIGN.md에 키가 없습니다. Shapes에 설명했습니다.",
     "글자가 아닌 색 쌍(포커스, 조작 요소 경계, 구분선): Components에 설명했습니다.",
     "폰트 스타일시트 출처와 라이선스: 이 파일에 없습니다. compose_design_tokens의 visualContract.typography.fonts를 보세요."
   ],
-  "sourceHash": "sha256:0b83e1d68b586df19487a71a192f58464c4780ef6926b0c83df42943977641c2",
+  "sourceHash": "sha256:9ebb0200d6eed2edc7d8271a245c42c8b992fe835033325566795c04c8c7a9b7",
   "primaryStyleId": "brutalist-grid",
   "colorMode": "light",
   "warnings": [
-    "label: 'IBM Plex Mono' does not declare weight 600; verify font synthesis or select an available weight.",
     "Locale reading adjustments are applied; verify actual glyph fallback and heading wrapping in the target browser.",
     "light: Link text — 4.02:1; requires 4.5:1"
   ],

@@ -21,7 +21,7 @@
     "Status colors (positive, caution, critical, info): not in this file.",
     "Motion (320ms, cubic-bezier(0.4, 0, 0.2, 1)): DESIGN.md has no motion key; not in this file."
   ],
-  "sourceHash": "sha256:093e629ea2102af2d680d872b8b6cb296e767e1291d89b04e5431f5e9079ab1d",
+  "sourceHash": "sha256:9a518c42472629cd6bd67ebad515a07ab0f636179b5717251fcca36a062cbd97",
   "primaryStyleId": "editorial-silence",
   "colorMode": "light",
   "warnings": [],

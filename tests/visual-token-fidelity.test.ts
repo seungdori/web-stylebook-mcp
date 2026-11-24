@@ -34,12 +34,20 @@ describe('pinned visual contract fidelity', () => {
     const provenance = JSON.parse(readFileSync(new URL('../generated/visual-contract-source.v1.json', import.meta.url), 'utf8'));
     expect(provenance.license).toBe('MIT');
     const names = [...VISUAL_SOURCE_FILES, 'LICENSE'];
-    expect(Object.keys(provenance.files).sort()).toEqual(names.map((name) => `src/visual/${name}`).sort());
+    // A rewrite of the website's jitless zod wrapper import also pins the wrapper it replaced.
+    const rewritten: Record<string, string> = provenance.rewrites?.files ?? {};
+    expect(Object.keys(provenance.files).sort()).toEqual([
+      ...names.map((name) => `src/visual/${name}`), ...(Object.keys(rewritten).length ? ['src/utils/zod.ts'] : []),
+    ].sort());
     expect(readdirSync(new URL('../src/visual-canonical/', import.meta.url)).sort()).toEqual([...VISUAL_SOURCE_FILES].sort());
     for (const name of names) {
       const digest = provenance.files[`src/visual/${name}`];
       const bytes = readFileSync(new URL(name === 'LICENSE' ? '../generated/visual-contract-LICENSE' : `../src/visual-canonical/${name}`, import.meta.url));
-      expect(`sha256:${createHash('sha256').update(bytes).digest('hex')}`).toBe(digest);
+      // Undoing the recorded rewrite must give back the website file byte for byte.
+      const original = rewritten[`src/visual/${name}`]
+        ? Buffer.from(bytes.toString('utf8').replace(/(\bfrom\s+)'zod'/, "$1'../utils/zod'"))
+        : bytes;
+      expect(`sha256:${createHash('sha256').update(original).digest('hex')}`).toBe(digest);
       expect(bytes.toString('utf8')).toContain(name === 'LICENSE' ? 'MIT License' : 'SPDX-License-Identifier: MIT');
       if (name !== 'LICENSE') validateDependencies(name, bytes);
     }
@@ -84,7 +92,7 @@ describe('pinned visual contract fidelity', () => {
 
   it.each(['en', 'ko', 'ja'] as const)('preserves heavy display and ordinary body faces in every %s export', (locale) => {
     const fallback = { en: '', ko: ", 'Black Han Sans'", ja: ", 'Dela Gothic One'" }[locale];
-    const family = `'Archivo Black'${fallback}, sans-serif`;
+    const family = `'Anton'${fallback}, 'Impact', 'Arial Narrow', sans-serif`;
     for (const format of ['json', 'css-variables', 'tailwind', 'typescript'] as const) {
       const result = compose({ locale, format });
       const spec = result.visualContract as ResolvedVisualContract;
@@ -110,7 +118,7 @@ describe('pinned visual contract fidelity', () => {
       expect(ordinary.typography.roles.display.fontFamily).not.toMatch(/Black Han Sans|Dela Gothic One/);
       expect(ordinary.typography.fonts.some((font) => /Black Han Sans|Dela Gothic One/.test(font.family))).toBe(false);
       const editorial = single({ primaryStyleId: 'editorial-silence', locale });
-      expect(editorial.typography.roles.display.fontFamily).toBe(locale === 'ko' ? "'Noto Serif KR', serif" : "'Noto Serif JP', serif");
+      expect(editorial.typography.roles.display.fontFamily).toBe(`'Spectral', Georgia, ${locale === 'ko' ? "'Noto Serif KR'" : "'Noto Serif JP'"}, serif`);
       const overridden = single({ locale, overrides: { typography: { display: { fontFamily: 'system-ui', fontWeight: 700 } } } });
       expect(overridden.typography.roles.display).toMatchObject({ fontFamily: 'system-ui', fontWeight: 700 });
       expect(overridden.origins['typography.roles.display.fontFamily']).toBe('override');

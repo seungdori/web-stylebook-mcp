@@ -137,13 +137,16 @@ describe('issue 1 fidelity regressions', () => {
   });
 
   it('keeps authored role line-heights in every contract renderer', () => {
+    const authored = repo.visualContracts.library.contracts['brutalist-grid']!.typography.roles;
+    const display = authored.display.lineHeight;
+    const body = authored.body.lineHeight;
     for (const format of formats) {
       const result = composeDesignTokens({
         primaryStyleId: 'brutalist-grid', contract, format, colorMode: 'light',
       }, repo);
       const spec = result.visualContract as ResolvedVisualContract;
-      expect(spec.typography.roles.display.lineHeight).toBe(0.82);
-      expect(spec.typography.roles.body.lineHeight).toBe(1.65);
+      expect(spec.typography.roles.display.lineHeight).toBe(display);
+      expect(spec.typography.roles.body.lineHeight).toBe(body);
       expect((result.tokens as DesignTokens).typography.lineHeight).toEqual({
         tight: spec.typography.roles.display.lineHeight,
         normal: spec.typography.roles.body.lineHeight,
@@ -151,35 +154,36 @@ describe('issue 1 fidelity regressions', () => {
       });
       if (format === 'json') {
         const parsed = JSON.parse(result.rendered);
-        expect(parsed.typography.roles.display.lineHeight).toBe(0.82);
-        expect(parsed.typography.roles.body.lineHeight).toBe(1.65);
+        expect(parsed.typography.roles.display.lineHeight).toBe(display);
+        expect(parsed.typography.roles.body.lineHeight).toBe(body);
       }
       if (format === 'typescript') {
         const parsed = exportedJson(result.rendered, 'visualContract');
-        expect(parsed.typography.roles.display.lineHeight).toBe(0.82);
-        expect(parsed.typography.roles.body.lineHeight).toBe(1.65);
+        expect(parsed.typography.roles.display.lineHeight).toBe(display);
+        expect(parsed.typography.roles.body.lineHeight).toBe(body);
       }
       if (format === 'css-variables') {
-        expect(result.rendered).toContain('--line-height-tight: 0.82;');
-        expect(result.rendered).toContain('--line-height-normal: 1.65;');
-        expect(result.rendered).toContain('--type-display-line-height: 0.82;');
-        expect(result.rendered).toContain('--type-body-line-height: 1.65;');
+        expect(result.rendered).toContain(`--line-height-tight: ${display};`);
+        expect(result.rendered).toContain(`--line-height-normal: ${body};`);
+        expect(result.rendered).toContain(`--type-display-line-height: ${display};`);
+        expect(result.rendered).toContain(`--type-body-line-height: ${body};`);
       }
       if (format === 'tailwind') {
         const theme = exportedJson(result.rendered, 'theme');
-        expect(theme.roleStyles.display.lineHeight).toBe(0.82);
-        expect(theme.roleStyles.body.lineHeight).toBe(1.65);
-        expect(theme.extend.fontSize.display[1].lineHeight).toBe('0.82');
-        expect(theme.extend.fontSize.body[1].lineHeight).toBe('1.65');
-        expect(theme.metadata.typography.roles.body.lineHeight).toBe(1.65);
+        expect(theme.roleStyles.display.lineHeight).toBe(display);
+        expect(theme.roleStyles.body.lineHeight).toBe(body);
+        expect(theme.extend.fontSize.display[1].lineHeight).toBe(String(display));
+        expect(theme.extend.fontSize.body[1].lineHeight).toBe(String(body));
+        expect(theme.metadata.typography.roles.body.lineHeight).toBe(body);
       }
     }
   });
 
   it('preserves explicit none and zero through every contract renderer', () => {
+    // swiss-poster authors no shadows, square corners, and no motion.
     for (const format of formats) {
       const result = composeDesignTokens({
-        primaryStyleId: 'brutalist-grid',
+        primaryStyleId: 'swiss-poster',
         contract,
         format,
         overrides: { typography: { body: { letterSpacingEm: 0, paragraphSpacingEm: 0 } } },
@@ -223,7 +227,7 @@ describe('issue 1 fidelity regressions', () => {
         expect(result.rendered).toContain('--type-body-letter-spacing: 0em;');
         expect(result.rendered).toContain('--type-body-margin-block-end: 0em;');
         expect(result.rendered).toContain('--type-body-text-transform: none;');
-        expect(result.rendered).toContain('--type-display-line-height: 0.82;');
+        expect(result.rendered).toContain(`--type-display-line-height: ${spec.typography.roles.display.lineHeight};`);
       }
       if (format === 'tailwind') {
         const theme = exportedJson(result.rendered, 'theme');

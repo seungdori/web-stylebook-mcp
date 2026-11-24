@@ -1,17 +1,17 @@
 ---
 name: "Brutalist Grid (web-stylebook · brutalist-grid)"
-description: "굵고 투박한 선, 구조적인 타이포 블록 시스템."
+description: "회색 바탕 위의 흰 용지를 5px 검은 테두리로 감싸고 4px 검은 선으로 나눕니다. 압축 대문자와 타자체 모노 필드를 쓰며, 노랑과 빨강은 단색 블록으로만 씁니다."
 ---
 
 # Brutalist Grid
 
 ## Overview
 
-굵고 투박한 선, 구조적인 타이포 블록 시스템. 고대비 박스와 타협 없는 정렬, 드러난 구조로 강한 태도가 필요한 제품에 어울립니다.
+회색 바탕 위의 흰 용지를 5px 검은 테두리로 감싸고 4px 검은 선으로 나눕니다. 압축 대문자와 타자체 모노 필드를 쓰며, 노랑과 빨강은 단색 블록으로만 씁니다. 한 장의 틀 안에 기록과 집계를 담습니다. 압축 대문자, 타자체 모노 필드, 4px 선을 씁니다. 기록 보관소, 등록 명부, 시간표에 어울립니다.
 
-web-stylebook-mcp가 brutalist-grid 스타일로 만든 파일입니다. 값은 고정한 시각 계약(revision fnv1a:229761bcdae6bbf6)에서 가져왔습니다. 이 파일은 라이트 테마를 담습니다.
+web-stylebook-mcp가 brutalist-grid 스타일로 만든 파일입니다. 값은 고정한 시각 계약(revision fnv1a:cf61464e6b8958a7)에서 가져왔습니다. 이 파일은 라이트 테마를 담습니다.
 
-시각 프로필: uppercase blocks, white panels with black rules, strict modular grid.
+시각 프로필: condensed capitals and typed mono, white sheet in a black frame, blocks on 4px rules.
 
 ```yaml
 version: alpha
@@ -21,23 +21,23 @@ version: alpha
 
 토큰 이름은 DESIGN.md 관례를 따릅니다. 괄호 안은 compose_design_tokens의 역할 이름입니다.
 
-- **primary** (text) `#111`: 본문과 제목.
+- **primary** (text) `#111111`: 본문과 제목.
 - **on-primary** (textInverse) `#e6e6e1`: 잉크색(primary) 면 위의 글자.
-- **secondary** (textMuted) `#111`: 보조 글자: 캡션, 메타데이터, 도움말.
+- **secondary** (textMuted) `#4d4d49`: 보조 글자: 캡션, 메타데이터, 도움말.
 - **surface** (canvas) `#e6e6e1`: 페이지 배경.
-- **surface-container** (surface) `#fff`: 패널과 카드.
-- **surface-container-high** (surfaceRaised) `#fff`: 입력란, 메뉴, 팝오버처럼 떠 있는 면.
-- **surface-variant** (surfaceMuted) `#fff`: 호버 행, 움푹한 영역, 비활성 영역 같은 옅은 면.
-- **outline** (borderStrong) `#111`: 항상 보여야 하는 조작 요소 경계.
-- **outline-variant** (border) `#111`: 구분선과 장식 선.
+- **surface-container** (surface) `#ffffff`: 패널과 카드.
+- **surface-container-high** (surfaceRaised) `#ffffff`: 입력란, 메뉴, 팝오버처럼 떠 있는 면.
+- **surface-variant** (surfaceMuted) `#ffffff`: 호버 행, 움푹한 영역, 비활성 영역 같은 옅은 면.
+- **outline** (borderStrong) `#111111`: 항상 보여야 하는 조작 요소 경계.
+- **outline-variant** (border) `#111111`: 구분선과 장식 선.
 - **accent** (accent) `#d72600`: 스타일의 정체성 강조색.
 - **on-accent** (accentText) `#ffffff`: 강조색 위의 글자.
-- **accent-secondary** (accentSecondary) `#fff`: 선택 상태와 보조 면에 쓰는 보조 강조색. 주 행동에는 쓰지 않습니다.
-- **on-accent-secondary** (accentSecondaryText) `#111`: 보조 강조색 위의 글자.
+- **accent-secondary** (accentSecondary) `#ffffff`: 선택 상태와 보조 면에 쓰는 보조 강조색. 주 행동에는 쓰지 않습니다.
+- **on-accent-secondary** (accentSecondaryText) `#111111`: 보조 강조색 위의 글자.
 - **action-primary** (actionPrimary) `#d72600`: 주 버튼 배경.
 - **on-action-primary** (actionPrimaryText) `#ffffff`: 주 버튼 라벨.
-- **action-secondary** (actionSecondary) `#fff`: 보조 버튼 배경.
-- **on-action-secondary** (actionSecondaryText) `#111`: 보조 버튼 라벨.
+- **action-secondary** (actionSecondary) `#ffffff`: 보조 버튼 배경.
+- **on-action-secondary** (actionSecondaryText) `#111111`: 보조 버튼 라벨.
 - **link** (link) `#d72600`: 링크 글자.
 - **focus** (focus) `#d72600`: 포커스 표시.
 
@@ -45,87 +45,87 @@ version: alpha
 
 ```yaml
 colors:
-  primary: "#111"
+  primary: "#111111"
   on-primary: "#e6e6e1"
-  secondary: "#111"
+  secondary: "#4d4d49"
   surface: "#e6e6e1"
-  surface-container: "#fff"
-  surface-container-high: "#fff"
-  surface-variant: "#fff"
-  outline: "#111"
-  outline-variant: "#111"
+  surface-container: "#ffffff"
+  surface-container-high: "#ffffff"
+  surface-variant: "#ffffff"
+  outline: "#111111"
+  outline-variant: "#111111"
   accent: "#d72600"
   on-accent: "#ffffff"
-  accent-secondary: "#fff"
-  on-accent-secondary: "#111"
+  accent-secondary: "#ffffff"
+  on-accent-secondary: "#111111"
   action-primary: "#d72600"
   on-action-primary: "#ffffff"
-  action-secondary: "#fff"
-  on-action-secondary: "#111"
+  action-secondary: "#ffffff"
+  on-action-secondary: "#111111"
   link: "#d72600"
   focus: "#d72600"
 ```
 
 ## Typography
 
-의도한 서체: Mono or compressed grotesk, large weight jumps.
+의도한 서체: Condensed upper-case capitals for names and counts, a typed mono for every field.
 
-- **display**: 'Archivo Black', 'Black Han Sans', sans-serif, 굵기 400, 10rem, 줄 간격 1.2, 유동 크기 5–10rem, 토큰은 최댓값, word-break keep-all, 행 길이 24ch, 문단 간격 1em
-- **heading**: 'Archivo Black', 'Black Han Sans', sans-serif, 굵기 400, 3.5rem, 줄 간격 1.2, 유동 크기 1.8–3.5rem, 토큰은 최댓값, word-break keep-all, 행 길이 36ch, 문단 간격 1em
-- **subheading**: 'Archivo Black', 'Black Han Sans', sans-serif, 굵기 400, 1.3rem, 줄 간격 1.65, 유동 크기 1.012–1.3rem, 토큰은 최댓값, word-break keep-all, 행 길이 42ch, 문단 간격 1em
-- **body**: 'IBM Plex Mono', 'Noto Sans KR', monospace, 굵기 400, 0.88rem, 줄 간격 1.65, word-break keep-all, 행 길이 68ch, 문단 간격 1em
-- **small**: 'IBM Plex Mono', 'Noto Sans KR', monospace, 굵기 400, 0.77rem, 줄 간격 1.65, word-break keep-all, 행 길이 72ch, 문단 간격 1em
-- **label**: 'IBM Plex Mono', 'Noto Sans KR', monospace, 굵기 600, 0.75rem, 줄 간격 1.65, word-break keep-all, 행 길이 36ch, 문단 간격 1em
-- **caption**: 'IBM Plex Mono', 'Noto Sans KR', monospace, 굵기 400, 0.6875rem, 줄 간격 1.65, word-break keep-all, 행 길이 72ch, 문단 간격 1em
-- **data**: 'IBM Plex Mono', 'Noto Sans KR', monospace, 굵기 400, 0.77rem, 줄 간격 1.65, 고정폭 숫자, word-break keep-all, 행 길이 80ch, 문단 간격 1em
+- **display**: 'Anton', 'Black Han Sans', 'Impact', 'Arial Narrow', sans-serif, 굵기 400, 4.5rem, 줄 간격 1.2, 유동 크기 2.5–4.5rem, 토큰은 최댓값, word-break keep-all, 행 길이 18ch, 문단 간격 0.15em
+- **heading**: 'Anton', 'Black Han Sans', 'Impact', 'Arial Narrow', sans-serif, 굵기 400, 1.89rem, 줄 간격 1.2, 유동 크기 1.8–1.89rem, 토큰은 최댓값, word-break keep-all, 행 길이 28ch, 문단 간격 0.4em
+- **subheading**: 'Anton', 'Black Han Sans', 'Impact', 'Arial Narrow', sans-serif, 굵기 400, 1.35rem, 줄 간격 1.65, 유동 크기 1.15–1.35rem, 토큰은 최댓값, word-break keep-all, 행 길이 36ch, 문단 간격 0.45em
+- **body**: 'Overpass Mono', 'Noto Sans KR', ui-monospace, 'SFMono-Regular', Menlo, monospace, 굵기 400, 1rem, 줄 간격 1.65, word-break keep-all, 행 길이 64ch, 문단 간격 0.8em
+- **small**: 'Overpass Mono', 'Noto Sans KR', ui-monospace, 'SFMono-Regular', Menlo, monospace, 굵기 400, 0.875rem, 줄 간격 1.65, word-break keep-all, 행 길이 68ch, 문단 간격 0.6em
+- **label**: 'Overpass Mono', 'Noto Sans KR', ui-monospace, 'SFMono-Regular', Menlo, monospace, 굵기 600, 0.8125rem, 줄 간격 1.65, word-break keep-all, 행 길이 24ch, 문단 간격 0em
+- **caption**: 'Overpass Mono', 'Noto Sans KR', ui-monospace, 'SFMono-Regular', Menlo, monospace, 굵기 400, 0.75rem, 줄 간격 1.65, word-break keep-all, 행 길이 60ch, 문단 간격 0.4em
+- **data**: 'Overpass Mono', 'Noto Sans KR', ui-monospace, 'SFMono-Regular', Menlo, monospace, 굵기 400, 0.875rem, 줄 간격 1.65, 고정폭 숫자, word-break keep-all, 행 길이 70ch, 문단 간격 0.25em
 
 ```yaml
 typography:
   display:
-    fontFamily: "'Archivo Black', 'Black Han Sans', sans-serif"
-    fontSize: 10rem
+    fontFamily: "'Anton', 'Black Han Sans', 'Impact', 'Arial Narrow', sans-serif"
+    fontSize: 4.5rem
     fontWeight: 400
     lineHeight: 1.2
     letterSpacing: 0em
   heading:
-    fontFamily: "'Archivo Black', 'Black Han Sans', sans-serif"
-    fontSize: 3.5rem
+    fontFamily: "'Anton', 'Black Han Sans', 'Impact', 'Arial Narrow', sans-serif"
+    fontSize: 1.89rem
     fontWeight: 400
     lineHeight: 1.2
     letterSpacing: 0em
   subheading:
-    fontFamily: "'Archivo Black', 'Black Han Sans', sans-serif"
-    fontSize: 1.3rem
+    fontFamily: "'Anton', 'Black Han Sans', 'Impact', 'Arial Narrow', sans-serif"
+    fontSize: 1.35rem
     fontWeight: 400
     lineHeight: 1.65
     letterSpacing: 0em
   body:
-    fontFamily: "'IBM Plex Mono', 'Noto Sans KR', monospace"
-    fontSize: 0.88rem
+    fontFamily: "'Overpass Mono', 'Noto Sans KR', ui-monospace, 'SFMono-Regular', Menlo, monospace"
+    fontSize: 1rem
     fontWeight: 400
     lineHeight: 1.65
     letterSpacing: 0em
   small:
-    fontFamily: "'IBM Plex Mono', 'Noto Sans KR', monospace"
-    fontSize: 0.77rem
+    fontFamily: "'Overpass Mono', 'Noto Sans KR', ui-monospace, 'SFMono-Regular', Menlo, monospace"
+    fontSize: 0.875rem
     fontWeight: 400
     lineHeight: 1.65
     letterSpacing: 0em
   label:
-    fontFamily: "'IBM Plex Mono', 'Noto Sans KR', monospace"
-    fontSize: 0.75rem
+    fontFamily: "'Overpass Mono', 'Noto Sans KR', ui-monospace, 'SFMono-Regular', Menlo, monospace"
+    fontSize: 0.8125rem
     fontWeight: 600
     lineHeight: 1.65
     letterSpacing: 0em
   caption:
-    fontFamily: "'IBM Plex Mono', 'Noto Sans KR', monospace"
-    fontSize: 0.6875rem
+    fontFamily: "'Overpass Mono', 'Noto Sans KR', ui-monospace, 'SFMono-Regular', Menlo, monospace"
+    fontSize: 0.75rem
     fontWeight: 400
     lineHeight: 1.65
     letterSpacing: 0em
   data:
-    fontFamily: "'IBM Plex Mono', 'Noto Sans KR', monospace"
-    fontSize: 0.77rem
+    fontFamily: "'Overpass Mono', 'Noto Sans KR', ui-monospace, 'SFMono-Regular', Menlo, monospace"
+    fontSize: 0.875rem
     fontWeight: 400
     lineHeight: 1.65
     letterSpacing: 0em

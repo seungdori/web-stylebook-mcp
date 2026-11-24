@@ -57,7 +57,7 @@ describe('canonical visual contract over MCP', () => {
     expect(manifest.visualContract.contentHash).toMatch(/^sha256:[a-f0-9]{64}$/);
     expect(nativeStyle.visualContract.schema).toBe(manifest.visualContract.contractSchema);
     expect(nativeStyle.visualContract.styleId).toBe('brutalist-grid');
-    expect(nativeStyle.visualContract.colors.text).toBe('#111');
+    expect(nativeStyle.visualContract.colors.text).toBe('#111111');
     expect(nativeStyle.visualContract.colors.accent).toBe('#d72600');
     expect(nativeStyle.visualContract.modes).toBeUndefined();
     expect(nativeStyle.visualContract.styles).toBeUndefined();

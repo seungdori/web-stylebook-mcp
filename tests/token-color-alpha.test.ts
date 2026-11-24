@@ -47,11 +47,12 @@ describe('#24 — the reported cases', () => {
   it('#00000033 is not judged as opaque black: no 21:1, and the text color is chosen on the canvas', () => {
     const result = compose({ format: 'css-variables', colorMode: 'light', accentOverride: '#00000033' });
     const c = (result.tokens as DesignTokens).color;
-    expect(c.canvas).toBe('#fcfbf9');
+    expect(c.canvas).toBe('#fdfbf9');
     expect(c.accent).toBe('#00000033'); // alpha is kept: the design intent is not rewritten
     expect(contrastRatio('#ffffff', '#00000033')).toBeNull(); // unknown backdrop: no number, not 21
     expect(contrastRatio(c.accentText, c.accent)).toBeNull();
-    expect(contrastRatio('#ffffff', c.accent, c.canvas)).toBeCloseTo(1.6584076429866101, 12); // the issue's figure
+    expect(contrastRatio('#ffffff', c.accent, '#fcfbf9')).toBeCloseTo(1.6584076429866101, 12); // the issue's figure, on the canvas it reported
+    expect(contrastRatio('#ffffff', c.accent, c.canvas)).toBeCloseTo(1.65549, 5); // the same accent on today's canvas
     expect(c.accentText).toBe('#000000');
     const shown = over(rgba(c.accent), rgba(c.canvas));
     expect(contrastRatio(c.accentText, c.accent, c.canvas)).toBeCloseTo(ratio(BLACK, shown), 12);
@@ -59,7 +60,7 @@ describe('#24 — the reported cases', () => {
     expect(result.warnings.some((w) => w.startsWith('accent text'))).toBe(false);
     expect(result.warnings).toContain('accent on canvas (light) contrast 1.6:1 is below WCAG AA 3:1 — verify or adjust.');
     const review = result.warnings.find((w) => w.startsWith('accent (light)'));
-    expect(review).toBe('accent (light) #00000033 is not opaque (alpha 20%): its contrast is measured as painted on canvas #fcfbf9, where it shows as #cac9c7; on any other backdrop it is unknown — requires rendered contrast review.');
+    expect(review).toBe('accent (light) #00000033 is not opaque (alpha 20%): its contrast is measured as painted on canvas #fdfbf9, where it shows as #cac9c7; on any other backdrop it is unknown — requires rendered contrast review.');
   });
 
   it('#00000000 is fully transparent, not black: white text is not picked, and the invisible focus ring is repaired', () => {
@@ -266,18 +267,19 @@ describe('#24 — contrast math: opaque colors and thresholds unchanged', () => 
   });
 
   it('an opaque accent just under 3:1 on the canvas still warns and repairs focus; just over does not', () => {
-    const below = compose({ colorMode: 'light', accentOverride: '#02a680' });
+    // Neighbours on the runtime-signal light canvas (#fdfbf9): one green step apart, either side of 3:1.
+    const below = compose({ colorMode: 'light', accentOverride: '#00a683' });
     const bc = (below.tokens as DesignTokens).color;
-    expect(contrastRatio('#02a680', bc.canvas)).toBeCloseTo(2.99993, 5);
+    expect(contrastRatio('#00a683', bc.canvas)).toBeCloseTo(2.9995, 4);
     expect(below.warnings).toContain('accent on canvas (light) contrast 3:1 is below WCAG AA 3:1 — verify or adjust.');
-    expect(bc.focus).not.toBe('#02a680');
+    expect(bc.focus).not.toBe('#00a683');
     expect(below.warnings.some((w) => w.includes('not opaque'))).toBe(false);
 
-    const above = compose({ colorMode: 'light', accentOverride: '#00a680' });
+    const above = compose({ colorMode: 'light', accentOverride: '#00a583' });
     const ac = (above.tokens as DesignTokens).color;
-    expect(contrastRatio('#00a680', ac.canvas)).toBeGreaterThanOrEqual(3);
+    expect(contrastRatio('#00a583', ac.canvas)).toBeGreaterThanOrEqual(3);
     expect(above.warnings.some((w) => w.startsWith('accent on canvas'))).toBe(false);
-    expect(ac.focus).toBe('#00a680');
+    expect(ac.focus).toBe('#00a583');
   });
 });
 
