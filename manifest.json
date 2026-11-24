@@ -1,0 +1,51 @@
+{
+  "manifest_version": "0.3",
+  "name": "web-stylebook",
+  "display_name": "Web Stylebook",
+  "version": "0.16.0",
+  "description": "Design judgment for coding agents. It improves the UI you already have and shows the evidence.",
+  "author": {
+    "name": "Web Stylebook",
+    "url": "https://webstylebook.com"
+  },
+  "homepage": "https://webstylebook.com",
+  "documentation": "https://github.com/seungdori/web-stylebook-mcp#readme",
+  "support": "https://github.com/seungdori/web-stylebook-mcp/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/seungdori/web-stylebook-mcp"
+  },
+  "license": "MIT",
+  "keywords": ["mcp", "model-context-protocol", "design", "ui", "design-system", "coding-agent"],
+  "server": {
+    "type": "node",
+    "entry_point": "dist/cli.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/dist/cli.js"],
+      "env": {}
+    }
+  },
+  "tools": [
+    { "name": "recommend_design_direction", "description": "Recommend a design direction" },
+    { "name": "compare_design_directions", "description": "Compare design directions" },
+    { "name": "search_design_references", "description": "Search real-world design references" },
+    { "name": "get_design_reference", "description": "Get one real-world design reference" },
+    { "name": "get_design_improvement_plan", "description": "Improve an existing UI: decide, implement, compare and report" },
+    { "name": "validate_design_improvement_result", "description": "Check implementation evidence and compose a before/after improvement report" },
+    { "name": "get_design_principle_plan", "description": "Plan relevant design principles" },
+    { "name": "get_ux_principle_plan", "description": "Plan relevant UX principles" },
+    { "name": "get_design_audit_plan", "description": "Build an evidence-backed design audit plan" },
+    { "name": "audit_page_structure", "description": "Audit a built page for banned structural patterns" },
+    { "name": "compare_page_revisions", "description": "Check that a redesign kept the original page's content and behavior" },
+    { "name": "validate_design_audit_result", "description": "Validate a design audit result contract" },
+    { "name": "get_ui_state_plan", "description": "Plan UI states for a surface" },
+    { "name": "compose_design_tokens", "description": "Compose design tokens" }
+  ],
+  "compatibility": {
+    "platforms": ["darwin", "win32", "linux"],
+    "runtimes": {
+      "node": ">=20"
+    }
+  }
+}

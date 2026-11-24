@@ -82,6 +82,7 @@ claude mcp add web-stylebook -- npx -y web-stylebook-mcp@latest
 {
   "mcpServers": {
     "web-stylebook": {
+      "type": "stdio",
       "command": "npx",
       "args": ["-y", "web-stylebook-mcp@latest"]
     }
@@ -105,6 +106,33 @@ codex mcp add web-stylebook -- npx -y web-stylebook-mcp@latest
 command = "npx"
 args = ["-y", "web-stylebook-mcp@latest"]
 ```
+
+### VS Code
+
+VS Code의 GitHub Copilot에서는 버튼을 누르세요.
+
+[![VS Code에 web-stylebook 설치](https://img.shields.io/badge/VS_Code-Install_web--stylebook-0098FF?logo=visualstudiocode&logoColor=white)](https://vscode.dev/redirect?url=vscode%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522web-stylebook%2522%252C%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522-y%2522%252C%2522web-stylebook-mcp%2540latest%2522%255D%257D)
+
+VS Code가 서버 화면을 엽니다. 설치하기 전에 그 화면에서 실행 명령을 확인하세요.
+
+또는 작업 공간 루트의 `.mcp.json`에 서버를 추가하세요. Claude Code가 읽는 파일과 같습니다. 모든
+작업 공간에서 쓰려면 `~/.copilot/mcp-config.json`에 추가합니다.
+
+```json
+{
+  "mcpServers": {
+    "web-stylebook": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "web-stylebook-mcp@latest"]
+    }
+  }
+}
+```
+
+신뢰한 작업 공간에서는 VS Code가 `.mcp.json`의 서버를 추가 확인 없이 시작합니다. 명령 팔레트의
+**MCP: List Servers**에서 서버를 확인할 수 있습니다. 예전 안내에 나오는 `.vscode/mcp.json`(`servers`
+키)은 VS Code가 폐기 예정으로 표시한 형식입니다.
 
 ### 스킬과 다른 클라이언트
 

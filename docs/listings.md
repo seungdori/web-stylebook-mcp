@@ -4,7 +4,8 @@ Metadata for listing `web-stylebook-mcp` in MCP directories. Nothing here has be
 submission needs the maintainer's approval first.
 
 `tests/install-config.test.ts` checks that every install link and config block below starts the
-same command as the README.
+same command as the README. `tests/install-launch.test.ts` starts the server from each README
+config and from a bundle staged as in [Smithery](#smithery).
 
 ## Shared metadata
 
@@ -20,7 +21,7 @@ same command as the README.
 | Transport | stdio, local. No API key, no network access, no environment variables. |
 | Requirements | Node 20 or later |
 | Categories | Design; Developer Tools |
-| Tags | `design`, `ui`, `ux`, `frontend`, `design-system`, `design-tokens`, `accessibility`, `mcp`, `cursor`, `claude-code`, `codex` |
+| Tags | `design`, `ui`, `ux`, `frontend`, `design-system`, `design-tokens`, `accessibility`, `mcp`, `cursor`, `claude-code`, `codex`, `vscode` |
 | Logo | https://webstylebook.com/favicon.svg (SVG, 512 × 512 viewBox) |
 | Social card | https://webstylebook.com/social-card.jpg (JPEG, 1280 × 800) |
 | Screenshot | https://raw.githubusercontent.com/seungdori/web-stylebook-mcp/master/docs/demo/before-after.png |
@@ -81,6 +82,16 @@ claude mcp add web-stylebook -- npx -y web-stylebook-mcp@latest
 codex mcp add web-stylebook -- npx -y web-stylebook-mcp@latest
 ```
 
+VS Code (GitHub Copilot) install link. `url` is the URL-encoded `vscode:mcp/install?` link, and that
+link's query is the URL-encoded server object with `"name": "web-stylebook"` added:
+
+```text
+https://vscode.dev/redirect?url=vscode%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522web-stylebook%2522%252C%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522-y%2522%252C%2522web-stylebook-mcp%2540latest%2522%255D%257D
+```
+
+For a manual setup, VS Code reads the `mcpServers` block with `"type": "stdio"` added from `.mcp.json`
+at the workspace root or from `~/.copilot/mcp-config.json`.
+
 ## Official MCP Registry
 
 - File: [`server.json`](../server.json), schema `2025-12-11`, the current released schema.
@@ -91,6 +102,41 @@ codex mcp add web-stylebook -- npx -y web-stylebook-mcp@latest
 - On each release, set `version` and `packages[0].version` in `server.json` to the npm version.
   The install-config test fails if they differ from `package.json`.
 - Publish after the npm release: `mcp-publisher login github`, then `mcp-publisher publish`.
+
+## Smithery
+
+Checked on 2026-11-25. Smithery is now part of Arcade, and its old documentation site returns 404.
+Its home page says the hosted MCP proxy and managed identity shut down on 2026-10-31; whether the
+registry still accepts new servers was not checked. The `smithery` CLI (npm `smithery` 1.2.0,
+source moved to `arcadeai-labs/smithery-cli`) publishes a server URL or an MCP bundle (`.mcpb`).
+This server runs locally over stdio, so it is listed as a bundle.
+
+- File: [`manifest.json`](../manifest.json), MCPB manifest version 0.3. Smithery reads `name`,
+  `version`, `server.mcp_config` and `tools` from it. The listing shows only the tools in `tools`.
+- Size: the CLI rejects bundles over 25 MB. The 0.16.0 bundle is 5.1 MB.
+- On each release, set `version` in `manifest.json` to the npm version. The install-config test
+  fails if they differ, and the launch test fails if `tools` misses a server tool.
+- The CLI reads only `name` from an optional `smithery.yaml`. The `-n` option below replaces it, so
+  the repository has no `smithery.yaml`.
+
+Build the bundle from the released npm package, in an empty folder with this repository's
+`manifest.json`:
+
+```bash
+npm pack web-stylebook-mcp@<version>
+mkdir bundle
+tar -xzf web-stylebook-mcp-<version>.tgz -C bundle --strip-components=1
+cp manifest.json bundle/
+(cd bundle && npm install --omit=dev --ignore-scripts)
+npx -y @anthropic-ai/mcpb validate bundle/manifest.json
+npx -y @anthropic-ai/mcpb pack bundle server.mcpb
+```
+
+Publish after the maintainer approves. The CLI asks for a Smithery API key:
+
+```bash
+smithery mcp publish ./server.mcpb -n <namespace>/web-stylebook
+```
 
 ## cursor.directory
 
