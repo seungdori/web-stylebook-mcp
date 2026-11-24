@@ -605,6 +605,19 @@ webstylebook://workflows/improve-ui
 
 결과에는 `verdict`(`PASS`, `FIX_NOW`, `RISK`), 유지·손실·문구 변경·인정 항목을 담은 `inventory`, `wordCount`, `findings`, 그리고 `redesign-kept-<inventory>` 검사용 `evidence`와 `results`가 들어 있습니다. 기록하려면 `revisionPreservation: true`(와 같은 `productType`)로 `get_design_audit_plan`을 호출하세요. 이 계획에는 이 검사들만 들어 있어서 `validate_design_audit_result`가 evidence와 results를 그대로 받습니다. `revisionPreservation`이 없는 계획은 검사와 hash가 바뀌지 않습니다.
 
+### 원칙별 검사와 증거 방법
+
+`designPrincipleIds`나 `uxPrincipleIds`로 원칙을 고르면, 원칙의 verify 문장마다 `principle-<design|ux>-<id>-verify-<n>` 검사가 하나씩 붙습니다. 이 검사는 일반 `principles` 검사 4개와 따로 있습니다. `principles`의 각 원칙은 `checkIds`를 알려 주고, `coverage.principleChecks`는 그 수를 셉니다. 일반 검사에 답해도 이 검사에는 답한 것이 아닙니다. `src/audit/principle-verify.ts`의 검토한 표가 문장마다 답할 수 있는 방법을 정합니다. PASS, RISK, FIX_NOW를 내려면 검사가 받는 `method`(`evidenceMethods`)로 모은 결론 있는 증거가 필요합니다. 없으면 validator가 `EVIDENCE_METHOD_NOT_ACCEPTED`를 보고하고 판정은 `NOT_VERIFIED`가 됩니다.
+
+| 증거 `method` | 뒷받침하는 것 | 확정하지 못하는 것 |
+|---|---|---|
+| `static` | 라벨·속성·구조·토큰이 있다는 사실 | 실제로 누를 수 있는지, 사람이 이해하는지 |
+| `browser` | 누르는 영역, 포커스 순서, 오류 복구, 상태 보존, 뷰포트·모드별 렌더링 | 사람이 고르는 데 걸리는 시간 |
+| `agent-review` | 위계·그룹·밀도에 대한 근거 있는 우려나 개선 가설 | 사용자 성공률이나 만족도 |
+| `participant`, `analytics` | 밝힌 조건에서 잰 시간·오류·완료율·기억 | 다른 사용자·과업·제품에서도 같다는 일반화 |
+
+예를 들어 힉의 법칙의 첫 문장(첫 의미 있는 선택까지 걸리는 시간)은 `participant`나 `analytics` 증거만 받습니다. 에이전트가 자기 클릭 시간을 재면 `NOT_VERIFIED`로 남습니다. 두 번째 문장(우선순위 스타일이 빈도와 결과에 맞는지)은 `agent-review`를 받습니다. 이 검사들은 `when-present`입니다. 페이지에 없는 기능에 대한 문장은 `inapplicable` 증거와 함께 `NOT_APPLICABLE`로 답하세요.
+
 ## 감사 결과 계약
 
 `get_design_audit_plan`은 catalog version/hash와 결정론적 `planHash`를 담은 `identity`를

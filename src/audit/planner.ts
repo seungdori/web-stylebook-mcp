@@ -3,6 +3,10 @@ import type { CatalogRepository } from '../catalog/repository.js';
 import { stableHashOf } from '../catalog/stable-hash.js';
 import { planUiStates } from '../state-atlas/planner.js';
 import { structureChecks, type StructureClaim } from '../structure/checks.js';
+import {
+  DESIGN_VERIFY_METHODS, UX_VERIFY_METHODS, VERIFY_METHODS, principleVerifyCheckId,
+  type AuditEvidenceMethod, type VerifyMethodClass,
+} from './principle-verify.js';
 import { mustHaveExemptions, normalizeMustHaveConditions, type MustHaveCondition } from '../structure/must-haves.js';
 import { revisionChecks } from '../structure/revisions.js';
 import type {
@@ -62,13 +66,18 @@ export interface ResolvedAuditCheck {
   surfaceTags: UxSurface[];
   source: AuditCheckDefinition['source']
     | { kind: 'structure'; patternId: string; scope: 'global' | 'style' | 'must-have'; claim: StructureClaim }
-    | { kind: 'revision'; inventory: string };
+    | { kind: 'revision'; inventory: string }
+    | { kind: 'principle'; principle: 'design' | 'ux'; principleId: string; verifyIndex: number; method: VerifyMethodClass };
+  /** Present on principle verify checks: an asserted verdict needs conclusive evidence gathered by one of these methods. */
+  evidenceMethods?: AuditEvidenceMethod[];
 }
 
 interface PrincipleAuditContract {
   id: string;
   name: string;
   verify: string[];
+  /** The plan check that answers each verify sentence, in the same order. */
+  checkIds: string[];
   caution: string;
   resourceUri: string;
 }
@@ -128,6 +137,8 @@ export interface DesignAuditPlan {
     catalogChecks: number;
     includedChecks: number;
     excludedChecks: number;
+    /** Present only when principles are selected: one check per verify sentence. */
+    principleChecks?: number;
     /** Present only when the structure group is included; those checks come from the structure ruleset, not the catalog. */
     structureChecks?: number;
     revisionChecks?: number;
@@ -320,6 +331,7 @@ function designPrincipleContract(principle: DesignPrinciple, locale: Lang): Prin
     id: principle.id,
     name: text(principle.name, locale),
     verify: texts(principle.verify, locale),
+    checkIds: principle.verify.map((_, index) => principleVerifyCheckId('design', principle.id, index)),
     caution: text(principle.caution, locale),
     resourceUri: `webstylebook://design-principles/${principle.id}`,
   };
@@ -330,10 +342,42 @@ function uxPrincipleContract(principle: UxPrinciple, locale: Lang): UxPrincipleA
     id: principle.id,
     name: text(principle.name, locale),
     verify: texts(principle.verify, locale),
+    checkIds: principle.verify.map((_, index) => principleVerifyCheckId('ux', principle.id, index)),
     caution: text(principle.caution, locale),
     evidenceConfidence: principle.evidence.confidence,
     resourceUri: `webstylebook://principles/${principle.id}`,
   };
+}
+
+/**
+ * One check per verify sentence of each selected principle, with the evidence method the reviewed mapping assigns. A
+ * principle missing from the mapping, or whose verify list changed length, is a programming error, not a user error.
+ */
+function principleVerifyChecks(
+  kind: 'design' | 'ux', principle: DesignPrinciple | UxPrinciple, locale: Lang, remediation: string,
+): ResolvedAuditCheck[] {
+  const methods = (kind === 'design' ? DESIGN_VERIFY_METHODS : UX_VERIFY_METHODS)[principle.id];
+  if (!methods || methods.length !== principle.verify.length) {
+    throw new Error(`principle ${kind}/${principle.id} has ${principle.verify.length} verify sentence(s) but ${methods?.length ?? 0} mapped method(s); update src/audit/principle-verify.ts`);
+  }
+  return principle.verify.map((sentence, index) => {
+    const method = VERIFY_METHODS[methods[index]!];
+    return {
+      id: principleVerifyCheckId(kind, principle.id, index),
+      groupId: 'principles',
+      criterion: `${text(principle.name, locale)}: ${text(sentence, locale)} ${method.note[locale]}`,
+      why: text(principle.summary, locale),
+      remediation,
+      severity: 'minor',
+      evidenceTypes: [...method.evidenceTypes],
+      automation: method.automation,
+      // A sentence about a feature the page does not have is answered NOT_APPLICABLE with evidence, not PASS.
+      applicability: 'when-present',
+      surfaceTags: ['global'],
+      source: { kind: 'principle', principle: kind, principleId: principle.id, verifyIndex: index, method: methods[index]! },
+      evidenceMethods: [...method.methods],
+    };
+  });
 }
 
 export function planDesignAudit(
@@ -448,7 +492,11 @@ export function planDesignAudit(
       source: { kind: 'revision', inventory: check.inventory },
     }))
     : [];
-  const checks = [...catalogChecks, ...structure, ...revisionPlan];
+  const principleChecks: ResolvedAuditCheck[] = revision ? [] : [
+    ...designPrincipleIds.map((id) => principleVerifyChecks('design', repo.getDesignPrinciple(id)!, locale, labels[locale].verificationFix)),
+    ...uxPrincipleIds.map((id) => principleVerifyChecks('ux', repo.getPrinciple(id)!, locale, labels[locale].verificationFix)),
+  ].flat();
+  const checks = [...catalogChecks, ...principleChecks, ...structure, ...revisionPlan];
 
   const stateAtlasUnmappedSurfaces: UxSurface[] = surfaces
     .filter((surface) => surface !== 'global' && !repo.getSurface(surface));
@@ -491,6 +539,7 @@ export function planDesignAudit(
       catalogChecks: repo.policies.auditChecks.length,
       includedChecks: checks.length,
       excludedChecks: repo.policies.auditChecks.length - catalogChecks.length,
+      ...(principleChecks.length ? { principleChecks: principleChecks.length } : {}),
       ...(withStructure ? { structureChecks: structure.length } : {}),
       ...(revision ? { revisionChecks: revisionPlan.length } : {}),
     },

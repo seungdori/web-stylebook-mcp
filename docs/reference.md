@@ -602,6 +602,19 @@ A heading or link whose wording changed while its place or target stayed is repo
 
 The result has `verdict` (`PASS`, `FIX_NOW`, or `RISK`), an `inventory` with kept, lost, reworded, and acknowledged items, `wordCount`, `findings`, and `evidence` and `results` for the `redesign-kept-<inventory>` checks. To record them, call `get_design_audit_plan` with `revisionPreservation: true` (and the same `productType`); that plan holds only these checks, so `validate_design_audit_result` accepts the evidence and results as they are. Plans without `revisionPreservation` keep their checks and hash.
 
+### Principle checks and evidence methods
+
+Selecting `designPrincipleIds` or `uxPrincipleIds` adds one check per verify sentence of each principle, `principle-<design|ux>-<id>-verify-<n>`, beside the four general `principles` checks. Each principle in `principles` lists its `checkIds`, and `coverage.principleChecks` counts them. Answering the general checks does not answer these. A reviewed table in `src/audit/principle-verify.ts` assigns each sentence the method that can answer it, and an asserted verdict needs conclusive evidence whose `method` is one the check accepts (`evidenceMethods`); otherwise the validator reports `EVIDENCE_METHOD_NOT_ACCEPTED` and the verdict is `NOT_VERIFIED`.
+
+| Evidence `method` | Supports | Does not establish |
+|---|---|---|
+| `static` | that a label, attribute, structure, or token exists | that it is clickable or understood |
+| `browser` | hit areas, focus order, recovery, state kept, rendering at a viewport or mode | how long people take to choose |
+| `agent-review` | a reasoned concern or improvement hypothesis about hierarchy, grouping, density | user success or satisfaction |
+| `participant`, `analytics` | time, errors, completion, recall measured under stated conditions | the same result for other users, tasks, or products |
+
+For example, Hick's law's first sentence (time to first meaningful choice) accepts only `participant` or `analytics` evidence, so an agent timing its own clicks leaves it `NOT_VERIFIED`; its second sentence (priority styling matches frequency and consequence) accepts an `agent-review`. The checks are `when-present`: a sentence about something the page does not have is `NOT_APPLICABLE` with `inapplicable` evidence.
+
 ## Audit result contract
 
 `get_design_audit_plan` returns an `identity` with the catalog version/hash and a deterministic

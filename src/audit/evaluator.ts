@@ -23,6 +23,7 @@ import {
   widthInRange,
   type AuditCheckScope,
 } from './check-scope.js';
+import type { AuditEvidenceMethod } from './principle-verify.js';
 import { isAssertedVerdict, resolveAuditVerdict, type ViewportFit } from './verdict.js';
 
 export const AUDIT_EVIDENCE_PHASES = [
@@ -74,6 +75,8 @@ export interface AuditEvidence {
   phase?: AuditEvidencePhase;
   summary: string;
   outcome?: AuditEvidenceOutcome;
+  /** Who observed it and how; principle verify checks accept only the methods their claim allows. */
+  method?: AuditEvidenceMethod;
   actual?: unknown;
   expected?: unknown;
   artifactRef?: string;
@@ -871,7 +874,18 @@ export function validateDesignAuditResult(
     }
 
     const asserted = isAssertedVerdict(submitted.verdict);
-    const missingEvidence = badEvidenceRef || evidenceRefs.length === 0 || missingEvidenceTypes.length > 0;
+    // An agent's own run or judgment cannot stand in for what participants did; the check names the methods it accepts.
+    const methodMissing = !!check.evidenceMethods
+      && !conclusive.some((evidence) => evidence.method !== undefined && check.evidenceMethods!.includes(evidence.method));
+    if (asserted && methodMissing) {
+      issue(
+        issues,
+        'EVIDENCE_METHOD_NOT_ACCEPTED',
+        `check '${check.id}' needs conclusive evidence gathered by ${check.evidenceMethods!.join(' or ')}; set evidence.method, or leave the check NOT_VERIFIED`,
+        slot,
+      );
+    }
+    const missingEvidence = badEvidenceRef || evidenceRefs.length === 0 || missingEvidenceTypes.length > 0 || methodMissing;
     if (asserted && missingEvidence) {
       issue(
         issues,

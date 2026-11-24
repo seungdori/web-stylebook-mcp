@@ -22,6 +22,7 @@ import {
   type DesignPrinciplePlan,
   type DesignPrinciplePlanInput,
 } from '../design-principles/planner.js';
+import { AUDIT_EVIDENCE_METHODS } from '../audit/principle-verify.js';
 import {
   AUDIT_GROUP_IDS,
   AUDIT_VERDICTS,
@@ -166,6 +167,7 @@ const auditEvidenceShape = {
   phase: z.enum(AUDIT_EVIDENCE_PHASES).optional(),
   summary: z.string().trim().min(1).max(2000),
   outcome: z.enum(AUDIT_EVIDENCE_OUTCOMES).optional(),
+  method: z.enum(AUDIT_EVIDENCE_METHODS).describe('who observed it and how: static inspection, browser run, agent-review, participant observation, or analytics; principle verify checks accept only the methods they name').optional(),
   actual: auditValue.optional(),
   expected: auditValue.optional(),
   artifactRef: z.string().trim().min(1).max(2048).optional(),
@@ -458,7 +460,7 @@ export function registerTools(server: McpServer, repo: CatalogRepository): void 
 
   server.registerTool('get_design_audit_plan', {
     title: 'Build an evidence-backed design audit plan',
-    description: 'Return a localized, surface-aware audit checklist with stable check ids, severity, applicability, required evidence, remediation, verdict definitions, user-facing content checks, selected principle checks, and UI-state coverage. The host should confirm audit coverage and change depth with the user before choosing includeGroups. Include the opt-in "structure" group (with styleId) to add automated checks for banned generic and style-specific page patterns, answered by audit_page_structure; add productType to that group for one check per product must-have. This tool does not inspect a project: the host must collect actual rendered/code/interaction evidence, and missing evidence is NOT_VERIFIED rather than PASS.',
+    description: 'Return a localized, surface-aware audit checklist with stable check ids, severity, applicability, required evidence, remediation, verdict definitions, user-facing content checks, selected principle checks, and UI-state coverage. The host should confirm audit coverage and change depth with the user before choosing includeGroups. Include the opt-in "structure" group (with styleId) to add automated checks for banned generic and style-specific page patterns, answered by audit_page_structure; add productType to that group for one check per product must-have. Each selected design or UX principle adds one check per verify sentence (principle-<design|ux>-<id>-verify-<n>) that names the evidence method it accepts: static, browser, agent-review, or participant/analytics; an agent run of its own never answers a sentence that needs participants. This tool does not inspect a project: the host must collect actual rendered/code/interaction evidence, and missing evidence is NOT_VERIFIED rather than PASS.',
     inputSchema: auditPlanInputShape,
     annotations: READ_ONLY,
   }, async (args): Promise<ToolResult> => {
