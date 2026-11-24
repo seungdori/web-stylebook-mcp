@@ -28,6 +28,16 @@ All notable changes to this project are documented here. The format follows
   `not-time-series` (data-analytics changes and time range). Those checks become `when-present`;
   absent is NOT_APPLICABLE. The plan query and hash include the conditions, and the
   `webstylebook://structure/must-haves` resource lists them. The verdict policy id is `claims-v2`.
+- `get_design_audit_plan` turns each verify sentence of a selected design or UX principle into its
+  own check, `principle-<design|ux>-<id>-verify-<n>` (#20). Before, selecting Hick's law left the
+  same four general checks. A reviewed table (`src/audit/principle-verify.ts`) assigns each of the
+  71 sentences an evidence method; the checks are `when-present`, minor, and carry
+  `evidenceMethods`. Each selected principle lists its `checkIds`, and `coverage.principleChecks`
+  counts them. Plans that select principles change, so their plan hash changes.
+- Audit evidence takes an optional `method` (`static`, `browser`, `agent-review`, `participant`,
+  `analytics`). On a principle check, PASS, RISK or FIX_NOW without conclusive evidence of an
+  accepted method is `EVIDENCE_METHOD_NOT_ACCEPTED` and resolves to NOT_VERIFIED, so an agent's
+  own timing cannot answer a sentence that needs participants.
 
 ## [0.16.0] — 2026-11-24
 
