@@ -6,6 +6,18 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- `audit_page_structure` no longer turns a shape into a task defect on its own (#20). Every finding and
+  check now carries a `claim`, and `summary.claims` counts findings per claim. Without `styleId`, a
+  global pattern is a `shape-observation`: when found, its result is NOT_VERIFIED with `cant-tell`
+  evidence and a conditional remediation, and when absent it is NOT_APPLICABLE. The host judges the
+  shape against the page's task and submits PASS, RISK or FIX_NOW with `manual` evidence. With
+  `styleId`, the same patterns are `style-fidelity` results and keep FIX_NOW or RISK; a missing
+  must-have is a `required-element` result and keeps FIX_NOW. Structure plans without `styleId`
+  change accordingly (assisted, `when-present`, `manual` evidence), so their plan hash changes, and
+  the ruleset hash includes a new verdict policy id.
+
 ## [0.16.0] — 2026-11-24
 
 ### Added

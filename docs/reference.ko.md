@@ -202,7 +202,7 @@ MCP는 제출된 증거의 범위와 일관성을 검사하고 **실제 파일 �
 // → audit_page_structure({ html, styleId: "quiet-utility", locale: "ko" })
 // ← 구조 감사 결과 (일부)
 {
-  "summary": { "clean": false, "findings": 8, "major": 6, "minor": 2, "notVerified": 0, "checked": 12 },
+  "summary": { "clean": false, "findings": 8, "major": 6, "minor": 2, "notVerified": 0, "checked": 12, "claims": { "shape-observation": 0, "style-fidelity": 8, "required-element": 0 } },
   "findings": [
     {
       "patternId": "logo-strip",
@@ -239,6 +239,16 @@ MCP는 제출된 증거의 범위와 일관성을 검사하고 **실제 파일 �
 ```
 
 발견 항목마다 위치, 관찰값, 그리고 그 자리에 대신 넣을 것을 알려 줍니다. 대신 넣을 것은 고른 스타일에서 같은 역할을 하는 시그니처 무브(로고 띠라면 근거 역할), 히어로 구성, 섹션 순서입니다. 다시 빌드하고 감사를 한 번 더 돌린 뒤, `get_design_audit_plan.includeGroups`에 `"structure"`를 넣고 돌려받은 `evidence`와 `results`를 `validate_design_audit_result`에 넘기세요. 뷰포트마다 다른 `targetId`로 감사하세요. 증거 id에 `targetId`가 들어가므로 여러 실행 결과를 함께 검증할 수 있습니다. 이 검사는 브라우저 렌더링이 아니라 제출한 HTML과 CSS에 대한 결정적 휴리스틱입니다. `clean`은 모든 검사가 실행되었고 이 패턴들을 찾지 못했다는 뜻이지, 디자인이 통과했다는 뜻이 아닙니다. 스타일별 지침(아키타입과 무브)은 카탈로그의 `layout`·`typography` 필드처럼 영어로 작성되어 있고, 패턴 이름과 안내 문장은 `locale`을 따릅니다.
+
+모든 발견 항목과 검사에는 `claim`이 있고, `summary.claims`는 claim별 발견 수를 셉니다. 형태 자체는 과업의 결함이 아니기 때문입니다.
+
+| `claim` | 언제 | 발견했을 때 결과 |
+|---|---|---|
+| `style-fidelity` | 고른 `styleId`에 비추어 검사한 일반 금지 패턴과 스타일 전용 금지 항목 | FIX_NOW(major) 또는 RISK(minor). 페이지가 고른 방향에서 벗어났다는 뜻입니다 |
+| `shape-observation` | `styleId` 없이 검사한 일반 금지 패턴 | `cant-tell` 증거와 함께 NOT_VERIFIED. 형태는 있지만 과업을 방해하는지는 확인하지 않았습니다. 과업에 비추어 판단하고(서로 다른 업무로 이동하는 카드 3개는 문제가 아닙니다), `manual` 증거와 함께 PASS, RISK, FIX_NOW를 제출하세요. 형태가 없으면 NOT_APPLICABLE입니다 |
+| `required-element` | `productType`의 필수 요소 | 없거나 첫 화면 밖에 있으면 FIX_NOW |
+
+`severity`는 주장이 확인됐을 때의 심각도입니다.
 
 ### 스타일이 뺄 수 없는 필수 요소
 
@@ -614,7 +624,7 @@ webstylebook://workflows/improve-ui
 viewport·phase·범위 규칙은 validator에 있고 `planHash`에 들어가지 않습니다. `supersedes`와
 `scopeExclusions`는 선택 사항이며, result hash는 `scopeExclusions`를 줬을 때만 그것을 포함합니다.
 `includeGroups`에 `structure`를 넣고 `styleId`를 주면,
-plan에 금지 패턴마다 자동 검사가 1개씩 붙고, `productType`을 주면 필수 요소마다 1개씩 더 붙습니다. `audit_page_structure`는 이 검사 id에 맞는 evidence와
+plan에 금지 패턴마다 자동 검사가 1개씩 붙고(`styleId`가 없으면 과업 판단을 `manual` 증거로 받는 `shape-observation` 보조 검사가 붙습니다), `productType`을 주면 필수 요소마다 1개씩 더 붙습니다. `audit_page_structure`는 이 검사 id에 맞는 evidence와
 results를 돌려주고, validator는 그대로 받습니다. `revisionPreservation: true`를 주면 plan에는 `compare_page_revisions`가 답하는 `redesign-kept-*` 검사만 들어갑니다. 재검증 가능한 비교를 위해 plan,
 evidence bundle, 정규화된 result의 content-addressed hash도 반환합니다. 이 툴은 artifact를
 직접 열지 않으며 계약 유효성을 디자인 품질 점수로 바꾸지 않습니다.

@@ -194,7 +194,7 @@ After building, pass the page's HTML and CSS to `audit_page_structure`. This is 
 // → audit_page_structure({ html, styleId: "quiet-utility" })
 // ← structure audit (trimmed)
 {
-  "summary": { "clean": false, "findings": 8, "major": 6, "minor": 2, "notVerified": 0, "checked": 12 },
+  "summary": { "clean": false, "findings": 8, "major": 6, "minor": 2, "notVerified": 0, "checked": 12, "claims": { "shape-observation": 0, "style-fidelity": 8, "required-element": 0 } },
   "findings": [
     {
       "patternId": "logo-strip",
@@ -231,6 +231,16 @@ After building, pass the page's HTML and CSS to `audit_page_structure`. This is 
 ```
 
 Each finding names where the pattern is, what was observed, and what to put there instead: the chosen style's signature moves for the same job (proof, in the logo strip's case), its hero composition, or its section order. Rebuild, run the audit again, then add `"structure"` to `get_design_audit_plan.includeGroups` and pass the returned `evidence` and `results` to `validate_design_audit_result`. Audit each viewport with its own `targetId`: the evidence ids include it, so the runs validate together. The checks are deterministic heuristics over the submitted HTML and CSS, not a browser render, so `clean` means every check ran and found none of these patterns, not that the design passed. Per-style guidance (archetypes and moves) is written in English, like the catalog's own `layout` and `typography` fields; pattern names and instructions follow `locale`.
+
+Every finding and check carries a `claim`, and `summary.claims` counts findings per claim, because a shape is not by itself a task defect:
+
+| `claim` | When | Result when found |
+|---|---|---|
+| `style-fidelity` | a global pattern or style ban checked against the `styleId` you chose | FIX_NOW (major) or RISK (minor): the page departs from the chosen direction |
+| `shape-observation` | a global pattern checked without `styleId` | NOT_VERIFIED with `cant-tell` evidence: the shape is there, but whether it gets in the way of the task is not checked. Judge it against the task (three cards that lead to different tasks are fine), then submit PASS, RISK, or FIX_NOW with `manual` evidence. A shape that is not there is NOT_APPLICABLE |
+| `required-element` | a must-have for `productType` | FIX_NOW when missing or off the first screen |
+
+`severity` is the severity once the claim is confirmed.
 
 ### Must-haves a style can't remove
 
@@ -613,7 +623,7 @@ what is missing as warnings; `coverage.state` is `full` only when both are. A pl
 `global` reports the basis `submitted-targets-only`. These viewport, phase, and scope rules live in the
 validator and do not feed `planHash`; `supersedes` and `scopeExclusions` are optional, and the result
 hash includes `scopeExclusions` only when given. With `includeGroups` containing `structure` and a
-`styleId`, the plan adds one automated check per banned pattern, and `productType` adds one per must-have;
+`styleId`, the plan adds one automated check per banned pattern (without `styleId`, an assisted `shape-observation` check that needs `manual` evidence of the task judgment), and `productType` adds one per must-have;
 `audit_page_structure` returns evidence and results for those check ids that the validator accepts as they are. With `revisionPreservation: true`, the plan holds only the `redesign-kept-*` checks that `compare_page_revisions` answers. The result carries content-addressed plan,
 evidence-bundle, and normalized-result hashes for comparable rechecks. The tool never opens the
 artifact references and never turns contract validity into a design-quality score.

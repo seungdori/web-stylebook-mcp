@@ -2,7 +2,7 @@ import { text, texts } from '../localization.js';
 import type { CatalogRepository } from '../catalog/repository.js';
 import { stableHashOf } from '../catalog/stable-hash.js';
 import { planUiStates } from '../state-atlas/planner.js';
-import { structureChecks } from '../structure/checks.js';
+import { structureChecks, type StructureClaim } from '../structure/checks.js';
 import { revisionChecks } from '../structure/revisions.js';
 import type {
   AuditApplicability,
@@ -58,7 +58,7 @@ export interface ResolvedAuditCheck {
   applicability: AuditApplicability;
   surfaceTags: UxSurface[];
   source: AuditCheckDefinition['source']
-    | { kind: 'structure'; patternId: string; scope: 'global' | 'style' | 'must-have' }
+    | { kind: 'structure'; patternId: string; scope: 'global' | 'style' | 'must-have'; claim: StructureClaim }
     | { kind: 'revision'; inventory: string };
 }
 
@@ -417,11 +417,11 @@ export function planDesignAudit(
       why: check.why,
       remediation: check.remediation,
       severity: check.severity,
-      evidenceTypes: ['dom'],
-      automation: 'automated',
+      evidenceTypes: [...check.evidenceTypes],
+      automation: check.claim === 'shape-observation' ? 'assisted' : 'automated',
       applicability: check.applicability,
       surfaceTags: ['global'],
-      source: { kind: 'structure', patternId: check.patternId, scope: check.scope },
+      source: { kind: 'structure', patternId: check.patternId, scope: check.scope, claim: check.claim },
     }))
     : [];
   const revisionPlan: ResolvedAuditCheck[] = revision
