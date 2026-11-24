@@ -28,7 +28,8 @@ access to require 2FA and disallow traditional tokens.
    The suite verifies the catalog hash, counts and schema, visual artifact and resolver hashes,
    license, import allowlist, and reference outputs against the committed fixtures.
 2. Bump the version in `package.json`, `package-lock.json`, `.claude-plugin/plugin.json`,
-   `server.json` (both `version` fields), `src/server-info.ts` and `tests/contract.test.ts`.
+   `server.json` (both `version` fields), `manifest.json`, `src/server-info.ts` and
+   `tests/contract.test.ts`.
    Move the changelog's unreleased entries under the new version and commit the release.
 3. Tag the release commit and push the tag. For example, for version 0.4.0:
    ```bash

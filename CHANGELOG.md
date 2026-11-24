@@ -6,6 +6,15 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- The README groups install steps by client (#8): Claude Code scopes and `.mcp.json`, Codex
+  `~/.codex/config.toml`, and VS Code (GitHub Copilot) with an install button and the
+  `mcpServers` block for `.mcp.json` or `~/.copilot/mcp-config.json`. `tests/install-launch.test.ts`
+  starts the server from every documented client config with a tarball packed from the checkout.
+- `manifest.json`, an MCP bundle (MCPB 0.3) manifest for listing the local server on Smithery.
+  [docs/listings.md](docs/listings.md) builds the bundle from the npm package; nothing is submitted.
+
 ### Fixed
 
 - `npm run visual:sync` stopped at website revision `a8515dd` with "src/visual/schema.ts imports

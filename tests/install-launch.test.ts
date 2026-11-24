@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -43,8 +43,26 @@ function cursorLink(text: string): ServerConfig {
   return JSON.parse(Buffer.from([...configs][0]!, 'base64').toString('utf8'));
 }
 
-// The mcp.json shape that Cursor (.cursor/mcp.json) and Claude Code (.mcp.json) read.
-const mcpJson = (text: string): ServerConfig => JSON.parse(fence(text, 'json')).mcpServers['web-stylebook'];
+// The mcp.json shape that Cursor (.cursor/mcp.json), Claude Code (.mcp.json) and VS Code (.mcp.json,
+// ~/.copilot/mcp-config.json) read. VS Code moves only entries that name their transport into its
+// Copilot config, so its block must say `"type": "stdio"`; the others may leave it out.
+function mcpJson(text: string, { typed = false } = {}): ServerConfig {
+  const { type, ...server } = JSON.parse(fence(text, 'json')).mcpServers['web-stylebook'];
+  if (typed || type !== undefined) expect(type, 'transport type').toBe('stdio');
+  return server;
+}
+
+// VS Code's button wraps vscode:mcp/install?<URL-encoded JSON with the server name> in vscode.dev's redirect.
+function vscodeLink(text: string): ServerConfig {
+  const links = [...text.matchAll(/https:\/\/vscode\.dev\/redirect\?[^\s)"'`<]+/g)].map((m) => new URL(m[0]).searchParams.get('url')!);
+  expect(links, 'one VS Code install link').toHaveLength(1);
+  const link = links[0]!;
+  const prefix = 'vscode:mcp/install?';
+  expect(link.startsWith(prefix), link).toBe(true);
+  const { name, ...server } = JSON.parse(decodeURIComponent(link.slice(prefix.length)));
+  expect(name).toBe('web-stylebook');
+  return server;
+}
 
 function addCommand(text: string, cli: string): ServerConfig {
   const line = text.match(new RegExp(`^${cli} mcp add web-stylebook -- (.+)$`, 'm'));
@@ -72,10 +90,13 @@ const CLIENTS: { client: string; config: (doc: string) => ServerConfig }[] = [
   { client: 'Claude Code .mcp.json', config: (doc) => mcpJson(section(doc, 'Claude Code')) },
   { client: 'Codex codex mcp add', config: (doc) => addCommand(section(doc, 'Codex'), 'codex') },
   { client: 'Codex config.toml', config: (doc) => codexToml(section(doc, 'Codex')) },
+  { client: 'VS Code install link', config: (doc) => vscodeLink(section(doc, 'VS Code')) },
+  { client: 'VS Code .mcp.json and ~/.copilot/mcp-config.json', config: (doc) => mcpJson(section(doc, 'VS Code'), { typed: true }) },
 ];
 
 let packDir: string;
 let tarball: string;
+let tools: { name: string; title?: string }[];
 let toolNames: string[];
 // Identical configs start one process; a config that differs gets its own launch.
 const launches = new Map<string, ReturnType<typeof launch>>();
@@ -92,7 +113,8 @@ beforeAll(async () => {
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
   const client = new Client({ name: 'install-launch-reference', version: '0.0.0' });
   await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
-  toolNames = (await client.listTools()).tools.map((tool) => tool.name).sort();
+  tools = (await client.listTools()).tools;
+  toolNames = tools.map((tool) => tool.name).sort();
   await client.close();
 }, 60_000);
 
@@ -110,11 +132,9 @@ afterAll(async () => {
   rmSync(packDir, { recursive: true, force: true });
 });
 
-async function launch(config: ServerConfig) {
-  expect(config.args, `${config.command} ${config.args.join(' ')}`).toContain(PUBLISHED);
-  const args = config.args.map((arg) => (arg === PUBLISHED ? `file:${tarball}` : arg));
+async function launch(command: string, args: string[]) {
   const transport = new StdioClientTransport({
-    command: config.command,
+    command,
     args,
     cwd: packDir,
     stderr: 'pipe',
@@ -126,10 +146,10 @@ async function launch(config: ServerConfig) {
   const client = new Client({ name: 'install-launch-test', version: '0.0.0' });
   try {
     await client.connect(transport);
-    const { tools } = await client.listTools();
-    return { server: client.getServerVersion(), tools: tools.map((tool) => tool.name).sort() };
+    const listed = await client.listTools();
+    return { server: client.getServerVersion(), tools: listed.tools.map((tool) => tool.name).sort() };
   } catch (error) {
-    throw new Error(`${config.command} ${args.join(' ')} did not start the server: ${error}\n${stderr}`);
+    throw new Error(`${command} ${args.join(' ')} did not start the server: ${error}\n${stderr}`);
   } finally {
     await client.close();
   }
@@ -137,7 +157,10 @@ async function launch(config: ServerConfig) {
 
 function launched(config: ServerConfig) {
   const key = JSON.stringify(config);
-  if (!launches.has(key)) launches.set(key, launch(config));
+  if (!launches.has(key)) {
+    expect(config.args, `${config.command} ${config.args.join(' ')}`).toContain(PUBLISHED);
+    launches.set(key, launch(config.command, config.args.map((arg) => (arg === PUBLISHED ? `file:${tarball}` : arg))));
+  }
   return launches.get(key)!;
 }
 
@@ -146,6 +169,29 @@ describe('every documented client config starts the server', () => {
     const server = config('README.md');
     for (const doc of READMES.slice(1)) expect(config(doc), doc).toEqual(server);
     const started = await launched(server);
+    expect(started.server).toEqual({ name: 'web-stylebook', version: pkg.version });
+    expect(started.tools).toEqual(toolNames);
+  }, 60_000);
+});
+
+describe('the MCP bundle for Smithery', () => {
+  const manifest = JSON.parse(read('manifest.json'));
+
+  it('manifest.json lists every tool with its title', () => {
+    const byName = (a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name);
+    expect([...manifest.tools].sort(byName)).toEqual(tools.map(({ name, title }) => ({ name, description: title })).sort(byName));
+  });
+
+  it('starts the server from a bundle staged the way docs/listings.md stages it', async () => {
+    const bundle = join(packDir, 'bundle');
+    mkdirSync(bundle);
+    execFileSync('tar', ['-xzf', tarball, '-C', bundle, '--strip-components=1']);
+    copyFileSync(join(root, 'manifest.json'), join(bundle, 'manifest.json'));
+    // Stands in for `npm install --omit=dev`: the checkout already has the production dependencies.
+    symlinkSync(join(root, 'node_modules'), join(bundle, 'node_modules'), 'junction');
+    expect(existsSync(join(bundle, manifest.server.entry_point)), manifest.server.entry_point).toBe(true);
+    const { command, args } = manifest.server.mcp_config;
+    const started = await launch(command, args.map((arg: string) => arg.replaceAll('${__dirname}', bundle)));
     expect(started.server).toEqual({ name: 'web-stylebook', version: pkg.version });
     expect(started.tools).toEqual(toolNames);
   }, 60_000);
