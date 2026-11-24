@@ -4,6 +4,9 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { synchronizeVisualContract, VISUAL_SOURCE_FILES } from '../scripts/sync-visual-contract.mjs';
 
+// The website's src/utils/zod.ts at seungdori/web-stylebook a8515dd, byte for byte.
+const WEBSITE_ZOD_WRAPPER = "import { z } from 'zod';\n\n// Public pages validate saved drafts under a CSP without unsafe-eval. Disable\n// Zod's JIT before creating schemas, including its dynamic-code capability probe.\nz.config({ jitless: true });\n\nexport { z };\n";
+
 const fixtures: string[] = [];
 afterEach(() => fixtures.splice(0).forEach((path) => rmSync(path, { recursive: true, force: true })));
 function fixture() {
@@ -56,5 +59,44 @@ describe('portable visual source synchronization', () => {
     writeFileSync(join(paths.source, 'src/visual/fontSources.ts'), '// missing license');
     expect(() => synchronizeVisualContract(paths)).toThrow(/MIT source declaration/);
     expect(readFileSync(target)).toEqual(before);
+  });
+
+  it('copies a source that imports the website\'s jitless zod wrapper with the plain zod specifier, and records it', () => {
+    const paths = fixture();
+    mkdirSync(join(paths.source, 'src/utils'), { recursive: true });
+    writeFileSync(join(paths.source, 'src/utils/zod.ts'), WEBSITE_ZOD_WRAPPER);
+    const schema = "// SPDX-License-Identifier: MIT\nimport { z } from '../utils/zod';\nimport { COLOR_ROLES } from './types.js';\nexport const s = z.string();\n";
+    writeFileSync(join(paths.source, 'src/visual/schema.ts'), schema);
+    expect(synchronizeVisualContract(paths)).toBe(7);
+    expect(readFileSync(join(paths.root, 'src/visual-canonical/schema.ts'), 'utf8')).toBe(schema.replace("'../utils/zod'", "'zod'"));
+    const provenance = JSON.parse(readFileSync(join(paths.root, 'generated/visual-contract-source.v1.json'), 'utf8'));
+    expect(provenance.files['src/visual/schema.ts']).toMatch(/^sha256:/);
+    expect(provenance.files['src/utils/zod.ts']).toMatch(/^sha256:/);
+    expect(provenance.rewrites.files).toEqual({ 'src/visual/schema.ts': "'../utils/zod' -> 'zod'" });
+    expect(synchronizeVisualContract({ ...paths, check: true })).toBe(7);
+  });
+
+  it.each([
+    ['a wrapper that does more than set jitless', WEBSITE_ZOD_WRAPPER.replace('export { z };', 'export { z };\nexport const extra = 1;')],
+    ['a wrapper with another config', WEBSITE_ZOD_WRAPPER.replace('jitless: true', 'jitless: false')],
+    ['no wrapper at all', null],
+  ])('still rejects the wrapper import for %s', (_label, wrapper) => {
+    const paths = fixture();
+    if (wrapper !== null) {
+      mkdirSync(join(paths.source, 'src/utils'), { recursive: true });
+      writeFileSync(join(paths.source, 'src/utils/zod.ts'), wrapper);
+    }
+    writeFileSync(join(paths.source, 'src/visual/schema.ts'), "// SPDX-License-Identifier: MIT\nimport { z } from '../utils/zod';\n");
+    expect(() => synchronizeVisualContract(paths)).toThrow(/allowlist/);
+  });
+
+  it('leaves provenance without rewrites when no source imports the wrapper', () => {
+    const paths = fixture();
+    mkdirSync(join(paths.source, 'src/utils'), { recursive: true });
+    writeFileSync(join(paths.source, 'src/utils/zod.ts'), WEBSITE_ZOD_WRAPPER);
+    synchronizeVisualContract(paths);
+    const provenance = JSON.parse(readFileSync(join(paths.root, 'generated/visual-contract-source.v1.json'), 'utf8'));
+    expect(provenance).not.toHaveProperty('rewrites');
+    expect(provenance.files).not.toHaveProperty('src/utils/zod.ts');
   });
 });

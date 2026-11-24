@@ -58,6 +58,11 @@ visual data. Ordinary MCP releases reuse the checked-in snapshot.
    npm run catalog:check-canonical -- "$website/packages/mcp/generated"
    npm run visual:check -- "$website"
    ```
+   `visual:sync` copies the seven `src/visual/` files byte for byte, except one case: the website
+   imports zod through `src/utils/zod.ts`, which only sets jitless mode for its CSP. While that
+   wrapper is exactly that re-export, the copy imports `zod` directly, and
+   `generated/visual-contract-source.v1.json` records the wrapper hash and the rewrite. Any other
+   import outside the seven files still stops the sync.
 3. Review the changes together, update the pinned expectations and website parity fixtures for
    the new revision, and run the public build and test commands above. The current website parity
    fixture records the reviewed source revision in `tests/fixtures/website-visual-parity.v1.json`.
