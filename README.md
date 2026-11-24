@@ -32,7 +32,11 @@ data. [How it was made, what was measured, and what it does not show →](./docs
 
 ## Install
 
-For Cursor, click the button:
+Node 20 or later is required.
+
+### Cursor
+
+Click the button:
 
 [![Add web-stylebook to Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/install-mcp?name=web-stylebook&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsIndlYi1zdHlsZWJvb2stbWNwQGxhdGVzdCJdfQ==)
 
@@ -56,31 +60,63 @@ Or add the server to `.cursor/mcp.json` in your project (`~/.cursor/mcp.json` fo
 }
 ```
 
-For any agent with skills (Claude Code, Codex, Cursor and others):
+### Claude Code
 
-```bash
-npx skills add seungdori/web-stylebook-mcp
-```
-
-For Claude Code, the plugin installs the skill and the MCP server together (Claude Code 2.1.275 or
-later):
+The plugin installs the skill and the MCP server together (Claude Code 2.1.275 or later):
 
 ```text
 /plugin install web-stylebook --marketplace seungdori/web-stylebook-mcp
 ```
 
-For the MCP server only:
+For the MCP server only, run:
 
 ```bash
 claude mcp add web-stylebook -- npx -y web-stylebook-mcp@latest
 ```
 
+This turns the server on for you in the current project. For every project, add `--scope user`
+after `add`. To share the server with your team, add `--scope project`: Claude Code then writes it
+to `.mcp.json` in the project root. You can also write that file yourself:
+
+```json
+{
+  "mcpServers": {
+    "web-stylebook": {
+      "command": "npx",
+      "args": ["-y", "web-stylebook-mcp@latest"]
+    }
+  }
+}
+```
+
+Claude Code asks each person once to approve the servers in `.mcp.json`. `claude mcp list` shows
+whether the server connects.
+
+### Codex
+
 ```bash
 codex mcp add web-stylebook -- npx -y web-stylebook-mcp@latest
 ```
 
+The command adds the server to `~/.codex/config.toml`. You can also add these lines to that file
+yourself:
+
+```toml
+[mcp_servers.web-stylebook]
+command = "npx"
+args = ["-y", "web-stylebook-mcp@latest"]
+```
+
+### Skill and other clients
+
+Any agent with skills (Claude Code, Codex, Cursor and others) can install the skill. `npx skills`
+needs Node 22.20 or later:
+
+```bash
+npx skills add seungdori/web-stylebook-mcp
+```
+
 Windsurf and Claude Desktop settings are in the [reference](./docs/reference.md#install).
-Node 20 or later is required; `npx skills` needs Node 22.20 or later.
 
 ## Use
 

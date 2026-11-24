@@ -31,7 +31,11 @@
 
 ## 설치
 
-Cursor에서는 버튼을 누르세요.
+Node 20 이상이 필요합니다.
+
+### Cursor
+
+버튼을 누르세요.
 
 [![Cursor에 web-stylebook 추가](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/install-mcp?name=web-stylebook&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsIndlYi1zdHlsZWJvb2stbWNwQGxhdGVzdCJdfQ==)
 
@@ -56,30 +60,62 @@ cursor://anysphere.cursor-deeplink/mcp/install?name=web-stylebook&config=eyJjb21
 }
 ```
 
-스킬을 지원하는 에이전트(Claude Code, Codex, Cursor 등):
+### Claude Code
 
-```bash
-npx skills add seungdori/web-stylebook-mcp
-```
-
-Claude Code에서는 플러그인으로 스킬과 MCP 서버를 함께 설치할 수 있습니다(Claude Code 2.1.275 이상).
+플러그인으로 스킬과 MCP 서버를 함께 설치할 수 있습니다(Claude Code 2.1.275 이상).
 
 ```text
 /plugin install web-stylebook --marketplace seungdori/web-stylebook-mcp
 ```
 
-MCP 서버만 쓰려면:
+MCP 서버만 쓰려면 다음 명령을 실행하세요.
 
 ```bash
 claude mcp add web-stylebook -- npx -y web-stylebook-mcp@latest
 ```
 
+이 명령은 현재 프로젝트에서 나에게만 서버를 켭니다. 모든 프로젝트에서 쓰려면 `add` 뒤에
+`--scope user`를 붙이세요. 팀과 함께 쓰려면 `--scope project`를 붙이세요. Claude Code가 프로젝트
+루트의 `.mcp.json`에 서버를 씁니다. 이 파일을 직접 써도 됩니다.
+
+```json
+{
+  "mcpServers": {
+    "web-stylebook": {
+      "command": "npx",
+      "args": ["-y", "web-stylebook-mcp@latest"]
+    }
+  }
+}
+```
+
+Claude Code는 `.mcp.json`의 서버를 쓰기 전에 사람마다 한 번 승인을 받습니다. `claude mcp list`로
+서버가 연결되는지 확인할 수 있습니다.
+
+### Codex
+
 ```bash
 codex mcp add web-stylebook -- npx -y web-stylebook-mcp@latest
 ```
 
+이 명령은 `~/.codex/config.toml`에 서버를 추가합니다. 그 파일에 아래 줄을 직접 넣어도 됩니다.
+
+```toml
+[mcp_servers.web-stylebook]
+command = "npx"
+args = ["-y", "web-stylebook-mcp@latest"]
+```
+
+### 스킬과 다른 클라이언트
+
+스킬을 지원하는 에이전트(Claude Code, Codex, Cursor 등)는 스킬을 설치할 수 있습니다.
+`npx skills`는 Node 22.20 이상이 필요합니다.
+
+```bash
+npx skills add seungdori/web-stylebook-mcp
+```
+
 Windsurf, Claude Desktop 설정은 [레퍼런스](./docs/reference.ko.md#설치)에 있습니다.
-Node 20 이상이 필요하고, `npx skills`는 Node 22.20 이상이 필요합니다.
 
 ## 사용
 
