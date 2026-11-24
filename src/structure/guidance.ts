@@ -5,7 +5,7 @@ import { SERVER_VERSION } from '../server-info.js';
 import type { Density, Lang, ProductType } from '../types.js';
 import { STRUCTURE_GUIDES } from './guides/index.js';
 import {
-  MH, MUST_HAVES, PRODUCT_MUST_HAVES, ZONE_CRITERIA, ZONE_TEXT, candidateMustHaves, type CandidateMustHave,
+  MH, MUST_HAVES, MUST_HAVE_CONDITIONS, PRODUCT_MUST_HAVES, ZONE_CRITERIA, ZONE_TEXT, candidateMustHaves, type CandidateMustHave,
 } from './must-haves.js';
 import { GLOBAL_PATTERNS, T, styleRuleText } from './patterns.js';
 import {
@@ -194,8 +194,11 @@ export interface BannedPatternCatalog {
 
 let rulesetHashMemo: string | null = null;
 
-/** Without a styleId, a global pattern is a shape observation that needs a task judgment, not a defect (#20). */
-export const STRUCTURE_VERDICT_POLICY = 'claims-v1';
+/**
+ * v1: without a styleId, a global pattern is a shape observation that needs a task judgment, not a defect (#20 A).
+ * v2: a must-have off the first screen is RISK unless its action is on the first screen (#20 C).
+ */
+export const STRUCTURE_VERDICT_POLICY = 'claims-v2';
 
 /**
  * Hash of the guides, patterns, thresholds, and rule wording. Detector code is not hashable data, so the server
@@ -213,7 +216,7 @@ export function structureRulesetHash(): string {
       ...guide,
       bans: guide.bans.map((ban) => ({ ...ban, wording: styleRuleText(ban.rule, ban.params as never) })),
     })),
-    mustHaves: { thresholds: MH, zones: { text: ZONE_TEXT, criteria: ZONE_CRITERIA }, items: MUST_HAVES, productTypes: PRODUCT_MUST_HAVES },
+    mustHaves: { thresholds: MH, zones: { text: ZONE_TEXT, criteria: ZONE_CRITERIA }, items: MUST_HAVES, productTypes: PRODUCT_MUST_HAVES, conditions: MUST_HAVE_CONDITIONS },
   });
   return rulesetHashMemo;
 }

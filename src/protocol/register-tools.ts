@@ -48,6 +48,7 @@ import {
   auditPageStructure, PAGE_LIMITS, StructureAuditError, type StructureAuditResult,
 } from '../structure/audit.js';
 import { styleStructure, type StyleStructureSummary } from '../structure/guidance.js';
+import { MUST_HAVE_CONDITION_IDS, MUST_HAVE_CONDITION_REASON } from '../structure/must-haves.js';
 import {
   comparePageRevisions, REVISION_CHANGES, REVISION_KINDS, REVISION_LIMITS, RevisionCompareError, type ComparePageRevisionsResult,
 } from '../structure/revisions.js';
@@ -103,9 +104,17 @@ const auditValue = z.union([
     .refine((value) => Object.keys(value).length <= 50, 'at most 50 keys'),
 ]);
 
+const mustHaveConditionsSchema = z.array(z.object({
+  id: z.enum(MUST_HAVE_CONDITION_IDS),
+  reason: z.string().trim().min(MUST_HAVE_CONDITION_REASON.min).max(MUST_HAVE_CONDITION_REASON.max),
+}).strict()).min(1).max(MUST_HAVE_CONDITION_IDS.length).describe(
+  'named conditions that make some of productType\'s must-haves optional (single-variant: commerce variant choice; no-code-interface: developer-tool code sample; docs-article: documentation quickstart; not-time-series: data-analytics time range and changes), each with the observed fact as reason; pass the same list to get_design_audit_plan and audit_page_structure',
+);
+
 const auditPlanInputShape = {
   styleId: z.string().min(1).max(100).optional(),
   productType: z.enum(PRODUCT_TYPES).describe('with the "structure" group, adds one check per must-have of this product type').optional(),
+  mustHaveConditions: mustHaveConditionsSchema.optional(),
   surfaces: z.array(z.enum(UX_SURFACES)).min(1).max(12).optional(),
   designPrincipleIds: z.array(z.string().min(1).max(100)).max(12).optional(),
   uxPrincipleIds: z.array(z.string().min(1).max(100)).max(12).optional(),
@@ -466,12 +475,13 @@ export function registerTools(server: McpServer, repo: CatalogRepository): void 
 
   server.registerTool('audit_page_structure', {
     title: 'Audit a built page for banned structural patterns',
-    description: `Deterministically inspect submitted page markup (offline; the server never reads files) for the generic SaaS template (centered hero over a gradient blob, all-text centered stack, stock-photo hero, logo strip, "trusted by" band, icon feature cards, testimonial carousel, generic closing CTA banner, and the page skeleton they form) and, with styleId, for that style's own banned treatments. With productType, it also reports which of that product type's must-haves (the same list recommend_design_direction returns) the page is missing or keeps off the first screen. Pass the rendered HTML (for example document.documentElement.outerHTML) and the page's CSS text; Tailwind utility classes are understood without the stylesheet. Each finding names the location, the observed values, and what to replace it with from the chosen style's signature moves and archetype. Also returns evidence and results shaped for validate_design_audit_result with the "structure" audit group. Each finding carries a claim: with styleId, a found pattern is a style-fidelity result (FIX_NOW or RISK); without styleId, a global pattern is only a shape observation, returned as NOT_VERIFIED until you judge against the page's task whether it gets in the way and submit that judgment as manual evidence; a missing must-have is a required-element result. Declared-style heuristics, not a browser: a clean result is not a design pass. Limits: html ${PAGE_LIMITS.htmlChars} characters, ${PAGE_LIMITS.cssFiles} stylesheets, ${PAGE_LIMITS.cssTotalChars} CSS characters in total.`,
+    description: `Deterministically inspect submitted page markup (offline; the server never reads files) for the generic SaaS template (centered hero over a gradient blob, all-text centered stack, stock-photo hero, logo strip, "trusted by" band, icon feature cards, testimonial carousel, generic closing CTA banner, and the page skeleton they form) and, with styleId, for that style's own banned treatments. With productType, it also reports which of that product type's must-haves (the same list recommend_design_direction returns) the page is missing (FIX_NOW) or keeps off its first screen, which is estimated from markup (RISK); mustHaveConditions sets named must-haves aside, with a reason, where the page does not need them. Pass the rendered HTML (for example document.documentElement.outerHTML) and the page's CSS text; Tailwind utility classes are understood without the stylesheet. Each finding names the location, the observed values, and what to replace it with from the chosen style's signature moves and archetype. Also returns evidence and results shaped for validate_design_audit_result with the "structure" audit group. Each finding carries a claim: with styleId, a found pattern is a style-fidelity result (FIX_NOW or RISK); without styleId, a global pattern is only a shape observation, returned as NOT_VERIFIED until you judge against the page's task whether it gets in the way and submit that judgment as manual evidence; a missing must-have is a required-element result. Declared-style heuristics, not a browser: a clean result is not a design pass. Limits: html ${PAGE_LIMITS.htmlChars} characters, ${PAGE_LIMITS.cssFiles} stylesheets, ${PAGE_LIMITS.cssTotalChars} CSS characters in total.`,
     inputSchema: {
       html: z.string().min(1).max(PAGE_LIMITS.htmlChars),
       css: z.array(z.string().max(PAGE_LIMITS.cssChars)).max(PAGE_LIMITS.cssFiles).optional(),
       styleId: z.string().min(1).max(100).optional(),
       productType: z.enum(PRODUCT_TYPES).describe('the product type passed to recommend_design_direction; adds its must-have checks').optional(),
+      mustHaveConditions: mustHaveConditionsSchema.optional(),
       targetId: z.string().trim().min(1).max(160).optional(),
       viewportWidth: z.number().int().min(PAGE_LIMITS.viewportMin).max(PAGE_LIMITS.viewportMax).optional(),
       locale: LOCALE.optional(),

@@ -13,8 +13,8 @@ import { GLOBAL_PATTERNS, styleRuleText } from './patterns.js';
 import { detectStyleBan, type RuleContext } from './rules.js';
 import { detectMustHaves, type MustHaveDetection, type MustHaveStatus } from './must-have-detect.js';
 import {
-  ZONE_CRITERIA, ZONE_TEXT, mustHaveCheckId, mustHaveDef, mustHavePatternId, productMustHaveDef,
-  type MustHaveId, type MustHaveZone,
+  ZONE_CRITERIA, ZONE_TEXT, mustHaveCheckId, mustHaveDef, mustHaveExemptions, mustHavePatternId, productMustHaveDef,
+  type MustHaveCondition, type MustHaveConditionId, type MustHaveId, type MustHaveZone,
 } from './must-haves.js';
 import type { GlobalPatternDef, StructureJob, StyleBanDef } from './types.js';
 
@@ -40,6 +40,8 @@ export interface AuditPageStructureInput {
   styleId?: string;
   /** Adds the product type's must-have checks: which required elements the page lacks or keeps off the first screen. */
   productType?: ProductType;
+  /** Named situations that set some of the product type's must-haves aside, each with the observed reason. */
+  mustHaveConditions?: MustHaveCondition[];
   targetId?: string;
   viewportWidth?: number;
   locale?: Lang;
@@ -115,12 +117,17 @@ export interface MustHaveAuditItem {
   checkId: string;
   name: string;
   zone: MustHaveZone;
-  status: MustHaveStatus;
+  /** not-applicable: absent, and a declared condition sets it aside. */
+  status: MustHaveAuditStatus;
+  /** The declared condition that sets this must-have aside. */
+  condition?: { id: MustHaveConditionId; reason: string };
   /** Matches anywhere on the page; a misplaced must-have has matches but none in its zone. */
   count: number;
   locations: string[];
   note?: string;
 }
+
+export type MustHaveAuditStatus = MustHaveStatus | 'not-applicable';
 
 export interface MustHaveAuditReport {
   productType: ProductType;
@@ -172,9 +179,11 @@ const labels: Record<Lang, {
   shape: { unjudged: string; guidance: string };
   supersededBy: (id: string) => string;
   mustHave: {
-    status: Record<MustHaveStatus, string>;
+    status: Record<MustHaveAuditStatus, string>;
+    exempt: (when: string, reason: string) => string;
     missing: (build: string, placement: string) => string;
     misplaced: (build: string) => string;
+    beforeAction: (action: string, build: string) => string;
     misplacedAt: (name: string, where: string) => string;
     reasons: Record<NonNullable<MustHaveDetection['reason']>, string>;
     limit: string;
@@ -204,9 +213,11 @@ const labels: Record<Lang, {
     },
     supersededBy: (id) => `reported under ${id}`,
     mustHave: {
-      status: { present: 'present', misplaced: 'not on the first screen', missing: 'missing', 'not-verified': 'not verified' },
+      status: { present: 'present', misplaced: 'not on the first screen', missing: 'missing', 'not-verified': 'not verified', 'not-applicable': 'not applicable' },
+      exempt: (when, reason) => `Set aside by a declared condition: ${when} Reason: ${reason}`,
       missing: (build, placement) => `${build} Where: ${placement}`,
-      misplaced: (build) => `Move it onto the first screen; the audit found it only further down the page. ${build}`,
+      beforeAction: (action, build) => `Move it onto the first screen; the audit found it only further down the page, while ${action} is on the first screen, so people can act before they see it. ${build}`,
+      misplaced: (build) => `Consider moving it onto the first screen; the audit found it only further down the page. The first screen is estimated from document order, not measured: if a browser at this viewport shows it before the first scroll, cite that capture instead. ${build}`,
       misplacedAt: (name, where) => `${name} was found at ${where}, but not on the first screen.`,
       reasons: {
         'no-opening': 'the page has no section, so the first screen could not be placed',
@@ -214,7 +225,7 @@ const labels: Record<Lang, {
         truncated: 'parsing stopped before the end of the page, so it may be further down',
       },
       limit: 'Must-haves are recognized from markup, roles, and visible text in English, Korean, and Japanese. The first screen is estimated from document order and section size, not measured in a browser.',
-      guidance: 'Add every missing must-have and move every misplaced one onto the first screen in the style\'s own treatment, then rerun audit_page_structure with the same productType.',
+      guidance: 'Add every missing must-have in the style\'s own treatment, consider moving each one found off the first screen onto it, then rerun audit_page_structure with the same productType and mustHaveConditions.',
       plan: 'Pass the same productType to get_design_audit_plan as well, so the plan holds the must-have checks these results answer.',
     },
   },
@@ -240,9 +251,11 @@ const labels: Record<Lang, {
     },
     supersededBy: (id) => `${id} 항목으로 보고함`,
     mustHave: {
-      status: { present: '있음', misplaced: '첫 화면 밖', missing: '없음', 'not-verified': '확인 못 함' },
+      status: { present: '있음', misplaced: '첫 화면 밖', missing: '없음', 'not-verified': '확인 못 함', 'not-applicable': '해당 없음' },
+      exempt: (when, reason) => `밝힌 조건으로 제외: ${when} 이유: ${reason}`,
       missing: (build, placement) => `${build} 위치: ${placement}`,
-      misplaced: (build) => `첫 화면으로 옮기세요. 검사에서는 페이지 더 아래에서만 찾았습니다. ${build}`,
+      beforeAction: (action, build) => `첫 화면으로 옮기세요. 검사에서는 페이지 더 아래에서만 찾았는데 '${action}'은(는) 첫 화면에 있어서, 이 정보를 보기 전에 행동할 수 있습니다. ${build}`,
+      misplaced: (build) => `첫 화면으로 옮기는 것을 검토하세요. 검사에서는 페이지 더 아래에서만 찾았습니다. 첫 화면은 잰 값이 아니라 문서 순서로 추정한 범위입니다. 이 뷰포트의 브라우저에서 첫 스크롤 전에 보인다면 그 캡처를 증거로 내세요. ${build}`,
       misplacedAt: (name, where) => `${where}에서 '${name}'을(를) 찾았지만 첫 화면에는 없습니다.`,
       reasons: {
         'no-opening': '페이지에 섹션이 없어 첫 화면의 범위를 정하지 못했습니다',
@@ -250,7 +263,7 @@ const labels: Record<Lang, {
         truncated: '페이지 끝까지 분석하지 못해 더 아래에 있을 수 있습니다',
       },
       limit: '필수 요소는 마크업, role, 영어·한국어·일본어로 된 보이는 텍스트로 판단합니다. 첫 화면은 브라우저로 잰 것이 아니라 문서 순서와 섹션 크기로 추정합니다.',
-      guidance: '빠진 필수 요소는 모두 추가하고, 첫 화면 밖에 있는 요소는 스타일에 맞는 모양으로 첫 화면에 옮기세요. 그다음 같은 productType으로 audit_page_structure를 다시 실행하세요.',
+      guidance: '빠진 필수 요소는 스타일에 맞는 모양으로 모두 추가하세요. 첫 화면 밖에 있는 요소는 첫 화면으로 옮길지 검토하세요. 그다음 같은 productType과 mustHaveConditions로 audit_page_structure를 다시 실행하세요.',
       plan: 'get_design_audit_plan에도 같은 productType을 넘기세요. 그래야 계획에 이 결과가 답하는 필수 요소 검사가 들어갑니다.',
     },
   },
@@ -276,9 +289,11 @@ const labels: Record<Lang, {
     },
     supersededBy: (id) => `${id}として報告`,
     mustHave: {
-      status: { present: 'あり', misplaced: 'ファーストビューの外', missing: 'なし', 'not-verified': '未確認' },
+      status: { present: 'あり', misplaced: 'ファーストビューの外', missing: 'なし', 'not-verified': '未確認', 'not-applicable': '該当なし' },
+      exempt: (when, reason) => `示された条件で除外: ${when} 理由: ${reason}`,
       missing: (build, placement) => `${build} 位置: ${placement}`,
-      misplaced: (build) => `ファーストビューに移してください。検査ではページのもっと下でしか見つかりませんでした。${build}`,
+      beforeAction: (action, build) => `ファーストビューに移してください。検査ではページのもっと下でしか見つかりませんでしたが、「${action}」はファーストビューにあるため、この情報を見る前に行動できてしまいます。${build}`,
+      misplaced: (build) => `ファーストビューへの移動を検討してください。検査ではページのもっと下でしか見つかりませんでした。ファーストビューは測定値ではなく文書の順序から推定した範囲です。このビューポートのブラウザで最初のスクロール前に見えるなら、そのキャプチャを証拠にしてください。${build}`,
       misplacedAt: (name, where) => `${where}で「${name}」を検出しましたが、ファーストビューにはありません。`,
       reasons: {
         'no-opening': 'ページにセクションがないため、ファーストビューの範囲を決められませんでした',
@@ -286,7 +301,7 @@ const labels: Record<Lang, {
         truncated: 'ページの最後まで解析できなかったため、もっと下にある可能性があります',
       },
       limit: '必須要素は、マークアップ、role、英語・韓国語・日本語の表示テキストで判断します。ファーストビューはブラウザで測ったものではなく、文書の順序とセクションの大きさから推定します。',
-      guidance: '欠けている必須要素はすべて追加し、ファーストビューの外にある要素はスタイルに合った見た目でファーストビューに移してください。その後、同じproductTypeでaudit_page_structureを再実行してください。',
+      guidance: '欠けている必須要素はスタイルに合った見た目ですべて追加してください。ファーストビューの外にある要素は、ファーストビューへ移すかを検討してください。その後、同じproductTypeとmustHaveConditionsでaudit_page_structureを再実行してください。',
       plan: 'get_design_audit_planにも同じproductTypeを渡してください。そうすると、計画にこの結果が答える必須要素の検査が入ります。',
     },
   },
@@ -298,6 +313,11 @@ function validate(input: AuditPageStructureInput, repo: CatalogRepository): void
   }
   if (input.productType !== undefined && !(PRODUCT_TYPES as readonly string[]).includes(input.productType)) {
     throw new StructureAuditError(`productType must be one of: ${PRODUCT_TYPES.join(', ')}`);
+  }
+  try {
+    mustHaveExemptions(input.productType, input.mustHaveConditions);
+  } catch (error) {
+    throw new StructureAuditError((error as Error).message);
   }
   if (!input.html.trim()) throw new StructureAuditError('html must contain the built page markup');
   if (input.html.length > PAGE_LIMITS.htmlChars) throw new StructureAuditError(`html exceeds ${PAGE_LIMITS.htmlChars} characters`);
@@ -362,7 +382,8 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
   const guide = styleId ? structureGuide(styleId) : null;
   const allowed = guide?.allow ?? {};
   const productType = input.productType;
-  const checkDefs = new Map(structureChecks(styleId, locale, productType).map((check) => [check.id, check]));
+  const checkDefs = new Map(structureChecks(styleId, locale, productType, input.mustHaveConditions).map((check) => [check.id, check]));
+  const exemptions = mustHaveExemptions(productType, input.mustHaveConditions);
   const incomplete = page.styles.exhausted;
 
   const global = detectGlobalPatterns(page);
@@ -435,22 +456,30 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
   const mustHaveEntry = productType ? productMustHaveDef(productType) : null;
   const detections = detectMustHaves(page, mustHaveEntry?.items ?? [], global);
   const mustHaveItems: MustHaveAuditItem[] = [];
+  // Information shown below an action that is on the first screen can be skipped before acting: a defect, not advice.
+  const actsFirst = (item: { beforeAction?: MustHaveId }) => !!item.beforeAction && detections.get(item.beforeAction)?.status === 'present';
+  const actionName = (item: { beforeAction?: MustHaveId }) => text(mustHaveDef(item.beforeAction!).name, locale);
   for (const item of mustHaveEntry?.items ?? []) {
     const detection = detections.get(item.id)!;
     const def = mustHaveDef(item.id);
     const name = text(def.name, locale);
     const shown = detection.status === 'present' ? detection.inZone : detection.matches;
+    const exemption = exemptions.get(item.id);
+    // A declared condition sets the must-have aside only where the page lacks it in its zone; one that is there passes.
+    const setAside = exemption && (detection.status === 'missing' || detection.status === 'misplaced');
     mustHaveItems.push({
       id: item.id,
       checkId: mustHaveCheckId(item.id),
       name,
       zone: item.zone,
-      status: detection.status,
+      status: setAside ? 'not-applicable' : detection.status,
+      ...(exemption ? { condition: { id: exemption.condition.id, reason: exemption.reason } } : {}),
       count: detection.matches.length,
       locations: shown.slice(0, LOCATIONS).map(selectorPath),
-      ...(detection.reason ? { note: label.mustHave.reasons[detection.reason] } : {}),
+      ...(setAside ? { note: label.mustHave.exempt(text(exemption.condition.when, locale), exemption.reason) }
+        : detection.reason ? { note: label.mustHave.reasons[detection.reason] } : {}),
     });
-    if (detection.status !== 'missing' && detection.status !== 'misplaced') continue;
+    if (setAside || (detection.status !== 'missing' && detection.status !== 'misplaced')) continue;
     const moves = movesFor(def.job, styleId);
     const build = text(def.build, locale);
     findings.push({
@@ -459,14 +488,16 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
       scope: 'must-have',
       claim: 'required-element',
       name,
-      severity: 'major',
+      // Missing information or a missing function is a defect; a first screen estimated from markup is a placement risk.
+      severity: detection.status === 'missing' || actsFirst(item) ? 'major' : 'minor',
       count: detection.matches.length,
       locations: detection.matches.slice(0, LOCATIONS).map(selectorPath),
       criteria: [...def.criteria.map((criterion) => criterion.id), ZONE_CRITERIA[item.zone].id],
       observed: { status: detection.status, zone: item.zone, found: detection.matches.length, inZone: detection.inZone.length },
       why: text(item.why, locale),
       replaceWith: {
-        instruction: (detection.status === 'missing' ? label.mustHave.missing(build, text(ZONE_TEXT[item.zone], locale)) : label.mustHave.misplaced(build))
+        instruction: (detection.status === 'missing' ? label.mustHave.missing(build, text(ZONE_TEXT[item.zone], locale))
+          : actsFirst(item) ? label.mustHave.beforeAction(actionName(item), build) : label.mustHave.misplaced(build))
           + (styleId ? '' : ` ${label.noStyle}`),
         moves,
         ...(styleId && item.zone === 'first-screen' ? { archetype: { hero: structureGuide(styleId).hero } } : {}),
@@ -517,9 +548,11 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
 
   for (const item of mustHaveItems) {
     const detection = detections.get(item.id)!;
+    const entry = mustHaveEntry!.items.find((candidate) => candidate.id === item.id)!;
     const evidenceId = evidenceIdFor(targetId, mustHavePatternId(item.id));
     const first = item.locations[0];
-    const outcome: StructureEvidence['outcome'] = item.status === 'present' ? 'passed' : item.status === 'not-verified' ? 'cant-tell' : 'failed';
+    const outcome: StructureEvidence['outcome'] = item.status === 'present' ? 'passed' : item.status === 'not-verified' ? 'cant-tell'
+      : item.status === 'not-applicable' ? 'inapplicable' : 'failed';
     evidence.push({
       id: evidenceId,
       targetId,
@@ -534,7 +567,8 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
     });
     const check = checkDefs.get(item.checkId);
     if (!check) continue;
-    const verdict: StructureResult['verdict'] = item.status === 'present' ? 'PASS' : item.status === 'not-verified' ? 'NOT_VERIFIED' : 'FIX_NOW';
+    const verdict: StructureResult['verdict'] = item.status === 'present' ? 'PASS' : item.status === 'not-verified' ? 'NOT_VERIFIED'
+      : item.status === 'not-applicable' ? 'NOT_APPLICABLE' : item.status === 'misplaced' && !actsFirst(entry) ? 'RISK' : 'FIX_NOW';
     results.push({
       checkId: item.checkId,
       targetId,
@@ -544,7 +578,8 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
         : item.status === 'missing' ? label.absent(item.name)
           : item.status === 'misplaced' ? label.mustHave.misplacedAt(item.name, first ?? '')
             : `${item.name}: ${item.note ?? label.mustHave.status[item.status]}`,
-      ...(verdict === 'FIX_NOW' ? { remediation: check.remediation } : {}),
+      ...(verdict === 'FIX_NOW' ? { remediation: check.remediation }
+        : verdict === 'RISK' ? { remediation: label.mustHave.misplaced(text(mustHaveDef(item.id).build, locale)) } : {}),
     });
   }
 

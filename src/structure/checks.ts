@@ -1,7 +1,7 @@
 import { text } from '../localization.js';
 import type { AuditApplicability, AuditEvidenceType, AuditSeverity, Lang, ProductType } from '../types.js';
 import { structureGuide } from './guidance.js';
-import { ZONE_TEXT, mustHaveCheckId, mustHaveDef, mustHavePatternId, productMustHaveDef } from './must-haves.js';
+import { ZONE_TEXT, mustHaveCheckId, mustHaveDef, mustHaveExemptions, mustHavePatternId, productMustHaveDef, type MustHaveCondition } from './must-haves.js';
 import { GLOBAL_PATTERNS, styleRuleText } from './patterns.js';
 import type { GlobalPatternId, StyleBanDef } from './types.js';
 
@@ -34,6 +34,7 @@ const wording: Record<Lang, {
   shapeFix: (fix: string) => string;
   style: (name: string) => string;
   mustHave: (name: string, placement: string) => string;
+  exempt: (when: string, reason: string) => string;
 }> = {
   en: {
     global: (name) => `Confirm audit_page_structure finds no ${name} in the built page.`,
@@ -41,6 +42,7 @@ const wording: Record<Lang, {
     shapeFix: (fix) => `Only if it gets in the way of the task: ${fix} Keep it when it serves the task, for example cards that lead to different tasks.`,
     style: (name) => `Confirm audit_page_structure finds no style-specific violation: ${name}.`,
     mustHave: (name, placement) => `Confirm audit_page_structure finds the must-have ${name} in the built page. ${placement}`,
+    exempt: (when, reason) => `Not applicable when absent, because the caller declared: ${when} Reason: ${reason}`,
   },
   ko: {
     global: (name) => `audit_page_structure가 빌드한 페이지에서 '${name}'을(를) 찾지 않는지 확인`,
@@ -48,6 +50,7 @@ const wording: Record<Lang, {
     shapeFix: (fix) => `과업을 방해할 때만 바꾸세요. ${fix} 서로 다른 업무로 이동하는 카드처럼 과업에 맞는 형태는 유지하세요.`,
     style: (name) => `audit_page_structure가 스타일 전용 금지 항목 '${name}' 위반을 찾지 않는지 확인`,
     mustHave: (name, placement) => `audit_page_structure가 빌드한 페이지에서 필수 요소 '${name}'을(를) 찾는지 확인. ${placement}`,
+    exempt: (when, reason) => `호출자가 다음 조건을 밝혔으므로 없으면 해당 없음: ${when} 이유: ${reason}`,
   },
   ja: {
     global: (name) => `audit_page_structureがビルドしたページで「${name}」を検出しないことを確認`,
@@ -55,6 +58,7 @@ const wording: Record<Lang, {
     shapeFix: (fix) => `タスクを妨げる場合だけ変えてください。${fix} 別々の業務へ進むカードのように、タスクに合う形は残してください。`,
     style: (name) => `audit_page_structureがスタイル固有の禁止項目「${name}」の違反を検出しないことを確認`,
     mustHave: (name, placement) => `audit_page_structureがビルドしたページで必須要素「${name}」を検出することを確認。${placement}`,
+    exempt: (when, reason) => `呼び出し側が次の条件を示したため、なければ該当なし: ${when} 理由: ${reason}`,
   },
 };
 
@@ -68,7 +72,9 @@ export function structureCheckId(patternId: string, ban?: StyleBanDef): string {
  * shape is found and needs a task judgment (manual evidence) before it can pass or need a fix. With a styleId, the
  * chosen direction bans the pattern, so finding it is a style-fidelity result.
  */
-export function structureChecks(styleId: string | undefined, locale: Lang, productType?: ProductType): StructureCheckDef[] {
+export function structureChecks(
+  styleId: string | undefined, locale: Lang, productType?: ProductType, conditions?: readonly MustHaveCondition[],
+): StructureCheckDef[] {
   const guide = styleId ? structureGuide(styleId) : null;
   const allowed = new Set(Object.keys(guide?.allow ?? {}));
   const checks: StructureCheckDef[] = GLOBAL_PATTERNS.filter((pattern) => !allowed.has(pattern.id)).map((pattern) => {
@@ -113,18 +119,22 @@ export function structureChecks(styleId: string | undefined, locale: Lang, produ
       remediation: text(rule.fix, locale),
     });
   }
+  const exemptions = mustHaveExemptions(productType, conditions);
   for (const item of (productType ? productMustHaveDef(productType)?.items : undefined) ?? []) {
     const def = mustHaveDef(item.id);
     const placement = text(ZONE_TEXT[item.zone], locale);
+    const exemption = exemptions.get(item.id);
     checks.push({
       id: mustHaveCheckId(item.id),
       patternId: mustHavePatternId(item.id),
       scope: 'must-have',
       claim: 'required-element',
       severity: 'major',
-      applicability: 'always',
+      // A declared condition makes the must-have optional: present is still checked, absent is not a defect.
+      applicability: exemption ? 'when-present' : 'always',
       evidenceTypes: ['dom'],
-      criterion: wording[locale].mustHave(text(def.name, locale), placement),
+      criterion: wording[locale].mustHave(text(def.name, locale), placement)
+        + (exemption ? ` ${wording[locale].exempt(text(exemption.condition.when, locale), exemption.reason)}` : ''),
       why: text(item.why, locale),
       remediation: `${text(def.build, locale)} ${placement}`,
     });

@@ -17,6 +17,17 @@ All notable changes to this project are documented here. The format follows
   must-have is a `required-element` result and keeps FIX_NOW. Structure plans without `styleId`
   change accordingly (assisted, `when-present`, `manual` evidence), so their plan hash changes, and
   the ruleset hash includes a new verdict policy id.
+- Must-haves separate necessity from first-screen placement (#20). A missing must-have is still
+  FIX_NOW. One found only below the estimated first screen is now RISK with a note that the first
+  screen is estimated, not measured, unless the action it has to be seen with is on the first
+  screen: a commerce price, variant choice, or delivery details below a first-screen add-to-cart
+  stay FIX_NOW. Must-have findings below the first screen in that RISK case are `minor`.
+- `mustHaveConditions` on `audit_page_structure` and `get_design_audit_plan` sets named must-haves
+  aside with a stated reason (12-500 characters): `single-variant` (commerce variant choice),
+  `no-code-interface` (developer-tool code sample), `docs-article` (documentation quickstart) and
+  `not-time-series` (data-analytics changes and time range). Those checks become `when-present`;
+  absent is NOT_APPLICABLE. The plan query and hash include the conditions, and the
+  `webstylebook://structure/must-haves` resource lists them. The verdict policy id is `claims-v2`.
 
 ## [0.16.0] — 2026-11-24
 
