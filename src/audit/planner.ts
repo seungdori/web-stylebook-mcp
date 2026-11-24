@@ -3,6 +3,7 @@ import type { CatalogRepository } from '../catalog/repository.js';
 import { stableHashOf } from '../catalog/stable-hash.js';
 import { planUiStates } from '../state-atlas/planner.js';
 import { structureChecks, type StructureClaim } from '../structure/checks.js';
+import { mustHaveExemptions, normalizeMustHaveConditions, type MustHaveCondition } from '../structure/must-haves.js';
 import { revisionChecks } from '../structure/revisions.js';
 import type {
   AuditApplicability,
@@ -35,6 +36,8 @@ export interface DesignAuditPlanInput {
   styleId?: string;
   /** With the structure group, adds one check per must-have of this product type. */
   productType?: ProductType;
+  /** Named conditions that make some of the product type's must-haves optional, each with its observed reason. */
+  mustHaveConditions?: MustHaveCondition[];
   surfaces?: UxSurface[];
   designPrincipleIds?: string[];
   uxPrincipleIds?: string[];
@@ -91,6 +94,8 @@ export interface DesignAuditPlan {
     styleId?: string;
     /** Present only when passed, so plans without it keep their hash. */
     productType?: ProductType;
+    /** Present only when passed, sorted by id with trimmed reasons. */
+    mustHaveConditions?: MustHaveCondition[];
     surfaces: UxSurface[];
     designPrincipleIds: string[];
     uxPrincipleIds: string[];
@@ -362,6 +367,11 @@ export function planDesignAudit(
       throw new AuditPlanError('productType adds must-have checks to the "structure" group; include "structure" in includeGroups');
     }
   }
+  try {
+    mustHaveExemptions(input.productType, input.mustHaveConditions);
+  } catch (error) {
+    throw new AuditPlanError((error as Error).message);
+  }
 
   const designPrinciples = designPrincipleIds.map((id) => {
     const principle = repo.getDesignPrinciple(id);
@@ -410,7 +420,7 @@ export function planDesignAudit(
     .map((check) => resolveCheck(check, locale, repo));
   const withStructure = !revision && includeGroups.includes('structure');
   const structure: ResolvedAuditCheck[] = withStructure
-    ? structureChecks(input.styleId, locale, input.productType).map((check) => ({
+    ? structureChecks(input.styleId, locale, input.productType, input.mustHaveConditions).map((check) => ({
       id: check.id,
       groupId: 'structure',
       criterion: check.criterion,
@@ -455,6 +465,7 @@ export function planDesignAudit(
     query: {
       styleId: input.styleId,
       ...(input.productType ? { productType: input.productType } : {}),
+      ...(input.mustHaveConditions?.length ? { mustHaveConditions: normalizeMustHaveConditions(input.mustHaveConditions) } : {}),
       surfaces,
       designPrincipleIds,
       uxPrincipleIds,

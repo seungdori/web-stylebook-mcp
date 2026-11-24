@@ -51,7 +51,11 @@ export interface ProductMustHaveDef {
   productType: Exclude<ProductType, 'other'>;
   /** The page the list is written for. */
   page: LocalizedText;
-  items: Array<{ id: MustHaveId; zone: MustHaveZone; why: LocalizedText }>;
+  /**
+   * beforeAction names the action this information has to be seen with: when that action is on the first screen and
+   * this item is not, people can act before they see it, which is a defect. Other first-screen placement is advice.
+   */
+  items: Array<{ id: MustHaveId; zone: MustHaveZone; why: LocalizedText; beforeAction?: MustHaveId }>;
 }
 
 const t = (en: string, ko: string, ja: string): LocalizedText => ({ en, ko, ja });
@@ -378,10 +382,10 @@ export const PRODUCT_MUST_HAVES: readonly ProductMustHaveDef[] = [
     productType: 'commerce',
     page: t('product detail page', '상품 상세 페이지', '商品詳細ページ'),
     items: [
-      { id: 'price', zone: 'first-screen', why: t('Shoppers decide on price before they scroll; a price that is not visible reads as expensive or evasive.', '구매자는 스크롤하기 전에 가격으로 판단합니다. 가격이 보이지 않으면 비싸거나 숨긴다고 받아들입니다.', '購入者はスクロールする前に価格で判断します。価格が見えないと、高いか隠していると受け取られます。') },
-      { id: 'variant-choice', zone: 'first-screen', why: t('Size, shade, or quantity changes the price and the fit, so shoppers have to choose it beside the buy button.', '용량·색상·수량은 가격과 맞음새를 바꿉니다. 구매 버튼 옆에서 고를 수 있어야 합니다.', 'サイズ・色・数量は価格と合うかどうかを変えます。購入ボタンの横で選べる必要があります。') },
+      { id: 'price', zone: 'first-screen', why: t('Shoppers decide on price before they scroll; a price that is not visible reads as expensive or evasive.', '구매자는 스크롤하기 전에 가격으로 판단합니다. 가격이 보이지 않으면 비싸거나 숨긴다고 받아들입니다.', '購入者はスクロールする前に価格で判断します。価格が見えないと、高いか隠していると受け取られます。'), beforeAction: 'add-to-cart' },
+      { id: 'variant-choice', zone: 'first-screen', why: t('Size, shade, or quantity changes the price and the fit, so shoppers have to choose it beside the buy button.', '용량·색상·수량은 가격과 맞음새를 바꿉니다. 구매 버튼 옆에서 고를 수 있어야 합니다.', 'サイズ・色・数量は価格と合うかどうかを変えます。購入ボタンの横で選べる必要があります。'), beforeAction: 'add-to-cart' },
       { id: 'add-to-cart', zone: 'first-screen', why: t('Buying is the job of this page, so the action has to be reachable without scrolling.', '이 페이지의 일은 구매입니다. 구매 동작은 스크롤 없이 닿아야 합니다.', 'このページの役割は購入です。購入の操作はスクロールせずに届く必要があります。') },
-      { id: 'purchase-assurance', zone: 'first-screen', why: t('Delivery, returns, and guarantee details remove the last doubts at the moment of purchase.', '배송·반품·보증 안내가 구매하는 순간의 마지막 망설임을 없앱니다.', '配送・返品・保証の案内が、購入の瞬間の最後の迷いを取り除きます。') },
+      { id: 'purchase-assurance', zone: 'first-screen', why: t('Delivery, returns, and guarantee details remove the last doubts at the moment of purchase.', '배송·반품·보증 안내가 구매하는 순간의 마지막 망설임을 없앱니다.', '配送・返品・保証の案内が、購入の瞬間の最後の迷いを取り除きます。'), beforeAction: 'add-to-cart' },
     ],
   },
   {
@@ -450,6 +454,113 @@ export const ZONE_CRITERIA: Record<MustHaveZone, CriterionDef> = {
   },
   page: { id: 'page', text: 'Anywhere the must-have is searched for: the content sections, plus the site header, navigation, and footer when its searchIn is "page".' },
 };
+
+export const MUST_HAVE_CONDITION_IDS = ['single-variant', 'no-code-interface', 'docs-article', 'not-time-series'] as const;
+/** A named situation in which some of a product type's must-haves do not apply. */
+export type MustHaveConditionId = (typeof MUST_HAVE_CONDITION_IDS)[number];
+export const MUST_HAVE_CONDITION_REASON = { min: 12, max: 500 } as const;
+
+export interface MustHaveConditionDef {
+  id: MustHaveConditionId;
+  productType: Exclude<ProductType, 'other'>;
+  /** The must-haves that do not apply in this situation; the rest of the product type's list still does. */
+  exempts: MustHaveId[];
+  when: LocalizedText;
+}
+
+/** A condition the caller declares, with the observed fact that makes it true. */
+export interface MustHaveCondition {
+  id: MustHaveConditionId;
+  reason: string;
+}
+
+/**
+ * The few situations where a product type's list asks for something the page does not need. The list is closed on
+ * purpose: a must-have can only be set aside by one of these named conditions and a stated reason, never by free text.
+ */
+export const MUST_HAVE_CONDITIONS: readonly MustHaveConditionDef[] = [
+  {
+    id: 'single-variant',
+    productType: 'commerce',
+    exempts: ['variant-choice'],
+    when: t(
+      'The product is sold in one variant: no size, shade, or other choice changes its price or fit.',
+      '상품이 한 가지로만 팔립니다. 가격이나 맞음새를 바꾸는 용량·색상 같은 선택이 없습니다.',
+      '商品は一種類だけで販売されています。価格や合うかどうかを変えるサイズや色の選択がありません。',
+    ),
+  },
+  {
+    id: 'no-code-interface',
+    productType: 'developer-tool',
+    exempts: ['code-sample'],
+    when: t(
+      'The tool is used through its interface, not through code; show the real interface in use instead of a code sample.',
+      '도구를 코드가 아니라 화면으로 씁니다. 코드 예시 대신 실제 화면을 쓰는 모습을 보여 주세요.',
+      'ツールはコードではなく画面で使います。コード例の代わりに、実際の画面を使う様子を見せてください。',
+    ),
+  },
+  {
+    id: 'docs-article',
+    productType: 'documentation',
+    exempts: ['quickstart'],
+    when: t(
+      'The page is one documentation article, not the docs home; the quickstart belongs on the home.',
+      '이 페이지는 문서 홈이 아니라 개별 문서입니다. quickstart는 문서 홈에 둡니다.',
+      'このページはドキュメントのトップではなく個別の記事です。クイックスタートはトップに置きます。',
+    ),
+  },
+  {
+    id: 'not-time-series',
+    productType: 'data-analytics',
+    exempts: ['recent-changes', 'time-range'],
+    when: t(
+      'The view compares distributions or groups at one point, not values over time, so a period and its changes are not what it answers.',
+      '이 화면은 시간에 따른 값이 아니라 한 시점의 분포나 집단을 비교합니다. 기간과 그 변화는 이 화면이 답하는 질문이 아닙니다.',
+      'この画面は時間による値の変化ではなく、ある時点の分布や集団を比べます。期間とその変化は、この画面が答える問いではありません。',
+    ),
+  },
+];
+
+const conditionById = new Map(MUST_HAVE_CONDITIONS.map((def) => [def.id, def]));
+
+export function mustHaveConditionDef(id: MustHaveConditionId): MustHaveConditionDef {
+  const def = conditionById.get(id);
+  if (!def) throw new Error(`unknown must-have condition '${id}'`);
+  return def;
+}
+
+/**
+ * Checks declared conditions against the product type and returns the exemption each must-have gets. Throws an Error
+ * whose message names the problem; callers wrap it in their own error type.
+ */
+export function mustHaveExemptions(
+  productType: ProductType | undefined, conditions: readonly MustHaveCondition[] | undefined,
+): Map<MustHaveId, { condition: MustHaveConditionDef; reason: string }> {
+  const exemptions = new Map<MustHaveId, { condition: MustHaveConditionDef; reason: string }>();
+  if (!conditions?.length) return exemptions;
+  if (!productType) throw new Error('mustHaveConditions needs the productType whose must-haves they set aside');
+  const seen = new Set<string>();
+  for (const declared of conditions) {
+    const condition = conditionById.get(declared.id);
+    if (!condition) throw new Error(`mustHaveConditions id must be one of: ${MUST_HAVE_CONDITION_IDS.join(', ')}`);
+    if (seen.has(condition.id)) throw new Error(`mustHaveConditions lists '${condition.id}' twice`);
+    seen.add(condition.id);
+    if (condition.productType !== productType) {
+      throw new Error(`must-have condition '${condition.id}' applies to productType '${condition.productType}', not '${productType}'`);
+    }
+    const reason = declared.reason?.trim() ?? '';
+    if (reason.length < MUST_HAVE_CONDITION_REASON.min || reason.length > MUST_HAVE_CONDITION_REASON.max) {
+      throw new Error(`must-have condition '${condition.id}' needs a reason of ${MUST_HAVE_CONDITION_REASON.min}-${MUST_HAVE_CONDITION_REASON.max} characters that states the observed fact`);
+    }
+    for (const id of condition.exempts) exemptions.set(id, { condition, reason });
+  }
+  return exemptions;
+}
+
+/** Declared conditions in a stable order with trimmed reasons, for plan queries and hashes. */
+export function normalizeMustHaveConditions(conditions: readonly MustHaveCondition[]): MustHaveCondition[] {
+  return [...conditions].map(({ id, reason }) => ({ id, reason: reason.trim() })).sort((a, b) => a.id.localeCompare(b.id));
+}
 
 const defById = new Map(MUST_HAVES.map((def) => [def.id, def]));
 const productById = new Map(PRODUCT_MUST_HAVES.map((entry) => [entry.productType, entry]));
@@ -567,6 +678,8 @@ export interface MustHaveCatalog {
   zones: Record<MustHaveZone, { text: LocalizedText; criterion: CriterionDef }>;
   mustHaves: typeof MUST_HAVES;
   productTypes: typeof PRODUCT_MUST_HAVES;
+  /** Named situations that set some must-haves aside; each needs a stated reason. */
+  conditions: typeof MUST_HAVE_CONDITIONS;
 }
 
 export function mustHaveCatalog(): MustHaveCatalog {
@@ -579,5 +692,6 @@ export function mustHaveCatalog(): MustHaveCatalog {
     },
     mustHaves: MUST_HAVES,
     productTypes: PRODUCT_MUST_HAVES,
+    conditions: MUST_HAVE_CONDITIONS,
   };
 }

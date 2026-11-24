@@ -273,6 +273,17 @@ MCP는 제출된 증거의 범위와 일관성을 검사하고 **실제 파일 �
 
 첫 화면은 첫 섹션(페이지의 `h1`이 있는 섹션)의 끝까지입니다. 지금까지의 섹션이 모두 짧으면 뒤따르는 섹션을 2개까지 더 넣습니다. 짧은 섹션은 40단어 이하이고, 이미지·비디오·표·큰 SVG가 없고, 화면을 채우는 높이를 선언하지 않은 섹션입니다. 사이트 헤더는 첫 화면에 들어가고, 푸터는 들어가지 않습니다. 제품 유형을 받지도 추론하지도 못한 설명은 `other`가 됩니다. `other`에는 목록이 없고, 결과는 목록을 지어내지 않고 그 사실을 알립니다. 모든 판단 기준은 `webstylebook://structure/must-haves`에 있습니다.
 
+빠진 필수 요소는 FIX_NOW입니다. 첫 화면 아래에서만 찾은 요소는 RISK입니다. 첫 화면은 잰 값이 아니라 마크업으로 추정한 범위이기 때문입니다. 위로 옮기거나, 그 뷰포트의 브라우저 캡처로 첫 스크롤 전에 보인다는 것을 증거로 내세요. 예외는 행동 전에 알아야 하는 정보입니다. 장바구니 담기가 첫 화면에 있는데 가격, 옵션 선택, 배송·보증 안내가 첫 화면에 없으면 사용자가 그 정보를 보기 전에 살 수 있습니다. 그래서 이 경우는 FIX_NOW로 남습니다.
+
+어떤 목록은 페이지에 필요 없는 요소를 요구합니다. 그럴 때는 아래 조건 중 하나와 관찰한 사실(`reason`, 12-500자)을 `mustHaveConditions`로 `audit_page_structure`와 `get_design_audit_plan`에 함께 넘기세요. 조건이 가리키는 필수 요소는 선택 사항이 됩니다. 있으면 PASS이고, 없으면 NOT_APPLICABLE입니다. 자유 문장으로는 필수 요소를 뺄 수 없습니다.
+
+| 조건 | 제품 유형 | 빼는 요소 | 언제 |
+|---|---|---|---|
+| `single-variant` | `commerce` | `variant-choice` | 상품이 한 가지로만 팔립니다 |
+| `no-code-interface` | `developer-tool` | `code-sample` | 도구를 화면으로 씁니다. 대신 실제 화면을 보여 주세요 |
+| `docs-article` | `documentation` | `quickstart` | 문서 홈이 아니라 개별 문서입니다 |
+| `not-time-series` | `data-analytics` | `recent-changes`, `time-range` | 한 시점의 분포나 집단을 비교합니다 |
+
 같은 `productType`을 `audit_page_structure`에 넘기면, 빌드한 페이지에서 빠진 필수 요소를 알려 줍니다. 아래는 쇼케이스의 실패 사례를 fixture로 다시 만든 페이지([`commerce-buy-button-only.html`](https://github.com/seungdori/web-stylebook-mcp/blob/master/tests/fixtures/must-haves/commerce-buy-button-only.html))의 실제 출력입니다.
 
 ```jsonc
@@ -299,7 +310,7 @@ MCP는 제출된 증거의 범위와 일관성을 검사하고 **실제 파일 �
       "severity": "major",
       "observed": { "status": "misplaced", "zone": "first-screen", "found": 1, "inZone": 0 },
       "replaceWith": {
-        "instruction": "첫 화면으로 옮기세요. 검사에서는 페이지 더 아래에서만 찾았습니다. 상품명 옆에 통화와 함께 가격을 보여 주세요. 용량마다 가격이 다르면 고른 용량의 가격을 보여 주세요.",
+        "instruction": "첫 화면으로 옮기세요. 검사에서는 페이지 더 아래에서만 찾았는데 '장바구니 담기'은(는) 첫 화면에 있어서, 이 정보를 보기 전에 행동할 수 있습니다. 상품명 옆에 통화와 함께 가격을 보여 주세요. 용량마다 가격이 다르면 고른 용량의 가격을 보여 주세요.",
         "moves": [],
         "archetype": { "hero": "Left-heavy and low: a 1.7fr/1fr grid with align-items: end …" }
       }

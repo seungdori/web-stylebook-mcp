@@ -265,6 +265,17 @@ A direction must not cost the page its function. In an earlier showcase run ([#7
 
 The first screen is everything up to the end of the opening section (the section that holds the page's `h1`), plus up to two following sections while each section so far is short (≤ 40 words, no image, video, table, or large SVG, and not sized to fill the viewport). The site header counts; the footer does not. A brief whose product type is neither given nor inferred resolves to `other`, which has no list, and the result says so instead of inventing one. Every criterion is in `webstylebook://structure/must-haves`.
 
+A missing must-have is FIX_NOW. One found only below the first screen is RISK, because the first screen is estimated from markup, not measured: move it up, or cite a browser capture at that viewport that shows it before the first scroll. The exception is information people need before they act: when add to cart is on the first screen and the price, variant choice, or delivery and guarantee details are not, people can buy before they see them, so those stay FIX_NOW.
+
+Some lists ask for something a page does not need. Pass `mustHaveConditions` with one of these named conditions and the observed fact as `reason` (12-500 characters) to both `audit_page_structure` and `get_design_audit_plan`. The must-haves it names become optional: present still passes, absent is NOT_APPLICABLE. Free text cannot set a must-have aside.
+
+| Condition | Product type | Sets aside | When |
+|---|---|---|---|
+| `single-variant` | `commerce` | `variant-choice` | The product is sold in one variant |
+| `no-code-interface` | `developer-tool` | `code-sample` | The tool is used through its interface; show the real interface instead |
+| `docs-article` | `documentation` | `quickstart` | The page is one article, not the docs home |
+| `not-time-series` | `data-analytics` | `recent-changes`, `time-range` | The view compares distributions or groups at one point |
+
 Pass the same `productType` to `audit_page_structure`, and it reports which must-haves the built page is missing. This is its real output for the showcase failure, rebuilt as a fixture ([`commerce-buy-button-only.html`](https://github.com/seungdori/web-stylebook-mcp/blob/master/tests/fixtures/must-haves/commerce-buy-button-only.html)):
 
 ```jsonc
@@ -291,7 +302,7 @@ Pass the same `productType` to `audit_page_structure`, and it reports which must
       "severity": "major",
       "observed": { "status": "misplaced", "zone": "first-screen", "found": 1, "inZone": 0 },
       "replaceWith": {
-        "instruction": "Move it onto the first screen; the audit found it only further down the page. Show the price with its currency next to the product name; when sizes differ in price, show the price of the selected size.",
+        "instruction": "Move it onto the first screen; the audit found it only further down the page, while Add to cart is on the first screen, so people can act before they see it. Show the price with its currency next to the product name; when sizes differ in price, show the price of the selected size.",
         "moves": [],
         "archetype": { "hero": "Left-heavy and low: a 1.7fr/1fr grid with align-items: end …" }
       }
