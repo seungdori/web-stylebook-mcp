@@ -3,7 +3,7 @@ import { stableHashOf } from '../catalog/stable-hash.js';
 import { text } from '../localization.js';
 import { SERVER_VERSION } from '../server-info.js';
 import { PRODUCT_TYPES, type AuditSeverity, type Lang, type ProductType } from '../types.js';
-import { structureCheckId, structureChecks, type StructureCheckDef } from './checks.js';
+import { structureCheckId, structureChecks, type StructureCheckDef, type StructureClaim } from './checks.js';
 import { detectGlobalPatterns, sectionOf, type DetectionStatus, type Observation } from './detect.js';
 import { selectorPath } from './dom/html.js';
 import { buildPage, type PageModel } from './dom/page.js';
@@ -60,7 +60,10 @@ export interface StructureFinding {
   patternId: string;
   checkId: string;
   scope: 'global' | 'style' | 'must-have';
+  /** What the finding can claim; a shape observation is not a task defect until a task judgment confirms it. */
+  claim: StructureClaim;
   name: string;
+  /** Severity once the claim is confirmed. */
   severity: AuditSeverity;
   count: number;
   locations: string[];
@@ -79,6 +82,7 @@ export interface StructureCheckReport {
   patternId: string;
   checkId: string;
   scope: 'global' | 'style';
+  claim: StructureClaim;
   status: StructureCheckStatus;
   count: number;
   note?: string;
@@ -137,7 +141,16 @@ export interface StructureAuditResult {
   };
   styleId: string | null;
   target: { id: string; viewportWidth: number };
-  summary: { clean: boolean; findings: number; major: number; minor: number; notVerified: number; checked: number };
+  summary: {
+    clean: boolean;
+    findings: number;
+    major: number;
+    minor: number;
+    notVerified: number;
+    checked: number;
+    /** Findings per claim; shape observations still need a task judgment. */
+    claims: Record<StructureClaim, number>;
+  };
   findings: StructureFinding[];
   checks: StructureCheckReport[];
   outline: Array<{ index: number; selector: string; patterns: string[] }>;
@@ -156,6 +169,7 @@ const labels: Record<Lang, {
   noStyle: string;
   limits: { heuristics: string; notAPass: string; truncated: (n: number) => string; unparsed: (n: number) => string; exhausted: string };
   guidance: string[];
+  shape: { unjudged: string; guidance: string };
   supersededBy: (id: string) => string;
   mustHave: {
     status: Record<MustHaveStatus, string>;
@@ -184,6 +198,10 @@ const labels: Record<Lang, {
       'Replace each finding with the listed signature move or archetype step, rebuild, and run audit_page_structure again on the new HTML and CSS.',
       'To record the outcome, call get_design_audit_plan with includeGroups containing "structure" and the same styleId, then submit these evidence and results entries to validate_design_audit_result under the same targetId.',
     ],
+    shape: {
+      unjudged: 'This is a shape observation: whether it gets in the way of the page\'s task was not checked.',
+      guidance: 'Without a styleId, global findings are shape observations, not defects. Judge each against the page\'s task (who uses it, for what, and what the shape hides or delays), keep shapes that serve the task, and submit that judgment as manual evidence with PASS, RISK, or FIX_NOW. Pass styleId to check fidelity to a chosen direction instead.',
+    },
     supersededBy: (id) => `reported under ${id}`,
     mustHave: {
       status: { present: 'present', misplaced: 'not on the first screen', missing: 'missing', 'not-verified': 'not verified' },
@@ -216,6 +234,10 @@ const labels: Record<Lang, {
       '발견 항목마다 제시한 시그니처 무브나 아키타입 단계로 바꾸고, 다시 빌드한 뒤 새 HTML과 CSS로 audit_page_structure를 다시 실행하세요.',
       '결과를 기록하려면 includeGroups에 "structure"를 넣고 같은 styleId로 get_design_audit_plan을 호출하세요. 그다음 이 evidence와 results를 같은 targetId로 validate_design_audit_result에 제출하세요.',
     ],
+    shape: {
+      unjudged: '형태를 관찰한 결과입니다. 이 형태가 페이지의 과업을 방해하는지는 확인하지 않았습니다.',
+      guidance: 'styleId가 없으면 전역 발견 항목은 결함이 아니라 형태 관찰입니다. 항목마다 페이지의 과업(누가, 무엇을 하려고 쓰는지, 이 형태가 무엇을 가리거나 늦추는지)에 비추어 판단하세요. 과업에 맞는 형태는 유지하세요. 판단은 manual 증거로 PASS, RISK, FIX_NOW와 함께 제출하세요. 고른 방향에 대한 충실도를 보려면 styleId를 넘기세요.',
+    },
     supersededBy: (id) => `${id} 항목으로 보고함`,
     mustHave: {
       status: { present: '있음', misplaced: '첫 화면 밖', missing: '없음', 'not-verified': '확인 못 함' },
@@ -248,6 +270,10 @@ const labels: Record<Lang, {
       '検出項目ごとに示したシグネチャームーブかアーキタイプの手順で置き換え、再ビルドして、新しいHTMLとCSSでaudit_page_structureを再実行してください。',
       '結果を記録するには、includeGroupsに"structure"を含め同じstyleIdでget_design_audit_planを呼び、これらのevidenceとresultsを同じtargetIdでvalidate_design_audit_resultに提出してください。',
     ],
+    shape: {
+      unjudged: '形を観察した結果です。この形がページのタスクを妨げるかは確認していません。',
+      guidance: 'styleIdがない場合、グローバルの検出項目は欠陥ではなく形の観察です。項目ごとに、ページのタスク(誰が何のために使うか、この形が何を隠したり遅らせたりするか)に照らして判断してください。タスクに合う形は残してください。判断はmanual証拠としてPASS、RISK、FIX_NOWと一緒に提出してください。選んだ方向への忠実度を確かめるにはstyleIdを渡してください。',
+    },
     supersededBy: (id) => `${id}として報告`,
     mustHave: {
       status: { present: 'あり', misplaced: 'ファーストビューの外', missing: 'なし', 'not-verified': '未確認' },
@@ -314,6 +340,8 @@ function ruleContext(repo: CatalogRepository, styleId: string | undefined): Rule
 }
 
 function verdictFor(status: StructureCheckStatus, check: StructureCheckDef): StructureResult['verdict'] {
+  // A shape alone cannot settle whether it hurts the task, so a found shape waits for the host's task judgment.
+  if (check.claim === 'shape-observation') return status === 'absent' || status === 'not-applicable' ? 'NOT_APPLICABLE' : 'NOT_VERIFIED';
   if (status === 'found') return check.severity === 'minor' ? 'RISK' : 'FIX_NOW';
   if (status === 'absent') return 'PASS';
   if (status === 'not-applicable') return check.applicability === 'always' ? 'NOT_VERIFIED' : 'NOT_APPLICABLE';
@@ -356,13 +384,14 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
     const checkId = structureCheckId(pattern.id);
     const allowReason = allowed[pattern.id];
     if (allowReason) {
-      reports.push({ patternId: pattern.id, checkId, scope: 'global', status: 'allowed-by-style', count: status.status === 'found' ? status.matches.length : 0, note: allowReason });
+      reports.push({ patternId: pattern.id, checkId, scope: 'global', claim: 'style-fidelity', status: 'allowed-by-style', count: status.status === 'found' ? status.matches.length : 0, note: allowReason });
       continue;
     }
     const { report, count, note } = describe(status);
     const superseding = pattern.supersededBy?.find((id) => global.get(id)?.status === 'found' && !allowed[id]);
-    reports.push({ patternId: pattern.id, checkId, scope: 'global', status: report, count, ...(note ? { note } : superseding && report === 'found' ? { note: label.supersededBy(superseding) } : {}) });
-    statuses.set(checkId, { status, check: checkDefs.get(checkId), name: text(pattern.name, locale) });
+    const check = checkDefs.get(checkId)!;
+    reports.push({ patternId: pattern.id, checkId, scope: 'global', claim: check.claim, status: report, count, ...(note ? { note } : superseding && report === 'found' ? { note: label.supersededBy(superseding) } : {}) });
+    statuses.set(checkId, { status, check, name: text(pattern.name, locale) });
     if (status.status !== 'found' || report !== 'found' || superseding) continue;
     const locations = status.matches.slice(0, LOCATIONS).map((match) => selectorPath(match.element));
     const moves = movesFor(pattern.job, styleId);
@@ -371,6 +400,7 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
       patternId: pattern.id,
       checkId,
       scope: 'global',
+      claim: check.claim,
       name: text(pattern.name, locale),
       severity: pattern.severity,
       count: status.matches.length,
@@ -379,7 +409,7 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
       observed: status.matches[0]!.observed,
       why: text(pattern.description, locale),
       replaceWith: {
-        instruction: text(pattern.replace, locale) + (styleId ? '' : ` ${label.noStyle}`),
+        instruction: check.remediation + (styleId ? '' : ` ${label.noStyle}`),
         moves,
         ...(archetype ? { archetype } : {}),
       },
@@ -395,7 +425,7 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
     const { report, count, note } = describe(status);
     const wording = styleRuleText(ban.rule, ban.params as never);
     const name = text(wording.name, locale);
-    reports.push({ patternId, checkId, scope: 'style', status: report, count, ...(note ? { note } : {}) });
+    reports.push({ patternId, checkId, scope: 'style', claim: 'style-fidelity', status: report, count, ...(note ? { note } : {}) });
     const check = checkDefs.get(checkId);
     statuses.set(checkId, { status, check, name });
     if (status.status !== 'found' || report !== 'found') continue;
@@ -427,6 +457,7 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
       patternId: mustHavePatternId(item.id),
       checkId: mustHaveCheckId(item.id),
       scope: 'must-have',
+      claim: 'required-element',
       name,
       severity: 'major',
       count: detection.matches.length,
@@ -451,8 +482,12 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
     const entry = statuses.get(report.checkId);
     const first = report.status === 'found' && entry?.status.status === 'found' ? entry.status.matches[0] : undefined;
     const evidenceId = evidenceIdFor(targetId, report.patternId);
-    const outcome: StructureEvidence['outcome'] = report.status === 'found' ? 'failed' : report.status === 'absent' ? 'passed'
-      : report.status === 'not-verified' ? 'cant-tell' : 'inapplicable';
+    const shape = report.claim === 'shape-observation';
+    // For a shape observation the DOM shows only where the shape is: no shape means the check does not apply, and a
+    // found shape cannot tell whether the task suffers.
+    const outcome: StructureEvidence['outcome'] = report.status === 'found' ? (shape ? 'cant-tell' : 'failed')
+      : report.status === 'absent' ? (shape ? 'inapplicable' : 'passed')
+        : report.status === 'not-verified' ? 'cant-tell' : 'inapplicable';
     const name = entry?.name ?? report.patternId;
     evidence.push({
       id: evidenceId,
@@ -474,9 +509,9 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
       targetId,
       verdict,
       evidenceRefs: [evidenceId],
-      rationale: report.status === 'found' ? label.foundAt(name, where, report.count)
+      rationale: report.status === 'found' ? label.foundAt(name, where, report.count) + (shape ? ` ${label.shape.unjudged}` : '')
         : report.status === 'absent' ? label.absent(name) : `${name}: ${report.note ?? label.status[report.status]}`,
-      ...(verdict === 'FIX_NOW' || verdict === 'RISK' ? { remediation: entry.check.remediation } : {}),
+      ...(verdict === 'FIX_NOW' || verdict === 'RISK' || (shape && report.status === 'found') ? { remediation: entry.check.remediation } : {}),
     });
   }
 
@@ -533,6 +568,8 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
   }));
 
   const major = findings.filter((finding) => finding.severity === 'major').length;
+  const claims: Record<StructureClaim, number> = { 'shape-observation': 0, 'style-fidelity': 0, 'required-element': 0 };
+  for (const finding of findings) claims[finding.claim] += 1;
   const notVerified = reports.filter((report) => report.status === 'not-verified').length
     + mustHaveItems.filter((item) => item.status === 'not-verified').length;
   return {
@@ -553,6 +590,7 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
       minor: findings.length - major,
       notVerified,
       checked: reports.length + mustHaveItems.length,
+      claims,
     },
     findings,
     checks: reports,
@@ -568,6 +606,7 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
     results,
     limits,
     guidance: [
+      ...(claims['shape-observation'] ? [label.shape.guidance] : []),
       ...(mustHaveItems.some((item) => item.status === 'missing' || item.status === 'misplaced') ? [label.mustHave.guidance] : []),
       ...label.guidance,
       ...(mustHaveItems.length ? [label.mustHave.plan] : []),
@@ -583,6 +622,7 @@ function styleFinding(
     patternId,
     checkId,
     scope: 'style',
+    claim: 'style-fidelity',
     name,
     severity,
     count: status.matches.length,

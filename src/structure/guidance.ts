@@ -194,6 +194,9 @@ export interface BannedPatternCatalog {
 
 let rulesetHashMemo: string | null = null;
 
+/** Without a styleId, a global pattern is a shape observation that needs a task judgment, not a defect (#20). */
+export const STRUCTURE_VERDICT_POLICY = 'claims-v1';
+
 /**
  * Hash of the guides, patterns, thresholds, and rule wording. Detector code is not hashable data, so the server
  * version stands in for it: a detector change without a release does not change this hash.
@@ -202,6 +205,8 @@ export function structureRulesetHash(): string {
   rulesetHashMemo ??= stableHashOf({
     schema: STRUCTURE_SCHEMA,
     serverVersion: SERVER_VERSION,
+    // Bumped when the meaning of a result changes without a detector or wording change (#20: shape observations).
+    verdictPolicy: STRUCTURE_VERDICT_POLICY,
     thresholds: T,
     global: GLOBAL_PATTERNS,
     guides: STRUCTURE_GUIDES.map((guide) => ({
