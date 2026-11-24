@@ -47,6 +47,11 @@ All notable changes to this project are documented here. The format follows
   `STYLE_PREFERENCE_NOT_IMPROVEMENT`, and a concern or hypothesis behind an improvement without a
   success criterion is `SUCCESS_CRITERION_MISSING`. `validationVersion` is 3, so improvement plan
   hashes change.
+- [docs/research/issue-20-evaluation.md](docs/research/issue-20-evaluation.md) records how the
+  representative cases of #20 are handled now, which test checks each one, the hash and version
+  changes, and the remaining limits. `tests/issue-20-evaluation-cases.test.ts` covers the cases the
+  per-problem tests did not: a sourced logo row and centered openings without a style, keyboard and
+  kept-input principle checks, and a missing price under every style and condition.
 
 ## [0.16.0] — 2026-11-24
 
