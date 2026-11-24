@@ -6,77 +6,49 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
-### Added
-
-- The README groups install steps by client (#8): Claude Code scopes and `.mcp.json`, Codex
-  `~/.codex/config.toml`, and VS Code (GitHub Copilot) with an install button and the
-  `mcpServers` block for `.mcp.json` or `~/.copilot/mcp-config.json`. `tests/install-launch.test.ts`
-  starts the server from every documented client config with a tarball packed from the checkout.
-- `manifest.json`, an MCP bundle (MCPB 0.3) manifest for listing the local server on Smithery.
-  [docs/listings.md](docs/listings.md) builds the bundle from the npm package; nothing is submitted.
-
-### Fixed
-
-- `npm run visual:sync` stopped at website revision `a8515dd` with "src/visual/schema.ts imports
-  '../utils/zod' outside the portable source/dependency allowlist". The website now imports zod
-  through `src/utils/zod.ts`, which only turns on jitless mode for its CSP. While the wrapper is
-  exactly that re-export, the sync copies the file with the plain `zod` import and records the
-  wrapper hash and the rewrite in `generated/visual-contract-source.v1.json`; a wrapper with any
-  other content, or none, still stops the sync. The bundled snapshot is unchanged.
+## [0.17.0] — 2026-11-25
 
 ### Added
 
-- `scripts/generate-website-parity-fixture.mts` builds `tests/fixtures/website-visual-parity.v1.json`
-  from a website checkout's own resolver and CSS exporter, so the fixture no longer has to be pinned
-  by hand at each snapshot update. Run against website revision `b6771f9` it reproduces the current
-  fixture exactly; only its `note` now names the script. RELEASING.md lists the step.
+- The README's Install section is grouped by client. Claude Code gains `--scope` options and a
+  `.mcp.json` example, Codex a `~/.codex/config.toml` example, and VS Code (GitHub Copilot) an
+  install button and a `.mcp.json` or `~/.copilot/mcp-config.json` example (#36, #39).
+- `mustHaveConditions` on `audit_page_structure` and `get_design_audit_plan` sets a named must-have
+  aside with a stated reason, for example `single-variant` for a product without a variant choice
+  (#31).
+- `manifest.json` packages the server as an MCP bundle (`.mcpb`).
+  [docs/listings.md](docs/listings.md) has the build steps. The bundle is not published yet (#39).
 
 ### Changed
 
-- `audit_page_structure` no longer turns a shape into a task defect on its own (#20). Every finding and
-  check now carries a `claim`, and `summary.claims` counts findings per claim. Without `styleId`, a
-  global pattern is a `shape-observation`: when found, its result is NOT_VERIFIED with `cant-tell`
-  evidence and a conditional remediation, and when absent it is NOT_APPLICABLE. The host judges the
-  shape against the page's task and submits PASS, RISK or FIX_NOW with `manual` evidence. With
-  `styleId`, the same patterns are `style-fidelity` results and keep FIX_NOW or RISK; a missing
-  must-have is a `required-element` result and keeps FIX_NOW. Structure plans without `styleId`
-  change accordingly (assisted, `when-present`, `manual` evidence), so their plan hash changes, and
-  the ruleset hash includes a new verdict policy id.
-- Must-haves separate necessity from first-screen placement (#20). A missing must-have is still
-  FIX_NOW. One found only below the estimated first screen is now RISK with a note that the first
-  screen is estimated, not measured, unless the action it has to be seen with is on the first
-  screen: a commerce price, variant choice, or delivery details below a first-screen add-to-cart
-  stay FIX_NOW. Must-have findings below the first screen in that RISK case are `minor`.
-- `mustHaveConditions` on `audit_page_structure` and `get_design_audit_plan` sets named must-haves
-  aside with a stated reason (12-500 characters): `single-variant` (commerce variant choice),
-  `no-code-interface` (developer-tool code sample), `docs-article` (documentation quickstart) and
-  `not-time-series` (data-analytics changes and time range). Those checks become `when-present`;
-  absent is NOT_APPLICABLE. The plan query and hash include the conditions, and the
-  `webstylebook://structure/must-haves` resource lists them. The verdict policy id is `claims-v2`.
-- `get_design_audit_plan` turns each verify sentence of a selected design or UX principle into its
-  own check, `principle-<design|ux>-<id>-verify-<n>` (#20). Before, selecting Hick's law left the
-  same four general checks. A reviewed table (`src/audit/principle-verify.ts`) assigns each of the
-  71 sentences an evidence method; the checks are `when-present`, minor, and carry
-  `evidenceMethods`. Each selected principle lists its `checkIds`, and `coverage.principleChecks`
-  counts them. Plans that select principles change, so their plan hash changes.
-- Audit evidence takes an optional `method` (`static`, `browser`, `agent-review`, `participant`,
-  `analytics`). On a principle check, PASS, RISK or FIX_NOW without conclusive evidence of an
-  accepted method is `EVIDENCE_METHOD_NOT_ACCEPTED` and resolves to NOT_VERIFIED, so an agent's
-  own timing cannot answer a sentence that needs participants.
-- `validate_design_improvement_result` separates how a check was observed from what a change
-  claims (#20). Checks take an optional `method`; a behavior or accessibility pass observed by
-  `static` or `agent-review`, or a visual pass observed by `static`, is
-  `CHECK_METHOD_INSUFFICIENT` and not verified. Changes take an optional `claim`
-  (`observed-defect`, `grounded-concern`, `improvement-hypothesis`, `style-preference`) and
-  `successCriterion`: an improvement resting only on style preferences is
-  `STYLE_PREFERENCE_NOT_IMPROVEMENT`, and a concern or hypothesis behind an improvement without a
-  success criterion is `SUCCESS_CRITERION_MISSING`. `validationVersion` is 3, so improvement plan
-  hashes change.
-- [docs/research/issue-20-evaluation.md](docs/research/issue-20-evaluation.md) records how the
-  representative cases of #20 are handled now, which test checks each one, the hash and version
-  changes, and the remaining limits. `tests/issue-20-evaluation-cases.test.ts` covers the cases the
-  per-problem tests did not: a sourced logo row and centered openings without a style, keyboard and
-  kept-input principle checks, and a missing price under every style and condition.
+- Without `styleId`, `audit_page_structure` reports a layout shape it finds, such as a centered
+  hero, as an observation (`NOT_VERIFIED`) for the agent to judge against the page's task. With
+  `styleId`, the style's patterns and missing must-haves fail as before (#30).
+- A must-have that is present only below the estimated first screen is `RISK` instead of
+  `FIX_NOW`. It stays `FIX_NOW` when the action it belongs to is on the first screen, such as a
+  price below an add-to-cart button (#31).
+- `get_design_audit_plan` adds a check for each verify sentence of a selected design or UX
+  principle and names the evidence methods that can answer it. A PASS, RISK or FIX_NOW on such a
+  check without evidence of one of those `method` values is NOT_VERIFIED (#32).
+- `validate_design_improvement_result` takes a `method` on checks, and a `claim` and
+  `successCriterion` on changes. A pass observed by a method that cannot show the result, such as
+  `static` for a behavior check, is not verified. A change that rests only on style preference does
+  not count as an improvement, and a hypothesis needs a success criterion (#33).
+- Plan hashes change for structure plans without `styleId`, plans that select principles, and
+  improvement plans (`validationVersion` 3). Request a plan again before validating against it
+  (#30-#33).
+
+### For maintainers
+
+- `npm run visual:sync` accepts website revisions that import zod through `src/utils/zod.ts` (#35).
+- `scripts/generate-website-parity-fixture.mts` regenerates the website parity fixture from a
+  website checkout (#38).
+- [docs/research/issue-20-evaluation.md](docs/research/issue-20-evaluation.md) lists how each case
+  reported in #20 is handled and which test covers it (#34).
+
+### Unchanged
+
+- The bundled catalog, visual contracts and dependencies are the same as in 0.16.0.
 
 ## [0.16.0] — 2026-11-24
 
