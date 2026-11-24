@@ -6,6 +6,15 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- `npm run visual:sync` stopped at website revision `a8515dd` with "src/visual/schema.ts imports
+  '../utils/zod' outside the portable source/dependency allowlist". The website now imports zod
+  through `src/utils/zod.ts`, which only turns on jitless mode for its CSP. While the wrapper is
+  exactly that re-export, the sync copies the file with the plain `zod` import and records the
+  wrapper hash and the rewrite in `generated/visual-contract-source.v1.json`; a wrapper with any
+  other content, or none, still stops the sync. The bundled snapshot is unchanged.
+
 ### Changed
 
 - `audit_page_structure` no longer turns a shape into a task defect on its own (#20). Every finding and
