@@ -103,7 +103,17 @@ API 키 없음. 모델 호출 없음. 네트워크 없음. 프로젝트 파일�
 시각·보존 검사는 결과에 연결한 전후 캡처를 모두 참조해야 합니다. 비교 조건이 다르거나 폰트가
 로딩되지 않은 캡처에 의존한 검사는 통과하지 못하며, 같은 이미지를 서로 다른 경로·조건·소스의
 증거로 사용할 수 없습니다. 검증 규칙 업데이트 후에는 계획을 다시 받아 `workflow.planHash`를
-사용하세요(`validationVersion: 2`).
+사용하세요(`validationVersion: 3`).
+
+선택 필드 세 개는 증거가 주장할 수 있는 범위를 밝힙니다. `checks[].method`는 누가 어떤 방법으로
+관찰했는지 기록합니다(`static`, `browser`, `agent-review`, `participant`, `analytics`). `static`이나
+`agent-review`로 관찰한 동작·접근성 통과와 `static`으로 관찰한 시각 통과는
+`CHECK_METHOD_INSUFFICIENT`이며 미검증으로 셉니다. `changes[].claim`은 변경이 주장하는 내용입니다
+(`observed-defect`, `grounded-concern`, `improvement-hypothesis`, `style-preference`). 스타일 선호뿐인
+변경으로 `improved`를 주장하면 `STYLE_PREFERENCE_NOT_IMPROVEMENT`입니다. 우려나 가설로 개선을
+주장하려면 `changes[].successCriterion`에 어떤 조건에서 무엇이 바뀌면 개선인지 적어야 합니다. 선택
+시간이나 완료율 같은 사용자 성과는 `participant`나 `analytics` 증거가 필요합니다. 에이전트가 직접
+실행한 결과로는 보여 줄 수 없습니다.
 MCP는 제출된 증거의 범위와 일관성을 검사하고 **실제 파일 내용이나 디자인 품질을 독립 인증하지
 않습니다**. 편집·캡처·관찰은 호스트가 수행하며 사용자 조사 결과나 사용성 점수를 꾸며내지 않습니다.
 `context` 없는 지식 조회도 지원하지만 개선 완료로 처리할 수는 없습니다. 커밋·푸시·릴리스·배포에는

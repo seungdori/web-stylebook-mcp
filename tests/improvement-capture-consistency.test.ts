@@ -173,7 +173,7 @@ describe('capture consistency through MCP', () => {
     value.plan.locale = locale;
     const planned = await client.callTool({ name: 'get_design_improvement_plan', arguments: value.plan as unknown as Record<string, unknown> });
     const plan = planned.structuredContent as ReturnType<typeof planDesignImprovement>;
-    expect(plan.workflow.validationVersion).toBe(2);
+    expect(plan.workflow.validationVersion).toBe(3);
     expect(plan.workflow.captureRequirements).toBeTruthy();
     value.submission.captures[3]!.screenshotRef = value.submission.captures[1]!.screenshotRef;
     const checked = await client.callTool({ name: 'validate_design_improvement_result', arguments: { plan: plan.query, expectedPlanHash: plan.workflow.planHash, submission: value.submission } });
