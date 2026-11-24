@@ -264,9 +264,10 @@ describe('defect: style-specific bans that misread the page', () => {
     expect(status(result, 'zen-minimalism/crowded-grid')).not.toBe('found');
   });
 
-  it('zen-minimalism: a serif display stack ("Vollkorn", Georgia, serif) satisfies the serif requirement', () => {
-    const result = audit(body(''), ['h1,h2{font-family:"Vollkorn", Georgia, serif} body{font-family:"Inter", sans-serif}'], 'zen-minimalism');
-    expect(status(result, 'zen-minimalism/typeface')).not.toBe('found');
+  it('soft-pastel: a serif display stack ("Vollkorn", Georgia, serif) satisfies the serif requirement', () => {
+    // zen-minimalism required a serif display before web-stylebook a8515dd; soft-pastel does now.
+    const result = audit(body(''), ['h1,h2{font-family:"Vollkorn", Georgia, serif} body{font-family:"Inter", sans-serif}'], 'soft-pastel');
+    expect(status(result, 'soft-pastel/typeface')).not.toBe('found');
   });
 
   it('soft-pastel: a full-bleed tinted section band is not a sharp-cornered card', () => {

@@ -6,6 +6,9 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { CatalogRepository } from '../src/catalog/repository.js';
 import { auditPageStructure, type StructureAuditResult } from '../src/structure/audit.js';
+import { buildPage } from '../src/structure/dom/page.js';
+import { detectStyleBan } from '../src/structure/rules.js';
+import type { StyleBanDef } from '../src/structure/types.js';
 
 const repo = CatalogRepository.load();
 const fixtures = join(dirname(fileURLToPath(import.meta.url)), 'fixtures', 'page-structure');
@@ -107,11 +110,11 @@ describe('defect: regressions in the follow-up', () => {
     expect(status(audit(html), 'testimonial-carousel')).toBe('found');
   });
 
-  it('platform-core: a compiled Tailwind v4 `border-white/10` (color-mix with transparent) is still a faint border', () => {
+  it('neumorphism: a compiled Tailwind v4 `border-white/10` (color-mix with transparent) is still a faint border', () => {
     const v4 = '@layer utilities{.border{border-style:var(--tw-border-style);border-width:1px}.border-white\\/10{border-color:color-mix(in srgb,#fff 10%,transparent)}}@property --tw-border-style{syntax:"*";inherits:false;initial-value:solid}';
     const html = page('<section><h2>Runs</h2><div class="border border-white/10 px-4"><h3>Run 42</h3><p>Finished in 3 minutes with 12 output files.</p></div></section>');
-    expect(status(audit(html, [], 'platform-core'), 'platform-core/faint-borders')).toBe('found');
-    expect(status(audit(html, [v4], 'platform-core'), 'platform-core/faint-borders')).toBe('found');
+    expect(status(audit(html, [], 'neumorphism'), 'neumorphism/faint-borders')).toBe('found');
+    expect(status(audit(html, [v4], 'neumorphism'), 'neumorphism/faint-borders')).toBe('found');
   });
 
   it('does not call a centered hero an all-text stack when its hand-built product mock is marked aria-hidden', () => {
@@ -206,8 +209,8 @@ describe('verified: follow-up fixes that hold', () => {
     ['.btn{border-width:1px;border-style:solid;border-color:transparent}', 'absent'],
     ['.btn{border:1px solid rgba(0,0,0,.05)}', 'found'],
     ['.btn{border:1px solid;border-color:rgba(0,0,0,.05)}', 'found'],
-  ])('platform-core faint borders: %s is %s', (css, expected) => {
-    expect(status(audit(buttons, [css], 'platform-core'), 'platform-core/faint-borders')).toBe(expected);
+  ])('neumorphism faint borders: %s is %s', (css, expected) => {
+    expect(status(audit(buttons, [css], 'neumorphism'), 'neumorphism/faint-borders')).toBe(expected);
   });
 
   const faq = (rowClass: string) => page(`<section><h2>Questions</h2>${['Can I cancel?', 'Do you store card data?', 'Is there a free plan?']
@@ -217,8 +220,11 @@ describe('verified: follow-up fixes that hold', () => {
     ['qa', ['.qa{border-style:solid;border-color:#e5e7eb;border-width:0 0 1px}'], 'absent'],
     ['border p-4', [], 'found'],
     ['qa', ['.qa{border:1px solid #e5e7eb;padding:16px}'], 'found'],
-  ] as const)('soft-pastel cards: rows with class "%s" and css %j are %s', (rowClass, css, expected) => {
-    expect(status(audit(faq(rowClass), [...css], 'soft-pastel'), 'soft-pastel/corner-radius')).toBe(expected);
+  ] as const)('min-radius cards: rows with class "%s" and css %j are %s', (rowClass, css, expected) => {
+    // No style bans sharp corners with a minimum radius since web-stylebook a8515dd (soft-pastel did, at 16px), so the
+    // detector is exercised directly with that rule.
+    const ban: StyleBanDef = { rule: 'corner-radius', params: { min: 16 }, why: 'Cards need a 16px or larger radius.', source: { kind: 'specimen', note: 'former soft-pastel radius ladder' } };
+    expect(detectStyleBan(buildPage(faq(rowClass), [...css], { viewportWidth: 1440, viewportHeight: 900 }, 40000), ban).status).toBe(expected);
   });
 
   it('reports a pattern it found as not verified, with no finding, once the selector budget runs out', () => {
@@ -239,8 +245,8 @@ describe('verified: follow-up fixes that hold', () => {
       for (let i = 1; i <= steps; i++) css += `--v${i}:var(--v${i - 1});`;
       return `${css}} .btn{border:1px solid var(--v${steps})}`;
     };
-    expect(status(audit(buttons, [chain(60)], 'platform-core'), 'platform-core/faint-borders')).toBe('found');
-    expect(status(audit(buttons, [chain(70)], 'platform-core'), 'platform-core/faint-borders')).toBe('absent');
+    expect(status(audit(buttons, [chain(60)], 'neumorphism'), 'neumorphism/faint-borders')).toBe('found');
+    expect(status(audit(buttons, [chain(70)], 'neumorphism'), 'neumorphism/faint-borders')).toBe('absent');
   });
 
   it('audits fan-out above a chain that stays inside the depth limit in bounded time', () => {
