@@ -169,20 +169,21 @@ Spacing tokens: unit 4px, stack 20px, gutter 24px, row 44px, section 64px. Densi
 
 ### Page structure
 
-- **Opening:** The opening is the article's own first screen, not a split: a full-bleed command bar prints the release path, then the reading grid (1fr | minmax(220px,280px)) sets a lowercase mono '>' kicker, a 2.8-6rem Iowan Old Style headline in ink, and a 50ch serif lede in the column, while the margin lane already holds the release spec plate: a 24px graph-paper box with ┌ ┐ └ ┘ corner glyphs around the version number in giant serif and a blinking block cursor, over a mono dl whose last row, the live build state, is set in amber. At most one text link; the headline reads first, then the build state.
-- **Grid:** A reading layout rather than a card grid: the article runs as 1fr | minmax(220px,280px) with a clamp(28px,4vw,64px) gap, its prose capped at 62ch on a flat surface fill, and sections step by 64px with clamp(40px,5vw,80px) of vertical padding. Full-bleed command bars cut between sections at the same side padding, and below 980px the margin lane drops under the article.
-- **Density:** Two densities interleaved: the reading column is loose at 1.1rem/1.85 with 22px between paragraphs inside 62ch, while the chrome around it is tight, with 0.74rem command bars, 0.68rem status text, and margin-log rows at 0.74rem/1.7 on the 4px unit.
-- **Type scale:** Iowan Old Style carries every reading and display role: the 2.8-6rem display at 400 and -0.025em is about five times the 1.1rem body, h2s are 500 at 1.9-2.9rem within 26ch, and section indices are 1.6rem italic serif. JetBrains Mono is confined to state, time, and chrome at 0.62-0.78rem, lowercase, prefixed with sigils ('$', '//', '#', '›').
+- **Opening:** A magazine issue's first screen on near-black (#0a0e08): under a masthead ruled off by one 1px line, the issue title runs the full width in Newsreader 400 at clamp(3.5rem, 12.2vw, 9.75rem)/0.9 with -0.038em tracking. Below it the 12-column grid splits: the 4-column margin holds a 1.5rem/1.36 serif standfirst, a Fira Code key/value list of the issue's facts (the ok value in green #7aff9c), and one underlined word as the action; columns 5-12 hold the ruled contents list, which is the hero object. No card, no filled button, no image: the title reads first, then the contents.
+- **Grid:** One 12-column grid with 24px gaps for the whole page: a margin of four columns for who, when and how much, and eight columns for the reading, where prose keeps a 31em measure. Sections are separated by a 1px rule at 30% ink with 48px above and 36px below; log figures run the full 12 columns but hang their machine fields in the margin so messages start on the prose edge. Everything is ruled rows with square corners: no cards, pills, filled buttons or shadows.
+- **Density:** Comfortable reading: body at 1.3125rem/1.52 in a 31em measure with 1.05em between paragraphs and 48px plus 36px around every section rule; the machine text around it is tight, with 0.8125rem/1.55 mono rows padded 2-3px and contents rows padded 11-12px.
+- **Type scale:** Newsreader sets everything a person wrote: the issue title at up to 9.75rem, article headlines at clamp(2.375rem, 4.6vw, 3.5rem)/1 with -0.028em at optical size 72, h3 and back-issue heads at 2rem 500, contents titles at 1.4375rem 500, body at 1.3125rem/1.52 at optical size 16, and italic only for authors, bylines and captions. Fira Code 400 sets what a machine wrote or counted (logs, page numbers, dates, prices, facts) at 0.75-0.9375rem with ligatures off.
 - **Section order:**
-  1. Article opening: command bar, serif headline in the reading column, the release spec plate in the margin lane
-  2. Command bar naming the step, then the explanatory article with its runtime margin lane
-  3. Install or migration section: serif steps, each preceded by the exact shell command it runs
-  4. Changelog section: line-numbered paragraphs that reviewers can cite by line
-  5. Closing build summary line and an empty prompt, beside the one link to the docs
+  1. Masthead bar: the magazine name and issue links over a 1px rule
+  2. Issue opening: giant serif title, then standfirst, facts and the buy link in the margin beside the ruled contents list
+  3. Lead article: serif headline, byline in the margin, prose, a full-width log figure, and the night's times in the margin beside the paragraph that tells them
+  4. Second article: headline with a credit line, prose, and a small mono tally table in the margin
+  5. Subscribe: two editions as ruled radio rows, the chosen price in the margin, and one email line with the button as a word at its end
+  6. Back issues set as log lines, then stockists and a colophon as plain key/value rows
 - **Signature moves:**
-  - Runtime marginalia lane: Lets checkable technical facts (versions, timings, build results) ride beside the explanation without interrupting the reading column.
-  - Shell-command section dividers: Gives a docs or release page a scannable outline in which every section names the exact command behind what it explains.
-  - Line-numbered serif paragraphs: Makes long explanations citable like source, so a reader can link to 'line 031' or anchor a review comment.
+  - Ruled contents list as the opening: Opens on what the issue contains and where to find it, so the visitor can jump to a piece the way a reader flips to a page number.
+  - Log figure with fields hung in the margin: Puts the machine record of the event inside the article as evidence, readable on the same edge as the story it backs up.
+  - Margin lane of bylines and log facts: Keeps who wrote it, when things happened and how much they cost beside the sentence they belong to, without breaking the reading column.
 
 ### Must-haves on the portfolio home
 
@@ -219,7 +220,9 @@ Non-text pairs, which need 3:1 against their background:
 ## Do's and Don'ts
 
 - Do: Replace the monospace body face with the style's authored family. (style rule typeface)
-- Do: Put running text on a solid island; keep the gradient behind it, not under the words. (style rule text-on-effect)
+- Do: Keep the corner radius of cards, panels, buttons, inputs, and images at 0px or less. (style rule corner-radius)
+- Do: Use at most 2 accent hue(s) and keep everything else neutral. (style rule accent-hues)
+- Do: Make state changes instant or stepped with steps(), as this style snaps. (style rule eased-motion)
 - Don't: Centered hero over a gradient blob (pattern gradient-blob-hero)
 - Don't: All-text centered stack (pattern centered-stack-hero)
 - Don't: Stock-photo hero (pattern stock-photo-hero)

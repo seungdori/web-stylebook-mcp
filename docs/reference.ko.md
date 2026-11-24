@@ -212,7 +212,7 @@ MCP는 제출된 증거의 범위와 일관성을 검사하고 **실제 파일 �
 // → audit_page_structure({ html, styleId: "quiet-utility", locale: "ko" })
 // ← 구조 감사 결과 (일부)
 {
-  "summary": { "clean": false, "findings": 8, "major": 6, "minor": 2, "notVerified": 0, "checked": 12, "claims": { "shape-observation": 0, "style-fidelity": 8, "required-element": 0 } },
+  "summary": { "clean": false, "findings": 9, "major": 7, "minor": 2, "notVerified": 1, "checked": 13, "claims": { "shape-observation": 0, "style-fidelity": 9, "required-element": 0 } },
   "findings": [
     {
       "patternId": "logo-strip",
@@ -223,8 +223,8 @@ MCP는 제출된 증거의 범위와 일관성을 검사하고 **실제 파일 �
       "replaceWith": {
         "instruction": "실제 고객을 밝힐 권한과 이유가 없다면 지우세요. 대신 방문자가 직접 확인할 수 있는 근거(실제 결과·결과물·이름이 있는 사례)를 이 스타일의 근거 무브로 보여 주세요.",
         "moves": [
-          { "id": "hairline-gap-list", "name": "Gap-as-hairline state list", "purpose": "Triage: shows many resources and their current state at an even rhythm, with dividers that cannot drift out of alignment." },
-          { "id": "stepped-state-badges", "name": "Three-step state badges", "purpose": "Calm status: state reads through steps of weight and fill instead of traffic-light colors, so the one urgent item stands out." }
+          { "id": "grouped-approval-queue", "name": "Queue grouped by who has to act", "purpose": "Triage: the person sees first what waits on them and what it is worth, then everything else in the same rhythm." },
+          { "id": "three-way-match-strip", "name": "Three-way match strip and approval trail", "purpose": "Proof: the reason to approve or dispute is on screen as figures and a sequence, not as a summary sentence." }
         ]
       }
     },
@@ -234,16 +234,16 @@ MCP는 제출된 증거의 범위와 일관성을 검사하고 **실제 파일 �
       "replaceWith": {
         "archetype": {
           "sectionOrder": [
-            "Top bar: breadcrumb path on the left, search and one primary action on the right",
-            "The primary working list or table with its filter row",
-            "A detail or form panel for the selected item",
-            "Secondary panels such as activity, audit history, or settings for the same object",
-            "Empty, loading, and error states drawn in the same slots as the data"
+            "Top bar with the product mark, the organisation and the signed-in person",
+            "Head: the screen title and brief beside the month total, stacked bar and status legend",
+            "The queue: segmented view switch, filter token and count, then rows grouped by who has to act",
+            "The open record: properties, the three-way match strip and the line items with the one line that differs",
+            "The approval trail as a real sequence, with approve and dispute actions and a reason field"
           ]
         }
       }
     }
-    // 나머지 6개: centered-stack-hero, trusted-by-band, icon-feature-grid, testimonial-carousel, closing-cta-banner, quiet-utility/corner-radius
+    // 나머지 7개: centered-stack-hero, trusted-by-band, icon-feature-grid, testimonial-carousel, closing-cta-banner, quiet-utility/shadow-blur, quiet-utility/corner-radius
   ]
 }
 ```
@@ -321,8 +321,10 @@ MCP는 제출된 증거의 범위와 일관성을 검사하고 **실제 파일 �
       "observed": { "status": "misplaced", "zone": "first-screen", "found": 1, "inZone": 0 },
       "replaceWith": {
         "instruction": "첫 화면으로 옮기세요. 검사에서는 페이지 더 아래에서만 찾았는데 '장바구니 담기'은(는) 첫 화면에 있어서, 이 정보를 보기 전에 행동할 수 있습니다. 상품명 옆에 통화와 함께 가격을 보여 주세요. 용량마다 가격이 다르면 고른 용량의 가격을 보여 주세요.",
-        "moves": [],
-        "archetype": { "hero": "Left-heavy and low: a 1.7fr/1fr grid with align-items: end …" }
+        "moves": [
+          {"id":"gold-chosen-slot-book","name":"Appointment book with one gold slot","build":"Under a 1px ivory top rule, each day is a row of minmax(0, 2.6fr) for the date (bold day over a muted date) and eight 1fr slots, each 64px tall with a 1px left rule and its time in Bodoni Moda 500 at 1.3125rem with tabular numerals; a stronger 50% ivory rule marks the lunch gap. Taken times go #7f7b73 with a 1px strike-through, hover tints a slot to 7% ivory over 160ms, and the chosen slot alone gets a 12% gold wash, a 1px inset gold line and gold text. Below, the chosen time repeats large at clamp(2rem, 3.4vw, 2.75rem) in columns 1-5 beside a form in columns 7-12 (name and phone side by side, the watch on a full-width line) with underlined inputs and one solid ivory rectangular button.","purpose":"Makes booking a choice of a real free time, with the choice confirmed in gold and restated large before anyone types."}
+        ],
+        "archetype": { "hero": "A one-line headline naming the actual service, Bodoni Moda …" }
       }
     }
     // 나머지 2개: must-have/variant-choice, must-have/purchase-assurance
@@ -482,7 +484,7 @@ cursor://anysphere.cursor-deeplink/mcp/install?name=web-stylebook&config=eyJjb21
 
 **카탈로그:** 실제 디자인 레퍼런스 520 · 스타일 48 · 인터페이스 디자인 원칙 25 · UX 원칙 23 · 구조화 감사 검사 51 · 컴포넌트 20 · 표면 5 · UI 상태 레시피 57 · 모션 프로파일 29 · 제품 아키타입 14.
 
-**구조:** 레이아웃 아키타입 48 · 시그니처 무브 144 · 일반 금지 패턴 9 · 탐지기 19종으로 만든 스타일 전용 금지 항목 142 · 제품 유형 14개의 필수 요소 21종.
+**구조:** 레이아웃 아키타입 48 · 시그니처 무브 144 · 일반 금지 패턴 9 · 탐지기 19종으로 만든 스타일 전용 금지 항목 181 · 제품 유형 14개의 필수 요소 21종.
 
 레퍼런스 라이브러리는 [OpenDesign](https://opendesign.cc)의 완성도 높은 항목을 선별·수정한 데이터이며, 구조화 스펙은 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)으로 제공됩니다. Web Stylebook은 원본 스크린샷과 브랜드 자산을 포함하지 않습니다. 원 사이트·브랜드·카피·서체·시각 정체성의 권리는 각 권리자에게 있으므로 사용 전 상세 항목의 출처와 권리 고지를 확인하세요.
 

@@ -138,20 +138,22 @@ typography:
 
 ### 페이지 구조
 
-- **첫 화면:** A full-width ruled cell at the top of the page grid, flush left: a boxed mono label strip, an Archivo Black h1 at 2-4.2rem over one aria-hidden uppercase word at 5-10rem that runs into the cell border and is cropped by it, a mono paragraph capped near 560px, and at most one rotated stamp. No image and no centered stack.
-- **그리드:** One 12-column grid with zero gap whose cells draw 4px ink rules on their right and bottom edges, so the rules are the gutters. Full-width rows re-declare 12 columns to keep column lines aligned down the page; side-by-side content uses explicit 8/4 or 6/6 spans.
-- **밀도:** High: modules butt against each other with no gaps and 14-36px of padding inside each cell, so whitespace lives inside cells, never between them, and one screen holds many declared modules.
-- **타입 스케일:** Archivo Black for every loud role and mono for the rest: the h1 at 2-4.2rem, manifest titles at 1.6-2.8rem, and 2.4rem numerals that index the sections where other styles would use icons, while the opening's one cropped decorative word runs to 5-10rem. Body, labels, and data are mono at 0.6-0.88rem, with labels uppercase and widely tracked.
+- **첫 화면:** The archive's name block, flush left inside the framed sheet under a 64px header row: an Anton upper-case name at min(14rem, 16.2cqi)/0.84 across all 12 columns with its second word hollow (transparent fill, 2.5px ink stroke), a count line at min(5.5rem, 8.2cqi) over 8 columns, a red rubber stamp (4px frame with a 2px frame inside, rotated -4deg) in columns 9-12, then a mono intro in columns 1-6 capped at 34em beside a framed search field in columns 8-12. No image and no centered stack.
+- **그리드:** One white sheet in a 5px ink frame on the #e6e6e1 ground; every block inside it is stacked with a 4px ink rule on its top edge and no gap. Inside a block, content sits on repeat(12, minmax(0, 1fr)) with a 24px column gap and explicit spans (1-6 beside 7-12, 1-5 beside 6-12, 1-8 beside 9-12); blocks that sit side by side are split by a 4px border-right instead of a gutter, and proportional rows use fr shares such as 731fr 341fr 212fr.
+- **밀도:** Medium-high: blocks butt against each other on 4px rules with no space between them, and whitespace lives inside each block as clamp(18px, 3.4vw, 40px) side padding; table cells pad 11px 14px and every control keeps a 44px touch height, so one screen holds the count, the bars and the first listing rows.
+- **타입 스케일:** Anton at its one weight, always upper case, sets the name, counts, years, headings, stamps and button words: the name at min(14rem, 16.2cqi), section headings at clamp(2.5rem, 5.4vw, 4.5rem)/0.9 with 0.005em tracking, state counts at clamp(3rem, 5vw, 4.25rem), the readers count at clamp(4.5rem, 9vw, 7.5rem) and step numerals at 2.75rem. Overpass Mono at 400, 500 and 600 types every record field, label, paragraph and control at 1rem/1.6, table heads at 500, with 0.75rem captions.
 - **섹션 순서:**
-  1. Opening cell: label strip, cropped display line, one-paragraph claim
-  2. A numbered column ruler that exposes the grid under the opening
-  3. Rows of flat color blocks whose spans carry real labels and values
-  4. An 8/4 split of numbered rule rows beside a filled cell of hard facts
-  5. A closing full-width ink bar that states the next action in uppercase
+  1. Header row: name mark, nav and a red submit link, split by 4px rules
+  2. Name block: hollow-word name, count line, stamp, intro and search
+  3. Ink band of 35 year bars with a 7-column axis, then one row of state blocks as wide as their share and an ink headline line
+  4. Browse: heading and note on a 6/6 split, a ruled filter bar, a fixed-layout listing table and a pager
+  5. Record sheet: a yellow facts block over 5 of 12 columns beside the history, then a ruled plan drawing
+  6. Submit: an ink block, a yellow numbered steps block and a red start button overlapping on one grid
+  7. Footer on the 12-column grid, 1-5 and 7-12
 - **시그니처 무브:**
-  - Zero-gap ruled cell grid: Turns each section into a declared cell, so scanning follows the rules instead of whitespace and more modules fit on a screen.
-  - Numbered column ruler band: Orientation: shows the layout system as a ruler, so later spans and offsets read as measured rather than arbitrary.
-  - Span-labelled value blocks: Proof and comparison: proportions become content, so features or metrics read as a measured tiling with checkable values instead of a card grid.
+  - Framed sheet of rule-split blocks: Makes the page read as one filed record sheet, so each section is a declared block and the reader scans along the rules instead of through whitespace.
+  - Year-bar band over share-width state blocks: Proof: the record counts are drawn at their true proportions, so the reader sees the size and split of the archive before reading a single row.
+  - Overlapping ink, yellow and red submit slabs: Action: the steps and the one button sit physically on top of the reason to contribute, so the next action reads as part of the record rather than a detached banner.
 
 ### 제품 랜딩 페이지의 필수 요소
 
@@ -237,8 +239,9 @@ components:
 ## Do's and Don'ts
 
 - Do: 부드러운 그림자를 빼세요. 이 스타일처럼 선·테두리·단색 면으로 표면을 나누세요. (스타일 규칙 shadow-blur)
-- Do: 단색 면을 쓰세요. 섹션·카드·버튼·장식 도형에 그라디언트를 쓰지 마세요. (스타일 규칙 gradient-fill)
 - Do: 카드·패널·버튼·입력란·이미지의 모서리 반경을 0px 이하로 두세요. (스타일 규칙 corner-radius)
+- Do: 반복되는 카드는 단색 면에 두세요. 그라디언트는 한 영역에만 쓰세요. (스타일 규칙 gradient-fill)
+- Do: 본문에는 고정폭 글꼴을 쓰세요. (스타일 규칙 typeface)
 - Don't: 그라디언트 얼룩 위의 가운데 정렬 히어로 (패턴 gradient-blob-hero)
 - Don't: 텍스트만 가운데로 쌓은 첫 화면 (패턴 centered-stack-hero)
 - Don't: 스톡 사진 히어로 (패턴 stock-photo-hero)

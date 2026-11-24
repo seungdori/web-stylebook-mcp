@@ -35,9 +35,9 @@
     "styleId": "editorial-silence",
     "resourceUri": "webstylebook://styles/editorial-silence",
     "signatureMoves": [
-      "section-index-rule-pair",
-      "margin-note-rail",
-      "running-head-reference-sheet"
+      "title-page-purchase-column",
+      "facing-pages-spread",
+      "edition-ledger-rows"
     ]
   }
 }

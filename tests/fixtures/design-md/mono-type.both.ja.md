@@ -169,19 +169,19 @@ web-stylebook-mcpがmono-typeスタイルから生成したファイルです。
 
 ### ページ構造
 
-- **ファーストビュー:** Flush left and type only: a small uppercase mono label, a two-line Space Mono 700 headline at 2.5-6rem, and one lead line within 620px, closed by a hairline. Directly below, the product's own token (a command, a record id, a glyph pair) is set huge on a character-cell sheet with labelled guide lines naming its parts, followed by one inverting text button; no image and no hue.
-- **グリッド:** A narrow min(960px, 90vw) column of full-width blocks, each opened by a 1px top rule with 56px above and 28px of padding. Inside, structure is ruled tables with zero gap: auto-fit minmax(60-260px, 1fr) cells sharing 1px borders within one outer border, plus two-track 130px | 1fr rows for lists and changelogs.
-- **密度:** High: 10-22px rows, tiny uppercase labels, and ruled tables that pack dozens of cells per block on shared 1px rules instead of gutters; generous space appears only as the 56px above each block rule and the 1.85-2.2 leading of running text.
-- **タイプスケール:** Type is the only hierarchy: Space Mono 700 display at 2.5-6rem (about six times the 0.96rem body) with 0.95 leading and -0.03em tracking, 1.4rem bold block titles, 2.4-2.6rem bold numerals, and every label in small uppercase mono tracked 0.08-0.2em. Grays from #eee to #6a6a6a stand in for color; emphasis is weight, underline, strike-through, or italic.
+- **ファーストビュー:** Flush left and type only on a near-black #111111 canvas: an uppercase Space Mono kicker at 0.84rem tracked 0.18em, the product name in Space Mono 700 on two lines at clamp(2.5rem, 8vw, 6rem), and one Space Mono lead at 0.96rem within 620px, closed by a 1px rule 40px below. Directly under it sits the product's specimen sheet: its key token (a glyph pair, a command, a record id) set huge with dashed guide lines named in the margin; no image and no hue.
+- **グリッド:** A single min(960px, 90vw) column with a 20px gutter. The sheet is one 1px-bordered panel; below it come numbered blocks that each open with a 1px top rule, 56px above and 28px of padding. Inside, structure is ruled grids at gap 0 within one 1px outer border (auto-fit columns of 60px, 120px, 180px, or 220px minimum) and two-track 130px | 1fr rows for history entries.
+- **密度:** High: ruled grids pack dozens of cells per block on shared 1px lines instead of gutters, tables run 10-12px cell padding at 0.78-0.82rem, and history rows sit 22px apart; generous space appears only as the 56px above each block rule and the 1.85-2.2 leading of running text on the sheet.
+- **タイプスケール:** Two faces with fixed jobs: Space Mono 700 sets the 2.5-6rem headline (line-height 0.95, -0.03em), the clamp(6rem, 18vw, 14rem) specimen glyph, and every label, table, button, and tab in small uppercase tracked 0.12-0.2em; Noto Sans KR 700 sets the 1.4rem section titles (1.1rem on phones) under a 0.7rem Space Mono § number line, and the 2.4-2.6rem figures and prices. Greys from #eeeeee to #6a6a6a stand in for color; emphasis is weight, underline, strike-through, or inversion.
 - **セクション順:**
-  1. Opening: mono label, bold two-line headline, one lead line, the product token with anatomy guides
-  2. The working document on one bordered sheet with running heads and a colophon row
-  3. Ruled index of every command, endpoint, or term, each cell carrying a corner code
-  4. Reference table: bold property left, muted value right-aligned, solid rule under the header
-  5. Edition history: version and date beside each change, replaced words struck through
-  6. Start row: the install or request command in a bordered block beside an inverting button
+  1. Opening: tracked kicker, two-line Space Mono name, one lead line, and the 1px closing rule
+  2. The specimen sheet: giant token with named guides, width comparison, tab ruler, a live typed line, and a dashed-top colophon
+  3. Numbered blocks of ruled inventory cells: glyphs, weights, kerning pairs, or commands, each with a corner code
+  4. Reference table and order form: bold property left, muted value right-aligned, bottom-rule inputs with typed prefixes
+  5. Three licence tiers with + and − lists, the chosen one tinted at 4% ink and tagged SELECTED
+  6. Edition history: version and date in a 130px column beside a Noto Sans KR 700 title and a muted note
 - **シグネチャームーブ:**
-  - Character-cell sheet with colophon: Proof of provenance: readers see the real document with its revision and date, the way an archive or docs product should present it.
+  - Character-cell sheet with colophon: Proof of provenance: readers see the real document with its revision and date, the way an archive, docs product, or foundry should present it.
   - Giant token with hung guides: Opening: measures the product's own token in place of a picture and teaches the vocabulary the rest of the page relies on.
   - Corner-coded inventory cells: Capabilities at a glance: a dense, scannable index of everything on offer (commands, endpoints, glyphs, SKUs) with lookup codes and a colorless active state.
 

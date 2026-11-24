@@ -128,20 +128,20 @@ Spacing tokens: 1 4px, 2 8px, 3 12px, 4 16px, 6 24px, 8 32px, gutter 12px, row 3
 
 ### Page structure
 
-- **Opening:** No hero card: the first screen is the work surface itself. A thin top bar with a breadcrumb path and a search field sits over the first working panel (a filtered list, a form, or a status table) at full width, under at most one left-aligned 2.5-4rem heading that names the workspace.
-- **Grid:** A persistent two-track shell, a 240px slate sidebar beside a fluid work area behind a 1px divider; inside it, flat bordered panels sit on a 4/8px spacing grid in one or two columns, and full-width lists span both columns instead of being split into cards.
-- **Density:** Medium to high: 32-44px rows, 12-16px cell padding, and 24px between panels, dense enough for repeated daily work; whitespace groups related controls and is never used to stage a single claim.
-- **Type scale:** One neutral sans at weights 400-600. The single display size (2.5-4rem at -0.04em) appears at most once per screen; section titles are 0.75rem uppercase eyebrows, rows are 0.875rem, values sit in muted 0.8rem, and code uses the monospace role.
+- **Opening:** No hero: the first screen is one working tool on white. A two-column head (minmax(0, 1fr) beside a 540px column) puts a left-aligned 1.875rem heading and a muted one-line brief on the left and the month in a 1px-lined, 12px-radius panel on the right: a count, a 1.75rem tabular total, a 10px stacked bar and a legend of 8px status dots. The queue and the open record start directly below.
+- **Grid:** A queue beside the open record: a minmax(0, 5fr) / minmax(0, 7fr) split with a 16px gap. Each side is a slate shell (4px padding, 16px radius, #edf2f4) holding a white panel with a visible 1px edge and a 12px radius; inside the record, properties sit in three equal columns and the match in a three-cell ruled strip. Below 1079px and 899px the split stacks to one column.
+- **Density:** High enough for daily repeated work: queue rows at 10px 16px 11px padding, group heads at 40px minimum, 32px tokens and buttons in the shell head, 16px between shells and a 4px spacing unit. Whitespace groups related controls; it never stages a single claim.
+- **Type scale:** One sans, Inter, at 400, 500 and 600. The display size, 1.875rem at 600 with -0.024em tracking and 1.15 line-height (1.625rem below 759px), appears once per screen; body is 1rem/1.5, supplier names take 500, meta text sits at 0.875rem and labels at 0.75rem. Amounts are tabular-nums slashed-zero so columns of money line up; references are proportional-nums slashed-zero.
 - **Section order:**
-  1. Top bar: breadcrumb path on the left, search and one primary action on the right
-  2. The primary working list or table with its filter row
-  3. A detail or form panel for the selected item
-  4. Secondary panels such as activity, audit history, or settings for the same object
-  5. Empty, loading, and error states drawn in the same slots as the data
+  1. Top bar with the product mark, the organisation and the signed-in person
+  2. Head: the screen title and brief beside the month total, stacked bar and status legend
+  3. The queue: segmented view switch, filter token and count, then rows grouped by who has to act
+  4. The open record: properties, the three-way match strip and the line items with the one line that differs
+  5. The approval trail as a real sequence, with approve and dispute actions and a reason field
 - **Signature moves:**
-  - Gap-as-hairline state list: Triage: shows many resources and their current state at an even rhythm, with dividers that cannot drift out of alignment.
-  - Breadcrumb work shell: Orientation for daily use: people always know where they are and can move elsewhere without returning to a landing page.
-  - Three-step state badges: Calm status: state reads through steps of weight and fill instead of traffic-light colors, so the one urgent item stands out.
+  - Slate shell around a white panel: Orientation: controls that change the list live in the frame, the data lives in the panel, and the two never blur together.
+  - Queue grouped by who has to act: Triage: the person sees first what waits on them and what it is worth, then everything else in the same rhythm.
+  - Three-way match strip and approval trail: Proof: the reason to approve or dispute is on screen as figures and a sequence, not as a summary sentence.
 
 ### Must-haves on the main dashboard
 
@@ -167,9 +167,10 @@ Each component names its text color and the background it sits on.
 
 ## Do's and Don'ts
 
-- Do: Remove pictorial ornament; this style is carried by type and structure. (style rule imagery)
-- Do: Use opaque surfaces; this style does not use glass blur. (style rule backdrop-blur)
+- Do: Remove soft elevation; separate surfaces with rules, borders, or flat fills, as this style does. (style rule shadow-blur)
+- Do: Use flat fills; keep gradients out of sections, cards, buttons, and decorative shapes. (style rule gradient-fill)
 - Do: Keep the corner radius of cards, panels, buttons, inputs, and images at 16px or less. (style rule corner-radius)
+- Do: Set the body role in a sans face. (style rule typeface)
 - Don't: Centered hero over a gradient blob (pattern gradient-blob-hero)
 - Don't: All-text centered stack (pattern centered-stack-hero)
 - Don't: Stock-photo hero (pattern stock-photo-hero)

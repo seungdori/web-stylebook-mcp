@@ -39,9 +39,9 @@
     "styleId": "fusion-editorial-terminal",
     "resourceUri": "webstylebook://styles/fusion-editorial-terminal",
     "signatureMoves": [
-      "runtime-margin-log-lane",
-      "shell-command-section-bars",
-      "line-numbered-serif-gutter"
+      "editorial-ruled-contents-opening",
+      "terminal-log-hanging-margin",
+      "runtime-margin-log-lane"
     ]
   }
 }

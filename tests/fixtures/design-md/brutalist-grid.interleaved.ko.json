@@ -42,9 +42,9 @@
     "styleId": "brutalist-grid",
     "resourceUri": "webstylebook://styles/brutalist-grid",
     "signatureMoves": [
-      "ruled-cell-grid",
-      "column-ruler-band",
-      "span-value-blocks"
+      "brutalist-framed-ruled-sheet",
+      "brutalist-year-bars-share-blocks",
+      "brutalist-overlapping-submit-slabs"
     ]
   }
 }

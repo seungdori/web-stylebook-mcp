@@ -37,9 +37,9 @@
     "styleId": "quiet-utility",
     "resourceUri": "webstylebook://styles/quiet-utility",
     "signatureMoves": [
-      "hairline-gap-list",
-      "breadcrumb-work-shell",
-      "stepped-state-badges"
+      "slate-frame-panel",
+      "grouped-approval-queue",
+      "three-way-match-strip"
     ]
   }
 }
