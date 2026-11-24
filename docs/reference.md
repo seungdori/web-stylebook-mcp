@@ -147,24 +147,24 @@ and [research record](./research/design-foundations.md) (in Korean). The machine
 {
   "confidence": "high",
   "candidates": [
-    { "styleId": "quiet-utility",  "score": 0.93 },
-    { "styleId": "runtime-signal", "score": 0.89 },
-    { "styleId": "notion-style",   "score": 0.83 },
-    { "styleId": "console-launch", "score": 0.77 },
-    { "styleId": "platform-core",  "score": 0.77 }
+    { "styleId": "quiet-utility",  "score": 0.87 },
+    { "styleId": "runtime-signal", "score": 0.86 },
+    { "styleId": "console-launch", "score": 0.8 },
+    { "styleId": "notion-style",   "score": 0.79 },
+    { "styleId": "platform-core",  "score": 0.75 }
   ],
   "ranking": {
     "winner": "quiet-utility",
     "runnerUp": "runtime-signal",
-    "gap": 0.04,
+    "gap": 0.01,
     "tied": false,
-    "reasonCodes": ["USE_CASE_FIT", "LOWER_UPKEEP"],
-    "explanation": "quiet-utility outranks runtime-signal by 0.04: 3 of 3 bestFor entries aim at operational-saas (runtime-signal: 2 of 3); lighter upkeep for daily use (quiet-utility: motion low, maintenance low; runtime-signal: motion low, maintenance medium)."
+    "reasonCodes": ["FARTHER_FROM_AVOIDED"],
+    "explanation": "quiet-utility outranks runtime-signal by 0.01: farther from the avoided cyberpunk-glitch (runtime-signal shares dark, tech)."
   },
   "rejected": [                        // 29 in total, three shown
-    { "styleId": "aurora-gradient",  "reasonCodes": ["PRODUCT_NOT_IDEAL", "DAILY_USE_OVERSTIMULATION"] },
+    { "styleId": "aurora-gradient",  "reasonCodes": ["PRODUCT_NOT_IDEAL"] },
     { "styleId": "claymorphism",     "reasonCodes": ["PRODUCT_NOT_IDEAL"] },
-    { "styleId": "cyberpunk-glitch", "reasonCodes": ["EXPLICITLY_AVOIDED", "DAILY_USE_OVERSTIMULATION"] }
+    { "styleId": "cyberpunk-glitch", "reasonCodes": ["EXPLICITLY_AVOIDED"] }
   ],
   "pairings": [
     { "styleId": "notion-style",       "pairWith": "quiet-utility", "role": ["forms", "navigation", "repetitive surfaces"] },
@@ -174,7 +174,7 @@ and [research record](./research/design-foundations.md) (in Korean). The machine
 }
 ```
 
-Notice what it does: the top candidates get clearly different scores (0.93, 0.89, 0.83), and `ranking` says why #1 beat #2 — here every `bestFor` entry of `quiet-utility` targets operational SaaS, and its upkeep is lighter for daily use. When the top two really do score alike, `ranking.tied` says so instead of inventing a winner. Rejected styles come with reason codes, and pairings are suggestions rather than a mandate. The server provides evidence; the agent decides.
+Notice what it does: the candidates get separate scores (0.87, 0.86, 0.80), and `ranking` says why #1 beat #2 — here by one cent, because `runtime-signal` shares dark and tech traits with the avoided `cyberpunk-glitch`. A lead that small is still reported as a lead, and the agent weighs it against the product context. When the top two really do score alike, `ranking.tied` says so instead of inventing a winner. Rejected styles come with reason codes, and pairings are suggestions rather than a mandate. The server provides evidence; the agent decides.
 
 Then turn the chosen direction into real tokens:
 

@@ -34,7 +34,8 @@ describe('audit HIGH#1 — constraint matcher no longer cross-matches on shared 
     expect(r.has('bento-bloom')).toBe(false);
   });
   it('high-contrast-required still rejects low-contrast styles', () => {
-    expect(rejectedFor('high-contrast-required').has('quiet-utility')).toBe(true);
+    // quiet-utility no longer lists 'subtle borders' as a risk since web-stylebook a8515dd; macos-liquid-glass lists 'low contrast'.
+    expect(rejectedFor('high-contrast-required').has('macos-liquid-glass')).toBe(true);
   });
 });
 

@@ -52,10 +52,11 @@ describe('scoring terms', () => {
     expect(r.ranking?.tied).toBe(false);
   });
 
-  it('keeps quiet-utility first without the avoid term and with the tones reversed', () => {
-    for (const variant of [{ avoid: [] }, { tone: ['technical', 'calm'] as ProductContext['tone'] }]) {
-      expect(recommendDesignDirection({ ...headline, ...variant }, repo).candidates[0]!.styleId).toBe('quiet-utility');
-    }
+  it('keeps quiet-utility first with the tones reversed, and lets the infra-dashboard use case lead without the avoid term', () => {
+    expect(recommendDesignDirection({ ...headline, tone: ['technical', 'calm'] }, repo).candidates[0]!.styleId).toBe('quiet-utility');
+    // Since web-stylebook a8515dd quiet-utility's bestFor no longer names ops dashboards; runtime-signal's names infra dashboards.
+    const noAvoid = recommendDesignDirection({ ...headline, avoid: [] }, repo);
+    expect(noAvoid.ranking).toMatchObject({ winner: 'runtime-signal', runnerUp: 'quiet-utility', reasonCodes: ['USE_CASE_FIT'] });
   });
 });
 
@@ -102,8 +103,8 @@ describe('ranking explanation', () => {
     const r = recommendDesignDirection(headline, repo);
     expect(r.ranking!.winner).toBe('quiet-utility');
     expect(r.ranking!.runnerUp).toBe('runtime-signal');
-    expect(r.ranking!.reasonCodes).toEqual(expect.arrayContaining(['USE_CASE_FIT', 'LOWER_UPKEEP']));
-    expect(r.ranking!.explanation).toMatch(/lighter upkeep for daily use/);
+    expect(r.ranking!.reasonCodes).toEqual(['FARTHER_FROM_AVOIDED']);
+    expect(r.ranking!.explanation).toMatch(/farther from the avoided cyberpunk-glitch/);
   });
 
   it('still compares with the runner-up when candidateLimit hides it', () => {
@@ -185,7 +186,8 @@ describe('inputs that used to be ignored now move the score', () => {
 
   it('reads bestFor: a matching use case raises that style and nothing else about the facets', () => {
     const plain = recommendDesignDirection({ ...base, candidateLimit: 10 }, repo);
-    const music = recommendDesignDirection({ ...base, productDescription: 'A music streaming product', candidateLimit: 10 }, repo);
+    // duotone-bold's bestFor is "race series", "club nights", "print fairs" since web-stylebook a8515dd.
+    const music = recommendDesignDirection({ ...base, productDescription: 'A club nights listing product', candidateLimit: 10 }, repo);
     expect(byId(plain, 'duotone-bold')!.scoreBreakdown.useCase).toBe(0);
     expect(byId(music, 'duotone-bold')!.scoreBreakdown.useCase).toBeGreaterThan(0);
     expect(byId(music, 'duotone-bold')!.scoreBreakdown.tone).toBe(byId(plain, 'duotone-bold')!.scoreBreakdown.tone);
@@ -209,8 +211,8 @@ describe('inputs that used to be ignored now move the score', () => {
 
   it('gives half credit to one product-kind word and full credit to a vertical word or repeated phrase', () => {
     expect(evidenceOf('Launch page for a startup', 'fusion-cyber-console').lexical).toBe(0.5);
-    expect(evidenceOf('A dashboard', 'notion-style').lexical).toBe(0.5);
-    expect(evidenceOf('A music streaming service for artists', 'duotone-bold').lexical).toBe(1);
+    expect(evidenceOf('A knowledge product', 'notion-style').lexical).toBe(0.5); // bestFor "knowledge bases"
+    expect(evidenceOf('A club nights listing service', 'duotone-bold').lexical).toBe(1); // bestFor "club nights"
     expect(evidenceOf('Weekly gardening newsletter', 'duotone-bold').lexical).toBe(0);
   });
 

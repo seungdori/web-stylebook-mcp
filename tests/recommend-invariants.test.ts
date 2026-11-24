@@ -192,10 +192,10 @@ describe('3. ties are reported, not hidden', () => {
   });
 
   it('a one-cent difference is not called a tie', () => {
-    const alt = repoWithClones(repo, 'quiet-utility', [{ id: 'quiet-clone', edit: (style) => { style.bestFor = [...style.bestFor, 'something unrelated']; } }]);
-    const r = recommendDesignDirection({ ...headline, candidateLimit: 10 }, alt);
+    // The headline brief itself separates its top two by one cent since web-stylebook a8515dd.
+    const r = recommendDesignDirection({ ...headline, candidateLimit: 10 }, repo);
     expect(r.candidates[0]!.styleId).toBe('quiet-utility');
-    expect(r.ranking).toMatchObject({ tied: false, gap: 0.01, winner: 'quiet-utility', runnerUp: 'quiet-clone' });
+    expect(r.ranking).toMatchObject({ tied: false, gap: 0.01, winner: 'quiet-utility', runnerUp: 'runtime-signal' });
     expect(r.guidance).not.toMatch(/tied/);
   });
 
@@ -314,7 +314,8 @@ describe('6. guards that keep the notIdealFor matcher honest', () => {
 
   it('a brief that repeats the whole notIdealFor phrase does penalize', () => {
     // mesh-gradient: notIdealFor "craft or wellness brands"
-    const ctx = normalizeContext({ productDescription: 'Online shop for a craft and wellness brand', productType: 'commerce', tone: ['calm'] }, repo);
+    // 'playful' is one of mesh-gradient's tones; 'calm' is an anti-tone since web-stylebook a8515dd and would add its own caution.
+    const ctx = normalizeContext({ productDescription: 'Online shop for a craft and wellness brand', productType: 'commerce', tone: ['playful'] }, repo);
     const sc = scoreStyle(ctx, repo.getStyle('mesh-gradient')!, repo);
     expect(sc.evidence.notIdeal).toBe(1);
     expect(sc.terms.cautions).toBeCloseTo(-0.08, 6);

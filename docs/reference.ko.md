@@ -145,24 +145,24 @@ MCP는 제출된 증거의 범위와 일관성을 검사하고 **실제 파일 �
 {
   "confidence": "high",
   "candidates": [
-    { "styleId": "quiet-utility",  "score": 0.93 },
-    { "styleId": "runtime-signal", "score": 0.89 },
-    { "styleId": "notion-style",   "score": 0.83 },
-    { "styleId": "console-launch", "score": 0.77 },
-    { "styleId": "platform-core",  "score": 0.77 }
+    { "styleId": "quiet-utility",  "score": 0.87 },
+    { "styleId": "runtime-signal", "score": 0.86 },
+    { "styleId": "console-launch", "score": 0.8 },
+    { "styleId": "notion-style",   "score": 0.79 },
+    { "styleId": "platform-core",  "score": 0.75 }
   ],
   "ranking": {
     "winner": "quiet-utility",
     "runnerUp": "runtime-signal",
-    "gap": 0.04,
+    "gap": 0.01,
     "tied": false,
-    "reasonCodes": ["USE_CASE_FIT", "LOWER_UPKEEP"],
-    "explanation": "quiet-utility — runtime-signal보다 0.04점 높음: bestFor 3개 중 3개가 operational-saas 대상 (runtime-signal: 3개 중 2개); daily 사용 기준 유지 부담이 낮음 (quiet-utility: 모션 low, 유지보수 low; runtime-signal: 모션 low, 유지보수 medium)."
+    "reasonCodes": ["FARTHER_FROM_AVOIDED"],
+    "explanation": "quiet-utility — runtime-signal보다 0.01점 높음: 회피 대상(cyberpunk-glitch)에서 더 멂 (runtime-signal 공통 특성: dark, tech)."
   },
   "rejected": [                        // 모두 29개, 3개만 표시
-    { "styleId": "aurora-gradient",  "reasonCodes": ["PRODUCT_NOT_IDEAL", "DAILY_USE_OVERSTIMULATION"] },
+    { "styleId": "aurora-gradient",  "reasonCodes": ["PRODUCT_NOT_IDEAL"] },
     { "styleId": "claymorphism",     "reasonCodes": ["PRODUCT_NOT_IDEAL"] },
-    { "styleId": "cyberpunk-glitch", "reasonCodes": ["EXPLICITLY_AVOIDED", "DAILY_USE_OVERSTIMULATION"] }
+    { "styleId": "cyberpunk-glitch", "reasonCodes": ["EXPLICITLY_AVOIDED"] }
   ],
   "pairings": [
     {
@@ -182,7 +182,7 @@ MCP는 제출된 증거의 범위와 일관성을 검사하고 **실제 파일 �
 }
 ```
 
-여기서 달라진 점에 주목하세요 — 상위 후보가 뚜렷이 다른 점수(0.93, 0.89, 0.83)를 받고, `ranking`이 1위가 2위를 이긴 이유를 알려 줍니다. 이 예시에서는 `quiet-utility`의 `bestFor` 항목이 모두 운영 SaaS를 겨냥하고, 매일 쓰는 용도에 유지 부담이 더 낮습니다. 상위 두 방향의 점수가 정말 같으면 승자를 만들어 내지 않고 `ranking.tied`로 동점이라고 알립니다. 탈락한 스타일에는 사유 코드가 붙고, 페어링은 강제가 아니라 제안입니다. 서버는 근거를 주고, 결정은 에이전트가 합니다.
+여기서 달라진 점에 주목하세요 — 후보마다 다른 점수(0.87, 0.86, 0.80)를 받고, `ranking`이 1위가 2위를 이긴 이유를 알려 줍니다. 이 예시에서는 차이가 0.01점입니다. `runtime-signal`이 피하라고 한 `cyberpunk-glitch`와 dark·tech 특성을 공유하기 때문입니다. 이렇게 작은 차이도 승자로 보고하며, 에이전트가 제품 맥락과 함께 판단합니다. 상위 두 방향의 점수가 정말 같으면 승자를 만들어 내지 않고 `ranking.tied`로 동점이라고 알립니다. 탈락한 스타일에는 사유 코드가 붙고, 페어링은 강제가 아니라 제안입니다. 서버는 근거를 주고, 결정은 에이전트가 합니다.
 
 그다음 고른 방향을 실제 토큰으로:
 
