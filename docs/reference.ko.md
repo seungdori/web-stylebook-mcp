@@ -379,7 +379,15 @@ claude mcp add web-stylebook -- npx -y web-stylebook-mcp@latest
 <details>
 <summary><b>Cursor · Windsurf · 일반 MCP 클라이언트</b></summary>
 
-MCP 설정에 추가:
+Cursor에서는 [Cursor에 추가](https://cursor.com/install-mcp?name=web-stylebook&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsIndlYi1zdHlsZWJvb2stbWNwQGxhdGVzdCJdfQ==)
+링크를 여세요. 이 링크는 Cursor 설치 딥링크를 엽니다.
+
+```text
+cursor://anysphere.cursor-deeplink/mcp/install?name=web-stylebook&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsIndlYi1zdHlsZWJvb2stbWNwQGxhdGVzdCJdfQ==
+```
+
+직접 설정하려면 아래 블록을 프로젝트의 `.cursor/mcp.json`에 추가하세요. 모든 프로젝트에서 쓰려면
+`~/.cursor/mcp.json`에 추가합니다. 다른 클라이언트도 MCP 설정에 같은 블록을 넣습니다.
 
 ```json
 {

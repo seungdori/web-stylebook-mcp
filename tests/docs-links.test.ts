@@ -5,7 +5,7 @@ import { dirname, join, resolve } from 'node:path';
 
 // The README is short and points into docs/; keep every relative link and heading anchor alive.
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const DOCS = ['README.md', 'README.ko.md', 'docs/reference.md', 'docs/reference.ko.md', 'docs/demo/README.md', 'skills/web-stylebook-design/SKILL.md'];
+const DOCS = ['README.md', 'README.ko.md', 'docs/reference.md', 'docs/reference.ko.md', 'docs/demo/README.md', 'docs/listings.md', 'skills/web-stylebook-design/SKILL.md'];
 
 const slug = (heading: string) => heading.trim().toLowerCase().replace(/[^\p{L}\p{N}\s_-]/gu, '').replace(/\s/g, '-');
 const anchors = (md: string) => new Set([...md.matchAll(/^#{1,6}\s+(.+)$/gm)].map((m) => slug(m[1]!.replace(/`/g, ''))));
@@ -35,6 +35,18 @@ describe('documentation links', () => {
       expect(text.indexOf('docs/demo/before-after.png'), doc).toBeLessThan(text.indexOf('## '));
       expect(text.length, doc).toBeLessThan(8000);
       expect(text, doc).toContain('npx skills add seungdori/web-stylebook-mcp');
+    }
+  });
+
+  it('README images use absolute URLs, so npm renders them, and repository images exist here', () => {
+    const RAW = 'https://raw.githubusercontent.com/seungdori/web-stylebook-mcp/master/';
+    for (const doc of ['README.md', 'README.ko.md']) {
+      const images = [...readFileSync(join(root, doc), 'utf8').matchAll(/!\[[^\]]*\]\(([^)\s]+)\)/g)].map((m) => m[1]!);
+      expect(images.length, doc).toBeGreaterThan(0);
+      for (const src of images) {
+        expect(src, `${doc} → ${src}`).toMatch(/^https:\/\//);
+        if (src.startsWith(RAW)) expect(existsSync(join(root, src.slice(RAW.length))), `${doc} → ${src}`).toBe(true);
+      }
     }
   });
 });

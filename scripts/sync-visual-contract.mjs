@@ -55,7 +55,7 @@ export function synchronizeVisualContract({ root, source, check = false }) {
   outputs.push([join(root, 'generated', 'visual-contracts.v1.json'), artifact]);
   const provenance = {
     schema: 'webstylebook.visual-source.v1',
-    source: 'https://github.com/seungdori/web-stylebook',
+    source: 'https://webstylebook.com',
     license: 'MIT',
     policy: 'Generated source copy. Edit the website source, regenerate its artifact, then run visual:sync. No site UI, font files, images, or third-party reference content is included.',
     files: sourceHashes,

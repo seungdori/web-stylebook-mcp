@@ -6,6 +6,40 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.16.0] — 2026-11-24
+
+### Added
+
+- Cursor install at the top of the README's Install section: an "Add to Cursor" button, Cursor's
+  `cursor://anysphere.cursor-deeplink/mcp/install` deeplink and a `.cursor/mcp.json` example.
+  GitHub removes `cursor://` links from rendered Markdown, so the button opens Cursor's
+  `https://cursor.com/install-mcp` page, which opens the same deeplink. The reference's Cursor
+  section has the same link and file paths (#8).
+- `server.json` for the official MCP Registry (schema `2025-12-11`, server name
+  `io.github.seungdori/web-stylebook-mcp`) and the matching `mcpName` in `package.json`. The
+  server is not published to the registry yet.
+- [docs/listings.md](docs/listings.md): name, description, install configuration, categories,
+  tags, logo and screenshot URLs for the official MCP Registry, cursor.directory and mcp.so.
+- A test checks that the Cursor links, every `mcpServers` block, the Claude Code plugin and
+  `server.json` start the same `npx -y web-stylebook-mcp@latest` command, and that `server.json`
+  carries the package version.
+
+### Changed
+
+- `@modelcontextprotocol/sdk` 1.30.0 → 1.32.2 and `zod` 4.4.3 → 4.6.7. These versions fix
+  GHSA-6qxp-vccf-f47h, GHSA-22jm-h49p-29qw, GHSA-46jr-4wx8-v453, GHSA-rvq5-wwqv-78pq,
+  GHSA-f897-62hf-6gxq and GHSA-6prh-2h8m-c8cw in the SDK, and GHSA-mrhx-c7xc-m3w5 in `zod`. The
+  lockfile also moves the SDK's transitive dependencies (`hono`, `@hono/node-server`,
+  `body-parser`, `fast-uri`, `ip-address`, `proxy-addr`, `qs`) and the test toolchain (`vitest`
+  4.1.12, `vite` 8.3.8) to patched versions. `npm audit` now reports no vulnerabilities. No server
+  code changed.
+- README images use absolute `raw.githubusercontent.com` URLs, so they also show on npm.
+- The visual contract provenance (`visualContract.provenance.source` in the manifest and
+  `generated/visual-contract-source.v1.json`) points to https://webstylebook.com. The previous
+  repository URL is private and returned 404.
+- [RELEASING.md](RELEASING.md) lists every file that carries the version and adds the registry
+  publish step.
+
 ## [0.15.1] — 2026-11-07
 
 ### Added
@@ -664,7 +698,9 @@ Not tagged or published to npm; these changes first shipped in 0.10.0.
 - Output localization in English, Korean, and Japanese.
 - Fully offline at runtime: no API key, no model call, no network, no filesystem access.
 
-[Unreleased]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.15.0...HEAD
+[Unreleased]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.16.0...HEAD
+[0.16.0]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.15.1...v0.16.0
+[0.15.1]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.15.0...v0.15.1
 [0.15.0]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/seungdori/web-stylebook-mcp/compare/v0.12.1...v0.13.0

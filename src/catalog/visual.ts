@@ -61,7 +61,7 @@ export class VisualContractRepository {
       catalogVersion: this.library.catalogVersion,
       contentHash: this.library.contentHash,
       styleCount: Object.keys(this.library.contracts).length,
-      provenance: { source: this.provenance?.source ?? 'https://github.com/seungdori/web-stylebook', license: 'MIT' as const },
+      provenance: { source: this.provenance?.source ?? 'https://webstylebook.com', license: 'MIT' as const },
     };
   }
 
