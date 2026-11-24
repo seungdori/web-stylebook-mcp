@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { AUDIT_EVIDENCE_METHODS } from '../audit/principle-verify.js';
 import { UX_SURFACES } from '../types.js';
 
 const id = z.string().trim().min(1).max(160);
@@ -30,8 +31,14 @@ export const improvementContextSchema = z.object({
 }).strict();
 
 export const IMPROVEMENT_CHECKS = ['visual', 'behavior', 'preservation', 'accessibility'] as const;
+/**
+ * What a change claims: a defect someone observed, a concern grounded in the observation, a hypothesis that it
+ * improves the task, or a style preference. Only the first three can stand behind an "improved" outcome.
+ */
+export const IMPROVEMENT_CLAIMS = ['observed-defect', 'grounded-concern', 'improvement-hypothesis', 'style-preference'] as const;
 // Bind plans and results to the completion rules, independently of the wire schema.
-export const IMPROVEMENT_VALIDATION_VERSION = 2;
+// v3 (#20): evidence methods on checks, claim kinds and success criteria on changes.
+export const IMPROVEMENT_VALIDATION_VERSION = 3;
 export const improvementSubmissionSchema = z.object({
   captures: z.array(z.object({
     id, targetId: id, phase: z.enum(['before', 'after']),
@@ -47,12 +54,15 @@ export const improvementSubmissionSchema = z.object({
     foundationIds: z.array(id).min(1).max(12),
     observation: explanation, action: explanation, reason: explanation,
     status: z.enum(['implemented', 'proposed', 'reverted']),
+    claim: z.enum(IMPROVEMENT_CLAIMS).optional().describe('observed-defect, grounded-concern, improvement-hypothesis, or style-preference; a style preference alone is not an improvement'),
+    successCriterion: explanation.optional().describe('What has to change, under which conditions, for this to count as an improvement; measured values go in the check'),
     files: z.array(artifactReference).max(40),
     diffRef: artifactReference.optional(),
   }).strict()).max(40),
   checks: z.array(z.object({
     id, targetId: id, kind: z.enum([...IMPROVEMENT_CHECKS, 'build']),
     verdict: z.enum(['pass', 'fail', 'not-verified', 'not-applicable']),
+    method: z.enum(AUDIT_EVIDENCE_METHODS).optional().describe('Who observed it and how: static, browser, agent-review, participant, or analytics. Behavior and accessibility need a browser run or people; visual needs captures, not static inspection'),
     summary: explanation,
     captureIds: z.array(id).max(48).describe('Visual and preservation checks reference both outcome captures; other checks reference the after capture. Captures must satisfy the recorded conditions.'),
     evidenceRefs: z.array(artifactReference).max(20),

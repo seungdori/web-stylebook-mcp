@@ -16,6 +16,9 @@ const actions = {
   source: ['원본과 수정된 소스·빌드 식별자를 구분하세요. 커밋하지 않은 수정은 diff나 내용 해시로 기록하세요.', '原本と編集済みソース・ビルドを区別し、未コミット変更は差分や内容ハッシュで記録してください。'],
   checks: ['계획 조건에 맞고 폰트 로딩이 끝난 수정 후 화면에서 검사를 수행하고 조작 단계·결과 증거를 저장하세요. 시각·보존 검사는 결과에 연결한 전후 캡처를 모두 참조해야 합니다. 근거 없는 통과 판정은 미검증입니다.', '計画条件と一致しフォント読込済みの変更後画面で検査し、操作手順と結果証拠を保存してください。視覚・保存検査は結果の前後両画像を参照します。根拠のない合格は未検証です。'],
   applicable: ['정적 UI에서도 시각 비교·내용 보존·관련 접근성 검사는 수행하세요.', '静的UIでも視覚比較・内容保存・関連アクセシビリティ検査は実行してください。'],
+  method: ['동작과 접근성은 브라우저에서 조작하거나 참여자로 관찰하고, 시각은 캡처로 비교한 뒤 다시 기록하세요. 정적 검사나 검토만으로는 보여 주지 못합니다.', '操作とアクセシビリティはブラウザでの操作か参加者の観察で、視覚は画像比較で確認し直して記録してください。静的検査やレビューだけでは示せません。'],
+  claim: ['관찰한 과업 장애를 밝히거나, 스타일 선호뿐인 변경은 변화 없음으로 보고하세요.', '観察したタスク上の障害を示すか、スタイルの好みだけの変更は変化なしとして報告してください。'],
+  criterion: ['어떤 조건에서 무엇이 바뀌면 개선인지 성공 기준을 적고 그 기준을 확인하세요.', 'どの条件で何が変われば改善かという成功条件を書き、その条件を確認してください。'],
   reassess: ['수정법과 증거를 다시 판단하세요. 개선을 확인하지 못한 불필요한 변경은 고치거나 되돌리고 개선 효과를 꾸며내지 마세요.', '修正方法と証拠を再評価してください。改善を確認できない不要な変更は修復または戻し、効果を捏造しないでください。'],
 } as const;
 
@@ -29,6 +32,7 @@ const codeAction: Record<string, keyof typeof actions> = {
   CAPTURE_ARTIFACT_CONFLICT: 'captureIdentity',
   CHECK_CAPTURE_MISMATCH: 'identity', CHECK_EVIDENCE_MISSING: 'checks', CHECK_NOT_SKIPPABLE: 'applicable',
   CHECK_FAILED: 'repair', CHECK_UNVERIFIED: 'checks', CHECK_MISSING: 'checks', NO_VERIFIED_IMPROVEMENT: 'reassess',
+  CHECK_METHOD_INSUFFICIENT: 'method', STYLE_PREFERENCE_NOT_IMPROVEMENT: 'claim', SUCCESS_CRITERION_MISSING: 'criterion',
 };
 
 export function localizeImprovementAction(code: string, fallback: string, locale: Lang): string {

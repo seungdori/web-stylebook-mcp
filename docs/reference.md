@@ -105,7 +105,17 @@ Each target needs visual, behavior, preservation and affected-accessibility chec
 preservation alone is insufficient. Visual and preservation checks must reference both outcome
 captures. Invalid comparison conditions or unloaded fonts prevent dependent checks from passing;
 one screenshot cannot represent different routes, conditions or source snapshots. After upgrading
-validation rules, retrieve a fresh plan and use its `workflow.planHash` (`validationVersion: 2`).
+validation rules, retrieve a fresh plan and use its `workflow.planHash` (`validationVersion: 3`).
+
+Three optional fields say what the evidence can claim. `checks[].method` records who observed a
+check and how (`static`, `browser`, `agent-review`, `participant`, `analytics`): a behavior or
+accessibility pass observed by `static` or `agent-review`, or a visual pass observed by `static`,
+is `CHECK_METHOD_INSUFFICIENT` and counts as not verified. `changes[].claim` says what a change
+claims (`observed-defect`, `grounded-concern`, `improvement-hypothesis`, `style-preference`): an
+`improved` outcome resting only on style preferences is `STYLE_PREFERENCE_NOT_IMPROVEMENT`, and a
+concern or hypothesis behind it needs `changes[].successCriterion`, what has to change under which
+conditions to count as an improvement. User outcomes such as choice time or completion rate need
+`participant` or `analytics` evidence; an agent's own run does not show them.
 The MCP validates supplied coverage and consistency, **not**
 artifact contents or design quality. The host performs edits, captures and observations; no claimed
 user-study results or numerical usability gains are invented. A query without context remains valid

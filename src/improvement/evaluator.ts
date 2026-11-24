@@ -139,6 +139,13 @@ export function evaluateDesignImprovement(input: ImprovementResultInput) {
     if (applicable.some((change) => !outcome.changeIds.includes(change.id))) issue('CHANGE_UNREPORTED', 'incomplete', 'A change affecting this target was omitted from its outcome.', 'Report every implemented, proposed or reverted change affecting this target.', target.id);
     const implemented = referencedChanges.filter((change) => change?.status === 'implemented' && change.diffRef && change.files.length);
     if (outcome.outcome === 'improved' && !implemented.length) issue('IMPROVEMENT_WITHOUT_IMPLEMENTATION', 'contract', 'An improvement is claimed without an implemented change.', 'Implement a justified change, or report unchanged/not-verified; do not count a review as improvement.', target.id);
+    // Claims are optional; when given, a preference cannot carry an improvement, and a concern or hypothesis needs a test.
+    if (outcome.outcome === 'improved' && implemented.length && implemented.every((change) => change!.claim === 'style-preference')) {
+      issue('STYLE_PREFERENCE_NOT_IMPROVEMENT', 'contract', 'The improvement rests only on style-preference changes.', 'Report the target as unchanged with the change listed, or name the observed task obstacle the change addresses.', target.id);
+    }
+    if (outcome.outcome === 'improved' && implemented.some((change) => (change!.claim === 'grounded-concern' || change!.claim === 'improvement-hypothesis') && !change!.successCriterion)) {
+      issue('SUCCESS_CRITERION_MISSING', 'incomplete', 'A concern or hypothesis behind the improvement has no success criterion.', 'State what has to change, under which conditions, for the change to count as an improvement, and check it.', target.id);
+    }
     if (outcome.outcome === 'regressed') issue('REGRESSION', 'regression', outcome.summary, 'Repair or revert the regression, then recapture and rerun the affected checks.', target.id);
     if (outcome.outcome === 'not-verified') issue('OUTCOME_UNVERIFIED', 'incomplete', outcome.summary, 'Collect the missing evidence or keep this target explicitly incomplete.', target.id);
 
@@ -177,6 +184,13 @@ export function evaluateDesignImprovement(input: ImprovementResultInput) {
     const observedSteps = !['behavior', 'accessibility'].includes(check.kind) || check.verdict === 'not-applicable' || Boolean(check.steps?.length);
     const evidenceMissing = asserted && (!check.evidenceRefs.length || !afterLinked || (needsPair && !beforeLinked) || !observedSteps || invalidReferences || !usableCaptures);
     const notSkippable = check.verdict === 'not-applicable' && !['behavior', 'build'].includes(check.kind);
+    // Static inspection cannot show how a page looks or behaves, and a review cannot show what it does when operated.
+    const methodCannotShow = check.verdict === 'pass' && check.method !== undefined && (
+      (check.kind === 'visual' && check.method === 'static')
+      || ((check.kind === 'behavior' || check.kind === 'accessibility') && (check.method === 'static' || check.method === 'agent-review')));
+    if (methodCannotShow) {
+      issue('CHECK_METHOD_INSUFFICIENT', 'incomplete', `Check ${check.id} is a ${check.kind} pass observed by ${check.method}.`, `Observe the ${check.kind} result in a browser (or with participants) and record it; ${check.method} evidence does not show it.`, check.targetId);
+    }
     if (evidenceMissing) {
       issue('CHECK_EVIDENCE_MISSING', 'incomplete', `Check ${check.id} lacks durable evidence, valid compared capture(s), or observed interaction steps.`, `Run and record the ${check.kind} check against valid outcome captures; visual and preservation checks require both before and after. Keep unsupported claims not-verified.`, check.targetId);
     }
@@ -185,7 +199,7 @@ export function evaluateDesignImprovement(input: ImprovementResultInput) {
     }
     if (check.verdict === 'fail') issue('CHECK_FAILED', 'regression', `${check.id}: ${check.summary}`, 'Fix or revert the failing change and collect a fresh passing check.', check.targetId);
     if (check.verdict === 'not-verified') issue('CHECK_UNVERIFIED', 'incomplete', `${check.id}: ${check.summary}`, `Complete the ${check.kind} verification or report its concrete blocker.`, check.targetId);
-    return { ...check, verdict: evidenceMissing || notSkippable ? 'not-verified' as const : check.verdict };
+    return { ...check, verdict: evidenceMissing || notSkippable || methodCannotShow ? 'not-verified' as const : check.verdict };
   });
   for (const target of targets) for (const kind of IMPROVEMENT_CHECKS) {
     if (!checks.some((check) => check.targetId === target.id && check.kind === kind)) issue('CHECK_MISSING', 'incomplete', `Missing ${kind} verification.`, `Observe and record the ${kind} result for this target.`, target.id);

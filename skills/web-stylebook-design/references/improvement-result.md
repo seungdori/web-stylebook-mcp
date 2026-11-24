@@ -64,7 +64,8 @@ Surfaces on the same page may share a whole-page capture when those identities a
 
 `workflow.validationVersion` and result `identity.validationVersion` identify the completion rules
 and participate in their hashes. Version 2 adds these capture checks and the preservation-pair
-requirement. After upgrading, retrieve a fresh plan, use its `workflow.planHash`, and link both
+requirement. Version 3 adds the optional `checks[].method`, `changes[].claim`, and
+`changes[].successCriterion` and their rules (see the reference). After upgrading, retrieve a fresh plan, use its `workflow.planHash`, and link both
 outcome captures to preservation checks; an old plan hash is not accepted as current evidence.
 
 ## Continue, then report

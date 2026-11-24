@@ -38,6 +38,15 @@ All notable changes to this project are documented here. The format follows
   `analytics`). On a principle check, PASS, RISK or FIX_NOW without conclusive evidence of an
   accepted method is `EVIDENCE_METHOD_NOT_ACCEPTED` and resolves to NOT_VERIFIED, so an agent's
   own timing cannot answer a sentence that needs participants.
+- `validate_design_improvement_result` separates how a check was observed from what a change
+  claims (#20). Checks take an optional `method`; a behavior or accessibility pass observed by
+  `static` or `agent-review`, or a visual pass observed by `static`, is
+  `CHECK_METHOD_INSUFFICIENT` and not verified. Changes take an optional `claim`
+  (`observed-defect`, `grounded-concern`, `improvement-hypothesis`, `style-preference`) and
+  `successCriterion`: an improvement resting only on style preferences is
+  `STYLE_PREFERENCE_NOT_IMPROVEMENT`, and a concern or hypothesis behind an improvement without a
+  success criterion is `SUCCESS_CRITERION_MISSING`. `validationVersion` is 3, so improvement plan
+  hashes change.
 
 ## [0.16.0] — 2026-11-24
 
