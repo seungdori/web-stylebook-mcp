@@ -371,7 +371,15 @@ claude mcp add web-stylebook -- npx -y web-stylebook-mcp@latest
 <details>
 <summary><b>Cursor · Windsurf · generic MCP client</b></summary>
 
-Add to your MCP config:
+In Cursor, open the [Add to Cursor](https://cursor.com/install-mcp?name=web-stylebook&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsIndlYi1zdHlsZWJvb2stbWNwQGxhdGVzdCJdfQ==)
+link. It opens Cursor's install deeplink:
+
+```text
+cursor://anysphere.cursor-deeplink/mcp/install?name=web-stylebook&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsIndlYi1zdHlsZWJvb2stbWNwQGxhdGVzdCJdfQ==
+```
+
+To set it up by hand, add the block below to `.cursor/mcp.json` in your project, or to
+`~/.cursor/mcp.json` for every project. Other clients take the same block in their MCP config:
 
 ```json
 {

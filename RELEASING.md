@@ -27,7 +27,8 @@ access to require 2FA and disallow traditional tokens.
    ```
    The suite verifies the catalog hash, counts and schema, visual artifact and resolver hashes,
    license, import allowlist, and reference outputs against the committed fixtures.
-2. Bump the version in `package.json`, `package-lock.json`, and `.claude-plugin/plugin.json`.
+2. Bump the version in `package.json`, `package-lock.json`, `.claude-plugin/plugin.json`,
+   `server.json` (both `version` fields), `src/server-info.ts` and `tests/contract.test.ts`.
    Move the changelog's unreleased entries under the new version and commit the release.
 3. Tag the release commit and push the tag. For example, for version 0.4.0:
    ```bash
@@ -38,6 +39,9 @@ access to require 2FA and disallow traditional tokens.
    the release. It installs the tarball in a clean project, validates the catalog, composes design
    tokens and checks the bundled skill. It publishes that same tarball to npm using OIDC.
    Verify the public version with `npm view web-stylebook-mcp version`.
+5. To update the official MCP Registry entry after the npm release, run `mcp-publisher login github`
+   and `mcp-publisher publish` from the release commit. [docs/listings.md](docs/listings.md) has the
+   registry and directory metadata.
 
 ## Updating the website-authored snapshot
 

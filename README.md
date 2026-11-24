@@ -14,7 +14,7 @@
 
 </div>
 
-![Left: a dashboard in a common generated style, with the outage below the fold. Right: the same page after one pass of the skill, with the degraded service and the open incident at the top.](./docs/demo/before-after.png)
+![Left: a dashboard in a common generated style, with the outage below the fold. Right: the same page after one pass of the skill, with the degraded service and the open incident at the top.](https://raw.githubusercontent.com/seungdori/web-stylebook-mcp/master/docs/demo/before-after.png)
 
 <sub>Left: a fixture dashboard written in a common generated style. Right: the same page after one
 pass of the `web-stylebook-design` skill, run by Claude Opus 5.5 with no human edits. Fictional
@@ -31,6 +31,30 @@ data. [How it was made, what was measured, and what it does not show →](./docs
   same input always gives the same output.
 
 ## Install
+
+For Cursor, click the button:
+
+[![Add web-stylebook to Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/install-mcp?name=web-stylebook&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsIndlYi1zdHlsZWJvb2stbWNwQGxhdGVzdCJdfQ==)
+
+The button opens Cursor's install deeplink. If Cursor does not open, paste the deeplink into your
+browser:
+
+```text
+cursor://anysphere.cursor-deeplink/mcp/install?name=web-stylebook&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsIndlYi1zdHlsZWJvb2stbWNwQGxhdGVzdCJdfQ==
+```
+
+Or add the server to `.cursor/mcp.json` in your project (`~/.cursor/mcp.json` for every project):
+
+```json
+{
+  "mcpServers": {
+    "web-stylebook": {
+      "command": "npx",
+      "args": ["-y", "web-stylebook-mcp@latest"]
+    }
+  }
+}
+```
 
 For any agent with skills (Claude Code, Codex, Cursor and others):
 
@@ -55,7 +79,7 @@ claude mcp add web-stylebook -- npx -y web-stylebook-mcp@latest
 codex mcp add web-stylebook -- npx -y web-stylebook-mcp@latest
 ```
 
-Cursor, Windsurf and Claude Desktop settings are in the [reference](./docs/reference.md#install).
+Windsurf and Claude Desktop settings are in the [reference](./docs/reference.md#install).
 Node 20 or later is required; `npx skills` needs Node 22.20 or later.
 
 ## Use

@@ -14,7 +14,7 @@
 
 </div>
 
-![왼쪽: 흔한 AI 생성 스타일의 대시보드. 장애 정보가 첫 화면 아래에 있습니다. 오른쪽: 스킬을 한 번 적용한 같은 페이지. 문제가 생긴 서비스와 열린 인시던트가 맨 위에 있습니다.](./docs/demo/before-after.png)
+![왼쪽: 흔한 AI 생성 스타일의 대시보드. 장애 정보가 첫 화면 아래에 있습니다. 오른쪽: 스킬을 한 번 적용한 같은 페이지. 문제가 생긴 서비스와 열린 인시던트가 맨 위에 있습니다.](https://raw.githubusercontent.com/seungdori/web-stylebook-mcp/master/docs/demo/before-after.png)
 
 <sub>왼쪽은 흔한 AI 생성 스타일로 작성한 예시 대시보드입니다. 오른쪽은 Claude Opus 5.5가
 `web-stylebook-design` 스킬을 한 번 따라 고친 같은 페이지이며, 사람이 손대지 않았습니다. 데이터는
@@ -30,6 +30,31 @@
   않습니다. 같은 입력에는 항상 같은 결과가 나옵니다.
 
 ## 설치
+
+Cursor에서는 버튼을 누르세요.
+
+[![Cursor에 web-stylebook 추가](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/install-mcp?name=web-stylebook&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsIndlYi1zdHlsZWJvb2stbWNwQGxhdGVzdCJdfQ==)
+
+버튼은 Cursor 설치 딥링크를 엽니다. Cursor가 열리지 않으면 아래 딥링크를 브라우저 주소창에 붙여
+넣으세요.
+
+```text
+cursor://anysphere.cursor-deeplink/mcp/install?name=web-stylebook&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsIndlYi1zdHlsZWJvb2stbWNwQGxhdGVzdCJdfQ==
+```
+
+또는 프로젝트의 `.cursor/mcp.json`에 서버를 추가하세요. 모든 프로젝트에서 쓰려면
+`~/.cursor/mcp.json`에 추가합니다.
+
+```json
+{
+  "mcpServers": {
+    "web-stylebook": {
+      "command": "npx",
+      "args": ["-y", "web-stylebook-mcp@latest"]
+    }
+  }
+}
+```
 
 스킬을 지원하는 에이전트(Claude Code, Codex, Cursor 등):
 
@@ -53,7 +78,7 @@ claude mcp add web-stylebook -- npx -y web-stylebook-mcp@latest
 codex mcp add web-stylebook -- npx -y web-stylebook-mcp@latest
 ```
 
-Cursor, Windsurf, Claude Desktop 설정은 [레퍼런스](./docs/reference.ko.md#설치)에 있습니다.
+Windsurf, Claude Desktop 설정은 [레퍼런스](./docs/reference.ko.md#설치)에 있습니다.
 Node 20 이상이 필요하고, `npx skills`는 Node 22.20 이상이 필요합니다.
 
 ## 사용
