@@ -63,6 +63,9 @@ visual data. Ordinary MCP releases reuse the checked-in snapshot.
    wrapper is exactly that re-export, the copy imports `zod` directly, and
    `generated/visual-contract-source.v1.json` records the wrapper hash and the rewrite. Any other
    import outside the seven files still stops the sync.
-3. Review the changes together, update the pinned expectations and website parity fixtures for
-   the new revision, and run the public build and test commands above. The current website parity
-   fixture records the reviewed source revision in `tests/fixtures/website-visual-parity.v1.json`.
+3. Regenerate the website parity fixture from the same checkout's own resolver and CSS exporter:
+   `npx tsx scripts/generate-website-parity-fixture.mts "$website"`. It records the source revision
+   in `tests/fixtures/website-visual-parity.v1.json`; update the revision pinned in
+   `tests/website-parity.test.ts` to match.
+4. Review the changes together, update the other pinned expectations for the new revision, and run
+   the public build and test commands above.

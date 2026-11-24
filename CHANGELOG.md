@@ -15,6 +15,13 @@ All notable changes to this project are documented here. The format follows
   wrapper hash and the rewrite in `generated/visual-contract-source.v1.json`; a wrapper with any
   other content, or none, still stops the sync. The bundled snapshot is unchanged.
 
+### Added
+
+- `scripts/generate-website-parity-fixture.mts` builds `tests/fixtures/website-visual-parity.v1.json`
+  from a website checkout's own resolver and CSS exporter, so the fixture no longer has to be pinned
+  by hand at each snapshot update. Run against website revision `b6771f9` it reproduces the current
+  fixture exactly; only its `note` now names the script. RELEASING.md lists the step.
+
 ### Changed
 
 - `audit_page_structure` no longer turns a shape into a task defect on its own (#20). Every finding and
