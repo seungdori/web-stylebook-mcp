@@ -158,8 +158,9 @@ checks what the edit kept with `compare_page_revisions`, and finishes with
 reason, the checks that ran, and what was not verified.
 
 For a new page, describe the product instead, for example *"a landing page for a payments API"*.
-The agent starts with `recommend_design_direction` and shows the candidates it ranked, plus the ones
-it rejected and why.
+The agent starts with `start_ui_design`, which returns the top directions, the page structure, fonts
+with loading code, a photo plan and a copy brief. `recommend_design_direction` shows every candidate
+it ranked, plus the ones it rejected and why.
 
 If you ask for a review only, the agent audits and reports without editing anything.
 
@@ -182,7 +183,7 @@ npx -y web-stylebook-mcp call get_design_improvement_plan --input plan-args.json
 |---|---|
 | Improving an existing UI | `get_design_improvement_plan`, `compare_page_revisions`, `validate_design_improvement_result` |
 | Reviewing | `get_design_audit_plan`, `audit_page_structure`, `validate_design_audit_result` |
-| Choosing a direction | `recommend_design_direction`, `compare_design_directions`, `search_design_references`, `get_design_reference` |
+| Choosing a direction | `start_ui_design`, `recommend_design_direction`, `compare_design_directions`, `search_design_references`, `get_design_reference` |
 | Principles and states | `get_design_principle_plan`, `get_ux_principle_plan`, `get_ui_state_plan` |
 | Building | `compose_design_tokens` (JSON, CSS variables, Tailwind, TypeScript or DESIGN.md) |
 

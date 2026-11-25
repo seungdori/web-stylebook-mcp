@@ -27,6 +27,7 @@
     }
   },
   "tools": [
+    { "name": "start_ui_design", "description": "Start a UI design" },
     { "name": "recommend_design_direction", "description": "Recommend a design direction" },
     { "name": "compare_design_directions", "description": "Compare design directions" },
     { "name": "search_design_references", "description": "Search real-world design references" },

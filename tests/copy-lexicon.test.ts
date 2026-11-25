@@ -105,8 +105,8 @@ describe('English and Japanese patterns on authored cases', () => {
   });
 
   it('flag the Japanese template lines and unsourced claims, and pass near misses', () => {
-    expect(ids(['会議をもっとスマートに。'], 'ja')).toEqual(['ja-smarter']);
-    expect(ids(['プロフィールも通知も、すべてを一つに。'], 'ja')).toEqual(['ja-all-in-one']);
+    expect(ids(['会議をもっとスマートに。'], 'ja')).toEqual(['ja-buzzwords']);
+    expect(ids(['プロフィールも通知も、すべてを一つに。'], 'ja')).toEqual(['ja-one-place']);
     expect(ids(['無料で始める'], 'ja')).toEqual(['ja-generic-cta']);
     expect(ids(['5分で設定完了'], 'ja')).toEqual(['ja-setup-minutes']);
     expect(ids(['3,000社以上が導入'], 'ja')).toEqual(['ja-social-proof-count']);

@@ -63,6 +63,7 @@ import {
   type SearchDesignReferencesResult,
 } from '../references/search.js';
 import { ok, errorResult, type ToolResult } from './result.js';
+import { StartUiDesignError, renderStartUiDesign, startUiDesign, type StartUiDesignInput } from '../start/start-ui-design.js';
 import { ToolError, nearestIds } from './errors.js';
 import { FOUNDATIONS } from '../foundations/catalog.js';
 import { FOUNDATION_CATEGORIES } from '../foundations/types.js';
@@ -279,6 +280,17 @@ function toToolError(e: unknown, repo: CatalogRepository): ToolError {
     return new ToolError('INVALID_INPUT', e.message);
   }
   if (e instanceof RevisionCompareError) return new ToolError('INVALID_INPUT', e.message);
+  if (e instanceof StartUiDesignError) {
+    if (e.kind === 'STYLE_NOT_FOUND') {
+      const id = /unknown style '([^']+)'/.exec(e.message)?.[1] ?? '';
+      return new ToolError('STYLE_NOT_FOUND', e.message, nearestIds(id, repo.allStyles().map((s) => s.id)));
+    }
+    return new ToolError('NO_COMPATIBLE_STYLE', e.message, [
+      'relax or remove some entries from "avoid"',
+      'loosen conflicting constraints',
+      'broaden or drop an over-specific productType',
+    ], { rejectedCount: e.rejectedCount });
+  }
   if (e instanceof CompareError) {
     // mirror the token/state tools: an unknown style id is STYLE_NOT_FOUND + near-miss suggestions
     const m = /unknown (?:secondary )?style '([^']+)'/.exec(e.message);
@@ -289,9 +301,21 @@ function toToolError(e: unknown, repo: CatalogRepository): ToolError {
 }
 
 export function registerTools(server: McpServer, repo: CatalogRepository): void {
+  server.registerTool('start_ui_design', {
+    title: 'Start a UI design',
+    description: 'Call first, before writing HTML, CSS or JSX for any new page or screen (landing page, dashboard, docs, settings, product page, form), once per page. Given the product context and, if known, pageRole, return in one call: the top three directions, the chosen style\'s hero, section order, signature moves and bans, the must-haves of the page, the authored fonts and two alternative pairings with paste-ready <link> tags and CSS font stacks, a photo plan (whether to use photos, what to look for on Unsplash or Pexels, and how to credit them), a copy brief (voice, button, empty-state and error rules, and five patterns to avoid on this kind of page) and the next calls with their arguments. Pass styleId to build with a style other than the top-ranked one. Offline and deterministic: the server searches and fetches nothing; the host picks the photos and writes the page.',
+    inputSchema: { ...productContextShape, locale: LOCALE.optional(), styleId: z.string().min(1).max(100).describe('build with this catalog style instead of the top-ranked direction').optional() },
+    annotations: READ_ONLY,
+  }, async (args): Promise<ToolResult> => {
+    try {
+      const result = startUiDesign(args as StartUiDesignInput, repo);
+      return ok(result as unknown as Record<string, unknown>, renderStartUiDesign(result));
+    } catch (e) { return errorResult(toToolError(e, repo)); }
+  });
+
   server.registerTool('recommend_design_direction', {
     title: 'Recommend a design direction',
-    description: 'Call first, before writing HTML, CSS or JSX for any new page or screen (landing page, dashboard, docs, settings, product page, form). Given product context, return scored style candidates with reason codes, rejected styles with reasons, secondary pairings, assumptions and confidence. Evidence-provider: the host model makes the final pick. The "tone" field (named "tone", not "tones") is an ARRAY of zero or more of: calm, technical, trustworthy, premium, editorial, playful, bold, experimental. Each candidate.score already includes adjustments (soft penalties, repeated-use load, closeness to avoided styles) that are not itemized in scoreBreakdown. The "ranking" field says why candidates[0] outranks the next style, or reports a tie; list the most important tone first because tone order is weighted. Each candidate.structure gives the page structure the direction implies: a layout archetype (hero composition, grid, section order, density, type-scale use), 2-3 signature moves with their purpose, and the generic and style-specific patterns audit_page_structure will flag; read structure.resourceUri for move build steps and ban criteria. The top-level mustHaves lists the elements the resolved product type requires (for example price, variant choice, add to cart, and delivery details on a commerce product page) with the zone each must sit in; a style restyles them but never removes them, they come before the archetype\'s limits on the opening, and each candidate.structure.mustHaves names the signature moves that can present them. Pass the same productType to audit_page_structure to find the ones a built page is missing.',
+    description: 'Call after start_ui_design when you need more than its three directions, the full score breakdown or the rejected styles. Given product context, return scored style candidates with reason codes, rejected styles with reasons, secondary pairings, assumptions and confidence. Evidence-provider: the host model makes the final pick. The "tone" field (named "tone", not "tones") is an ARRAY of zero or more of: calm, technical, trustworthy, premium, editorial, playful, bold, experimental. Each candidate.score already includes adjustments (soft penalties, repeated-use load, closeness to avoided styles) that are not itemized in scoreBreakdown. The "ranking" field says why candidates[0] outranks the next style, or reports a tie; list the most important tone first because tone order is weighted. Each candidate.structure gives the page structure the direction implies: a layout archetype (hero composition, grid, section order, density, type-scale use), 2-3 signature moves with their purpose, and the generic and style-specific patterns audit_page_structure will flag; read structure.resourceUri for move build steps and ban criteria. The top-level mustHaves lists the elements the resolved product type requires (for example price, variant choice, add to cart, and delivery details on a commerce product page) with the zone each must sit in; a style restyles them but never removes them, they come before the archetype\'s limits on the opening, and each candidate.structure.mustHaves names the signature moves that can present them. Pass the same productType to audit_page_structure to find the ones a built page is missing.',
     inputSchema: { ...productContextShape, locale: LOCALE.optional(), candidateLimit: z.number().int().min(1).max(10).optional() },
     annotations: READ_ONLY,
   }, async (args): Promise<ToolResult> => {

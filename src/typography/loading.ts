@@ -6,7 +6,7 @@ import { TYPE_PAIRINGS, type FontRef, type TypePairing } from './pairings.js';
 export const TYPE_PAIRINGS_SCHEMA = 'webstylebook.type-pairings.v1';
 export const TYPE_PAIRINGS_URI = 'webstylebook://typography/pairings';
 const GOOGLE_CSS2 = 'https://fonts.googleapis.com/css2';
-const PRECONNECT = [
+export const PRECONNECT = [
   '<link rel="preconnect" href="https://fonts.googleapis.com">',
   '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>',
 ];
