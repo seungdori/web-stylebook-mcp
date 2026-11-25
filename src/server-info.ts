@@ -1,5 +1,5 @@
 export const SERVER_NAME = 'web-stylebook';
-export const SERVER_VERSION = '0.24.0';
+export const SERVER_VERSION = '0.24.1';
 
 /** The tool the on-init instructions send every new page or screen to first. */
 export const ENTRY_TOOL = 'start_ui_design';

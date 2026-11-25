@@ -6,6 +6,23 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.24.1] — 2026-11-25
+
+### Fixed
+
+- 0.24.0 named the entry tool in `skills/CLAUDE.md` and the skill only as
+  `mcp__web-stylebook__start_ui_design`, its name when you add the server with `claude mcp add`. A
+  plugin install names it `mcp__plugin_web-stylebook_web-stylebook__start_ui_design`, so the
+  `select:` hint missed it. Both files now give both names, and the block tells the agent to load the
+  tool with a ToolSearch keyword query for `start_ui_design`, which finds either. The note for a
+  server added under another key covers the plugin prefix. If you copied `skills/CLAUDE.md` from
+  0.24.0, copy it again (#61).
+
+### Unchanged
+
+- Tool inputs and results, server instructions, audit plan hashes, the catalog snapshot and the
+  dependencies are the same as in 0.24.0.
+
 ## [0.24.0] — 2026-11-25
 
 ### Added
