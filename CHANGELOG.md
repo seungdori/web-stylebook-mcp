@@ -6,30 +6,28 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.22.1] — 2026-11-25
+
 ### Fixed
 
-- `audit_copy` found nothing in Korean marketing clichés such as "혁신적인 솔루션으로 비즈니스를 한 단계
-  끌어올리세요": English and Japanese had a buzzword pattern and Korean did not. `ko-buzzwords` adds it, and
-  plain uses of the same words (솔루션 엔지니어, 한 단계 작은 목표, 스마트폰) still pass. Korean now has every
-  pattern topic English or Japanese has (25 patterns).
-- `audit_page_structure` results on a page with many findings reached about 57 KB, because each finding
-  repeated the build steps of the moves it named and the hero text. The largest result on the benchmark
-  page is now 47,768 bytes.
+- `audit_copy` now finds Korean marketing clichés such as "혁신적인 솔루션으로 비즈니스를 한 단계
+  끌어올리세요" (`ko-buzzwords`); plain uses of the same words still pass. Korean has every pattern topic
+  English or Japanese has (25 patterns). A Korean plan with the `copy` group gains the
+  `copy-ko-buzzwords` check, so its plan hash and the `audit_copy` ruleset hash change (#55).
+- `audit_page_structure` results no longer repeat the same text in every finding; the largest result on
+  the benchmark page is 47,768 bytes, within a new 48 KiB budget (#55).
 
 ### Changed
 
-- `audit_page_structure`: `finding.replaceWith.moves` lists each move as `{ id, name }`, and
-  `finding.replaceWith.archetype` is `"hero"` or `"sectionOrder"`. The new `replacements` field holds each
-  named move's purpose and build steps and the hero or section order, once. Evidence items no longer repeat
-  `actual`, the selector or the ruleset hash (they are in `checks`, `location` and `identity`), the asset
-  checks share one evidence item per outcome, and result rationales no longer repeat locations. The text
-  output points to the build steps instead of printing them.
+- `audit_page_structure`: `finding.replaceWith.moves` lists `{ id, name }`, `finding.replaceWith.archetype`
+  is `"hero"` or `"sectionOrder"`, and the new `replacements` field holds each named move's purpose and
+  build steps and the hero or section order, once. Evidence items no longer carry `actual` or
+  `producer.configHash`, and the asset checks share one evidence item per outcome (#55).
 
-### For maintainers
+### Unchanged
 
-- `npm run visual:benchmark` checks the largest `audit_page_structure` result (text and
-  `structuredContent`) on `tests/fixtures/page-structure/benchmark-problem-page.html` against a 48 KiB
-  budget, for every style, language and product type.
+- Tool inputs, plans without a Korean `copy` group, `compose_design_tokens`, the catalog snapshot and the
+  dependencies are the same as in 0.22.0.
 
 ## [0.22.0] — 2026-11-25
 
