@@ -1,6 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
+import { join } from 'node:path';
 import type {
   CatalogEnvelope, WebStylebookCatalogV1, CatalogStyle, MotionPattern, ComponentTerm,
   ProductArchetype, StateSurface, StateRecipe, StyleFamily, Ontology, NotIdealMap,
@@ -9,6 +8,7 @@ import type {
 } from '../types.js';
 import { text } from '../localization.js';
 import { VisualContractRepository, type VisualContractSelection } from './visual.js';
+import { GENERATED_DIR, readGenerated } from './generated.js';
 
 export interface StyleSummary {
   id: string; kind: 'style' | 'fusion'; name: string; summary: string;
@@ -45,10 +45,6 @@ export interface ReferenceSummary {
 
 export const SCHEMA_ID = 'webstylebook.catalog.v1';
 
-function locateCatalog(): string {
-  const here = dirname(fileURLToPath(import.meta.url)); // dist/catalog (or src/catalog under tsx)
-  return join(here, '..', '..', 'generated', 'catalog.v1.json');
-}
 
 export class CatalogRepository {
   readonly envelope: CatalogEnvelope;
@@ -111,12 +107,13 @@ export class CatalogRepository {
     }
   }
 
-  static load(path: string = locateCatalog()): CatalogRepository {
+  /** The bundled catalog, or the catalog file at `path`. */
+  static load(path?: string): CatalogRepository {
     let raw: string;
     try {
-      raw = readFileSync(path, 'utf8');
+      raw = (path === undefined ? readGenerated('catalog.v1.json') : readFileSync(path)).toString('utf8');
     } catch (err) {
-      throw new Error(`failed to read catalog at ${path}: ${(err as Error).message}`, { cause: err });
+      throw new Error(`failed to read catalog at ${path ?? join(GENERATED_DIR, 'catalog.v1.json')}: ${(err as Error).message}`, { cause: err });
     }
     const envelope = JSON.parse(raw) as CatalogEnvelope;
     return new CatalogRepository(envelope);

@@ -6,7 +6,7 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { createWebStylebookServer } from '../src/server.js';
 import { CatalogRepository } from '../src/catalog/repository.js';
-import { composeDesignTokens, type ComposeDesignTokensInput, type TokenFormat } from '../src/tokens/compile.js';
+import { composeDesignTokens, type ComposeDesignTokensInput, type TokenFormat, tokenFileText } from '../src/tokens/compile.js';
 import { checkContrast, contrastRatio, normalizeHexColor, parseHex } from '../src/tokens/contrast.js';
 import type { DesignTokenColor, DesignTokens } from '../src/types.js';
 
@@ -78,7 +78,7 @@ describe('#24 — the reported cases', () => {
   it('bare hex is emitted as a CSS hex color in every format', () => {
     for (const format of FORMATS) {
       const result = run(format, { colorMode: 'light', accentOverride: '000000' });
-      const text = 'rendered' in result ? result.rendered : result.content;
+      const text = 'content' in result ? result.content : tokenFileText(result);
       expect(text, format).not.toMatch(/(?:--color-accent: |"accent": |accent: )"?000000/);
       if (format === 'css-variables') expect(text).toContain('--color-accent: #000000;');
       else if (format === 'design-md') expect(text).toContain('accent: "#000000"');
@@ -126,7 +126,7 @@ describe('#24 — one normalized color for input, math and every output', () => 
     for (const style of repo.allStyles()) {
       for (const accentOverride of ['000000', '#000000', 'abc', '#ABC', '00000033', '#00000033', '#FFFFFF80', 'ff006600']) {
         for (const colorMode of ['light', 'dark', 'both'] as const) {
-          const css = compose({ primaryStyleId: style.id, format: 'css-variables', colorMode, accentOverride }).rendered;
+          const css = tokenFileText(compose({ primaryStyleId: style.id, format: 'css-variables', colorMode, accentOverride }));
           for (const [, name, value] of css.matchAll(/--(color-[\w-]+): ([^;]*);/g)) {
             if (!CSS_HEX.test(value!)) bad.push(`${style.id} ${accentOverride} ${colorMode} ${name}: ${value}`);
           }
@@ -143,12 +143,12 @@ describe('#24 — one normalized color for input, math and every output', () => 
         const c = (json.tokens as DesignTokens).color;
         expect(c.accent).toBe(normalizeHexColor(accentOverride));
         const css = compose({ format: 'css-variables', colorMode, accentOverride });
-        expect(css.rendered).toContain(`--color-accent: ${c.accent};`);
-        expect(css.rendered).toContain(`--color-accentText: ${c.accentText};`);
+        expect(tokenFileText(css)).toContain(`--color-accent: ${c.accent};`);
+        expect(tokenFileText(css)).toContain(`--color-accentText: ${c.accentText};`);
         for (const format of ['typescript', 'tailwind'] as const) {
           const out = compose({ format, colorMode, accentOverride });
-          expect(out.rendered).toContain(`"accent": "${c.accent}"`);
-          expect(out.rendered).toContain(`"accentText": "${c.accentText}"`);
+          expect(tokenFileText(out)).toContain(`"accent": "${c.accent}"`);
+          expect(tokenFileText(out)).toContain(`"accentText": "${c.accentText}"`);
           expect(out.warnings).toEqual(json.warnings);
         }
         const md = designMd({ colorMode, accentOverride });

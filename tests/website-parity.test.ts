@@ -3,7 +3,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { CatalogRepository } from '../src/catalog/repository.js';
-import { composeDesignTokens } from '../src/tokens/compile.js';
+import { composeDesignTokens, tokenFileText } from '../src/tokens/compile.js';
 import type { DesignTokens } from '../src/types.js';
 import type { ResolvedVisualContract } from '../src/visual-canonical/types.js';
 
@@ -72,8 +72,8 @@ describe('pinned website visual parity', () => {
         const css = composeDesignTokens({ ...input, format: 'css-variables' }, repo);
         const label = `${item.styleId}/${item.mode}/${item.overrides ? 'edited' : 'authored'}`;
         expect(json.visualContract, label).toEqual(item.resolved);
-        expect(JSON.parse(json.rendered), label).toEqual(item.resolved);
-        expect(css.rendered, label).toBe(item.css);
+        expect(JSON.parse(tokenFileText(json)), label).toEqual(item.resolved);
+        expect(tokenFileText(css), label).toBe(item.css);
         expect((json.visualContract as ResolvedVisualContract).colors.text).toBe(item.resolved.colors.text);
         expect((json.visualContract as ResolvedVisualContract).colors.accent).toBe(item.resolved.colors.accent);
         expect((json.visualContract as ResolvedVisualContract).shadows).toEqual(item.resolved.shadows);
@@ -98,7 +98,7 @@ describe('pinned website visual parity', () => {
       expect(tokens.shadow, label).toEqual(item.resolved.shadows);
       expect(tokens.typography.lineHeight, label).toEqual(legacyLineHeight);
       for (const shadow of genericSoftShadows) {
-        if (!Object.values(item.resolved.shadows).includes(shadow)) expect(result.rendered, label).not.toContain(shadow);
+        if (!Object.values(item.resolved.shadows).includes(shadow)) expect(tokenFileText(result), label).not.toContain(shadow);
       }
       const defaults = familyFonts(item.styleId);
       expect(defaults, label).toBeDefined();

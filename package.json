@@ -17,7 +17,9 @@
   "files": [
     "dist",
     "!dist/**/*.map",
-    "generated",
+    "generated/manifest.v1.json",
+    "generated/visual-contract-LICENSE",
+    "generated/visual-contract-source.v1.json",
     "skills",
     "README.md"
   ],
@@ -31,7 +33,8 @@
   "homepage": "https://github.com/seungdori/web-stylebook-mcp#readme",
   "bugs": "https://github.com/seungdori/web-stylebook-mcp/issues",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && node scripts/pack-generated.mjs",
+    "prepack": "node scripts/pack-generated.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "pretest": "tsc -p tsconfig.json",
     "test": "vitest run",

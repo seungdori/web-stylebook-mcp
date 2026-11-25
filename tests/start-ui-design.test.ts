@@ -97,22 +97,23 @@ describe('start_ui_design results', () => {
     if (!shop.use) throw new Error('expected photo slots');
     expect(shop.slots.map((slot) => slot.slot)).toEqual(['hero', 'detail', 'scale']);
     expect(shop.credit).toContain('Photo by {name} on {Source}');
-    expect(shop.termsChecked).toBe('2026-11-25');
+    expect(shop.rulesUri).toBe('webstylebook://photos/rules/ja');
     const portfolio = startUiDesign({ productDescription: 'My design portfolio', productType: 'portfolio', pageRole: 'portfolio' }, repo).photos;
     if (!portfolio.use) throw new Error('expected photo slots');
     expect(portfolio.slots.every((slot) => slot.own && !slot.query)).toBe(true);
   });
 
-  it('write the photo rules in the requested language, in both channels', () => {
+  it('write the photo rules in the requested language, inline and in the rules resource', async () => {
     const script = { en: /^[\x20-\x7e]+$/, ko: /[가-힣]/, ja: /[ぁ-んァ-ン]/ } as const;
     for (const locale of LOCALES) {
       const result = startUiDesign({ productDescription: 'A product page for a hand blender', productType: 'commerce', pageRole: 'product-detail', locale }, repo);
       if (!result.photos.use) throw new Error('expected photo slots');
-      for (const field of ['pick', 'credit', 'dont', 'markup', 'fallback'] as const) {
-        expect(result.photos[field], `${locale} ${field}`).toMatch(script[locale]);
-      }
+      const read = await client.readResource({ uri: result.photos.rulesUri });
+      const rules = JSON.parse((read.contents[0] as { text: string }).text);
+      expect(rules).toMatchObject({ termsChecked: '2026-11-25', credit: result.photos.credit, fallback: result.photos.fallback });
+      for (const field of ['pick', 'credit', 'dont', 'markup', 'fallback'] as const) expect(rules[field], `${locale} ${field}`).toMatch(script[locale]);
       expect(result.photos.credit).toContain('Photo by {name} on {Source}');
-      expect(renderStartUiDesign(result)).toContain(result.photos.credit);
+      expect(renderStartUiDesign(result)).toContain(`${result.photos.credit} Rules: ${result.photos.rulesUri}`);
     }
   });
 

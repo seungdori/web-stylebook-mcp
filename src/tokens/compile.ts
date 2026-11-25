@@ -5,6 +5,7 @@ import type { ResolvedVisualContract, VisualContract, VisualOverrides, VisualRep
 import { parseHex, luminanceOf, contrastRatio, checkContrast, compositeOver, normalizeHexColor, type Rgb } from './contrast.js';
 import { hasStructureGuide, structureReference, type StructureReference } from '../structure/guidance.js';
 import { tokenSetToDesignMd, type DesignMd, type DesignMdOptions } from './design-md.js';
+import { serializeVisualJson } from '../visual-canonical/export.js';
 
 export type TokenFormat = 'json' | 'css-variables' | 'tailwind' | 'typescript';
 
@@ -29,7 +30,8 @@ export interface TokenSetResult {
   format: string;
   colorMode: 'light' | 'dark' | 'both';
   tokens: DesignTokens | { light: DesignTokens; dark: DesignTokens };
-  rendered: string;
+  /** The token file in the requested format. Absent for format json: the result carries that JSON as tokens and visualContract. */
+  rendered?: string;
   warnings: string[];
   notes: string[];
   contract?: { schema: string; contractSchema: string; catalogVersion: string; contentHash: string; styleCount: number; provenance: { source: string; license: 'MIT' } };
@@ -371,14 +373,13 @@ function composeTokenSet(input: ComposeDesignTokensInput & { format: TokenFormat
     }
   }
 
-  const rendered = render(input.format, tokens, colorMode);
   return {
     primaryStyleId: input.primaryStyleId,
     ...(input.secondaryStyleId ? { secondaryStyleId: input.secondaryStyleId } : {}),
     format: input.format,
     colorMode,
     tokens,
-    rendered,
+    ...(input.format === 'json' ? {} : { rendered: render(input.format, tokens, colorMode) }),
     warnings: allWarnings,
     notes: [...allNotes],
   };
@@ -448,4 +449,10 @@ function render(format: TokenFormat, tokens: ComposeDesignTokensResult['tokens']
     return `// Tailwind theme.extend — colors.light / colors.dark for both modes\nexport const theme = ${JSON.stringify(both, null, 2)};\n\n// Complete per-mode themes; motion and density retain source metadata.\nexport const themes = ${JSON.stringify(themes, null, 2)};\n`;
   }
   return `// Tailwind theme.extend (framework-version agnostic)\nexport const theme = ${JSON.stringify(themeOf(tokens as DesignTokens), null, 2)};\n`;
+}
+
+/** The token file text for the text channel: rendered, or for format json the JSON the result already carries. */
+export function tokenFileText(r: TokenSetResult): string {
+  if (r.rendered !== undefined) return r.rendered;
+  return r.visualContract ? serializeVisualJson(r.visualContract, 0) : JSON.stringify(r.tokens, null, 2);
 }

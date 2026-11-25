@@ -1,4 +1,4 @@
-import type { LocalizedText, ProductType } from '../types.js';
+import type { Lang, LocalizedText, ProductType } from '../types.js';
 import type { PageRole } from '../recommendation/page-roles.js';
 
 /**
@@ -194,6 +194,8 @@ export const SOFTWARE_PRODUCT_TYPES: ReadonlySet<ProductType> = new Set([
   'healthcare-portal', 'ai-chat', 'knowledge-base',
 ]);
 
+export const PHOTO_RULES_URI = 'webstylebook://photos/rules';
+
 /** The licence terms read on termsChecked, and how a page credits and marks up a stock photo. */
 export const PHOTO_RULES = {
   termsChecked: '2026-11-25',
@@ -224,3 +226,9 @@ export const PHOTO_RULES = {
     ja: '合う写真がなければその枠を外し、製品の画面か文字で組んでください。灰色の箱は使わないでください。',
   },
 } satisfies { termsChecked: string; licenses: Record<'unsplash' | 'pexels', string> } & Record<'pick' | 'credit' | 'dont' | 'markup' | 'fallback', LocalizedText>;
+
+/** Every photo rule in one language: the resource behind each photo plan's rulesUri. */
+export function photoRules(locale: Lang) {
+  const { termsChecked, licenses, ...texts } = PHOTO_RULES;
+  return { termsChecked, licenses, ...Object.fromEntries(Object.entries(texts).map(([key, value]) => [key, value[locale]])) };
+}
