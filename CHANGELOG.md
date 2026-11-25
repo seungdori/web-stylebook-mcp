@@ -6,6 +6,46 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.25.0] — 2026-11-25
+
+### Breaking
+
+- `compose_design_tokens` with `format: "json"` no longer returns `rendered`; it repeated the JSON the result
+  already carries. Read `visualContract` (with `contract`) or `tokens`. The text channel still prints the JSON,
+  and the other formats keep `rendered` (#64).
+- Evidence items from `audit_page_structure` (assets included), `audit_copy` and `compare_page_revisions` no
+  longer carry `producer`; each result names it once in `identity.producer`. `validate_design_audit_result`
+  accepts evidence with or without it (#64).
+- The `start_ui_design` photo plan keeps `credit` and `fallback` and adds `rulesUri`. `termsChecked`,
+  `licenses`, `pick`, `dont` and `markup` moved to that resource, `webstylebook://photos/rules/{locale}` (#64).
+- The npm package no longer contains `generated/catalog.v1.json` and `generated/visual-contracts.v1.json`.
+  They ship byte for byte, brotli-compressed, as `dist/generated/*.json.br`. Code that read those two files
+  from an installed package reads the compressed copies or the repository (#64).
+
+### Fixed
+
+- `assets-font-loading` no longer asks to load a Korean or Japanese web font that a system face listed
+  before it already draws, such as Noto Sans KR after Apple SD Gothic Neo or Malgun Gothic. It now reads a
+  `font` shorthand that starts with a weight (`font: 400 16px/1.6 "Noto Sans KR"`) (#64).
+
+### Changed
+
+- `compose_design_tokens` notes, with `contract`, say to load each external family in
+  `visualContract.typography.fonts` from its `stylesheetUrl` (#64).
+- The server instructions are shorter (1,423 characters) and route the same way (#64).
+
+### For maintainers
+
+- `npm run eval:static` scores saved pages with `audit_page_structure`, its asset checks and `audit_copy`, as
+  JSON and markdown. CI runs it on the repository fixtures, and a snapshot test keeps the result.
+  `--experiment <dir>` reads a before/after folder without writing to it (#63).
+- `npm run build` and `prepack` write the compressed snapshots (`scripts/pack-generated.mjs`). The packed
+  package is 1,171,830 B in CI (#64).
+
+### Unchanged
+
+- Tool inputs, audit plan hashes, the catalog snapshot and the dependencies are the same as in 0.24.1.
+
 ## [0.24.1] — 2026-11-25
 
 ### Fixed
