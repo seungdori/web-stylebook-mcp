@@ -2,7 +2,7 @@ import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mc
 import type { CatalogRepository } from '../catalog/repository.js';
 import type { VisualResolutionOptions } from '../visual-canonical/types.js';
 import { REFERENCE_CATEGORIES } from '../types.js';
-import { TOOL_NAMES, SERVER_NAME, SERVER_VERSION } from '../server-info.js';
+import { IMPROVEMENT_GUIDANCE, NEW_UI_GUIDANCE, NEW_UI_WORKFLOW_URI, SERVER_NAME, SERVER_VERSION, TOOL_NAMES } from '../server-info.js';
 import { ERROR_CODES } from './errors.js';
 import { bannedPatternCatalog, styleStructure, structureManifest, structureRulesetHash } from '../structure/guidance.js';
 import { MUST_HAVE_RESOURCE_URI, mustHaveCatalog } from '../structure/must-haves.js';
@@ -38,6 +38,9 @@ export function registerResources(server: McpServer, repo: CatalogRepository): v
       schema: IMPROVEMENT_WORKFLOW_SCHEMA, resourceUri: IMPROVEMENT_WORKFLOW_URI,
       entryTool: 'get_design_improvement_plan', completionTool: 'validate_design_improvement_result',
       defaultIntent: 'implement-verify-report', executor: 'host-agent',
+    },
+    newUiWorkflow: {
+      resourceUri: NEW_UI_WORKFLOW_URI, entryTool: 'recommend_design_direction', completionTool: 'validate_design_audit_result',
     },
     languages: repo.envelope.languages,
     counts: {
@@ -79,7 +82,23 @@ export function registerResources(server: McpServer, repo: CatalogRepository): v
     schema: IMPROVEMENT_WORKFLOW_SCHEMA,
     entryTool: 'get_design_improvement_plan', completionTool: 'validate_design_improvement_result',
     localized: Object.fromEntries((['en', 'ko', 'ja'] as const).map((locale) => [locale, improvementWorkflow(locale, undefined, FOUNDATION_IDENTITY.contentHash)])),
+    guidance: IMPROVEMENT_GUIDANCE,
     notice: 'This resource explains the workflow. Obtain an execution plan with context from the entry tool before validating completion.',
+  }));
+  fixed('new-ui-workflow', NEW_UI_WORKFLOW_URI, 'Workflow for a new page or screen: direction, structure, tokens, principles, states, references, then audit and validation', () => ({
+    schema: 'webstylebook.new-ui-workflow.v1',
+    entryTool: 'recommend_design_direction',
+    steps: [
+      'recommend_design_direction with the product context, then read webstylebook://styles/{id}',
+      'compose_design_tokens for the chosen style (pass contract for the full visual contract)',
+      'get_design_principle_plan and get_ux_principle_plan for the layout concerns and task outcomes',
+      'get_ui_state_plan for each surface that shows data or forms',
+      'search_design_references and get_design_reference for a few attributed examples',
+      'build, then audit_page_structure on the rendered HTML and CSS',
+      'get_design_audit_plan, collect evidence, validate_design_audit_result',
+    ],
+    completionTool: 'validate_design_audit_result',
+    guidance: NEW_UI_GUIDANCE.join(' '),
   }));
   fixed('motion', 'webstylebook://motion', 'Compact list of motion patterns', () => repo.listMotion());
   fixed('components', 'webstylebook://components', 'Component vocabulary', () => repo.listComponents());

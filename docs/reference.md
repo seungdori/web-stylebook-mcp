@@ -556,12 +556,14 @@ webstylebook://references · /references/{id}
 webstylebook://policies/anti-patterns · /policies/verification · /policies/audit-checks
 webstylebook://structure/banned-patterns · /structure/must-haves
 webstylebook://design-md/{id}
-webstylebook://workflows/improve-ui
+webstylebook://workflows/improve-ui · /workflows/new-ui
 ```
 
 Style detail accepts optional `locale`, `mode`, and expected `revision` query parameters, for example `webstylebook://styles/brutalist-grid?locale=ko&mode=light`. It returns one resolved locale and mode; unsupported values, duplicate parameters, and unknown query names return an explicit error.
 
 Foundation detail accepts one optional `locale=en|ko|ja` parameter. `manifest.designFoundations` describes this independently versioned MCP knowledge layer; the website's canonical catalog and its content hash remain separate.
+
+`webstylebook://workflows/new-ui` holds the full workflow and composition guidance for a new page or screen. The on-init instructions stay short and point to it, and `manifest.newUiWorkflow` names its entry tool.
 
 ## Prompts
 
