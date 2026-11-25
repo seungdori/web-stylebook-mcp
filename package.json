@@ -1,6 +1,6 @@
 {
   "name": "web-stylebook-mcp",
-  "version": "0.18.0",
+  "version": "0.18.1",
   "description": "Design intelligence for coding agents — improve real UIs with design foundations, implementation, verification and before/after reports.",
   "mcpName": "io.github.seungdori/web-stylebook-mcp",
   "type": "module",
@@ -16,15 +16,10 @@
   "types": "./dist/server.d.ts",
   "files": [
     "dist",
+    "!dist/**/*.map",
     "generated",
     "skills",
-    "docs/research/design-foundations.md",
-    "docs/reference.md",
-    "docs/reference.ko.md",
-    "docs/reference.ja.md",
-    "README.md",
-    "README.ko.md",
-    "README.ja.md"
+    "README.md"
   ],
   "engines": {
     "node": ">=20"

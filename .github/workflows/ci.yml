@@ -21,3 +21,5 @@ jobs:
       - run: npm test
       - name: Validate bundled catalog
         run: node dist/cli.js --validate-catalog
+      - name: Check package size and visual budgets
+        run: npm run visual:benchmark
