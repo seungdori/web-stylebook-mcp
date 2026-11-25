@@ -564,6 +564,7 @@ webstylebook://policies/anti-patterns · /policies/verification · /policies/aud
 webstylebook://structure/banned-patterns · /structure/must-haves
 webstylebook://design-md/{id}
 webstylebook://workflows/improve-ui · /workflows/new-ui
+webstylebook://typography/pairings · /typography/pairings/{id}
 ```
 
 스타일 상세에는 `locale`, `mode`, 기대하는 `revision`을 쿼리로 지정할 수 있습니다. 예: `webstylebook://styles/brutalist-grid?locale=ko&mode=light`. 선택한 언어와 모드 1개의 명세를 반환하며, 지원하지 않는 값·중복 인자·알 수 없는 쿼리 이름은 명확한 오류로 반환합니다.
@@ -571,6 +572,8 @@ webstylebook://workflows/improve-ui · /workflows/new-ui
 원론 상세는 `locale=en|ko|ja` 쿼리 하나를 선택적으로 받습니다. `manifest.designFoundations`는 독립 버전으로 관리하는 MCP 지식층을 설명하며, 웹사이트 정본 카탈로그와 그 content hash는 별도로 유지됩니다.
 
 `webstylebook://workflows/new-ui`에는 새 페이지나 화면을 만드는 전체 흐름과 구성 지침이 있습니다. 시작할 때 받는 instructions는 짧게 두고 이 리소스를 가리키며, `manifest.newUiWorkflow`가 진입 도구를 알려 줍니다.
+
+`webstylebook://typography/pairings`는 대안 글꼴 짝의 목록과, 스타일마다 저작된 글꼴과 어울리는 짝을 보여 줍니다. `/typography/pairings/{id}?locale=ko`는 한 스타일의 짝을 한국어 또는 일본어 글꼴, 붙여 넣을 `<link>` 태그와 CSS 글꼴 스택, 라이선스와 함께 반환합니다. 기본값은 계속 `compose_design_tokens`가 주는 저작 글꼴입니다.
 
 ## 프롬프트
 

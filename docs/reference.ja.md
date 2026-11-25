@@ -529,6 +529,7 @@ webstylebook://policies/anti-patterns · /policies/verification · /policies/aud
 webstylebook://structure/banned-patterns · /structure/must-haves
 webstylebook://design-md/{id}
 webstylebook://workflows/improve-ui · /workflows/new-ui
+webstylebook://typography/pairings · /typography/pairings/{id}
 ```
 
 スタイルの詳細は、省略可能な `locale`、`mode`、期待される `revision` のクエリパラメーターを受け付けます（例: `webstylebook://styles/brutalist-grid?locale=ko&mode=light`）。解決された 1 つのロケールとモードを返します。対応していない値、重複したパラメーター、未知のクエリ名は、明示的なエラーを返します。
@@ -536,6 +537,8 @@ webstylebook://workflows/improve-ui · /workflows/new-ui
 原論の詳細は、省略可能な `locale=en|ko|ja` パラメーターを 1 つ受け付けます。`manifest.designFoundations` は、独立してバージョン管理される MCP の知識レイヤーを説明します。Web サイトの正式なカタログとそのコンテンツハッシュは、これとは別のままです。
 
 `webstylebook://workflows/new-ui` には、新しいページや画面を作る流れと構成の指針がすべて入っています。起動時の instructions は短くしてこのリソースを指し、`manifest.newUiWorkflow` が入口のツールを示します。
+
+`webstylebook://typography/pairings` は、代わりのフォントの組み合わせの一覧と、スタイルごとの既定のフォントと合う組み合わせを示します。`/typography/pairings/{id}?locale=ko` は、1 つのスタイルの組み合わせを、韓国語または日本語の書体、貼り付けて使う `<link>` タグと CSS のフォントスタック、ライセンスとともに返します。既定は引き続き `compose_design_tokens` が返すフォントです。
 
 ## プロンプト
 
