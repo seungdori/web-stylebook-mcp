@@ -1,6 +1,6 @@
 # With and without web-stylebook-mcp
 
-**English** · [한국어](./README.ko.md)
+**English** · [한국어](./README.ko.md) · [日本語](./README.ja.md)
 
 An experiment for [issue #7](https://github.com/seungdori/web-stylebook-mcp/issues/7). The claim under test: a coding agent that has this MCP server produces less generic UI than the same agent without it.
 
@@ -22,7 +22,7 @@ Ten product briefs were each built twice from an empty folder by the same headle
 | `screenshots/<brief>/{left,right}-{1440,390}.webp` | Full-page screenshots, cut at 4000 px. The names are neutral on purpose; `key.json` says which arm each one is. |
 | `mcp-outputs/<brief>.json`, `mcp-outputs/resource-list.txt` | Every MCP tool call the MCP arm made, with the result it received, plus the saved text of results too large to pass inline. |
 | `runs.json` | Per-build record: status, wall time, exit code, token counts, tool counts, isolation audit, prompt, exact command. |
-| `RESULTS.md`, `RESULTS.ko.md` | The results note. |
+| `RESULTS.md`, `RESULTS.ko.md`, `RESULTS.ja.md` | The results note. |
 | `blind-notes.md` | My notes on each pair, written before I opened `key.json`. |
 | `blind-reads/` | Two independent blind reads by fresh Claude subagents, with the exact instructions they got. |
 | `harness/` | The scripts that ran, captured, and published everything. |
@@ -156,7 +156,7 @@ The scripts in `harness/`:
 | `governor.mjs` | Paces the driver against the usage window: `node governor.mjs <driver-pid> [--concurrency 4]`. |
 | `publish.mjs` | Writes `runs.json` and `mcp-outputs/` from the build logs. |
 | `build-compare.mjs` | Writes the WebP screenshots, `key.json`, and the comparison page: `[--out <dir>] [--quality 78]`. |
-| `tables.mjs` | Prints the tables used in `RESULTS.md`: `[--lang ko]`. |
+| `tables.mjs` | Prints the tables used in `RESULTS.md`: `[--lang ko]`, `[--lang ja]`. |
 | `lib.mjs`, `session.mjs`, `shoot.mjs` | Shared settings and prompts, transcript reading and the isolation audit, and the screenshots. |
 | `assign.mjs`, `seed.mjs` | The seeded left/right draw and its seed. |
 

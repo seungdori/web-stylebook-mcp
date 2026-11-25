@@ -1,5 +1,7 @@
 # Before/after demo: how it was made
 
+**English** · [한국어](./README.ko.md) · [日本語](./README.ja.md)
+
 ![Before and after](./before-after.png)
 
 **What this is.** Two fixture pages for a fictional product, Acme Cloud, with fixed data and a fixed

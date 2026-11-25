@@ -10,15 +10,15 @@
 [![node](https://img.shields.io/node/v/web-stylebook-mcp?logo=nodedotjs&color=339933)](https://nodejs.org)
 [![MCP](https://img.shields.io/badge/MCP-server-6E56CF)](https://modelcontextprotocol.io)
 
-[English](./README.md) · **한국어**
+[English](./README.md) · **한국어** · [日本語](./README.ja.md)
 
 </div>
 
-![왼쪽: 흔한 AI 생성 스타일의 대시보드. 장애 정보가 첫 화면 아래에 있습니다. 오른쪽: 스킬을 한 번 적용한 같은 페이지. 문제가 생긴 서비스와 열린 인시던트가 맨 위에 있습니다.](https://raw.githubusercontent.com/seungdori/web-stylebook-mcp/master/docs/demo/before-after.png)
+![왼쪽: 흔한 AI 생성 스타일의 대시보드. 서비스 중단 정보가 첫 화면 아래에 있습니다. 오른쪽: 스킬을 한 번 적용한 같은 페이지. 문제가 생긴 서비스와 열린 인시던트가 맨 위에 있습니다.](https://raw.githubusercontent.com/seungdori/web-stylebook-mcp/master/docs/demo/before-after.png)
 
 <sub>왼쪽은 흔한 AI 생성 스타일로 작성한 예시 대시보드입니다. 오른쪽은 Claude Opus 5.5가
 `web-stylebook-design` 스킬을 한 번 따라 고친 같은 페이지이며, 사람이 손대지 않았습니다. 데이터는
-가상입니다. [만든 방법, 측정한 값, 보여 주지 않는 것 →](./docs/demo/README.md)</sub>
+가상입니다. [만든 방법, 측정한 값, 보여 주지 않는 것 →](./docs/demo/README.ko.md)</sub>
 
 - **디자인 지식이 들어 있습니다.** 조사된 디자인 원론 24개(출처 30개), 인터페이스 원칙 25개, UX
   원칙 23개, 시각 방향 48개, 실제 사이트 레퍼런스 520개를 담고 있습니다. 규칙마다 언제 적용하고
@@ -187,7 +187,7 @@ npx -y web-stylebook-mcp call get_design_improvement_plan --input plan-args.json
 ## 더 보기
 
 - [레퍼런스](./docs/reference.ko.md): 툴 예시, 계약, CLI, 호환성
-- [데모](./docs/demo/README.md): 위 전후 비교와 모든 증거 파일(영문)
+- [데모](./docs/demo/README.ko.md): 위 전후 비교와 모든 증거 파일(증거 파일은 영문)
 - [MCP 사용·미사용 비교](./showcase/README.ko.md): 브리프 10개의 비교 화면과 실험 기록
 - [변경 기록](./CHANGELOG.md) · [보안](./SECURITY.md) · [릴리스](./RELEASING.md)
 

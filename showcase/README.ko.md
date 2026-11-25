@@ -1,10 +1,10 @@
 # web-stylebook-mcp를 쓸 때와 안 쓸 때
 
-[English](./README.md) · **한국어**
+[English](./README.md) · **한국어** · [日本語](./README.ja.md)
 
 [이슈 #7](https://github.com/seungdori/web-stylebook-mcp/issues/7)을 위한 실험입니다. 검증하려는 주장은 이렇습니다. 이 MCP 서버를 쓰는 코딩 에이전트가 서버 없이 만들 때보다 덜 뻔한 UI를 만든다는 것입니다.
 
-제품 브리프 10개를 같은 헤드리스 에이전트가 빈 폴더에서 두 번씩 만들었습니다. 한 번은 MCP 없이, 한 번은 MCP와 함께입니다. 시간 제한에 걸려 중단된 빌드까지 전부 실었고, 점수는 매기지 않았습니다. 어느 쪽이 어느 쪽인지 가린 채 두 결과를 나란히 보여 주니, 직접 판단해 보세요.
+제품 브리프 10개를 같은 헤드리스 에이전트가 빈 폴더에서 두 번씩 만들었습니다. 한 번은 MCP 없이, 한 번은 MCP와 함께입니다. 90분 시간 제한에 걸려 중단된 빌드까지 전부 실었고, 점수는 매기지 않았습니다. 어느 쪽이 어느 쪽인지 가린 채 두 결과를 나란히 보여 주니, 직접 판단해 보세요.
 
 ## 여기서 시작하세요
 
@@ -22,7 +22,7 @@
 | `screenshots/<brief>/{left,right}-{1440,390}.webp` | 전체 페이지 스크린샷(4000px에서 자름). 이름은 일부러 중립적입니다. 어느 군인지는 `key.json`에 있습니다. |
 | `mcp-outputs/<brief>.json`, `mcp-outputs/resource-list.txt` | MCP군이 부른 MCP 툴 호출 전부와 받은 결과, 그리고 너무 커서 그대로 넘기지 못한 결과의 저장본. |
 | `runs.json` | 빌드별 기록: 상태, 소요 시간, 종료 코드, 토큰 수, 툴 호출 수, 격리 감사, 프롬프트, 실제 명령어. |
-| `RESULTS.md`, `RESULTS.ko.md` | 결과 노트. |
+| `RESULTS.md`, `RESULTS.ko.md`, `RESULTS.ja.md` | 결과 노트. |
 | `blind-notes.md` | `key.json`을 열기 전에 쌍마다 적은 제 메모. |
 | `blind-reads/` | 새로 띄운 Claude 서브에이전트 두 명의 독립 블라인드 판독과, 그들이 받은 지시문 전문. |
 | `harness/` | 실행·촬영·게시에 쓴 스크립트. |
@@ -156,7 +156,7 @@ node publish.mjs && node build-compare.mjs
 | `governor.mjs` | 사용량 창에 맞춰 드라이버 속도를 조절합니다: `node governor.mjs <driver-pid> [--concurrency 4]`. |
 | `publish.mjs` | 빌드 로그에서 `runs.json`과 `mcp-outputs/`를 만듭니다. |
 | `build-compare.mjs` | WebP 스크린샷, `key.json`, 비교 페이지를 만듭니다: `[--out <dir>] [--quality 78]`. |
-| `tables.mjs` | `RESULTS.md`에 쓴 표를 출력합니다: `[--lang ko]`. |
+| `tables.mjs` | `RESULTS.md`에 쓴 표를 출력합니다: `[--lang ko]`, `[--lang ja]`. |
 | `lib.mjs`, `session.mjs`, `shoot.mjs` | 공통 설정과 프롬프트, 세션 기록 읽기와 격리 감사, 스크린샷. |
 | `assign.mjs`, `seed.mjs` | 시드 기반 좌우 추첨과 그 시드. |
 

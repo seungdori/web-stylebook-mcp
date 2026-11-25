@@ -6,6 +6,25 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Japanese documentation: `README.ja.md`, `docs/reference.ja.md`, and the showcase's `README.ja.md`
+  and `RESULTS.ja.md`. The demo guide now has Korean and Japanese editions
+  (`docs/demo/README.ko.md`, `docs/demo/README.ja.md`). Every edition links to the others, the npm
+  package ships `README.ja.md` and `docs/reference.ja.md`, and the documentation tests check the
+  Japanese reference examples against real `locale: "ja"` output. `showcase/harness/tables.mjs
+  --lang ja` prints the Japanese results tables, and a test checks that each translated edition
+  keeps the English edition's links, numbers, code and section structure.
+
+### Changed
+
+- Korean and Japanese tool text no longer uses the word for an outage or obstacle that reads first
+  as "disability". The improvement workflow, its next actions and three design foundations now say
+  문제 / 問題 for an obstacle or blocker and 서비스 중단 / サービス停止 for an outage, so Korean and
+  Japanese improvement plan hashes change. The bundled catalog takes the same wording with the next
+  catalog sync, because the website catalog already uses it. Search aliases and the must-have status
+  detector still match the old word, because pages and users still write it.
+
 ## [0.17.0] — 2026-11-25
 
 ### Added

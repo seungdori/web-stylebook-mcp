@@ -7,7 +7,8 @@ import { dirname, join } from 'node:path';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (path: string) => readFileSync(join(root, path), 'utf8');
 const json = (path: string) => JSON.parse(read(path));
-const DOCS = ['README.md', 'README.ko.md', 'docs/reference.md', 'docs/reference.ko.md', 'docs/listings.md'];
+const READMES = ['README.md', 'README.ko.md', 'README.ja.md'];
+const DOCS = [...READMES, 'docs/reference.md', 'docs/reference.ko.md', 'docs/reference.ja.md', 'docs/listings.md'];
 
 const pkg = json('package.json');
 const server = json('server.json');
@@ -43,7 +44,7 @@ describe('install configuration', () => {
   });
 
   it('README files show both the official cursor:// deeplink and a GitHub-safe https button', () => {
-    for (const doc of ['README.md', 'README.ko.md']) {
+    for (const doc of READMES) {
       const links = cursorLinks(read(doc)).map((url) => url.protocol);
       expect(links, doc).toContain('cursor:');
       expect(links, doc).toContain('https:');
