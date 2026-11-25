@@ -6,37 +6,38 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.18.0] — 2026-11-25
+
 ### Added
 
-- Japanese documentation: `README.ja.md`, `docs/reference.ja.md`, and the showcase's `README.ja.md`
-  and `RESULTS.ja.md`. The demo guide now has Korean and Japanese editions
-  (`docs/demo/README.ko.md`, `docs/demo/README.ja.md`). Every edition links to the others, the npm
-  package ships `README.ja.md` and `docs/reference.ja.md`, and the documentation tests check the
-  Japanese reference examples against real `locale: "ja"` output. `showcase/harness/tables.mjs
-  --lang ja` prints the Japanese results tables, and a test checks that each translated edition
-  keeps the English edition's links, numbers, code and section structure.
+- Japanese editions of the README and the reference (`README.ja.md`, `docs/reference.ja.md`), both
+  shipped in the npm package, a Japanese edition of the showcase pages, and Korean and Japanese
+  editions of the demo guide (#41).
 
 ### Changed
 
-- Korean and Japanese tool text no longer uses the word for an outage or obstacle that reads first
-  as "disability". The improvement workflow, its next actions and three design foundations now say
-  문제 / 問題 for an obstacle or blocker and 서비스 중단 / サービス停止 for an outage, so Korean and
-  Japanese improvement plan hashes change. The bundled catalog takes the same wording with the next
-  catalog sync, because the website catalog already uses it. Search aliases and the must-have status
-  detector still match the old word, because pages and users still write it.
+- The bundled catalog is the web-stylebook `a9d40ee` snapshot. The website redesigned all 48
+  styles, so their visual contracts, descriptions and recommendation facets are new, and design
+  references carry a `preview` image URL (#42).
+- Six styles now have one authored color mode: `platform-core`, `terminal-core`, `console-launch`
+  and `duotone-bold` are dark only, `neumorphism` and `fusion-grain-mono` light only. With
+  `contract`, `compose_design_tokens` returns an error for the other mode and for `colorMode: "both"`;
+  without `contract` it still returns the family-derived tokens (#42).
+- Structure guides follow the new designs: archetypes, signature moves and style bans (181, was 142)
+  change for every style, so `audit_page_structure` results and structure plan hashes change for any
+  `styleId` (#42).
+- Recommendations follow the new facets, and some briefs get a different top pick.
+  `healthcare-portal` no longer lists `notion-style` as a primary pick (#42).
+- Korean and Japanese tool text says 문제 / 問題 for an obstacle and 서비스 중단 / サービス停止 for an
+  outage, instead of a word that reads first as "disability", so Korean and Japanese improvement
+  plan hashes change (#41).
+- The catalog hash is `sha256:2773e919…` (was `33f3638c…`) and the visual library hash
+  `sha256:5d0c3a35…` (was `72bd2fd8…`); `catalogVersion` stays `0.10.1`. Update a pinned
+  `contract.contentHash`, and request plans again before validating against them (#42).
 
-### Changed (catalog snapshot)
+### Unchanged
 
-- `generated/` now holds the web-stylebook `a9d40ee` snapshot (#37). The website redesigned all
-  48 styles: new visual contracts (six styles keep one color mode), descriptions, facets, and
-  reference previews. The snapshot also carries the #20 citation and wording fixes and drops
-  `notion-style` as a primary pick for `healthcare-portal`. `src/visual-canonical/` follows it.
-- The 48 structure guides are rewritten from the new specimen pages: hero, grid, section order,
-  density, type scale, signature moves, and bans. Every ban cites a current constraint, contract
-  value, or specimen rule, no guide names a font its style no longer uses, and the counts are now
-  144 signature moves and 181 style-specific bans. Structure plans and audits change accordingly.
-- Recommendation rankings follow the new facets. In the README brief `quiet-utility` still leads,
-  now by 0.01 and only because `runtime-signal` is closer to the avoided style.
+- Dependencies are the same as in 0.17.0.
 
 ## [0.17.0] — 2026-11-25
 
