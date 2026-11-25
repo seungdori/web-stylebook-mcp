@@ -23,3 +23,5 @@ jobs:
         run: node dist/cli.js --validate-catalog
       - name: Check package size and visual budgets
         run: npm run visual:benchmark
+      - name: Static design evaluation of the repository fixtures
+        run: npm run eval:static

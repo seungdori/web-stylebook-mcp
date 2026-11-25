@@ -36,6 +36,7 @@
     "pretest": "tsc -p tsconfig.json",
     "test": "vitest run",
     "eval:audit-contract": "tsx scripts/evaluate-audit-contract.ts",
+    "eval:static": "tsx scripts/evaluate-design-static.ts",
     "start": "node dist/cli.js",
     "dev": "tsx src/cli.ts",
     "catalog:check-canonical": "node scripts/check-canonical-catalog.mjs",
