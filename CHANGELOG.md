@@ -6,15 +6,19 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.20.0] — 2026-11-25
+
 ### Added
 
-- Type pairings: `webstylebook://typography/pairings` lists 25 alternative font pairings and, for each
-  of the 48 styles, its authored fonts and two to five pairings. Each pairing names its contrast
-  axis, page roles, product types, why it fits and when to avoid it, and Korean and Japanese faces.
-  `webstylebook://typography/pairings/{id}?locale=en|ko|ja` returns one style's pairings with the
-  `<link>` tags and CSS font stacks to paste for that language, and the licences. The pairings use
-  only families and weights the visual contracts already load, so every family has a verified free
-  licence. Tool responses and the authored fonts are unchanged.
+- Type pairings: `webstylebook://typography/pairings` lists 25 alternative font pairings and each
+  style's authored fonts. `webstylebook://typography/pairings/{id}?locale=en|ko|ja` returns two to
+  five pairings for one style, with Korean and Japanese faces, the `<link>` tags and CSS font stacks
+  to paste, and the licences. The pairings use only families and weights the visual contracts
+  already load (#48).
+
+### Unchanged
+
+- Tool responses, the catalog snapshot, its hashes and the dependencies are the same as in 0.19.0.
 
 ## [0.19.0] — 2026-11-25
 

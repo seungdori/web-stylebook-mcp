@@ -1,5 +1,5 @@
 export const SERVER_NAME = 'web-stylebook';
-export const SERVER_VERSION = '0.19.0';
+export const SERVER_VERSION = '0.20.0';
 
 /** The tool the on-init instructions send every new page or screen to first. */
 export const ENTRY_TOOL = 'recommend_design_direction';
