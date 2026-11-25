@@ -56,6 +56,7 @@
       },
       "facts": {
         "firstFont": "system-ui",
+        "displayFont": "system-ui",
         "fontSources": [],
         "images": 0,
         "externalImageHosts": [],
@@ -118,6 +119,7 @@
       },
       "facts": {
         "firstFont": "system-ui",
+        "displayFont": "system-ui",
         "fontSources": [],
         "images": 1,
         "externalImageHosts": [],
@@ -180,6 +182,7 @@
       },
       "facts": {
         "firstFont": "system-ui",
+        "displayFont": "system-ui",
         "fontSources": [],
         "images": 1,
         "externalImageHosts": [],
@@ -250,6 +253,7 @@
       },
       "facts": {
         "firstFont": "Georgia",
+        "displayFont": "Georgia",
         "fontSources": [],
         "images": 1,
         "externalImageHosts": [],
@@ -312,6 +316,7 @@
       },
       "facts": {
         "firstFont": null,
+        "displayFont": null,
         "fontSources": [],
         "images": 1,
         "externalImageHosts": [],
@@ -374,6 +379,7 @@
       },
       "facts": {
         "firstFont": "system-ui",
+        "displayFont": "system-ui",
         "fontSources": [],
         "images": 1,
         "externalImageHosts": [],
@@ -436,6 +442,7 @@
       },
       "facts": {
         "firstFont": "system-ui",
+        "displayFont": "system-ui",
         "fontSources": [],
         "images": 1,
         "externalImageHosts": [],
@@ -498,6 +505,7 @@
       },
       "facts": {
         "firstFont": "system-ui",
+        "displayFont": "system-ui",
         "fontSources": [],
         "images": 1,
         "externalImageHosts": [],
@@ -560,6 +568,7 @@
       },
       "facts": {
         "firstFont": "system-ui",
+        "displayFont": "system-ui",
         "fontSources": [],
         "images": 1,
         "externalImageHosts": [],
@@ -622,6 +631,7 @@
       },
       "facts": {
         "firstFont": "system-ui",
+        "displayFont": "system-ui",
         "fontSources": [],
         "images": 1,
         "externalImageHosts": [],
@@ -684,6 +694,7 @@
       },
       "facts": {
         "firstFont": null,
+        "displayFont": null,
         "fontSources": [],
         "images": 0,
         "externalImageHosts": [],
@@ -746,6 +757,7 @@
       },
       "facts": {
         "firstFont": "system-ui",
+        "displayFont": "system-ui",
         "fontSources": [],
         "images": 1,
         "externalImageHosts": [],
@@ -810,6 +822,7 @@
       },
       "facts": {
         "firstFont": "system-ui",
+        "displayFont": "system-ui",
         "fontSources": [],
         "images": 1,
         "externalImageHosts": [],
@@ -872,6 +885,7 @@
       },
       "facts": {
         "firstFont": "system-ui",
+        "displayFont": "system-ui",
         "fontSources": [],
         "images": 1,
         "externalImageHosts": [],
@@ -934,6 +948,7 @@
       },
       "facts": {
         "firstFont": "system-ui",
+        "displayFont": "system-ui",
         "fontSources": [],
         "images": 1,
         "externalImageHosts": [],
@@ -996,6 +1011,7 @@
       },
       "facts": {
         "firstFont": "system-ui",
+        "displayFont": "system-ui",
         "fontSources": [],
         "images": 1,
         "externalImageHosts": [],
@@ -1058,6 +1074,7 @@
       },
       "facts": {
         "firstFont": "system-ui",
+        "displayFont": "system-ui",
         "fontSources": [],
         "images": 1,
         "externalImageHosts": [],
@@ -1118,6 +1135,7 @@
       },
       "facts": {
         "firstFont": null,
+        "displayFont": null,
         "fontSources": [],
         "images": 0,
         "externalImageHosts": [],
@@ -1178,6 +1196,7 @@
       },
       "facts": {
         "firstFont": null,
+        "displayFont": null,
         "fontSources": [],
         "images": 4,
         "externalImageHosts": [],
@@ -1238,6 +1257,7 @@
       },
       "facts": {
         "firstFont": null,
+        "displayFont": null,
         "fontSources": [],
         "images": 0,
         "externalImageHosts": [],
@@ -1298,6 +1318,7 @@
       },
       "facts": {
         "firstFont": null,
+        "displayFont": null,
         "fontSources": [],
         "images": 1,
         "externalImageHosts": [],
@@ -1358,6 +1379,7 @@
       },
       "facts": {
         "firstFont": null,
+        "displayFont": null,
         "fontSources": [],
         "images": 13,
         "externalImageHosts": [],
@@ -1418,6 +1440,7 @@
       },
       "facts": {
         "firstFont": null,
+        "displayFont": null,
         "fontSources": [],
         "images": 0,
         "externalImageHosts": [],
@@ -1478,6 +1501,7 @@
       },
       "facts": {
         "firstFont": null,
+        "displayFont": null,
         "fontSources": [],
         "images": 2,
         "externalImageHosts": [],
@@ -1538,6 +1562,7 @@
       },
       "facts": {
         "firstFont": null,
+        "displayFont": null,
         "fontSources": [],
         "images": 0,
         "externalImageHosts": [],
@@ -1598,6 +1623,7 @@
       },
       "facts": {
         "firstFont": null,
+        "displayFont": null,
         "fontSources": [],
         "images": 4,
         "externalImageHosts": [
@@ -1678,6 +1704,7 @@
       },
       "facts": {
         "firstFont": null,
+        "displayFont": null,
         "fontSources": [],
         "images": 6,
         "externalImageHosts": [
@@ -1744,6 +1771,7 @@
       },
       "facts": {
         "firstFont": "Inter",
+        "displayFont": "Inter",
         "fontSources": [],
         "images": 0,
         "externalImageHosts": [],
@@ -1806,6 +1834,7 @@
       },
       "facts": {
         "firstFont": null,
+        "displayFont": null,
         "fontSources": [],
         "images": 0,
         "externalImageHosts": [],
@@ -1868,6 +1897,7 @@
       },
       "facts": {
         "firstFont": null,
+        "displayFont": null,
         "fontSources": [],
         "images": 0,
         "externalImageHosts": [],
@@ -1937,6 +1967,7 @@
       },
       "facts": {
         "firstFont": null,
+        "displayFont": null,
         "fontSources": [],
         "images": 0,
         "externalImageHosts": [],
@@ -1999,6 +2030,7 @@
       },
       "facts": {
         "firstFont": null,
+        "displayFont": null,
         "fontSources": [],
         "images": 5,
         "externalImageHosts": [],
@@ -2064,6 +2096,7 @@
       },
       "facts": {
         "firstFont": "Inter",
+        "displayFont": "Inter",
         "fontSources": [],
         "images": 0,
         "externalImageHosts": [],
@@ -2128,6 +2161,7 @@
       },
       "facts": {
         "firstFont": null,
+        "displayFont": null,
         "fontSources": [],
         "images": 1,
         "externalImageHosts": [
@@ -2192,6 +2226,7 @@
       },
       "facts": {
         "firstFont": null,
+        "displayFont": null,
         "fontSources": [],
         "images": 0,
         "externalImageHosts": [],
@@ -2256,6 +2291,7 @@
       },
       "facts": {
         "firstFont": null,
+        "displayFont": null,
         "fontSources": [],
         "images": 4,
         "externalImageHosts": [],
@@ -2320,6 +2356,7 @@
       },
       "facts": {
         "firstFont": "Pretendard",
+        "displayFont": "Noto Serif KR",
         "fontSources": [
           "google",
           "pretendard"
@@ -2389,6 +2426,7 @@
       },
       "facts": {
         "firstFont": "Noto Sans KR",
+        "displayFont": "Noto Serif KR",
         "fontSources": [
           "google"
         ],
@@ -2413,12 +2451,19 @@
       "freeStart": 1,
       "emDash": 2,
       "noMcpCall": 0,
+      "startUiDesign": 0,
+      "auditAfterStart": 0,
+      "stockPhotoPages": 4,
+      "creditedStockPages": 2,
       "structureFindings": 25,
+      "shapes": 13,
       "mustHaveGaps": 3,
       "copyFindings": 9,
       "copyClaims": 2,
       "assetIssues": 7,
-      "flags": 41
+      "flags": 41,
+      "displayFonts": 4,
+      "displayFontsByRound": {}
     }
   },
   "pairs": [],

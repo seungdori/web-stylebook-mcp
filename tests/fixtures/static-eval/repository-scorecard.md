@@ -14,12 +14,16 @@ Flags from audit_page_structure (with its asset checks) and audit_copy on saved 
 | pages with <img> as served | 26 |
 | title or text has 무료로 시작 | 1 |
 | title or text has an em dash | 2 |
+| pages with stock photos | 4 |
+| … all credited | 2 |
 | structure findings | 25 |
+| … generic page shapes | 13 |
 | must-have gaps | 3 |
 | copy findings | 9 |
 | copy claims (FIX_NOW) | 2 |
 | asset checks at FIX_NOW or RISK | 7 |
 | all flags | 41 |
+| distinct display fonts | 4 |
 
 ## Pages
 
