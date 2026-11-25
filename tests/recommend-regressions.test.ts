@@ -89,7 +89,7 @@ describe('A. phrase matching: precision without losing the verbatim case', () =>
   });
 
   it('a product-kind word alone earns half credit for bestFor and nothing for notIdealFor', () => {
-    const quiet = useCaseEvidence(repo.getStyle('quiet-utility')!, new Set(contentKeys('dashboard')), 'other', repo); // bestFor "ops dashboards"
+    const quiet = useCaseEvidence(repo.getStyle('quiet-utility')!, new Set(contentKeys('admin')), 'other', repo); // bestFor "admin tools"
     expect(quiet.lexical).toBe(0.5);
     const glass = useCaseEvidence(repo.getStyle('glass-orbit')!, new Set(contentKeys('admin')), 'other', repo); // notIdealFor "high-density admin tools"
     expect(glass.notIdeal).toBe(0);
@@ -204,7 +204,8 @@ describe('F. the note on the revised fixture expectation is true', () => {
     const variant = recommendDesignDirection({ ...brief, productDescription: brief.productDescription.replace('Learning app', 'Education app'), candidateLimit: 10 }, repo);
     expect(variant.candidates.map((c) => c.styleId).slice(0, 3)).toEqual(['paper-cut', 'soft-pastel', 'claymorphism']);
     const asWritten = recommendDesignDirection({ ...brief, candidateLimit: 10 }, repo);
-    expect(byId(asWritten.candidates, 'claymorphism')!.scoreBreakdown.useCase).toBe(0);
+    // Since web-stylebook a8515dd claymorphism's bestFor lists "children products", which the brief as written names.
+    expect(byId(asWritten.candidates, 'claymorphism')!.scoreBreakdown.useCase).toBeGreaterThan(0);
   });
 });
 

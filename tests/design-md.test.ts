@@ -3,6 +3,7 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { createWebStylebookServer } from '../src/server.js';
 import { CatalogRepository } from '../src/catalog/repository.js';
+import { structureGuide } from '../src/structure/guidance.js';
 import { composeDesignTokens, TokenError, type ComposeDesignTokensInput } from '../src/tokens/compile.js';
 import { DESIGN_MD_SECTIONS } from '../src/tokens/design-md.js';
 import { LANGS } from '../src/types.js';
@@ -87,8 +88,9 @@ function expectSpecShape(content: string, sections: readonly string[]) {
 const GOLDENS: Array<[string, Omit<ComposeDesignTokensInput, 'format'>]> = [
   ['editorial-silence.legacy.en', { primaryStyleId: 'editorial-silence', designMd: { productType: 'content-editorial' } }],
   ['brutalist-grid.interleaved.ko', { primaryStyleId: 'brutalist-grid', contract, locale: 'ko', designMd: { tokenPlacement: 'interleaved', productType: 'developer-tool' } }],
-  ['neumorphism.both.ja', { primaryStyleId: 'neumorphism', contract, colorMode: 'both', locale: 'ja' }],
-  ['fusion-grain-mono.dark.en', { primaryStyleId: 'fusion-grain-mono', contract, colorMode: 'dark', designMd: { productType: 'portfolio' } }],
+  // mono-type is the only style with two authored modes since web-stylebook a8515dd.
+  ['mono-type.both.ja', { primaryStyleId: 'mono-type', contract, colorMode: 'both', locale: 'ja' }],
+  ['fusion-editorial-terminal.dark.en', { primaryStyleId: 'fusion-editorial-terminal', contract, colorMode: 'dark', designMd: { productType: 'portfolio' } }],
   ['quiet-utility+brutalist-grid.legacy.en', { primaryStyleId: 'quiet-utility', secondaryStyleId: 'brutalist-grid', designMd: { productType: 'operational-saas' } }],
 ];
 
@@ -160,10 +162,11 @@ describe('DESIGN.md format', () => {
   });
 
   it('writes translucent rgba() colors as 8-digit hex', () => {
-    const spec = composeDesignTokens({ primaryStyleId: 'cyberpunk-glitch', contract, format: 'json' }, repo).visualContract as { colors: Record<string, string> };
-    expect(spec.colors.surface).toBe('rgba(217, 70, 239, 0.05)');
-    const colors = readDesignMd(designMd({ primaryStyleId: 'cyberpunk-glitch', contract }).content).tree.colors as Tree;
-    expect(colors['surface-container']).toBe('#d946ef0d');
+    const spec = composeDesignTokens({ primaryStyleId: 'glass-orbit', contract, format: 'json' }, repo).visualContract as { colors: Record<string, string> };
+    expect(spec.colors.surface).toBe('rgba(255, 222, 238, 0.17)');
+    const colors = readDesignMd(designMd({ primaryStyleId: 'glass-orbit', contract }).content).tree.colors as Tree;
+    // 0.17 × 255 = 43.35, rounded to 43 = 0x2b.
+    expect(colors['surface-container']).toBe('#ffdeee2b');
   });
 
   it('keeps fluid type at its maximum and reports what DESIGN.md cannot hold', () => {
@@ -174,7 +177,7 @@ describe('DESIGN.md format', () => {
     expect(result.lossy.some((item) => item.startsWith('Motion'))).toBe(true);
     expect(result.lossy.some((item) => item.includes('fluid size minimums'))).toBe(true);
     expect(result.lossy.some((item) => item.startsWith('Dark theme'))).toBe(false);
-    expect(designMd({ primaryStyleId: 'neumorphism', contract, colorMode: 'both' }).lossy[0]).toMatch(/^Dark theme/);
+    expect(designMd({ primaryStyleId: 'mono-type', contract, colorMode: 'both' }).lossy[0]).toMatch(/^Dark theme/);
   });
 
   it('omits Elevation & Depth for a style without shadows and lists shadows when there are some', () => {
@@ -208,7 +211,7 @@ describe('DESIGN.md format', () => {
   it("builds Do's and Don'ts from the style's bans and the global patterns it does not allow", () => {
     const result = designMd({ primaryStyleId: 'brutalist-grid' });
     const rules = result.content.split("## Do's and Don'ts\n\n")[1]!.trim().split('\n');
-    expect(rules.filter((line) => line.startsWith('- Do: ')).map((line) => /style rule ([\w-]+)/.exec(line)?.[1])).toEqual(['shadow-blur', 'gradient-fill', 'corner-radius']);
+    expect(rules.filter((line) => line.startsWith('- Do: ')).map((line) => /style rule ([\w-]+)/.exec(line)?.[1])).toEqual(structureGuide('brutalist-grid').bans.map((ban) => ban.rule));
     expect(rules.filter((line) => line.startsWith("- Don't: "))).toHaveLength(9);
   });
 

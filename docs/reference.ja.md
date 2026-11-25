@@ -117,24 +117,24 @@ MCP が検証するのは、提供されたカバレッジと整合性だけで�
 {
   "confidence": "high",
   "candidates": [
-    { "styleId": "quiet-utility",  "score": 0.93 },
-    { "styleId": "runtime-signal", "score": 0.89 },
-    { "styleId": "notion-style",   "score": 0.83 },
-    { "styleId": "console-launch", "score": 0.77 },
-    { "styleId": "platform-core",  "score": 0.77 }
+    { "styleId": "quiet-utility",  "score": 0.87 },
+    { "styleId": "runtime-signal", "score": 0.86 },
+    { "styleId": "console-launch", "score": 0.8 },
+    { "styleId": "notion-style",   "score": 0.79 },
+    { "styleId": "platform-core",  "score": 0.75 }
   ],
   "ranking": {
     "winner": "quiet-utility",
     "runnerUp": "runtime-signal",
-    "gap": 0.04,
+    "gap": 0.01,
     "tied": false,
-    "reasonCodes": ["USE_CASE_FIT", "LOWER_UPKEEP"],
-    "explanation": "quiet-utilityがruntime-signalを0.04上回る: bestFor 3件中3件がoperational-saas向け(runtime-signal: 3件中2件); daily利用で維持負担が小さい(quiet-utility: モーションlow、保守low; runtime-signal: モーションlow、保守medium)。"
+    "reasonCodes": ["FARTHER_FROM_AVOIDED"],
+    "explanation": "quiet-utilityがruntime-signalを0.01上回る: 回避対象(cyberpunk-glitch)から遠い(runtime-signalの共通特性: dark, tech)。"
   },
   "rejected": [                        // 全29件のうち3件を表示
-    { "styleId": "aurora-gradient",  "reasonCodes": ["PRODUCT_NOT_IDEAL", "DAILY_USE_OVERSTIMULATION"] },
+    { "styleId": "aurora-gradient",  "reasonCodes": ["PRODUCT_NOT_IDEAL"] },
     { "styleId": "claymorphism",     "reasonCodes": ["PRODUCT_NOT_IDEAL"] },
-    { "styleId": "cyberpunk-glitch", "reasonCodes": ["EXPLICITLY_AVOIDED", "DAILY_USE_OVERSTIMULATION"] }
+    { "styleId": "cyberpunk-glitch", "reasonCodes": ["EXPLICITLY_AVOIDED"] }
   ],
   "pairings": [
     {
@@ -154,7 +154,7 @@ MCP が検証するのは、提供されたカバレッジと整合性だけで�
 }
 ```
 
-注目してください。上位候補のスコアは明確に異なります（0.93、0.89、0.83）。`ranking` は、1 位が 2 位を上回った理由を示しています。この例では、`quiet-utility` の `bestFor` の項目がすべて operational SaaS を対象にしており、日々の利用では維持の負担が軽いことが理由です。上位 2 件が本当に同程度のスコアであれば、`ranking.tied` がそのことを示し、勝者を無理に作ることはありません。却下されたスタイルには理由コードが付きます。ペアリングは提案であり、必須ではありません。サーバーは証拠を提供し、判断はエージェントが行います。
+注目してください。候補ごとにスコアが異なります（0.87、0.86、0.80）。`ranking` は、1 位が 2 位を上回った理由を示しています。この例では差は 0.01 です。`runtime-signal` が、避けるよう指定された `cyberpunk-glitch` と dark・tech の特性を共有しているためです。これほど小さな差でも勝者として報告し、エージェントがプロダクトの文脈とあわせて判断します。上位 2 件が本当に同程度のスコアであれば、`ranking.tied` がそのことを示し、勝者を無理に作ることはありません。却下されたスタイルには理由コードが付きます。ペアリングは提案であり、必須ではありません。サーバーは証拠を提供し、判断はエージェントが行います。
 
 次に、選んだ方向性を実際のトークンに変換します。
 
@@ -184,7 +184,7 @@ MCP が検証するのは、提供されたカバレッジと整合性だけで�
 // → audit_page_structure({ html, styleId: "quiet-utility", locale: "ja" })
 // ← 構造監査の結果 (一部)
 {
-  "summary": { "clean": false, "findings": 8, "major": 6, "minor": 2, "notVerified": 0, "checked": 12, "claims": { "shape-observation": 0, "style-fidelity": 8, "required-element": 0 } },
+  "summary": { "clean": false, "findings": 9, "major": 7, "minor": 2, "notVerified": 1, "checked": 13, "claims": { "shape-observation": 0, "style-fidelity": 9, "required-element": 0 } },
   "findings": [
     {
       "patternId": "logo-strip",
@@ -195,8 +195,8 @@ MCP が検証するのは、提供されたカバレッジと整合性だけで�
       "replaceWith": {
         "instruction": "実際の顧客名を出す許可と理由がなければ削除してください。代わりに、訪問者が確かめられる根拠(実際の結果・成果物・名前のある事例)をこのスタイルの根拠ムーブで見せてください。",
         "moves": [
-          { "id": "hairline-gap-list", "name": "Gap-as-hairline state list", "purpose": "Triage: shows many resources and their current state at an even rhythm, with dividers that cannot drift out of alignment." },
-          { "id": "stepped-state-badges", "name": "Three-step state badges", "purpose": "Calm status: state reads through steps of weight and fill instead of traffic-light colors, so the one urgent item stands out." }
+          { "id": "grouped-approval-queue", "name": "Queue grouped by who has to act", "purpose": "Triage: the person sees first what waits on them and what it is worth, then everything else in the same rhythm." },
+          { "id": "three-way-match-strip", "name": "Three-way match strip and approval trail", "purpose": "Proof: the reason to approve or dispute is on screen as figures and a sequence, not as a summary sentence." }
         ]
       }
     },
@@ -206,16 +206,16 @@ MCP が検証するのは、提供されたカバレッジと整合性だけで�
       "replaceWith": {
         "archetype": {
           "sectionOrder": [
-            "Top bar: breadcrumb path on the left, search and one primary action on the right",
-            "The primary working list or table with its filter row",
-            "A detail or form panel for the selected item",
-            "Secondary panels such as activity, audit history, or settings for the same object",
-            "Empty, loading, and error states drawn in the same slots as the data"
+            "Top bar with the product mark, the organisation and the signed-in person",
+            "Head: the screen title and brief beside the month total, stacked bar and status legend",
+            "The queue: segmented view switch, filter token and count, then rows grouped by who has to act",
+            "The open record: properties, the three-way match strip and the line items with the one line that differs",
+            "The approval trail as a real sequence, with approve and dispute actions and a reason field"
           ]
         }
       }
     }
-    // 残り6件: centered-stack-hero, trusted-by-band, icon-feature-grid, testimonial-carousel, closing-cta-banner, quiet-utility/corner-radius
+    // 残り7件: centered-stack-hero, trusted-by-band, icon-feature-grid, testimonial-carousel, closing-cta-banner, quiet-utility/shadow-blur, quiet-utility/corner-radius
   ]
 }
 ```
@@ -293,8 +293,10 @@ MCP が検証するのは、提供されたカバレッジと整合性だけで�
       "observed": { "status": "misplaced", "zone": "first-screen", "found": 1, "inZone": 0 },
       "replaceWith": {
         "instruction": "ファーストビューに移してください。検査ではページのもっと下でしか見つかりませんでしたが、「カートに追加」はファーストビューにあるため、この情報を見る前に行動できてしまいます。商品名の横に通貨付きで価格を表示します。サイズで価格が変わる場合は、選択中のサイズの価格を表示します。",
-        "moves": [],
-        "archetype": { "hero": "Left-heavy and low: a 1.7fr/1fr grid with align-items: end …" }
+        "moves": [
+          {"id":"gold-chosen-slot-book","name":"Appointment book with one gold slot","build":"Under a 1px ivory top rule, each day is a row of minmax(0, 2.6fr) for the date (bold day over a muted date) and eight 1fr slots, each 64px tall with a 1px left rule and its time in Bodoni Moda 500 at 1.3125rem with tabular numerals; a stronger 50% ivory rule marks the lunch gap. Taken times go #7f7b73 with a 1px strike-through, hover tints a slot to 7% ivory over 160ms, and the chosen slot alone gets a 12% gold wash, a 1px inset gold line and gold text. Below, the chosen time repeats large at clamp(2rem, 3.4vw, 2.75rem) in columns 1-5 beside a form in columns 7-12 (name and phone side by side, the watch on a full-width line) with underlined inputs and one solid ivory rectangular button.","purpose":"Makes booking a choice of a real free time, with the choice confirmed in gold and restated large before anyone types."}
+        ],
+        "archetype": { "hero": "A one-line headline naming the actual service, Bodoni Moda …" }
       }
     }
     // 残り2件: must-have/variant-choice, must-have/purchase-assurance
@@ -449,7 +451,7 @@ cursor://anysphere.cursor-deeplink/mcp/install?name=web-stylebook&config=eyJjb21
 
 **カタログ:** 実在のデザイン参考事例 520 件 · スタイル 48 件 · インターフェースのデザイン原則 25 件 · UX 原則 23 件 · 構造化された監査項目 51 件 · コンポーネント 20 件 · 対象画面 5 種 · UI 状態のレシピ 57 件 · モーションプロファイル 29 件 · プロダクトアーキタイプ 14 種。
 
-**構造:** レイアウトアーキタイプ 48 · シグネチャームーブ 144 · 汎用禁止パターン 9 · 検出器 19 種によるスタイル固有の禁止項目 142 · プロダクトタイプ 14 種の必須要素 21 種。
+**構造:** レイアウトアーキタイプ 48 · シグネチャームーブ 144 · 汎用禁止パターン 9 · 検出器 19 種によるスタイル固有の禁止項目 181 · プロダクトタイプ 14 種の必須要素 21 種。
 
 参考事例ライブラリは、[OpenDesign](https://opendesign.cc) から記述の揃った項目を選び、改変したものです。構造化された仕様は [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) のもとでライセンスされています。Web Stylebook は、上流のスクリーンショットやブランド素材を含みません。元サイト、ブランド、文章、書体、ビジュアルアイデンティティは、それぞれの権利者に帰属します。使用前に、各項目の帰属表示と権利表示を確認してください。
 

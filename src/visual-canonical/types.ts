@@ -2,11 +2,35 @@
 // Shared, serializable visual specification. No browser state or renderer imports.
 export type VisualMode = 'light' | 'dark';
 export type VisualLocale = 'en' | 'ko' | 'ja';
-export const COLOR_ROLES = ['canvas', 'surface', 'surfaceRaised', 'surfaceMuted', 'text', 'textMuted', 'textInverse', 'border', 'borderStrong', 'accent', 'accentText', 'accentSecondary', 'accentSecondaryText', 'actionPrimary', 'actionPrimaryText', 'actionSecondary', 'actionSecondaryText', 'link', 'focus', 'positive', 'caution', 'critical', 'info'] as const;
-export type ColorRole = typeof COLOR_ROLES[number];
+export const COLOR_ROLES = [
+  'canvas',
+  'surface',
+  'surfaceRaised',
+  'surfaceMuted',
+  'text',
+  'textMuted',
+  'textInverse',
+  'border',
+  'borderStrong',
+  'accent',
+  'accentText',
+  'accentSecondary',
+  'accentSecondaryText',
+  'actionPrimary',
+  'actionPrimaryText',
+  'actionSecondary',
+  'actionSecondaryText',
+  'link',
+  'focus',
+  'positive',
+  'caution',
+  'critical',
+  'info',
+] as const;
+export type ColorRole = (typeof COLOR_ROLES)[number];
 export type VisualColors = Record<ColorRole, string>;
 export const TYPOGRAPHY_ROLES = ['display', 'heading', 'subheading', 'body', 'small', 'label', 'caption', 'data'] as const;
-export type TypographyRoleName = typeof TYPOGRAPHY_ROLES[number];
+export type TypographyRoleName = (typeof TYPOGRAPHY_ROLES)[number];
 export interface TypographyRole {
   fontFamily: string;
   fontWeight: number;
@@ -33,7 +57,10 @@ export interface FontMetadata {
   fallback: string;
   availability: 'system-dependent' | 'requires-load' | 'unverified';
 }
-export interface VisualTypography { roles: Record<TypographyRoleName, TypographyRole>; fonts: FontMetadata[] }
+export interface VisualTypography {
+  roles: Record<TypographyRoleName, TypographyRole>;
+  fonts: FontMetadata[];
+}
 export interface VisualPair {
   id: string;
   foreground: ColorRole;
@@ -64,7 +91,9 @@ export interface VisualContract {
   usage: { preserve: string[]; adapt: string[]; verify: string[] };
   provenance: VisualProvenance;
 }
-export interface VisualModeRecipe extends Partial<Pick<VisualContract, 'typography' | 'spacing' | 'borders' | 'radii' | 'shadows' | 'motion' | 'components' | 'usage'>> {
+export interface VisualModeRecipe extends Partial<
+  Pick<VisualContract, 'typography' | 'spacing' | 'borders' | 'radii' | 'shadows' | 'motion' | 'components' | 'usage'>
+> {
   colors: VisualColors;
   backdropDependent: boolean;
 }

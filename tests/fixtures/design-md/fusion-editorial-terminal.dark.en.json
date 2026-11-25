@@ -7,23 +7,26 @@
     "Colors",
     "Typography",
     "Layout",
-    "Elevation & Depth",
     "Shapes",
     "Components",
     "Do's and Don'ts"
   ],
-  "omitted": [],
+  "omitted": [
+    {
+      "section": "Elevation & Depth",
+      "reason": "The style uses no shadows; surfaces separate by borders and fills."
+    }
+  ],
   "lossy": [
     "Status colors (positive, caution, critical, info): not in this file.",
-    "Motion (180ms, ease): DESIGN.md has no motion key; not in this file.",
-    "Shadows: DESIGN.md has no shadow key; listed under Elevation & Depth.",
+    "Motion (0ms, ease): DESIGN.md has no motion key; not in this file.",
     "Typography fluid size minimums, measure, paragraph spacing, overflow-wrap: DESIGN.md has no key; described under Typography.",
     "Border width and style: DESIGN.md has no key; described under Shapes.",
     "Non-text color pairs (focus, control boundaries, separators): described under Components.",
     "Font stylesheet sources and licenses: not in this file; read visualContract.typography.fonts from compose_design_tokens."
   ],
-  "sourceHash": "sha256:a1203de515307bb8697a027a8959f09d8386d538e0a5aef33d930ddb8a138c58",
-  "primaryStyleId": "fusion-grain-mono",
+  "sourceHash": "sha256:733e0d6915144a3644c1a239cb8b1231c359af851b732147d9c14d45db3e23ed",
+  "primaryStyleId": "fusion-editorial-terminal",
   "colorMode": "dark",
   "warnings": [],
   "notes": [
@@ -33,12 +36,12 @@
   ],
   "structure": {
     "schema": "webstylebook.structure.v1",
-    "styleId": "fusion-grain-mono",
-    "resourceUri": "webstylebook://styles/fusion-grain-mono",
+    "styleId": "fusion-editorial-terminal",
+    "resourceUri": "webstylebook://styles/fusion-editorial-terminal",
     "signatureMoves": [
-      "filed-provenance-card",
-      "lifted-sheet-on-grain",
-      "folio-contents-ledger"
+      "editorial-ruled-contents-opening",
+      "terminal-log-hanging-margin",
+      "runtime-margin-log-lane"
     ]
   }
 }

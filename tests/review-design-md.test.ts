@@ -31,7 +31,8 @@ function yaml(source: string): Tree {
     if (key in parent) throw new Error(`duplicate key ${key}`);
     const raw = m[3]!;
     if (raw === '') { const child: Tree = {}; parent[key] = child; stack.push({ indent, node: child }); continue; }
-    if (/^[#&*!|>%@`]/.test(raw) || / #/.test(raw)) throw new Error(`unsafe plain scalar: ${raw}`);
+    // A double-quoted scalar may hold any character; only a plain scalar must avoid indicators and ' #'.
+    if (!raw.startsWith('"') && (/^[#&*!|>%@`]/.test(raw) || / #/.test(raw))) throw new Error(`unsafe plain scalar: ${raw}`);
     parent[key] = raw.startsWith('"') ? JSON.parse(raw) as string : /^-?\d+(\.\d+)?$/.test(raw) ? Number(raw) : raw;
   }
   return root;

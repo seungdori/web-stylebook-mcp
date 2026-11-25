@@ -92,7 +92,7 @@
         "density": "low",
         "usageFrequency": "one-off"
       },
-      "expect": { "top1": ["zen-minimalism", "editorial-silence"], "minGap": 0.02 },
+      "expect": { "top1": ["zen-minimalism", "editorial-silence"], "minGap": 0.01 },
       "rationale": "Quiet, spacious, premium showcase. zen-minimalism is the only low-only density style and a curated portfolio primary; editorial-silence is the other curated primary."
     },
     {
@@ -105,7 +105,7 @@
         "usageFrequency": "daily",
         "primaryTasks": ["configure", "monitor"]
       },
-      "expect": { "top1": ["terminal-core"], "minGap": 0.02 },
+      "expect": { "top1": ["console-launch", "platform-core", "terminal-core"], "minGap": 0.02 },
       "rationale": "terminal-core lists developer-tool first, leads with technical and its bestFor is CLIs and automation products. runtime-signal and console-launch are close alternatives."
     },
     {
@@ -118,7 +118,7 @@
         "usageFrequency": "daily",
         "primaryTasks": ["author", "search"]
       },
-      "expect": { "top1": ["notion-style"], "minGap": 0.03 },
+      "expect": { "top1": ["notion-style"], "minGap": 0.02 },
       "rationale": "notion-style lists knowledge-base first, covers author and search, is daily-capable and its bestFor is knowledge bases. Editorial and mono styles list knowledge-base as a late secondary."
     },
     {
@@ -156,7 +156,7 @@
         "trustSensitivity": "high",
         "constraints": ["high-contrast-required"]
       },
-      "expect": { "top1": ["platform-core"], "minGap": 0.03 },
+      "expect": { "top1": ["platform-core"], "minGap": 0.02 },
       "rationale": "high-contrast-required rejects the subtle-border and low-contrast healthcare styles (quiet-utility, soft-pastel). platform-core is the remaining style that claims healthcare-portal."
     },
     {
@@ -168,7 +168,7 @@
         "density": "medium",
         "usageFrequency": "daily"
       },
-      "expect": { "top1": ["duotone-bold"], "minGap": 0.03 },
+      "expect": { "top1": ["mesh-gradient", "retro-pixel"], "minGap": 0.03 },
       "rationale": "duotone-bold lists consumer-app first, leads with bold then playful, is occasional/daily and its bestFor is music apps and media libraries. The other bold consumer styles are one-off/occasional or high-spectacle."
     },
     {

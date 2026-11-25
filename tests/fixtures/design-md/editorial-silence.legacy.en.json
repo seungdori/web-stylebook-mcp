@@ -21,7 +21,7 @@
     "Status colors (positive, caution, critical, info): not in this file.",
     "Motion (320ms, cubic-bezier(0.4, 0, 0.2, 1)): DESIGN.md has no motion key; not in this file."
   ],
-  "sourceHash": "sha256:093e629ea2102af2d680d872b8b6cb296e767e1291d89b04e5431f5e9079ab1d",
+  "sourceHash": "sha256:5f4207ee00493644f11987f3f3247c3bbfcbb7155686b2327e137b0b3b369ed1",
   "primaryStyleId": "editorial-silence",
   "colorMode": "light",
   "warnings": [],
@@ -35,9 +35,9 @@
     "styleId": "editorial-silence",
     "resourceUri": "webstylebook://styles/editorial-silence",
     "signatureMoves": [
-      "section-index-rule-pair",
-      "margin-note-rail",
-      "running-head-reference-sheet"
+      "title-page-purchase-column",
+      "facing-pages-spread",
+      "edition-ledger-rows"
     ]
   }
 }

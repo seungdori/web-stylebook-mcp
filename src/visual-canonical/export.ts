@@ -25,16 +25,20 @@ export function typographyRoleStyle(role: TypographyRole, basis: 'viewport' | 'c
   };
 }
 
-function kebab(value: string): string { return value.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`); }
+function kebab(value: string): string {
+  return value.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
+}
 function cssValue(value: string | number): string {
   const scalar = String(value);
-  if ([...scalar].some((character) => character.charCodeAt(0) < 32) || /[;{}<>\\]|\/\*|\*\/|url\s*\(|expression\s*\(/i.test(scalar)) throw new Error('Unsafe visual contract CSS value');
+  if ([...scalar].some((character) => character.charCodeAt(0) < 32) || /[;{}<>\\]|\/\*|\*\/|url\s*\(|expression\s*\(/i.test(scalar))
+    throw new Error('Unsafe visual contract CSS value');
   return scalar;
 }
 
 /** Every scalar has a variable; generated role classes apply the full type hierarchy. */
 export function visualContractToCss(resolved: ResolvedVisualContract, selector = ':root'): string {
-  if (!/^(?::root|\[data-theme="(?:light|dark)"\]|:root:not\(\[data-theme="light"\]\))$/.test(selector)) throw new Error('Unsupported visual contract CSS selector');
+  if (!/^(?::root|\[data-theme="(?:light|dark)"\]|:root:not\(\[data-theme="light"\]\))$/.test(selector))
+    throw new Error('Unsupported visual contract CSS selector');
   const variables: Record<string, string | number> = {};
   for (const [key, value] of Object.entries(resolved.colors)) variables[`color-${kebab(key)}`] = value;
   // Existing ColorSystem and MCP variable names remain as explicit aliases.
@@ -64,8 +68,15 @@ export function visualContractToCss(resolved: ResolvedVisualContract, selector =
     for (const [key, value] of Object.entries(role)) variables[`type-${name}-${kebab(key)}`] = value;
     for (const [key, value] of Object.entries(typographyRoleStyle(role))) variables[`type-${name}-${kebab(key)}`] = value;
   }
-  const block = `${selector} {\n${Object.entries(variables).map(([key, value]) => `  --${key}: ${cssValue(value)};`).join('\n')}\n}`;
-  const classes = TYPOGRAPHY_ROLES.map((name) => `.ws-type-${name} {\n${Object.keys(typographyRoleStyle(resolved.typography.roles[name])).map((property) => `  ${kebab(property)}: var(--type-${name}-${kebab(property)});`).join('\n')}\n}`).join('\n\n');
+  const block = `${selector} {\n${Object.entries(variables)
+    .map(([key, value]) => `  --${key}: ${cssValue(value)};`)
+    .join('\n')}\n}`;
+  const classes = TYPOGRAPHY_ROLES.map(
+    (name) =>
+      `.ws-type-${name} {\n${Object.keys(typographyRoleStyle(resolved.typography.roles[name]))
+        .map((property) => `  ${kebab(property)}: var(--type-${name}-${kebab(property)});`)
+        .join('\n')}\n}`,
+  ).join('\n\n');
   return `/* Web Stylebook visual contract ${resolved.styleId}; ${resolved.contentLocale}; ${resolved.mode}.\n * Components, font loading/licensing, usage, provenance and repairs remain in the JSON companion.\n * No font assets are bundled. Fluid type: 320–1280 px viewport, 16 px root baseline. */\n${block}\n\n${classes}\n\n@media (prefers-reduced-motion: reduce) {\n  ${selector} { --motion-duration: 0ms; --motion-continuous: false; }\n}\n`;
 }
 
@@ -76,11 +87,17 @@ export function visualContractToTheme(resolved: ResolvedVisualContract) {
     extend: {
       colors: resolved.colors,
       fontFamily: Object.fromEntries(TYPOGRAPHY_ROLES.map((name) => [name, [resolved.typography.roles[name].fontFamily]])),
-      fontSize: Object.fromEntries(TYPOGRAPHY_ROLES.map((name) => {
-        const style = typographyRoleStyle(resolved.typography.roles[name]);
-        return [name, [style.fontSize, { lineHeight: String(style.lineHeight), letterSpacing: style.letterSpacing, fontWeight: String(style.fontWeight) }]];
-      })),
-      spacing: Object.fromEntries(Object.entries(resolved.spacing).filter((entry) => typeof entry[1] === 'number').map(([name, value]) => [name, `${value}px`])),
+      fontSize: Object.fromEntries(
+        TYPOGRAPHY_ROLES.map((name) => {
+          const style = typographyRoleStyle(resolved.typography.roles[name]);
+          return [name, [style.fontSize, { lineHeight: String(style.lineHeight), letterSpacing: style.letterSpacing, fontWeight: String(style.fontWeight) }]];
+        }),
+      ),
+      spacing: Object.fromEntries(
+        Object.entries(resolved.spacing)
+          .filter((entry) => typeof entry[1] === 'number')
+          .map(([name, value]) => [name, `${value}px`]),
+      ),
       borderRadius: Object.fromEntries(Object.entries(resolved.radii).map(([name, value]) => [name, `${value}px`])),
       borderWidth: { DEFAULT: `${resolved.borders.width}px` },
       boxShadow: resolved.shadows,
@@ -94,7 +111,11 @@ export function visualContractToTheme(resolved: ResolvedVisualContract) {
 
 /** JSON strings are safe in external modules and when embedded in an HTML script tag. */
 export function serializeVisualJson(value: unknown, indentation = 2): string {
-  return JSON.stringify(value, null, indentation).replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
+  return JSON.stringify(value, null, indentation)
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029');
 }
 
 export type VisualExportFormat = 'json' | 'css-variables' | 'tailwind' | 'typescript';

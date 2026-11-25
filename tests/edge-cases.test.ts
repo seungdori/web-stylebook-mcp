@@ -351,7 +351,7 @@ describe('round 6 — compare safety axes + token typography', () => {
     expect(miss.notes.some((n) => n.includes('suggests a serif'))).toBe(true);
     // risograph-print is monospace-led, so the default output uses the authored faces.
     const authored = composeDesignTokens({ primaryStyleId: 'risograph-print', format: 'json' }, repo);
-    expect(authored.rendered).toContain('Space Mono');
+    expect(authored.rendered).toContain('Anonymous Pro');
     expect(authored.notes.some((n) => n.includes('suggests a serif'))).toBe(false);
     expect(authored.notes.some((n) => n.includes('authored faces'))).toBe(true);
     // fusion-grain-mono: authored mono faces, no family-serif mismatch note

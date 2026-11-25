@@ -554,12 +554,13 @@ describe('MCP contract', () => {
   it('avoiding every surviving style for a narrow product -> NO_COMPATIBLE_STYLE', async () => {
     // derive the surviving pool dynamically (robust to facet changes), then avoid all of it.
     const repo = CatalogRepository.load();
-    const probe = recommendDesignDirection({ productType: 'consumer-app', productDescription: 'x' }, repo);
+    // operational-saas keeps 20 survivors (the avoid limit); consumer-app keeps 23 since web-stylebook a8515dd.
+    const probe = recommendDesignDirection({ productType: 'operational-saas', productDescription: 'x' }, repo);
     const rejected = new Set(probe.rejected.map((r) => r.styleId));
     const survivors = repo.allStyles().map((s) => s.id).filter((id) => !rejected.has(id));
     expect(survivors.length).toBeGreaterThan(0);
     expect(survivors.length).toBeLessThanOrEqual(20);
-    const r = await client.callTool({ name: 'recommend_design_direction', arguments: { productType: 'consumer-app', productDescription: 'x', avoid: survivors } });
+    const r = await client.callTool({ name: 'recommend_design_direction', arguments: { productType: 'operational-saas', productDescription: 'x', avoid: survivors } });
     expect(r.isError).toBe(true);
     const sc = r.structuredContent as any;
     expect(sc.error.code).toBe('NO_COMPATIBLE_STYLE');

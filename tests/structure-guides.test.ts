@@ -44,7 +44,8 @@ describe('structure guides', () => {
     const contract = repo.getStyle('brutalist-grid')!.visualContract!;
     expect(brutal.archetype.density).toMatchObject({ spacing: contract.spacing.density, rowPx: contract.spacing.row, gutterPx: contract.spacing.gutter, sectionPx: contract.spacing.section });
     expect(brutal.archetype.typeScale.displayRem).toEqual({ min: contract.typography.roles.display.sizeMinRem, max: contract.typography.roles.display.sizeMaxRem });
-    expect(brutal.archetype.typeScale.displayToBody).toBe(Math.round((10 / 0.88) * 100) / 100);
+    const { display, body } = contract.typography.roles;
+    expect(brutal.archetype.typeScale.displayToBody).toBe(Math.round((display.sizeMaxRem / body.sizeMaxRem) * 100) / 100);
     const ratios = new Set(STRUCTURE_GUIDES.map((item) => styleStructure(item.styleId, repo).archetype.typeScale.displayToBody));
     expect(ratios.size).toBeGreaterThan(20);
   });

@@ -4,14 +4,21 @@
   "license": "MIT",
   "policy": "Generated source copy. Edit the website source, regenerate its artifact, then run visual:sync. No site UI, font files, images, or third-party reference content is included.",
   "files": {
-    "src/visual/types.ts": "sha256:8fd72da17114b73a869aa47190688d8cdd24b997a940cf5f7c121eac8a10f3f4",
-    "src/visual/hash.ts": "sha256:0e3ee195f910e8fc52b3b652d5f763e5eebf3d52e4d9ff7ab64b7c5902beffa0",
-    "src/visual/schema.ts": "sha256:54e1a94165b8f84e5a528c6f6c111bdd56cf460ca276b192072dd95432050141",
-    "src/visual/resolve.ts": "sha256:b194fc92f0298d71abd3e2fd718c639a6a43be1e1339150cc8f590355e3fc9d6",
-    "src/visual/contrast.ts": "sha256:0666bdab14f57667e5ce26806ef7fb66f25ab2a98e2fc2aee4c1ec63cad60260",
-    "src/visual/export.ts": "sha256:5c8edf771e65b698b76f62c5b7e724f7861b79310098c60c1d95498b89c6ccd0",
-    "src/visual/fontSources.ts": "sha256:078b6344274c6c35f005bdfca0c5270899d798bbbb3843311ed100b9d5126df8",
+    "src/visual/types.ts": "sha256:27d2b6042e774237c85d8c6cc9c2d767ee850d94a215f5bea3b89f1707afebeb",
+    "src/visual/hash.ts": "sha256:7dab83cbfc0e1d832969c2ed24c57f8bc4f23c977e0abd3959b2d88c80b8315b",
+    "src/visual/schema.ts": "sha256:5f5fe2d3f6f32ef23741fb3d2d31a0e6352a42ed13af759968e88055ef6283a8",
+    "src/visual/resolve.ts": "sha256:cef03a55fd3d60cfba62fad9b4fe6f4665957ac541fffabfdd23cec037aef023",
+    "src/visual/contrast.ts": "sha256:85ea88a1b075318fd09e6e62fad3a8d72c9029c4a248c01a506cfe8f09cfa803",
+    "src/visual/export.ts": "sha256:ab6ad05785b494f4de353dcdc3efa5d8579787d094bbef8195f5cab231461d45",
+    "src/visual/fontSources.ts": "sha256:62700c3d54172e21bb3255d3538d0fee78ec7af336e656512d9d00684e89e00d",
+    "src/utils/zod.ts": "sha256:620ad4562fd004a38869c788c8cf09edee3199ccf8bc47438bd58f2e67de087a",
     "src/visual/LICENSE": "sha256:ea2dd4bc356f09d85e1553f6bbf1140acf61db824e256c35f01ee2db6a3858ab"
   },
-  "artifactHash": "sha256:ccaa0c23d5a6492f76b13ae170d62e3f74b46cde9a4ae02a7a8ada968d4a3f58"
+  "rewrites": {
+    "reason": "src/utils/zod.ts only re-exports zod with jitless mode for the website's CSP; the MCP imports zod directly.",
+    "files": {
+      "src/visual/schema.ts": "'../utils/zod' -> 'zod'"
+    }
+  },
+  "artifactHash": "sha256:757b0ca084204674a22fadcc46483f0afc94d9ce9c7eefdbdfbe659bcfdac1eb"
 }

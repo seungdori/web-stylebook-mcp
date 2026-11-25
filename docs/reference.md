@@ -147,24 +147,24 @@ and [research record](./research/design-foundations.md) (in Korean). The machine
 {
   "confidence": "high",
   "candidates": [
-    { "styleId": "quiet-utility",  "score": 0.93 },
-    { "styleId": "runtime-signal", "score": 0.89 },
-    { "styleId": "notion-style",   "score": 0.83 },
-    { "styleId": "console-launch", "score": 0.77 },
-    { "styleId": "platform-core",  "score": 0.77 }
+    { "styleId": "quiet-utility",  "score": 0.87 },
+    { "styleId": "runtime-signal", "score": 0.86 },
+    { "styleId": "console-launch", "score": 0.8 },
+    { "styleId": "notion-style",   "score": 0.79 },
+    { "styleId": "platform-core",  "score": 0.75 }
   ],
   "ranking": {
     "winner": "quiet-utility",
     "runnerUp": "runtime-signal",
-    "gap": 0.04,
+    "gap": 0.01,
     "tied": false,
-    "reasonCodes": ["USE_CASE_FIT", "LOWER_UPKEEP"],
-    "explanation": "quiet-utility outranks runtime-signal by 0.04: 3 of 3 bestFor entries aim at operational-saas (runtime-signal: 2 of 3); lighter upkeep for daily use (quiet-utility: motion low, maintenance low; runtime-signal: motion low, maintenance medium)."
+    "reasonCodes": ["FARTHER_FROM_AVOIDED"],
+    "explanation": "quiet-utility outranks runtime-signal by 0.01: farther from the avoided cyberpunk-glitch (runtime-signal shares dark, tech)."
   },
   "rejected": [                        // 29 in total, three shown
-    { "styleId": "aurora-gradient",  "reasonCodes": ["PRODUCT_NOT_IDEAL", "DAILY_USE_OVERSTIMULATION"] },
+    { "styleId": "aurora-gradient",  "reasonCodes": ["PRODUCT_NOT_IDEAL"] },
     { "styleId": "claymorphism",     "reasonCodes": ["PRODUCT_NOT_IDEAL"] },
-    { "styleId": "cyberpunk-glitch", "reasonCodes": ["EXPLICITLY_AVOIDED", "DAILY_USE_OVERSTIMULATION"] }
+    { "styleId": "cyberpunk-glitch", "reasonCodes": ["EXPLICITLY_AVOIDED"] }
   ],
   "pairings": [
     { "styleId": "notion-style",       "pairWith": "quiet-utility", "role": ["forms", "navigation", "repetitive surfaces"] },
@@ -174,7 +174,7 @@ and [research record](./research/design-foundations.md) (in Korean). The machine
 }
 ```
 
-Notice what it does: the top candidates get clearly different scores (0.93, 0.89, 0.83), and `ranking` says why #1 beat #2 — here every `bestFor` entry of `quiet-utility` targets operational SaaS, and its upkeep is lighter for daily use. When the top two really do score alike, `ranking.tied` says so instead of inventing a winner. Rejected styles come with reason codes, and pairings are suggestions rather than a mandate. The server provides evidence; the agent decides.
+Notice what it does: the candidates get separate scores (0.87, 0.86, 0.80), and `ranking` says why #1 beat #2 — here by one cent, because `runtime-signal` shares dark and tech traits with the avoided `cyberpunk-glitch`. A lead that small is still reported as a lead, and the agent weighs it against the product context. When the top two really do score alike, `ranking.tied` says so instead of inventing a winner. Rejected styles come with reason codes, and pairings are suggestions rather than a mandate. The server provides evidence; the agent decides.
 
 Then turn the chosen direction into real tokens:
 
@@ -204,7 +204,7 @@ After building, pass the page's HTML and CSS to `audit_page_structure`. This is 
 // → audit_page_structure({ html, styleId: "quiet-utility" })
 // ← structure audit (trimmed)
 {
-  "summary": { "clean": false, "findings": 8, "major": 6, "minor": 2, "notVerified": 0, "checked": 12, "claims": { "shape-observation": 0, "style-fidelity": 8, "required-element": 0 } },
+  "summary": { "clean": false, "findings": 9, "major": 7, "minor": 2, "notVerified": 1, "checked": 13, "claims": { "shape-observation": 0, "style-fidelity": 9, "required-element": 0 } },
   "findings": [
     {
       "patternId": "logo-strip",
@@ -215,8 +215,8 @@ After building, pass the page's HTML and CSS to `audit_page_structure`. This is 
       "replaceWith": {
         "instruction": "Remove it unless you have permission and a reason to name real customers; show proof a visitor can inspect instead (a real result, artifact, or named case) with this style's proof move.",
         "moves": [
-          { "id": "hairline-gap-list", "name": "Gap-as-hairline state list", "purpose": "Triage: shows many resources and their current state at an even rhythm, with dividers that cannot drift out of alignment." },
-          { "id": "stepped-state-badges", "name": "Three-step state badges", "purpose": "Calm status: state reads through steps of weight and fill instead of traffic-light colors, so the one urgent item stands out." }
+          { "id": "grouped-approval-queue", "name": "Queue grouped by who has to act", "purpose": "Triage: the person sees first what waits on them and what it is worth, then everything else in the same rhythm." },
+          { "id": "three-way-match-strip", "name": "Three-way match strip and approval trail", "purpose": "Proof: the reason to approve or dispute is on screen as figures and a sequence, not as a summary sentence." }
         ]
       }
     },
@@ -226,16 +226,16 @@ After building, pass the page's HTML and CSS to `audit_page_structure`. This is 
       "replaceWith": {
         "archetype": {
           "sectionOrder": [
-            "Top bar: breadcrumb path on the left, search and one primary action on the right",
-            "The primary working list or table with its filter row",
-            "A detail or form panel for the selected item",
-            "Secondary panels such as activity, audit history, or settings for the same object",
-            "Empty, loading, and error states drawn in the same slots as the data"
+            "Top bar with the product mark, the organisation and the signed-in person",
+            "Head: the screen title and brief beside the month total, stacked bar and status legend",
+            "The queue: segmented view switch, filter token and count, then rows grouped by who has to act",
+            "The open record: properties, the three-way match strip and the line items with the one line that differs",
+            "The approval trail as a real sequence, with approve and dispute actions and a reason field"
           ]
         }
       }
     }
-    // 6 more: centered-stack-hero, trusted-by-band, icon-feature-grid, testimonial-carousel, closing-cta-banner, quiet-utility/corner-radius
+    // 7 more: centered-stack-hero, trusted-by-band, icon-feature-grid, testimonial-carousel, closing-cta-banner, quiet-utility/shadow-blur, quiet-utility/corner-radius
   ]
 }
 ```
@@ -313,8 +313,10 @@ Pass the same `productType` to `audit_page_structure`, and it reports which must
       "observed": { "status": "misplaced", "zone": "first-screen", "found": 1, "inZone": 0 },
       "replaceWith": {
         "instruction": "Move it onto the first screen; the audit found it only further down the page, while Add to cart is on the first screen, so people can act before they see it. Show the price with its currency next to the product name; when sizes differ in price, show the price of the selected size.",
-        "moves": [],
-        "archetype": { "hero": "Left-heavy and low: a 1.7fr/1fr grid with align-items: end …" }
+        "moves": [
+          {"id":"gold-chosen-slot-book","name":"Appointment book with one gold slot","build":"Under a 1px ivory top rule, each day is a row of minmax(0, 2.6fr) for the date (bold day over a muted date) and eight 1fr slots, each 64px tall with a 1px left rule and its time in Bodoni Moda 500 at 1.3125rem with tabular numerals; a stronger 50% ivory rule marks the lunch gap. Taken times go #7f7b73 with a 1px strike-through, hover tints a slot to 7% ivory over 160ms, and the chosen slot alone gets a 12% gold wash, a 1px inset gold line and gold text. Below, the chosen time repeats large at clamp(2rem, 3.4vw, 2.75rem) in columns 1-5 beside a form in columns 7-12 (name and phone side by side, the watch on a full-width line) with underlined inputs and one solid ivory rectangular button.","purpose":"Makes booking a choice of a real free time, with the choice confirmed in gold and restated large before anyone types."}
+        ],
+        "archetype": { "hero": "A one-line headline naming the actual service, Bodoni Moda …" }
       }
     }
     // 2 more: must-have/variant-choice, must-have/purchase-assurance
@@ -479,7 +481,7 @@ rules file.
 
 **Catalog:** 520 real-world design references · 48 styles · 25 interface design principles · 23 UX principles · 51 structured audit checks · 20 components · 5 surfaces · 57 UI-state recipes · 29 motion profiles · 14 product archetypes.
 
-**Structure:** 48 layout archetypes · 144 signature moves · 9 banned generic patterns · 142 style-specific bans from 19 detectors · 21 must-haves across 14 product types.
+**Structure:** 48 layout archetypes · 144 signature moves · 9 banned generic patterns · 181 style-specific bans from 19 detectors · 21 must-haves across 14 product types.
 
 The reference library is an adapted, high-completeness subset of [OpenDesign](https://opendesign.cc), whose structured specifications are licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Web Stylebook excludes upstream screenshots and brand assets. Original sites, brands, copy, typefaces, and visual identities remain the property of their respective owners; inspect each detail's attribution and rights notice before use.
 

@@ -25,6 +25,19 @@ All notable changes to this project are documented here. The format follows
   catalog sync, because the website catalog already uses it. Search aliases and the must-have status
   detector still match the old word, because pages and users still write it.
 
+### Changed (catalog snapshot)
+
+- `generated/` now holds the web-stylebook `a9d40ee` snapshot (#37). The website redesigned all
+  48 styles: new visual contracts (six styles keep one color mode), descriptions, facets, and
+  reference previews. The snapshot also carries the #20 citation and wording fixes and drops
+  `notion-style` as a primary pick for `healthcare-portal`. `src/visual-canonical/` follows it.
+- The 48 structure guides are rewritten from the new specimen pages: hero, grid, section order,
+  density, type scale, signature moves, and bans. Every ban cites a current constraint, contract
+  value, or specimen rule, no guide names a font its style no longer uses, and the counts are now
+  144 signature moves and 181 style-specific bans. Structure plans and audits change accordingly.
+- Recommendation rankings follow the new facets. In the README brief `quiet-utility` still leads,
+  now by 0.01 and only because `runtime-signal` is closer to the avoided style.
+
 ## [0.17.0] — 2026-11-25
 
 ### Added
