@@ -6,6 +6,21 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.18.1] — 2026-11-25
+
+### Changed
+
+- The npm package no longer includes source maps (`dist/**/*.map`) or the reference and research
+  documents (`docs/reference*.md`, `docs/research/design-foundations.md`); read them on GitHub.
+  The server never loads them, so tools, resources and the bundled skill are unchanged. The package
+  is about 1.47 MB, within the 1,572,864-byte budget again (0.18.0 was 1,689,236 bytes).
+  `README.ko.md` and `README.ja.md` stay, because npm always packs README files.
+
+### For maintainers
+
+- CI runs `npm run visual:benchmark`, which fails when the package or the visual artifacts exceed
+  their size budgets.
+
 ## [0.18.0] — 2026-11-25
 
 ### Added
