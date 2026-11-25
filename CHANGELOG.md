@@ -6,6 +6,32 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.24.0] — 2026-11-25
+
+### Added
+
+- `build-page` prompt: takes `product`, `pageRole` and `locale` and walks one new page from
+  `start_ui_design` through `audit_page_structure` and `audit_copy` to `validate_design_audit_result`
+  (#59).
+- A Cursor rule for `.cursor/rules/web-stylebook.mdc` in the reference (en, ko, ja) (#59).
+
+### Changed
+
+- `skills/CLAUDE.md` and `skills/AGENTS.md` start with the entry tool. The first line of CLAUDE.md
+  names `mcp__web-stylebook__start_ui_design`, because Claude Code shows MCP tools by name only until
+  it loads them. Both give the new-page order: `start_ui_design`, `compose_design_tokens` if needed,
+  the build, `audit_page_structure` and `audit_copy`, then `validate_design_audit_result`. Each block
+  is about 6 KB instead of 15 KB. If you copied an earlier block into a project, copy it again (#59).
+- The skill description and its new-page steps, the README, and the `design-product`,
+  `design-screen` and `redesign-with-style` prompts start a new page with `start_ui_design` (#59).
+- In Korean and Japanese, the `start_ui_design` photo plan gives its pick, credit, don't, markup and
+  fallback rules in that language instead of English (#59).
+
+### Unchanged
+
+- Tool inputs, server instructions, audit plan hashes, `compose_design_tokens`, the catalog snapshot
+  and the dependencies are the same as in 0.23.0.
+
 ## [0.23.0] — 2026-11-25
 
 ### Breaking
