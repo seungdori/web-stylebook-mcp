@@ -9,6 +9,7 @@ import type {
 } from './types.js';
 import { useCaseEvidence } from './lexicon.js';
 import { explainRanking } from './rank-reason.js';
+import { PAGE_ROLE_PROFILES } from './page-roles.js';
 
 const W = {
   product: 0.20, useCase: 0.10, task: 0.14, tone: 0.16, density: 0.12, usage: 0.10, trust: 0.08, constraint: 0.10,
@@ -48,12 +49,26 @@ function adjacent(p: ProductType, ont: Ontology): Set<ProductType> {
   return out;
 }
 
-function isPrimaryPick(ctx: ResolvedContext, styleId: string, repo: CatalogRepository): boolean {
-  return repo.getProduct(ctx.productType.value)?.recommendedPrimaryStyleIds.includes(styleId) ?? false;
+/** The product types a style is judged against: the product's own and, when the page does another's job, that one. */
+function fitProductTypes(ctx: ResolvedContext): ProductType[] {
+  const page = ctx.pageRole ? PAGE_ROLE_PROFILES[ctx.pageRole.value].productType : undefined;
+  return page && page !== ctx.productType.value ? [ctx.productType.value, page] : [ctx.productType.value];
 }
 
-function productFit(ctx: ResolvedContext, f: RecommendationFacets, ont: Ontology, primaryPick: boolean): number {
-  const pt = ctx.productType.value;
+function isPrimaryPickFor(pt: ProductType, styleId: string, repo: CatalogRepository): boolean {
+  return repo.getProduct(pt)?.recommendedPrimaryStyleIds.includes(styleId) ?? false;
+}
+
+function isPrimaryPick(ctx: ResolvedContext, styleId: string, repo: CatalogRepository): boolean {
+  return isPrimaryPickFor(ctx.productType.value, styleId, repo);
+}
+
+/** A page that does another product type's job fits a style as well as either type does. */
+function productFit(ctx: ResolvedContext, f: RecommendationFacets, repo: CatalogRepository, styleId: string): number {
+  return Math.max(...fitProductTypes(ctx).map((pt) => productFitFor(pt, f, repo.ontology, isPrimaryPickFor(pt, styleId, repo))));
+}
+
+function productFitFor(pt: ProductType, f: RecommendationFacets, ont: Ontology, primaryPick: boolean): number {
   // 'other' says nothing about the product, so no style fits it better than another.
   if (pt === 'other') return 0.5;
   // The catalog's hand-picked primaries for a product type are its own judgment of a full fit.
@@ -240,7 +255,7 @@ export function scoreStyle(ctx: ResolvedContext, s: CatalogStyle, repo: CatalogR
   const primaryPick = isPrimaryPick(ctx, s.id, repo);
   const taskStrengths = f.strengths.filter((x) => (TASK_TAGS as readonly string[]).includes(x.toLowerCase())).length;
   const fits: FitBreakdown = {
-    product: productFit(ctx, f, repo.ontology, primaryPick),
+    product: productFit(ctx, f, repo, s.id),
     useCase: useCaseFit(pt, evidence),
     task: taskFit(ctx.primaryTaskTags.value, f, taskStrengths),
     tone: toneFit(ctx, f),
@@ -469,6 +484,7 @@ function normalizedFacetLines(ctx: ResolvedContext): string[] {
   const line = (name: string, val: string, src: string) => `${name}: ${val} (${src})`;
   return [
     line('productType', ctx.productType.value, ctx.productType.source),
+    ...(ctx.pageRole ? [line('pageRole', ctx.pageRole.value, ctx.pageRole.source)] : []),
     line('tones', ctx.tones.value.join(', ') || '(none)', ctx.tones.source),
     line('density', ctx.density.value, ctx.density.source),
     line('usageFrequency', ctx.usageFrequency.value, ctx.usageFrequency.source),

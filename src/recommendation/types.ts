@@ -1,3 +1,4 @@
+import type { PageRole } from './page-roles.js';
 import type {
   ProductType, Tone, Density, UsageFrequency, TrustLevel, TaskTag, Lang, CatalogStyle,
 } from '../types.js';
@@ -7,6 +8,8 @@ import type { ProductMustHaves } from '../structure/must-haves.js';
 export interface ProductContext {
   productDescription: string;
   productType?: ProductType;
+  /** What the page or screen does; inferred from the description when omitted. */
+  pageRole?: PageRole;
   audience?: string[];
   primaryTasks?: string[];
   tone?: Tone[];
@@ -29,6 +32,8 @@ export interface ResolvedFacet<T> {
 
 export interface ResolvedContext {
   productType: ResolvedFacet<ProductType>;
+  /** Absent when the caller gave none and the description names no page. */
+  pageRole?: ResolvedFacet<PageRole>;
   tones: ResolvedFacet<Tone[]>;
   density: ResolvedFacet<Density>;
   usageFrequency: ResolvedFacet<UsageFrequency>;

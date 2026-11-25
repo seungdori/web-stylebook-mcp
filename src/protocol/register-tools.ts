@@ -1,3 +1,4 @@
+import { PAGE_ROLES } from '../recommendation/page-roles.js';
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { CatalogRepository } from '../catalog/repository.js';
@@ -85,6 +86,7 @@ const improvementPlanInputShape = {
 const productContextShape = {
   productDescription: z.string().min(1).max(2000),
   productType: z.enum(PRODUCT_TYPES).optional(),
+  pageRole: z.enum(PAGE_ROLES).describe('what the page or screen does, separate from the product: a marketing landing page for an operational product is marketing-landing. Sets density and usage when you give neither, and adds the product type whose job the page does. Inferred from the description when omitted').optional(),
   audience: z.array(z.string().max(200)).max(20).optional(),
   primaryTasks: z.array(z.string().max(200)).max(20).optional(),
   tone: z.array(z.enum(TONES)).max(8).optional(),
