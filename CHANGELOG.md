@@ -6,6 +6,17 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- The on-init server instructions are 1,414 characters (were 7,111; Claude Code shows the first
+  4,096). They open with the rule for any new page or screen, including dashboards, docs and
+  settings: call `recommend_design_direction` first. The existing-UI flow is one sentence that
+  points to `webstylebook://workflows/improve-ui`.
+- The full new-page workflow and composition guidance moved, unchanged, to the new resource
+  `webstylebook://workflows/new-ui` (`manifest.newUiWorkflow`). The existing-UI guidance is served
+  as `guidance` in `webstylebook://workflows/improve-ui`.
+- Every tool description starts with when to call the tool.
+
 ## [0.18.1] — 2026-11-25
 
 ### Changed

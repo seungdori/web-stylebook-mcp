@@ -14,7 +14,11 @@ import { contrastRatio } from '../src/tokens/contrast.js';
 import { planUxPrinciples } from '../src/principles/planner.js';
 import { planDesignPrinciples } from '../src/design-principles/planner.js';
 import { planDesignAudit } from '../src/audit/planner.js';
-import { SERVER_INSTRUCTIONS } from '../src/server-info.js';
+import { NEW_UI_GUIDANCE, NEW_UI_WORKFLOW_URI, SERVER_INSTRUCTIONS } from '../src/server-info.js';
+
+// The composition guidance moved out of the on-init instructions (which Claude Code cuts at 4,096 characters) into
+// webstylebook://workflows/new-ui; the instructions link to it.
+const NEW_UI_TEXT = NEW_UI_GUIDANCE.join(' ');
 
 const repo = CatalogRepository.load();
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -250,9 +254,10 @@ describe('UX-principle guidance is wired through server, skill, and agent fragme
 });
 
 describe('design-principle guidance is wired through server, skill, and agent fragments', () => {
-  it('on-init instructions name the planner and frame it as craft guidance, not a fixed recipe', () => {
+  it('on-init instructions name the planner, and the linked new-ui workflow frames it as craft guidance, not a fixed recipe', () => {
     expect(SERVER_INSTRUCTIONS).toContain('get_design_principle_plan');
-    expect(SERVER_INSTRUCTIONS).toMatch(/rather than a fixed recipe/i);
+    expect(SERVER_INSTRUCTIONS).toContain(NEW_UI_WORKFLOW_URI);
+    expect(NEW_UI_TEXT).toMatch(/rather than a fixed recipe/i);
   });
 
   it('the skill and both fragments name the planner and its placement/verification output', () => {
@@ -448,10 +453,11 @@ describe('anti-formulaic-opening guidance targets generic furniture (not column 
     expect(catalog).toContain('generic furniture');
     expect(catalog).toContain('bespoke product demonstration');
   });
-  it('the on-init server instructions target generic furniture + require structurally-distinct candidates', () => {
-    expect(SERVER_INSTRUCTIONS).toMatch(/generic furniture/i);
-    expect(SERVER_INSTRUCTIONS).toMatch(/bespoke demonstration/i);
-    expect(SERVER_INSTRUCTIONS).toMatch(/differ in opening STRUCTURE/i);
+  it('the new-ui workflow linked from the on-init instructions targets generic furniture + requires structurally-distinct candidates', () => {
+    expect(SERVER_INSTRUCTIONS).toContain(NEW_UI_WORKFLOW_URI);
+    expect(NEW_UI_TEXT).toMatch(/generic furniture/i);
+    expect(NEW_UI_TEXT).toMatch(/bespoke demonstration/i);
+    expect(NEW_UI_TEXT).toMatch(/differ in opening STRUCTURE/i);
   });
   it('the discoverable new-direction reference retains composition guidance without imposing it on fixes', () => {
     expect(read('skills/web-stylebook-design/SKILL.md')).toContain('(references/new-direction.md)');
@@ -479,9 +485,10 @@ describe('anti-AI-headline-cadence guidance is present and example-free', () => 
     expect(catalog).toContain('ai-headline-cadence');
     expect(catalog).toContain('italicized in the accent color');
   });
-  it('the on-init server instructions name the AI headline cadence + the paste-test', () => {
-    expect(SERVER_INSTRUCTIONS).toMatch(/AI headline cadence/i);
-    expect(SERVER_INSTRUCTIONS).toMatch(/paste-test/i);
+  it('the new-ui workflow linked from the on-init instructions names the AI headline cadence + the paste-test', () => {
+    expect(SERVER_INSTRUCTIONS).toContain(NEW_UI_WORKFLOW_URI);
+    expect(NEW_UI_TEXT).toMatch(/AI headline cadence/i);
+    expect(NEW_UI_TEXT).toMatch(/paste-test/i);
   });
   it('the new-direction reference and both fragments retain headline guidance', () => {
     expect(read('skills/web-stylebook-design/references/new-direction.md')).toMatch(/Kill the AI headline cadence/i);
