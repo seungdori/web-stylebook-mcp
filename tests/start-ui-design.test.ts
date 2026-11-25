@@ -73,7 +73,7 @@ describe('start_ui_design results', () => {
     expect(result.copy.voice).toMatchObject({ productType: 'operational-saas', register: '합니다체' });
     expect(result.copy.watch.map((entry) => entry.id)).toEqual(['ko-social-proof-count', 'ko-setup-minutes', 'ko-stop-doing-closer', 'ko-generic-cta', 'ko-team-size-pricing']);
     const tools = result.next.filter((step) => 'tool' in step).map((step) => (step as { tool: string }).tool);
-    expect(tools).toEqual(['compose_design_tokens', 'get_ui_state_plan', 'audit_page_structure', 'get_design_audit_plan']);
+    expect(tools).toEqual(['compose_design_tokens', 'get_ui_state_plan', 'audit_page_structure', 'audit_copy', 'get_design_audit_plan']);
     const audit = result.next.find((step) => 'tool' in step && step.tool === 'audit_page_structure') as { arguments: Record<string, unknown> };
     expect(audit.arguments).toMatchObject({ styleId: result.style.styleId, productType: 'campaign' });
   });

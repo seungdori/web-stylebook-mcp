@@ -17,6 +17,7 @@ import {
   type MustHaveCondition, type MustHaveConditionId, type MustHaveId, type MustHaveZone,
 } from './must-haves.js';
 import type { GlobalPatternDef, StructureJob, StyleBanDef } from './types.js';
+import { assetReports, assetText, type AssetCheckReport } from './assets.js';
 
 export const STRUCTURE_AUDIT_SCHEMA = 'webstylebook.structure-audit.v1';
 export const PAGE_LIMITS = {
@@ -165,6 +166,11 @@ export interface StructureAuditResult {
   mustHaves: MustHaveAuditReport | null;
   evidence: StructureEvidence[];
   results: StructureResult[];
+  /**
+   * The "assets" group: fonts and images. Its evidence and results are kept apart so that a plan with only the
+   * structure group still validates the arrays above; submit these too when the plan includes "assets".
+   */
+  assets: { checks: AssetCheckReport[]; evidence: StructureEvidence[]; results: StructureResult[] };
   limits: string[];
   guidance: string[];
 }
@@ -583,7 +589,31 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
     });
   }
 
-  const limits = [label.limits.heuristics, label.limits.notAPass];
+  const assetSay = assetText(locale);
+  const assetChecks = assetReports(page, css, styleId, locale, repo);
+  const assets: StructureAuditResult['assets'] = { checks: assetChecks, evidence: [], results: [] };
+  for (const check of assetChecks) {
+    const id = evidenceIdFor(targetId, check.checkId).replace(/^structure:/, 'assets:');
+    const listed = check.items.join(', ');
+    const summary = check.verdict === 'NOT_APPLICABLE' ? assetSay.none
+      : check.count ? assetSay.found(check.count, listed) : assetSay.clean;
+    // The items are listed once, in assets.checks and the result rationale; the evidence records the observation.
+    assets.evidence.push({
+      id, targetId, type: 'dom', phase: 'static',
+      summary: `${check.checkId}: ${check.verdict}${check.count ? ` (${check.count})` : ''}`,
+      outcome: check.verdict === 'PASS' ? 'passed' : check.verdict === 'NOT_APPLICABLE' ? 'inapplicable' : check.verdict === 'NOT_VERIFIED' ? 'cant-tell' : 'failed',
+      contentHash: inputHash,
+      actual: { verdict: check.verdict, count: check.count },
+      producer,
+    });
+    assets.results.push({
+      checkId: check.checkId, targetId, verdict: check.verdict, evidenceRefs: [id],
+      rationale: `${summary}${check.note ? ` ${check.note}` : ''}`,
+      ...(check.verdict === 'FIX_NOW' || check.verdict === 'RISK' ? { remediation: assetSay[check.checkId].fix } : {}),
+    });
+  }
+
+  const limits = [label.limits.heuristics, label.limits.notAPass, assetSay.limit];
   if (mustHaveEntry) limits.push(label.mustHave.limit);
   if (page.html.truncated) limits.push(label.limits.truncated(PAGE_LIMITS.maxElements));
   if (page.styles.unparsedSelectors) limits.push(label.limits.unparsed(page.styles.unparsedSelectors));
@@ -639,12 +669,14 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
     } : null,
     evidence,
     results,
+    assets,
     limits,
     guidance: [
       ...(claims['shape-observation'] ? [label.shape.guidance] : []),
       ...(mustHaveItems.some((item) => item.status === 'missing' || item.status === 'misplaced') ? [label.mustHave.guidance] : []),
       ...label.guidance,
       ...(mustHaveItems.length ? [label.mustHave.plan] : []),
+      assetSay.record,
     ],
   };
 }

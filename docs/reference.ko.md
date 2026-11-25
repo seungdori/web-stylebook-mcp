@@ -482,6 +482,7 @@ cursor://anysphere.cursor-deeplink/mcp/install?name=web-stylebook&config=eyJjb21
 | **`compose_design_tokens`** | 역할 기반 토큰을 `json` / `css-variables` / `tailwind` / `typescript`로 출력하거나 `DESIGN.md` 파일 하나(`design-md`)로 내보내며, 공통 시각 명세를 선택하면 스타일 원본과 편집값을 보존 | 명세에 작성된 색상 모드를 사용하며, 명시적으로 수락한 대비 수정만 적용합니다 |
 | **`get_design_audit_plan`** | 안정적인 검사 ID·심각도·적용 조건·필요 증거·수정 방향·사용자용 콘텐츠 검사·선택 원칙 검사·UI 상태 범위를 담은 다국어 감사 계획 | 프로젝트를 실제로 봤다고 가장하지 않으며, 증거가 없으면 `PASS`가 아니라 `NOT_VERIFIED`입니다 |
 | **`validate_design_audit_result`** | plan query·대상 행렬·지속 가능한 증거 참조·검사/대상별 판정을 검증하고 정규화 판정과 안정 hash를 반환 | 범위와 증거 정합성을 검증할 뿐 시각 품질을 판정하지 않으며, `valid: true`는 전체 디자인 통과가 아닙니다 |
+| **`audit_copy`** | 페이지의 보이는 텍스트(또는 일반 텍스트)에서 찾은 템플릿 문구와 출처 없는 주장을 selector나 줄, 일치한 문구, 고칠 방향과 함께 줍니다. `productType`을 주면 보이스의 존댓말 체계와 문장 길이도 봅니다. `copy` 그룹의 evidence와 results를 16 KiB 안에 줍니다 | 독해가 아니라 패턴 검사입니다. 템플릿 문구는 판단하기 전까지 관찰이고, 깨끗한 결과가 좋은 문구라는 뜻은 아닙니다 |
 | **`audit_page_structure`** | 넘겨받은 HTML·CSS에서 일반 금지 패턴과 스타일 전용 금지 항목을 찾아, 위치·관찰값·고른 스타일의 대체 무브와 함께 반환합니다. `productType`을 주면 페이지에 없거나 첫 화면 밖에 있는 필수 요소도 알려 줍니다. `structure` 감사 그룹용 증거와 결과도 만듭니다 | 브라우저가 아니라 선언된 스타일로 판단하며, 결과가 깨끗해도 디자인 통과가 아닙니다 |
 | **`compare_page_revisions`** | 리디자인 전후를 비교해 링크, 폼 필드와 라벨, 선택지, 폼 버튼, 핸들러, 테스트 훅, 스크립트 선택자, 제목, 그림, 랜드마크, 보이는 단어 수, 제품 필수 요소 중 무엇을 유지·문구 변경·삭제했는지 알려 줍니다. 의도한 삭제는 `acknowledged`로 표시합니다. `revisionPreservation` 감사 계획용 증거와 결과도 만듭니다 | 브라우저가 아니라 정적 마크업 비교이며, 스크립트를 실행하거나 스크린샷을 남기지 않습니다 |
 
@@ -672,7 +673,7 @@ viewport·phase·범위 규칙은 validator에 있고 `planHash`에 들어가지
 `scopeExclusions`는 선택 사항이며, result hash는 `scopeExclusions`를 줬을 때만 그것을 포함합니다.
 `includeGroups`에 `structure`를 넣고 `styleId`를 주면,
 plan에 금지 패턴마다 자동 검사가 1개씩 붙고(`styleId`가 없으면 과업 판단을 `manual` 증거로 받는 `shape-observation` 보조 검사가 붙습니다), `productType`을 주면 필수 요소마다 1개씩 더 붙습니다. `audit_page_structure`는 이 검사 id에 맞는 evidence와
-results를 돌려주고, validator는 그대로 받습니다. `revisionPreservation: true`를 주면 plan에는 `compare_page_revisions`가 답하는 `redesign-kept-*` 검사만 들어갑니다. 재검증 가능한 비교를 위해 plan,
+results를 돌려주고, validator는 그대로 받습니다. 선택 그룹 `copy`는 plan의 `locale`에 해당하는 문구 패턴마다 검사를 1개씩 붙이고(`productType`을 주면 보이스 검사도 붙습니다), `audit_copy`가 답합니다. 선택 그룹 `assets`는 글꼴과 이미지 검사를 붙이고(`assets-font-choice`는 `styleId`가 있을 때만), `audit_page_structure`의 `assets.evidence`와 `assets.results`가 답합니다. `revisionPreservation: true`를 주면 plan에는 `compare_page_revisions`가 답하는 `redesign-kept-*` 검사만 들어갑니다. 재검증 가능한 비교를 위해 plan,
 evidence bundle, 정규화된 result의 content-addressed hash도 반환합니다. 이 툴은 artifact를
 직접 열지 않으며 계약 유효성을 디자인 품질 점수로 바꾸지 않습니다.
 

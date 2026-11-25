@@ -64,6 +64,8 @@ import {
 } from '../references/search.js';
 import { ok, errorResult, type ToolResult } from './result.js';
 import { StartUiDesignError, renderStartUiDesign, startUiDesign, type StartUiDesignInput } from '../start/start-ui-design.js';
+import { COPY_LIMITS, auditCopy, renderCopyAudit, type AuditCopyInput } from '../copy/audit.js';
+import { COPY_PATTERNS } from '../copy/lexicon.js';
 import { ToolError, nearestIds } from './errors.js';
 import { FOUNDATIONS } from '../foundations/catalog.js';
 import { FOUNDATION_CATEGORIES } from '../foundations/types.js';
@@ -486,7 +488,7 @@ export function registerTools(server: McpServer, repo: CatalogRepository): void 
 
   server.registerTool('get_design_audit_plan', {
     title: 'Build an evidence-backed design audit plan',
-    description: 'Call after building or changing UI, before you report it as done, to get the checks you must verify. Return a localized, surface-aware audit checklist with stable check ids, severity, applicability, required evidence, remediation, verdict definitions, user-facing content checks, selected principle checks, and UI-state coverage. The host should confirm audit coverage and change depth with the user before choosing includeGroups. Include the opt-in "structure" group (with styleId) to add automated checks for banned generic and style-specific page patterns, answered by audit_page_structure; add productType to that group for one check per product must-have. Each selected design or UX principle adds one check per verify sentence (principle-<design|ux>-<id>-verify-<n>) that names the evidence method it accepts: static, browser, agent-review, or participant/analytics; an agent run of its own never answers a sentence that needs participants. This tool does not inspect a project: the host must collect actual rendered/code/interaction evidence, and missing evidence is NOT_VERIFIED rather than PASS.',
+    description: 'Call after building or changing UI, before you report it as done, to get the checks you must verify. Return a localized, surface-aware audit checklist with stable check ids, severity, applicability, required evidence, remediation, verdict definitions, user-facing content checks, selected principle checks, and UI-state coverage. The host should confirm audit coverage and change depth with the user before choosing includeGroups. Include the opt-in "structure" group (with styleId) to add automated checks for banned generic and style-specific page patterns, answered by audit_page_structure; add productType to that group for one check per product must-have. Include "copy" (answered by audit_copy; productType adds voice checks) and "assets" (fonts and images, answered by audit_page_structure) the same way. Each selected design or UX principle adds one check per verify sentence (principle-<design|ux>-<id>-verify-<n>) that names the evidence method it accepts: static, browser, agent-review, or participant/analytics; an agent run of its own never answers a sentence that needs participants. This tool does not inspect a project: the host must collect actual rendered/code/interaction evidence, and missing evidence is NOT_VERIFIED rather than PASS.',
     inputSchema: auditPlanInputShape,
     annotations: READ_ONLY,
   }, async (args): Promise<ToolResult> => {
@@ -503,7 +505,7 @@ export function registerTools(server: McpServer, repo: CatalogRepository): void 
 
   server.registerTool('audit_page_structure', {
     title: 'Audit a built page for banned structural patterns',
-    description: `Call after writing a page, with its rendered HTML and CSS, to find generic template patterns and missing must-haves. Deterministically inspect submitted page markup (offline; the server never reads files) for the generic SaaS template (centered hero over a gradient blob, all-text centered stack, stock-photo hero, logo strip, "trusted by" band, icon feature cards, testimonial carousel, generic closing CTA banner, and the page skeleton they form) and, with styleId, for that style's own banned treatments. With productType, it also reports which of that product type's must-haves (the same list recommend_design_direction returns) the page is missing (FIX_NOW) or keeps off its first screen, which is estimated from markup (RISK); mustHaveConditions sets named must-haves aside, with a reason, where the page does not need them. Pass the rendered HTML (for example document.documentElement.outerHTML) and the page's CSS text; Tailwind utility classes are understood without the stylesheet. Each finding names the location, the observed values, and what to replace it with from the chosen style's signature moves and archetype. Also returns evidence and results shaped for validate_design_audit_result with the "structure" audit group. Each finding carries a claim: with styleId, a found pattern is a style-fidelity result (FIX_NOW or RISK); without styleId, a global pattern is only a shape observation, returned as NOT_VERIFIED until you judge against the page's task whether it gets in the way and submit that judgment as manual evidence; a missing must-have is a required-element result. Declared-style heuristics, not a browser: a clean result is not a design pass. Limits: html ${PAGE_LIMITS.htmlChars} characters, ${PAGE_LIMITS.cssFiles} stylesheets, ${PAGE_LIMITS.cssTotalChars} CSS characters in total.`,
+    description: `Call after writing a page, with its rendered HTML and CSS, to find generic template patterns and missing must-haves. Deterministically inspect submitted page markup (offline; the server never reads files) for the generic SaaS template (centered hero over a gradient blob, all-text centered stack, stock-photo hero, logo strip, "trusted by" band, icon feature cards, testimonial carousel, generic closing CTA banner, and the page skeleton they form) and, with styleId, for that style's own banned treatments. With productType, it also reports which of that product type's must-haves (the same list recommend_design_direction returns) the page is missing (FIX_NOW) or keeps off its first screen, which is estimated from markup (RISK); mustHaveConditions sets named must-haves aside, with a reason, where the page does not need them. Pass the rendered HTML (for example document.documentElement.outerHTML) and the page's CSS text; Tailwind utility classes are understood without the stylesheet. Each finding names the location, the observed values, and what to replace it with from the chosen style's signature moves and archetype. Also returns evidence and results shaped for validate_design_audit_result with the "structure" audit group. Each finding carries a claim: with styleId, a found pattern is a style-fidelity result (FIX_NOW or RISK); without styleId, a global pattern is only a shape observation, returned as NOT_VERIFIED until you judge against the page's task whether it gets in the way and submit that judgment as manual evidence; a missing must-have is a required-element result. An assets section checks fonts (declared web fonts are loaded, set font-display: swap and, with styleId, are the style's or its pairings') and images (placeholders, unknown hosts, Unsplash/Pexels credits, alt, reserved size) with evidence and results for the "assets" audit group. Declared-style heuristics, not a browser: a clean result is not a design pass. Limits: html ${PAGE_LIMITS.htmlChars} characters, ${PAGE_LIMITS.cssFiles} stylesheets, ${PAGE_LIMITS.cssTotalChars} CSS characters in total.`,
     inputSchema: {
       html: z.string().min(1).max(PAGE_LIMITS.htmlChars),
       css: z.array(z.string().max(PAGE_LIMITS.cssChars)).max(PAGE_LIMITS.cssFiles).optional(),
@@ -523,6 +525,25 @@ export function registerTools(server: McpServer, repo: CatalogRepository): void 
         renderStructureAudit(result, args.locale ?? 'en'),
         result.styleId ? [`webstylebook://styles/${result.styleId}`] : [],
       );
+    } catch (e) { return errorResult(toToolError(e, repo)); }
+  });
+
+  server.registerTool('audit_copy', {
+    title: 'Audit page copy for template lines',
+    description: `Call after writing a page's text, with its rendered HTML (or the copy as text), to find template lines and unsourced claims. Check the visible text against the ${COPY_PATTERNS.length} copy patterns of webstylebook://copy/patterns/{locale} and, with productType, that product's voice (Korean register, sentence length). Returns each finding with its location (a selector, or a line for text), the matched text and how to fix it, plus evidence and results for the "copy" group of get_design_audit_plan (pass the same locale and productType). A template line is an observation, NOT_VERIFIED until you judge it against the page; an unsourced user count or percentage outcome is FIX_NOW. Deterministic and offline: pattern matching, not a reading, so a clean result does not mean the copy is good.`,
+    inputSchema: {
+      html: z.string().min(1).max(PAGE_LIMITS.htmlChars).describe('rendered page HTML; pass this or text').optional(),
+      css: z.array(z.string().max(PAGE_LIMITS.cssChars)).max(PAGE_LIMITS.cssFiles).describe('page CSS, so that hidden text is skipped').optional(),
+      text: z.union([z.string().min(1).max(COPY_LIMITS.textChars), z.array(z.string().max(4000)).min(1).max(COPY_LIMITS.textItems)]).describe('plain copy, one string split into lines or one entry per text unit; no evidence is returned').optional(),
+      locale: LOCALE.optional(),
+      productType: z.enum(PRODUCT_TYPES).describe('adds the voice checks of this product type').optional(),
+      targetId: z.string().trim().min(1).max(160).optional(),
+    },
+    annotations: READ_ONLY,
+  }, async (args): Promise<ToolResult> => {
+    try {
+      const result = auditCopy(args as AuditCopyInput, repo);
+      return ok(result as unknown as Record<string, unknown>, renderCopyAudit(result));
     } catch (e) { return errorResult(toToolError(e, repo)); }
   });
 

@@ -20,10 +20,10 @@ export const IMPROVEMENT_GUIDANCE = 'For an existing UI improvement request, def
  */
 export const SERVER_INSTRUCTIONS = [
   'Before writing HTML, CSS, JSX or other UI code for any new page or screen (landing pages, dashboards, docs, settings, product pages, forms), call start_ui_design once with the product context and pageRole; if tools are listed by name only, load it first.',
-  'It returns the direction, structure, fonts, photos, copy brief and next calls; follow them and webstylebook://workflows/new-ui (compose_design_tokens, get_design_principle_plan, get_ux_principle_plan, get_ui_state_plan).',
-  'recommend_design_direction only adds more directions.',
+  'It returns the direction, structure, fonts, photos, copy and next calls; follow them and webstylebook://workflows/new-ui (compose_design_tokens, get_design_principle_plan, get_ux_principle_plan, get_ui_state_plan).',
+  'recommend_design_direction lists more directions.',
   'search_design_references and get_design_reference give attributed examples: evidence, never permission to copy screenshots, brand assets, copy or typefaces.',
-  'After building, run audit_page_structure on the page HTML and CSS, then get_design_audit_plan and validate_design_audit_result with real evidence: missing evidence is NOT_VERIFIED, and the valid field describes contract validity, not visual quality.',
+  'After building, run audit_page_structure and audit_copy on the page HTML and CSS, then get_design_audit_plan and validate_design_audit_result with real evidence: missing evidence is NOT_VERIFIED, and the valid field describes contract validity, not visual quality.',
   'To improve or fix an existing UI, call get_design_improvement_plan and follow webstylebook://workflows/improve-ui through validate_design_improvement_result.',
   'Check that material claims, conclusions, and recommendations match their support, and that visual prominence matches information value, task relevance, and support.',
   'Audit-only requests stay read-only; commit, push, release and deployment need their own authorization.',
@@ -45,6 +45,7 @@ export const TOOL_NAMES = [
   'get_ui_state_plan',
   'compose_design_tokens',
   'audit_page_structure',
+  'audit_copy',
   'compare_page_revisions',
 ] as const;
 

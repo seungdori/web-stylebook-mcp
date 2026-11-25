@@ -170,7 +170,7 @@ npx -y web-stylebook-mcp call get_design_improvement_plan --input plan-args.json
 | 用途 | ツール |
 |---|---|
 | 既存 UI の改善 | `get_design_improvement_plan`, `compare_page_revisions`, `validate_design_improvement_result` |
-| レビュー | `get_design_audit_plan`, `audit_page_structure`, `validate_design_audit_result` |
+| レビュー | `get_design_audit_plan`, `audit_page_structure`, `audit_copy`, `validate_design_audit_result` |
 | 方向性の選択 | `start_ui_design`, `recommend_design_direction`, `compare_design_directions`, `search_design_references`, `get_design_reference` |
 | 原則と状態 | `get_design_principle_plan`, `get_ux_principle_plan`, `get_ui_state_plan` |
 | 実装 | `compose_design_tokens`（JSON、CSS 変数、Tailwind、TypeScript、DESIGN.md） |
