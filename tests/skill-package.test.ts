@@ -37,12 +37,43 @@ const expectFlowOrder = (text: string, label: string) => {
 describe('client blocks send a new page to start_ui_design first', () => {
   const firstLine = (rel: string) => read(rel).split('\n').find((line) => line.trim())!;
 
-  it('the first line names the entry tool the way the host lists it', () => {
-    // Claude Code lists MCP tools by name only until ToolSearch loads them, so the full name has to be findable.
-    expect(firstLine('skills/CLAUDE.md')).toContain('`mcp__web-stylebook__start_ui_design`');
-    expect(read('skills/CLAUDE.md')).toContain('`select:mcp__web-stylebook__start_ui_design`');
+  // Claude Code names a tool mcp__<server key>__<tool>, and a plugin server's tool mcp__plugin_<plugin>_<server key>__<tool>.
+  // It lists MCP tools by name only until ToolSearch loads them, so the blocks must work under both install paths.
+  const plugin = JSON.parse(read('.claude-plugin/plugin.json'));
+  const serverKey = Object.keys(plugin.mcpServers)[0]!;
+  const CLAUDE_CODE_NAMES = [`mcp__${serverKey}__start_ui_design`, `mcp__plugin_${plugin.name}_${serverKey}__start_ui_design`];
+  const NAMING_DOCS = ['skills/CLAUDE.md', 'skills/AGENTS.md', 'skills/web-stylebook-design/SKILL.md', 'docs/reference.md', 'docs/reference.ko.md', 'docs/reference.ja.md'];
+
+  it('the install commands use the server key the tool names assume', () => {
+    expect(read('README.md')).toContain(`claude mcp add ${serverKey} -- npx -y web-stylebook-mcp@latest`);
+    expect(CLAUDE_CODE_NAMES).toEqual(['mcp__web-stylebook__start_ui_design', 'mcp__plugin_web-stylebook_web-stylebook__start_ui_design']);
+  });
+
+  it('the first line names the entry tool under both Claude Code install paths', () => {
+    for (const name of CLAUDE_CODE_NAMES) expect(firstLine('skills/CLAUDE.md'), name).toContain(`\`${name}\``);
+    for (const rel of ['skills/CLAUDE.md', 'skills/web-stylebook-design/SKILL.md']) {
+      // A keyword query finds the tool under either name; an exact select: of one name misses the other install.
+      expect(read(rel), rel).toMatch(/ToolSearch with the query\s+`start_ui_design`/);
+    }
     expect(firstLine('skills/AGENTS.md')).toContain('`start_ui_design`');
     expect(read('skills/AGENTS.md')).toContain('npx -y web-stylebook-mcp@latest call start_ui_design --input args.json');
+  });
+
+  it('wherever a Claude Code tool name appears, the other install path appears too', () => {
+    for (const rel of NAMING_DOCS) {
+      const text = read(rel);
+      const named = [...text.matchAll(/mcp__[A-Za-z0-9_-]*?__start_ui_design/g)].map((m) => m[0]);
+      for (const name of named) expect(CLAUDE_CODE_NAMES, `${rel}: ${name}`).toContain(name);
+      if (named.length) for (const name of CLAUDE_CODE_NAMES) expect(text, `${rel} names one install path only`).toContain(name);
+      for (const [, list] of text.matchAll(/select:([^\s`]*start_ui_design[^\s`]*)/g)) {
+        for (const name of CLAUDE_CODE_NAMES) expect(list!.split(','), `${rel}: select:${list}`).toContain(name);
+      }
+    }
+    // The note for a server added under another key covers the plugin prefix as well.
+    const note = section(read('skills/CLAUDE.md'), '<!--', '-->');
+    expect(note).toContain('mcp__<server key>__<tool>');
+    expect(note).toContain('mcp__plugin_<plugin>_<server key>__<tool>');
+    expect(note).toContain('mcp__<your key>__start_ui_design');
   });
 
   it('the blocks, the skill and the Cursor rule give the same order', () => {
