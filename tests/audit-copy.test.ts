@@ -91,6 +91,38 @@ describe('audit_copy findings', () => {
   }, 60_000);
 });
 
+describe('Korean buzzwords (0.22.1)', () => {
+  // 0.22.0 had buzzword patterns for English and Japanese only, so this line returned no finding.
+  const BUZZ = '혁신적인 솔루션으로 비즈니스를 한 단계 끌어올리세요';
+  const PLAIN = '화요일 오후 3시 미팅이 끝나면, 할 일과 담당자가 붙은 요약을 슬랙으로 보냅니다.';
+  const found = (input: { text?: string; html?: string; productType?: 'operational-saas' }) =>
+    auditCopy({ ...input, locale: 'ko' }, repo).findings.map((finding) => finding.patternId);
+
+  it('flags the stock Korean marketing line as text and as a page, with or without a product type', () => {
+    for (const productType of [undefined, 'operational-saas' as const]) {
+      expect(found({ text: BUZZ, ...(productType ? { productType } : {}) })).toEqual(['ko-buzzwords']);
+      expect(found({ html: `<main><h1>${BUZZ}</h1></main>`, ...(productType ? { productType } : {}) })).toEqual(['ko-buzzwords']);
+    }
+  });
+
+  it('passes a concrete line, and plain uses of the same words', () => {
+    for (const productType of [undefined, 'operational-saas' as const]) {
+      expect(found({ text: PLAIN, ...(productType ? { productType } : {}) })).toEqual([]);
+      expect(found({ html: `<main><p>${PLAIN}</p></main>`, ...(productType ? { productType } : {}) })).toEqual([]);
+    }
+    for (const line of ['솔루션 엔지니어가 연락드립니다.', '목표를 너무 크게 잡으면 앱이 한 단계 작은 목표를 제안해요.', '스마트폰에서 바로 체크할 수 있어요.']) {
+      expect(found({ text: line }), line).toEqual([]);
+    }
+  });
+
+  it('gives Korean every pattern topic that English or Japanese has', () => {
+    const topic = (id: string) => id.replace(/^(?:en|ko|ja)-/, '');
+    const topics = (locale: 'en' | 'ko' | 'ja') => new Set(COPY_PATTERNS.filter((entry) => entry.locales.includes(locale)).map((entry) => topic(entry.id)));
+    const ko = topics('ko');
+    for (const locale of ['en', 'ja'] as const) for (const name of topics(locale)) expect(ko.has(name), `${locale} ${name}`).toBe(true);
+  });
+});
+
 describe('audit_copy and validate_design_audit_result', () => {
   const planInput = { includeGroups: ['copy' as const], locale: 'ko' as const, productType: 'operational-saas' as const };
 

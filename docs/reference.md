@@ -217,8 +217,8 @@ After building, pass the page's HTML and CSS to `audit_page_structure`. This is 
       "replaceWith": {
         "instruction": "Remove it unless you have permission and a reason to name real customers; show proof a visitor can inspect instead (a real result, artifact, or named case) with this style's proof move.",
         "moves": [
-          { "id": "grouped-approval-queue", "name": "Queue grouped by who has to act", "purpose": "Triage: the person sees first what waits on them and what it is worth, then everything else in the same rhythm." },
-          { "id": "three-way-match-strip", "name": "Three-way match strip and approval trail", "purpose": "Proof: the reason to approve or dispute is on screen as figures and a sequence, not as a summary sentence." }
+          { "id": "grouped-approval-queue", "name": "Queue grouped by who has to act" },
+          { "id": "three-way-match-strip", "name": "Three-way match strip and approval trail" }
         ]
       }
     },
@@ -226,23 +226,28 @@ After building, pass the page's HTML and CSS to `audit_page_structure`. This is 
       "patternId": "generic-saas-skeleton",
       "observed": { "sections": "opening → proof → features → testimonials → cta", "templateSections": 5 },
       "replaceWith": {
-        "archetype": {
-          "sectionOrder": [
-            "Top bar with the product mark, the organisation and the signed-in person",
-            "Head: the screen title and brief beside the month total, stacked bar and status legend",
-            "The queue: segmented view switch, filter token and count, then rows grouped by who has to act",
-            "The open record: properties, the three-way match strip and the line items with the one line that differs",
-            "The approval trail as a real sequence, with approve and dispute actions and a reason field"
-          ]
-        }
+        "archetype": "sectionOrder"
       }
     }
     // 7 more: centered-stack-hero, trusted-by-band, icon-feature-grid, testimonial-carousel, closing-cta-banner, quiet-utility/shadow-blur, quiet-utility/corner-radius
-  ]
+  ],
+  "replacements": {
+    "moves": {
+      "grouped-approval-queue": { "name": "Queue grouped by who has to act", "purpose": "Triage: the person sees first what waits on them and what it is worth, then everything else in the same rhythm.", "build": "Split the list into collapsible groups whose 40px head buttons sit on …" },
+      "three-way-match-strip": { "name": "Three-way match strip and approval trail", "purpose": "Proof: the reason to approve or dispute is on screen as figures and a sequence, not as a summary sentence.", "build": "Show Ordered, Received and Invoiced as three equal cells (repeat(3, …" }
+    },
+    "sectionOrder": [
+      "Top bar with the product mark, the organisation and the signed-in person",
+      "Head: the screen title and brief beside the month total, stacked bar and status legend",
+      "The queue: segmented view switch, filter token and count, then rows grouped by who has to act",
+      "The open record: properties, the three-way match strip and the line items with the one line that differs",
+      "The approval trail as a real sequence, with approve and dispute actions and a reason field"
+    ]
+  }
 }
 ```
 
-Each finding names where the pattern is, what was observed, and what to put there instead: the chosen style's signature moves for the same job (proof, in the logo strip's case), its hero composition, or its section order. Rebuild, run the audit again, then add `"structure"` to `get_design_audit_plan.includeGroups` and pass the returned `evidence` and `results` to `validate_design_audit_result`. Audit each viewport with its own `targetId`: the evidence ids include it, so the runs validate together. The checks are deterministic heuristics over the submitted HTML and CSS, not a browser render, so `clean` means every check ran and found none of these patterns, not that the design passed. Per-style guidance (archetypes and moves) is written in English, like the catalog's own `layout` and `typography` fields; pattern names and instructions follow `locale`.
+Each finding names where the pattern is, what was observed, and what to put there instead: the chosen style's signature moves for the same job (proof, in the logo strip's case), its hero composition, or its section order. A finding names the moves and the part of the archetype; their purpose, build steps, hero and section order are in `replacements`, once each, because several findings share them. Rebuild, run the audit again, then add `"structure"` to `get_design_audit_plan.includeGroups` and pass the returned `evidence` and `results` to `validate_design_audit_result`. Audit each viewport with its own `targetId`: the evidence ids include it, so the runs validate together. The checks are deterministic heuristics over the submitted HTML and CSS, not a browser render, so `clean` means every check ran and found none of these patterns, not that the design passed. Per-style guidance (archetypes and moves) is written in English, like the catalog's own `layout` and `typography` fields; pattern names and instructions follow `locale`.
 
 Every finding and check carries a `claim`, and `summary.claims` counts findings per claim, because a shape is not by itself a task defect:
 
@@ -316,13 +321,19 @@ Pass the same `productType` to `audit_page_structure`, and it reports which must
       "replaceWith": {
         "instruction": "Move it onto the first screen; the audit found it only further down the page, while Add to cart is on the first screen, so people can act before they see it. Show the price with its currency next to the product name; when sizes differ in price, show the price of the selected size.",
         "moves": [
-          {"id":"gold-chosen-slot-book","name":"Appointment book with one gold slot","build":"Under a 1px ivory top rule, each day is a row of minmax(0, 2.6fr) for the date (bold day over a muted date) and eight 1fr slots, each 64px tall with a 1px left rule and its time in Bodoni Moda 500 at 1.3125rem with tabular numerals; a stronger 50% ivory rule marks the lunch gap. Taken times go #7f7b73 with a 1px strike-through, hover tints a slot to 7% ivory over 160ms, and the chosen slot alone gets a 12% gold wash, a 1px inset gold line and gold text. Below, the chosen time repeats large at clamp(2rem, 3.4vw, 2.75rem) in columns 1-5 beside a form in columns 7-12 (name and phone side by side, the watch on a full-width line) with underlined inputs and one solid ivory rectangular button.","purpose":"Makes booking a choice of a real free time, with the choice confirmed in gold and restated large before anyone types."}
+          { "id": "gold-chosen-slot-book", "name": "Appointment book with one gold slot" }
         ],
-        "archetype": { "hero": "A one-line headline naming the actual service, Bodoni Moda …" }
+        "archetype": "hero"
       }
     }
     // 2 more: must-have/variant-choice, must-have/purchase-assurance
-  ]
+  ],
+  "replacements": {
+    "moves": {
+      "gold-chosen-slot-book": { "name": "Appointment book with one gold slot", "purpose": "Makes booking a choice of a real free time, with the choice confirmed in gold and restated large before anyone types.", "build": "Under a 1px ivory top rule, each day is a row of minmax(0, 2.6fr) for …" }
+    },
+    "hero": "A one-line headline naming the actual service, Bodoni Moda 500 at …"
+  }
 }
 ```
 

@@ -45,7 +45,7 @@ const FILENAME_ALT = /^(?:.*\.(?:jpe?g|png|webp|gif|avif|svg)|image|img|photo|pi
 const GENERIC_FAMILIES = new Set(['serif', 'sans-serif', 'monospace', 'cursive', 'fantasy', 'system-ui', 'ui-serif', 'ui-sans-serif', 'ui-monospace', 'ui-rounded', 'math', 'emoji', 'fangsong', 'inherit', 'initial', 'unset', 'revert']);
 const PRETENDARD = /pretendard/i;
 
-const say: Record<Lang, Record<AssetCheckId, { criterion: string; why: string; fix: string }> & { found: (n: number, items: string) => string; clean: string; none: string; unknownSheet: string; limit: string; record: string }> = {
+const say: Record<Lang, Record<AssetCheckId, { criterion: string; why: string; fix: string }> & { found: (n: number) => string; clean: string; none: string; unknownSheet: string; limit: string; record: string }> = {
   en: {
     'assets-font-loading': { criterion: 'Every web font the page declares is loaded by a <link>, an @import or an @font-face.', why: 'A declared web font that is never loaded falls back to a system face, so the page loses its type.', fix: 'Add the stylesheet or @font-face for each family listed; start_ui_design gives the <link> tags.' },
     'assets-font-display': { criterion: 'Web font stylesheets and @font-face rules set font-display: swap.', why: 'Without swap, text stays invisible until the font file arrives.', fix: 'Add &display=swap to the Google Fonts URL and font-display: swap to each @font-face.' },
@@ -55,7 +55,7 @@ const say: Record<Lang, Record<AssetCheckId, { criterion: string; why: string; f
     'assets-image-credit': { criterion: 'Stock photos from Unsplash or Pexels are credited on the page.', why: 'The licences ask for no credit on website picks but their APIs require it, and the photographer gets it either way.', fix: 'Add "Photo by {name} on {Source}" with links in a figcaption or the footer credits.' },
     'assets-image-alt': { criterion: 'Every <img> has an alt that says what it shows, or alt="" when it is decorative.', why: 'An image without alt is announced by its file name or skipped.', fix: 'Write alt text for each listed image, or alt="" with aria-hidden="true" for a decorative one.' },
     'assets-image-dimensions': { criterion: 'Every <img> reserves its size with width and height or an aspect-ratio.', why: 'An image without a reserved size moves the page when it loads.', fix: 'Add width and height attributes, or an aspect-ratio in CSS, to each listed image.' },
-    found: (n, items) => `${n} found: ${items}`,
+    found: (n) => `${n} found; see assets.checks for the list.`,
     clean: 'Nothing found.',
     none: 'Nothing on the page to check.',
     unknownSheet: 'A font stylesheet from an unrecognised host may load these families.',
@@ -71,7 +71,7 @@ const say: Record<Lang, Record<AssetCheckId, { criterion: string; why: string; f
     'assets-image-credit': { criterion: 'Unsplash·Pexels 스톡 사진의 출처를 페이지에 표기합니다.', why: '웹사이트에서 고른 사진은 라이선스상 표기가 필수가 아니지만 API는 요구하고, 어느 쪽이든 작가에게 공을 돌립니다.', fix: 'figcaption이나 푸터 크레딧에 "Photo by {name} on {Source}"와 링크를 넣으세요.' },
     'assets-image-alt': { criterion: '모든 <img>에 무엇을 보여 주는지 말하는 alt가 있거나, 장식이면 alt=""가 있습니다.', why: 'alt가 없는 이미지는 파일 이름으로 읽히거나 건너뜁니다.', fix: '목록의 이미지마다 alt를 쓰거나, 장식 이미지는 alt=""와 aria-hidden="true"를 주세요.' },
     'assets-image-dimensions': { criterion: '모든 <img>가 width·height나 aspect-ratio로 크기를 잡아 둡니다.', why: '크기를 잡지 않은 이미지는 로드될 때 페이지를 밀어냅니다.', fix: '목록의 이미지마다 width·height 속성이나 CSS aspect-ratio를 넣으세요.' },
-    found: (n, items) => `${n}개: ${items}`,
+    found: (n) => `${n}개를 찾았습니다. 목록은 assets.checks에 있습니다.`,
     clean: '찾은 문제가 없습니다.',
     none: '페이지에 검사할 대상이 없습니다.',
     unknownSheet: '알 수 없는 호스트의 글꼴 스타일시트가 이 family를 로드할 수도 있습니다.',
@@ -87,7 +87,7 @@ const say: Record<Lang, Record<AssetCheckId, { criterion: string; why: string; f
     'assets-image-credit': { criterion: 'Unsplash・Pexels のストック写真の出典をページに表記しています。', why: 'ウェブサイトで選んだ写真はライセンス上表記が必須ではありませんが API では必要で、どちらでも撮影者の功績を示せます。', fix: 'figcaption かフッターのクレジットに "Photo by {name} on {Source}" とリンクを入れてください。' },
     'assets-image-alt': { criterion: 'すべての <img> に何を示すかを書いた alt があるか、装飾なら alt="" があります。', why: 'alt のない画像はファイル名で読み上げられるか、飛ばされます。', fix: '一覧の画像ごとに alt を書くか、装飾画像には alt="" と aria-hidden="true" を付けてください。' },
     'assets-image-dimensions': { criterion: 'すべての <img> が width・height か aspect-ratio で大きさを確保しています。', why: '大きさを確保していない画像は、読み込み時にページを動かします。', fix: '一覧の画像ごとに width・height 属性か CSS の aspect-ratio を加えてください。' },
-    found: (n, items) => `${n} 件: ${items}`,
+    found: (n) => `${n} 件見つかりました。一覧は assets.checks にあります。`,
     clean: '問題は見つかりませんでした。',
     none: 'ページに確認する対象がありません。',
     unknownSheet: '不明なホストのフォントスタイルシートがこれらの family を読み込んでいる可能性があります。',

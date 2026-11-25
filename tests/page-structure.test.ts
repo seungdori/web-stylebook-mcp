@@ -67,11 +67,17 @@ describe('audit_page_structure fixtures', () => {
       expect(finding.relatedAuditCheckIds.every((id) => repo.policies.auditChecks.some((check) => check.id === id))).toBe(true);
     }
     const opening = result.findings.find((finding) => finding.patternId === 'centered-stack-hero')!;
-    expect(opening.replaceWith.archetype?.hero).toBe(guide.hero);
+    expect(opening.replaceWith.archetype).toBe('hero');
+    expect(result.replacements.hero).toBe(guide.hero);
     // The loop above pins the exact moves; here the opening must get at least one of quiet-utility's opening moves.
     expect(opening.replaceWith.moves.length).toBeGreaterThan(0);
     const skeleton = result.findings.find((finding) => finding.patternId === 'generic-saas-skeleton')!;
-    expect(skeleton.replaceWith.archetype?.sectionOrder).toEqual(guide.sectionOrder);
+    expect(skeleton.replaceWith.archetype).toBe('sectionOrder');
+    expect(result.replacements.sectionOrder).toEqual(guide.sectionOrder);
+    // Findings name moves; each named move's purpose and build steps appear once, in replacements.
+    const named = [...new Set(result.findings.flatMap((finding) => finding.replaceWith.moves.map((move) => move.id)))].sort();
+    expect(Object.keys(result.replacements.moves).sort()).toEqual(named);
+    for (const id of named) expect(result.replacements.moves[id]).toEqual(Object.fromEntries(Object.entries(guide.moves.find((move) => move.id === id)!).filter(([key]) => ['name', 'purpose', 'build'].includes(key))));
     expect(skeleton.observed.sections).toBe('opening → proof → features → testimonials → cta');
     expect(result.outline.map((section) => section.patterns)).toEqual([
       ['centered-stack-hero'], ['logo-strip', 'trusted-by-band'], ['icon-feature-grid'], ['testimonial-carousel'], ['closing-cta-banner'],

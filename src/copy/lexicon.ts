@@ -67,6 +67,14 @@ export const COPY_PATTERNS: readonly CopyPattern[] = [
     example: { flagged: '회의록은 AI가, 실행은 팀이.', better: '회의가 끝나면 담당자와 마감일이 붙은 할 일이 Slack에 올라옵니다.' },
   },
   {
+    id: 'ko-buzzwords', locales: ['ko'],
+    match: { kind: 'unit', pattern: '혁신적(?:인|으로)|획기적(?:인|으로)|차원이\\s*다른|새로운\\s*(?:경험|차원|기준|패러다임)|쉽고\\s*빠르게|올인원|스마트(?:한|하게)|최적의\\s*(?:경험|솔루션|선택|방법|환경)|한\\s*단계\\s*(?:더\\s*)?(?:끌어올|높여|높이|업그레이드|도약)|(?:맞춤형|통합|토털|차세대)\\s*솔루션|솔루션으로|압도적(?:인|으로)|극대화|패러다임|게임\\s*체인저|놀라운\\s*(?:경험|변화|성과|결과)|완벽한\\s*(?:솔루션|경험|파트너|선택)' },
+    verdict: 'observation', antiPatternIds: ['abstract-consultancy-copy'],
+    why: 'Words such as 혁신적인, 솔루션으로 and 한 단계 끌어올리세요 promise a feeling instead of a result and fit any product. Plain uses (솔루션 엔지니어, 한 단계 작은 목표, 스마트폰) do not match.',
+    instead: 'Say what the user can do now that they could not, with one concrete outcome.',
+    example: { flagged: '혁신적인 솔루션으로 비즈니스를 한 단계 끌어올리세요', better: '화요일 오후 3시 미팅이 끝나면, 할 일과 담당자가 붙은 요약을 슬랙으로 보냅니다.' },
+  },
+  {
     id: 'ko-setup-minutes', locales: ['ko'],
     match: { kind: 'unit', pattern: '(?:설정|세팅|연결)(?:은|는|하는\\s*데)?\\s*\\d+\\s*분|(?:설정|세팅|연결|설치|가입)[^.]{0,20}\\d+\\s*분이면|\\d+\\s*분이면\\s*(?:설정|연결|설치)\\s*(?:이\\s*)?(?:끝|완료)' },
     verdict: 'observation', antiPatternIds: ['abstract-consultancy-copy'],

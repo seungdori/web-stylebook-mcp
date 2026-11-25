@@ -55,7 +55,8 @@ const wording: Record<Lang, {
   length: (max: number) => string;
   registerWhy: string; lengthWhy: string;
   registerFix: (register: string) => string; lengthFix: (max: number) => string;
-  found: (count: number, where: string) => string; none: (count: number) => string; unjudged: string;
+  /** The location is in findings and the evidence; the rationale gives the count. */
+  found: (count: number) => string; none: (count: number) => string; unjudged: string;
   guidance: { shapes: string; record: string; text: string };
   limits: string[];
 }> = {
@@ -67,7 +68,7 @@ const wording: Record<Lang, {
     lengthWhy: 'The voice for this product type sets a sentence length; longer sentences slow the reader down.',
     registerFix: (register) => `Rewrite the statements in ${register}.`,
     lengthFix: (max) => `Split each sentence over ${max} words into two, one point each.`,
-    found: (count, where) => `Found ${count} time(s), first at ${where}.`,
+    found: (count) => `Found ${count} time(s).`,
     none: (count) => `Not found in ${count} text unit(s).`,
     unjudged: 'A shape alone is not a defect: judge it against the page task and audience, then submit that judgment as manual evidence.',
     guidance: {
@@ -88,7 +89,7 @@ const wording: Record<Lang, {
     lengthWhy: '이 제품 유형의 보이스는 문장 길이를 정합니다. 더 긴 문장은 읽기를 늦춥니다.',
     registerFix: (register) => `서술문을 ${register}로 다시 쓰세요.`,
     lengthFix: (max) => `${max}어절을 넘는 문장을 요점 하나씩 두 문장으로 나누세요.`,
-    found: (count, where) => `${count}회 나왔습니다. 처음 위치: ${where}.`,
+    found: (count) => `${count}회 나왔습니다.`,
     none: (count) => `텍스트 단위 ${count}개에서 찾지 못했습니다.`,
     unjudged: '형태만으로는 결함이 아닙니다. 페이지의 작업과 독자에 비춰 판단하고, 그 판단을 manual evidence로 제출하세요.',
     guidance: {
@@ -109,7 +110,7 @@ const wording: Record<Lang, {
     lengthWhy: 'この製品タイプの声は文の長さを決めます。長い文は読む速さを落とします。',
     registerFix: (register) => `叙述文を ${register} で書き直してください。`,
     lengthFix: (max) => `${max} 語を超える文を、要点ひとつずつの 2 文に分けてください。`,
-    found: (count, where) => `${count} 回見つかりました。最初の位置: ${where}。`,
+    found: (count) => `${count} 回見つかりました。`,
     none: (count) => `${count} 個のテキスト単位で見つかりませんでした。`,
     unjudged: '型だけでは欠陥ではありません。ページの作業と読者に照らして判断し、その判断を manual evidence として提出してください。',
     guidance: {
@@ -304,7 +305,7 @@ export function auditCopy(input: AuditCopyInput, repo: CatalogRepository) {
       const found = group.name.endsWith('found');
       const listed = group.checks.map((check) => {
         const hit = byPattern.get(check.patternId);
-        return hit ? `${check.patternId} ×${hit.count} @ ${hit.matches[0]!.where}` : check.patternId;
+        return hit ? `${check.patternId} ×${hit.count}` : check.patternId;
       }).join('; ');
       const first = found ? byPattern.get(group.checks[0]!.patternId)!.matches[0]!.where : undefined;
       evidence.push({
@@ -321,7 +322,7 @@ export function auditCopy(input: AuditCopyInput, repo: CatalogRepository) {
           : group.name === 'no-claims' ? 'PASS' : 'NOT_APPLICABLE';
         results.push({
           checkId: check.id, targetId, verdict, evidenceRefs: [evidenceId(group.name)],
-          rationale: hit ? say.found(hit.count, hit.matches[0]!.where) : say.none(units.length),
+          rationale: hit ? say.found(hit.count) : say.none(units.length),
           ...(verdict === 'FIX_NOW' ? { remediation: check.remediation } : {}),
         });
       }

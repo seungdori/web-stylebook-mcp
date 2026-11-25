@@ -225,8 +225,8 @@ MCP는 제출된 증거의 범위와 일관성을 검사하고 **실제 파일 �
       "replaceWith": {
         "instruction": "실제 고객을 밝힐 권한과 이유가 없다면 지우세요. 대신 방문자가 직접 확인할 수 있는 근거(실제 결과·결과물·이름이 있는 사례)를 이 스타일의 근거 무브로 보여 주세요.",
         "moves": [
-          { "id": "grouped-approval-queue", "name": "Queue grouped by who has to act", "purpose": "Triage: the person sees first what waits on them and what it is worth, then everything else in the same rhythm." },
-          { "id": "three-way-match-strip", "name": "Three-way match strip and approval trail", "purpose": "Proof: the reason to approve or dispute is on screen as figures and a sequence, not as a summary sentence." }
+          { "id": "grouped-approval-queue", "name": "Queue grouped by who has to act" },
+          { "id": "three-way-match-strip", "name": "Three-way match strip and approval trail" }
         ]
       }
     },
@@ -234,23 +234,28 @@ MCP는 제출된 증거의 범위와 일관성을 검사하고 **실제 파일 �
       "patternId": "generic-saas-skeleton",
       "observed": { "sections": "opening → proof → features → testimonials → cta", "templateSections": 5 },
       "replaceWith": {
-        "archetype": {
-          "sectionOrder": [
-            "Top bar with the product mark, the organisation and the signed-in person",
-            "Head: the screen title and brief beside the month total, stacked bar and status legend",
-            "The queue: segmented view switch, filter token and count, then rows grouped by who has to act",
-            "The open record: properties, the three-way match strip and the line items with the one line that differs",
-            "The approval trail as a real sequence, with approve and dispute actions and a reason field"
-          ]
-        }
+        "archetype": "sectionOrder"
       }
     }
     // 나머지 7개: centered-stack-hero, trusted-by-band, icon-feature-grid, testimonial-carousel, closing-cta-banner, quiet-utility/shadow-blur, quiet-utility/corner-radius
-  ]
+  ],
+  "replacements": {
+    "moves": {
+      "grouped-approval-queue": { "name": "Queue grouped by who has to act", "purpose": "Triage: the person sees first what waits on them and what it is worth, then everything else in the same rhythm.", "build": "Split the list into collapsible groups whose 40px head buttons sit on …" },
+      "three-way-match-strip": { "name": "Three-way match strip and approval trail", "purpose": "Proof: the reason to approve or dispute is on screen as figures and a sequence, not as a summary sentence.", "build": "Show Ordered, Received and Invoiced as three equal cells (repeat(3, …" }
+    },
+    "sectionOrder": [
+      "Top bar with the product mark, the organisation and the signed-in person",
+      "Head: the screen title and brief beside the month total, stacked bar and status legend",
+      "The queue: segmented view switch, filter token and count, then rows grouped by who has to act",
+      "The open record: properties, the three-way match strip and the line items with the one line that differs",
+      "The approval trail as a real sequence, with approve and dispute actions and a reason field"
+    ]
+  }
 }
 ```
 
-발견 항목마다 위치, 관찰값, 그리고 그 자리에 대신 넣을 것을 알려 줍니다. 대신 넣을 것은 고른 스타일에서 같은 역할을 하는 시그니처 무브(로고 띠라면 근거 역할), 히어로 구성, 섹션 순서입니다. 다시 빌드하고 감사를 한 번 더 돌린 뒤, `get_design_audit_plan.includeGroups`에 `"structure"`를 넣고 돌려받은 `evidence`와 `results`를 `validate_design_audit_result`에 넘기세요. 뷰포트마다 다른 `targetId`로 감사하세요. 증거 id에 `targetId`가 들어가므로 여러 실행 결과를 함께 검증할 수 있습니다. 이 검사는 브라우저 렌더링이 아니라 제출한 HTML과 CSS에 대한 결정적 휴리스틱입니다. `clean`은 모든 검사가 실행되었고 이 패턴들을 찾지 못했다는 뜻이지, 디자인이 통과했다는 뜻이 아닙니다. 스타일별 지침(아키타입과 무브)은 카탈로그의 `layout`·`typography` 필드처럼 영어로 작성되어 있고, 패턴 이름과 안내 문장은 `locale`을 따릅니다.
+발견 항목마다 위치, 관찰값, 그리고 그 자리에 대신 넣을 것을 알려 줍니다. 대신 넣을 것은 고른 스타일에서 같은 역할을 하는 시그니처 무브(로고 띠라면 근거 역할), 히어로 구성, 섹션 순서입니다. 발견 항목에는 무브와 아키타입 부분의 이름만 있고, 그 목적·만드는 방법·히어로·섹션 순서는 `replacements`에 한 번씩 있습니다. 여러 발견 항목이 같은 무브를 가리키기 때문입니다. 다시 빌드하고 감사를 한 번 더 돌린 뒤, `get_design_audit_plan.includeGroups`에 `"structure"`를 넣고 돌려받은 `evidence`와 `results`를 `validate_design_audit_result`에 넘기세요. 뷰포트마다 다른 `targetId`로 감사하세요. 증거 id에 `targetId`가 들어가므로 여러 실행 결과를 함께 검증할 수 있습니다. 이 검사는 브라우저 렌더링이 아니라 제출한 HTML과 CSS에 대한 결정적 휴리스틱입니다. `clean`은 모든 검사가 실행되었고 이 패턴들을 찾지 못했다는 뜻이지, 디자인이 통과했다는 뜻이 아닙니다. 스타일별 지침(아키타입과 무브)은 카탈로그의 `layout`·`typography` 필드처럼 영어로 작성되어 있고, 패턴 이름과 안내 문장은 `locale`을 따릅니다.
 
 모든 발견 항목과 검사에는 `claim`이 있고, `summary.claims`는 claim별 발견 수를 셉니다. 형태 자체는 과업의 결함이 아니기 때문입니다.
 
@@ -324,13 +329,19 @@ MCP는 제출된 증거의 범위와 일관성을 검사하고 **실제 파일 �
       "replaceWith": {
         "instruction": "첫 화면으로 옮기세요. 검사에서는 페이지 더 아래에서만 찾았는데 '장바구니 담기'은(는) 첫 화면에 있어서, 이 정보를 보기 전에 행동할 수 있습니다. 상품명 옆에 통화와 함께 가격을 보여 주세요. 용량마다 가격이 다르면 고른 용량의 가격을 보여 주세요.",
         "moves": [
-          {"id":"gold-chosen-slot-book","name":"Appointment book with one gold slot","build":"Under a 1px ivory top rule, each day is a row of minmax(0, 2.6fr) for the date (bold day over a muted date) and eight 1fr slots, each 64px tall with a 1px left rule and its time in Bodoni Moda 500 at 1.3125rem with tabular numerals; a stronger 50% ivory rule marks the lunch gap. Taken times go #7f7b73 with a 1px strike-through, hover tints a slot to 7% ivory over 160ms, and the chosen slot alone gets a 12% gold wash, a 1px inset gold line and gold text. Below, the chosen time repeats large at clamp(2rem, 3.4vw, 2.75rem) in columns 1-5 beside a form in columns 7-12 (name and phone side by side, the watch on a full-width line) with underlined inputs and one solid ivory rectangular button.","purpose":"Makes booking a choice of a real free time, with the choice confirmed in gold and restated large before anyone types."}
+          { "id": "gold-chosen-slot-book", "name": "Appointment book with one gold slot" }
         ],
-        "archetype": { "hero": "A one-line headline naming the actual service, Bodoni Moda …" }
+        "archetype": "hero"
       }
     }
     // 나머지 2개: must-have/variant-choice, must-have/purchase-assurance
-  ]
+  ],
+  "replacements": {
+    "moves": {
+      "gold-chosen-slot-book": { "name": "Appointment book with one gold slot", "purpose": "Makes booking a choice of a real free time, with the choice confirmed in gold and restated large before anyone types.", "build": "Under a 1px ivory top rule, each day is a row of minmax(0, 2.6fr) for …" }
+    },
+    "hero": "A one-line headline naming the actual service, Bodoni Moda 500 at …"
+  }
 }
 ```
 

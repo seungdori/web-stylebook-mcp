@@ -65,6 +65,7 @@ import {
 import { ok, errorResult, type ToolResult } from './result.js';
 import { StartUiDesignError, renderStartUiDesign, startUiDesign, type StartUiDesignInput } from '../start/start-ui-design.js';
 import { COPY_LIMITS, auditCopy, renderCopyAudit, type AuditCopyInput } from '../copy/audit.js';
+import { renderStructureAudit } from '../structure/render.js';
 import { COPY_PATTERNS } from '../copy/lexicon.js';
 import { ToolError, nearestIds } from './errors.js';
 import { FOUNDATIONS } from '../foundations/catalog.js';
@@ -1125,36 +1126,6 @@ function renderPrinciplePlan(p: UxPrinciplePlan): string {
   }
   if (!p.principles.length) lines.push('', labels.noMatches);
   lines.push('', ...p.guidance.map((item) => `- ${item}`));
-  return lines.join('\n');
-}
-
-const structureLabels: Record<Lang, {
-  title: string; clean: string; findings: string; replace: string; moves: string; checks: string; limits: string;
-  mustHaves: string; missing: string; misplaced: string; none: string;
-}> = {
-  en: { title: 'Page structure audit', clean: 'No banned pattern was found.', findings: 'Findings', replace: 'Replace with', moves: 'Moves', checks: 'Checks', limits: 'Limits', mustHaves: 'Must-haves', missing: 'Missing', misplaced: 'Not on the first screen', none: 'none' },
-  ko: { title: '페이지 구조 감사', clean: '금지 패턴을 찾지 못했습니다.', findings: '발견 항목', replace: '대체 방법', moves: '무브', checks: '검사', limits: '한계', mustHaves: '필수 요소', missing: '없음', misplaced: '첫 화면 밖', none: '없음' },
-  ja: { title: 'ページ構造の監査', clean: '禁止パターンは見つかりませんでした。', findings: '検出項目', replace: '置き換え', moves: 'ムーブ', checks: '検査', limits: '限界', mustHaves: '必須要素', missing: 'なし', misplaced: 'ファーストビューの外', none: 'なし' },
-};
-
-function renderStructureAudit(r: StructureAuditResult, locale: Lang): string {
-  const labels = structureLabels[locale];
-  const lines = [
-    `# ${labels.title}${r.styleId ? ` — ${r.styleId}` : ''}`,
-    `${labels.checks}: ${r.summary.checked} · ${labels.findings}: ${r.summary.findings} (major ${r.summary.major}, minor ${r.summary.minor}) · inputHash ${r.identity.inputHash}`,
-  ];
-  if (r.mustHaves && r.mustHaves.items.length) {
-    const names = (ids: readonly string[]) => (ids.length
-      ? ids.map((id) => r.mustHaves!.items.find((item) => item.id === id)!.name).join(', ') : labels.none);
-    lines.push('', `${labels.mustHaves} (${r.mustHaves.productType}, ${r.mustHaves.page}): ${labels.missing}: ${names(r.mustHaves.missing)} · ${labels.misplaced}: ${names(r.mustHaves.misplaced)}`);
-  }
-  if (!r.findings.length) lines.push('', labels.clean);
-  for (const finding of r.findings) {
-    lines.push('', `- [${finding.severity}] ${finding.patternId} — ${finding.name} @ ${finding.locations[0] ?? ''}${finding.count > 1 ? ` (+${finding.count - 1})` : ''}`,
-      `  ${labels.replace}: ${finding.replaceWith.instruction}`);
-    if (finding.replaceWith.moves.length) lines.push(`  ${labels.moves}: ${finding.replaceWith.moves.map((move) => `${move.name} — ${move.build}`).join(' | ')}`);
-  }
-  lines.push('', `${labels.limits}:`, ...r.limits.map((limit) => `- ${limit}`), '', ...r.guidance);
   return lines.join('\n');
 }
 

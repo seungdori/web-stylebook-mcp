@@ -34,7 +34,13 @@ describe.each([
       for (const key of ['scope', 'severity', 'observed'] as const) expect(item[key], `${item.patternId}.${key}`).toEqual(actual[key]);
       expect(item.replaceWith.instruction).toBe(actual.replaceWith.instruction);
       expect(item.replaceWith.moves).toEqual(actual.replaceWith.moves);
-      expect(actual.replaceWith.archetype!.hero.startsWith(item.replaceWith.archetype.hero.replace(/\s*…$/, ''))).toBe(true);
+      expect(item.replaceWith.archetype).toBe(actual.replaceWith.archetype);
+    }
+    expect(real.replacements.hero!.startsWith(shown.replacements.hero.replace(/\s*…$/, ''))).toBe(true);
+    for (const [id, move] of Object.entries(shown.replacements.moves as Record<string, { name: string; purpose: string; build: string }>)) {
+      const actual = real.replacements.moves[id]!;
+      expect({ name: move.name, purpose: move.purpose }, id).toEqual({ name: actual.name, purpose: actual.purpose });
+      expect(actual.build.startsWith(move.build.replace(/\s*…$/, '')), id).toBe(true);
     }
     const named = block.match(/must-have\/[a-z-]+/g) ?? [];
     expect([...new Set(named)].sort()).toEqual(realFindings.map((finding) => finding.patternId).sort());

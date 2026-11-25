@@ -37,11 +37,15 @@ describe.each([
         if (key in item) expect(item[key], `${item.patternId}.${key}`).toEqual(actual[key]);
       }
       if (item.replaceWith.instruction) expect(item.replaceWith.instruction).toBe(actual.replaceWith.instruction);
-      if (item.replaceWith.moves) {
-        expect(item.replaceWith.moves).toEqual(actual.replaceWith.moves.map(({ id, name, purpose }) => ({ id, name, purpose })));
-      }
-      if (item.replaceWith.archetype) expect(item.replaceWith.archetype).toEqual(actual.replaceWith.archetype);
+      if (item.replaceWith.moves) expect(item.replaceWith.moves).toEqual(actual.replaceWith.moves);
+      if (item.replaceWith.archetype) expect(item.replaceWith.archetype).toBe(actual.replaceWith.archetype);
     }
+    for (const [id, move] of Object.entries(shown.replacements.moves as Record<string, { name: string; purpose: string; build: string }>)) {
+      const actual = real.replacements.moves[id]!;
+      expect({ name: move.name, purpose: move.purpose }, id).toEqual({ name: actual.name, purpose: actual.purpose });
+      expect(actual.build.startsWith(move.build.replace(/\s*…$/, '')), id).toBe(true);
+    }
+    if (shown.replacements.sectionOrder) expect(shown.replacements.sectionOrder).toEqual(real.replacements.sectionOrder);
     const shownIds = shown.findings.map((item: { patternId: string }) => item.patternId);
     expect([...shownIds, ...others].sort()).toEqual(real.findings.map((finding) => finding.patternId).sort());
   });
