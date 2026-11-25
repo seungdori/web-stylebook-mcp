@@ -124,6 +124,10 @@ export const GLOBAL_PATTERNS: readonly GlobalPatternDef[] = [
         id: 'dominant-media',
         text: `That image is the opening's dominant visual: declared width ≥ ${T.photoMinWidthPx}px or ≥ 50%, object-fit cover, absolutely filling the section, or the section's own background image.`,
       },
+      {
+        id: 'credited-source',
+        text: "When the page names the photo's stock site (its name in visible text, as in \"Photo by … on Unsplash\", or a link to the site), the photo is an observation, not a defect: judge whether it shows the product's own place, material or use. Placeholder services are never credited.",
+      },
     ],
   },
   {

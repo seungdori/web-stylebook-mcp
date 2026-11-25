@@ -194,6 +194,8 @@ const labels: Record<Lang, {
   limits: { heuristics: string; notAPass: string; truncated: (n: number) => string; unparsed: (n: number) => string; exhausted: string };
   guidance: string[];
   shape: { unjudged: string; guidance: string };
+  /** A stock-photo hero whose source the page names: an observation to judge against the product (plan 5.1). */
+  credited: { note: string; fix: string };
   supersededBy: (id: string) => string;
   mustHave: {
     status: Record<MustHaveAuditStatus, string>;
@@ -227,6 +229,10 @@ const labels: Record<Lang, {
     shape: {
       unjudged: 'This is a shape observation: whether it gets in the way of the page\'s task was not checked.',
       guidance: 'Without a styleId, global findings are shape observations, not defects. Judge each against the page\'s task (who uses it, for what, and what the shape hides or delays), keep shapes that serve the task, and submit that judgment as manual evidence with PASS, RISK, or FIX_NOW. Pass styleId to check fidelity to a chosen direction instead.',
+    },
+    credited: {
+      note: 'The page names the photo\'s stock site, so this is an observation: judge whether the photo shows this product\'s own place, material or use, and record it as manual evidence, or with a styleId as DOM evidence that supersedes this item with your reason.',
+      fix: 'Keep the photo only if it shows this product\'s own place, material or use, and replace a stock stand-in with the business\'s own photo when one exists; otherwise show the product\'s real artifact in this style\'s hero composition.',
     },
     supersededBy: (id) => `reported under ${id}`,
     mustHave: {
@@ -266,6 +272,10 @@ const labels: Record<Lang, {
       unjudged: '형태를 관찰한 결과입니다. 이 형태가 페이지의 과업을 방해하는지는 확인하지 않았습니다.',
       guidance: 'styleId가 없으면 전역 발견 항목은 결함이 아니라 형태 관찰입니다. 항목마다 페이지의 과업(누가, 무엇을 하려고 쓰는지, 이 형태가 무엇을 가리거나 늦추는지)에 비추어 판단하세요. 과업에 맞는 형태는 유지하세요. 판단은 manual 증거로 PASS, RISK, FIX_NOW와 함께 제출하세요. 고른 방향에 대한 충실도를 보려면 styleId를 넘기세요.',
     },
+    credited: {
+      note: '페이지가 사진의 스톡 사이트를 밝혀서 관찰 항목입니다. 사진이 이 제품의 실제 장소·소재·쓰임을 보여 주는지 판단하세요. 판단은 manual 증거로, styleId가 있으면 이 항목을 이유와 함께 대체(supersedes)하는 DOM 증거로 제출하세요.',
+      fix: '사진이 이 제품의 실제 장소·소재·쓰임을 보여 줄 때만 두고, 업체가 직접 찍은 사진이 생기면 스톡 사진을 그것으로 바꾸세요. 그렇지 않으면 이 스타일의 히어로 구성 안에 제품의 실제 결과물을 보여 주세요.',
+    },
     supersededBy: (id) => `${id} 항목으로 보고함`,
     mustHave: {
       status: { present: '있음', misplaced: '첫 화면 밖', missing: '없음', 'not-verified': '확인 못 함', 'not-applicable': '해당 없음' },
@@ -303,6 +313,10 @@ const labels: Record<Lang, {
     shape: {
       unjudged: '形を観察した結果です。この形がページのタスクを妨げるかは確認していません。',
       guidance: 'styleIdがない場合、グローバルの検出項目は欠陥ではなく形の観察です。項目ごとに、ページのタスク(誰が何のために使うか、この形が何を隠したり遅らせたりするか)に照らして判断してください。タスクに合う形は残してください。判断はmanual証拠としてPASS、RISK、FIX_NOWと一緒に提出してください。選んだ方向への忠実度を確かめるにはstyleIdを渡してください。',
+    },
+    credited: {
+      note: 'ページが写真のストックサイトを示しているため観察項目です。写真がこの製品の実際の場所・素材・使われ方を示しているか判断してください。判断は manual 証拠として、styleId があればこの項目を理由付きで置き換える (supersedes) DOM 証拠として提出してください。',
+      fix: '写真がこの製品の実際の場所・素材・使われ方を示すときだけ残し、事業者自身の写真ができたらストック写真をそれに置き換えてください。そうでなければ、このスタイルのヒーロー構成の中で製品の実際の成果物を見せてください。',
     },
     supersededBy: (id) => `${id}として報告`,
     mustHave: {
@@ -418,7 +432,7 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
   const global = detectGlobalPatterns(page);
   const reports: StructureCheckReport[] = [];
   const findings: StructureFinding[] = [];
-  const statuses = new Map<string, { status: DetectionStatus; check?: StructureCheckDef; name: string }>();
+  const statuses = new Map<string, { status: DetectionStatus; check?: StructureCheckDef; name: string; credited?: boolean }>();
 
   const describe = (status: DetectionStatus): { report: StructureCheckStatus; count: number; note?: string } => {
     // Rules the matcher never applied could hide a pattern, reveal a hidden one, or hide the opening itself, so no
@@ -440,8 +454,10 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
     const { report, count, note } = describe(status);
     const superseding = pattern.supersededBy?.find((id) => global.get(id)?.status === 'found' && !allowed[id]);
     const check = checkDefs.get(checkId)!;
-    reports.push({ patternId: pattern.id, checkId, scope: 'global', claim: check.claim, status: report, count, ...(note ? { note } : superseding && report === 'found' ? { note: label.supersededBy(superseding) } : {}) });
-    statuses.set(checkId, { status, check, name: text(pattern.name, locale) });
+    // A stock-photo hero whose source the page names is an observation, whatever the style (plan 5.1).
+    const credited = report === 'found' && status.status === 'found' && pattern.id === 'stock-photo-hero' && status.matches.every((match) => match.observed.credited === true);
+    reports.push({ patternId: pattern.id, checkId, scope: 'global', claim: credited ? 'shape-observation' : check.claim, status: report, count, ...(note ? { note } : superseding && report === 'found' ? { note: label.supersededBy(superseding) } : credited ? { note: label.credited.note } : {}) });
+    statuses.set(checkId, { status, check, name: text(pattern.name, locale), credited });
     if (status.status !== 'found' || report !== 'found' || superseding) continue;
     const locations = status.matches.slice(0, LOCATIONS).map((match) => selectorPath(match.element));
     const moves = movesFor(pattern.job, styleId);
@@ -450,7 +466,7 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
       patternId: pattern.id,
       checkId,
       scope: 'global',
-      claim: check.claim,
+      claim: credited ? 'shape-observation' : check.claim,
       name: text(pattern.name, locale),
       severity: pattern.severity,
       count: status.matches.length,
@@ -459,7 +475,7 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
       observed: status.matches[0]!.observed,
       why: text(pattern.description, locale),
       replaceWith: {
-        instruction: check.remediation + (styleId ? '' : ` ${label.noStyle}`),
+        instruction: (credited ? label.credited.fix : check.remediation) + (styleId ? '' : ` ${label.noStyle}`),
         moves,
         ...(archetype ? { archetype } : {}),
       },
@@ -545,7 +561,10 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
     const shape = report.claim === 'shape-observation';
     // For a shape observation the DOM shows only where the shape is: no shape means the check does not apply, and a
     // found shape cannot tell whether the task suffers.
-    const outcome: StructureEvidence['outcome'] = report.status === 'found' ? (shape ? 'cant-tell' : 'failed')
+    // A credited stock hero meets the source criterion but the DOM cannot tell whether the scene shows the product, so
+    // the host judges it: manual evidence without a styleId, or DOM evidence that supersedes this item with a reason.
+    const credited = entry?.credited === true;
+    const outcome: StructureEvidence['outcome'] = credited ? 'cant-tell' : report.status === 'found' ? (shape ? 'cant-tell' : 'failed')
       : report.status === 'absent' ? (shape ? 'inapplicable' : 'passed')
         : report.status === 'not-verified' ? 'cant-tell' : 'inapplicable';
     const name = entry?.name ?? report.patternId;
@@ -562,15 +581,17 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
       producer,
     });
     if (!entry?.check) continue;
-    const verdict = verdictFor(report.status, entry.check);
+    const verdict = credited ? 'NOT_VERIFIED' : verdictFor(report.status, entry.check);
     results.push({
       checkId: report.checkId,
       targetId,
       verdict,
       evidenceRefs: [evidenceId],
-      rationale: report.status === 'found' ? label.foundAt(name, report.count) + (shape ? ` ${label.shape.unjudged}` : '')
-        : report.status === 'absent' ? label.absent(name) : `${name}: ${report.note ?? label.status[report.status]}`,
-      ...(verdict === 'FIX_NOW' || verdict === 'RISK' || (shape && report.status === 'found') ? { remediation: entry.check.remediation } : {}),
+      rationale: credited ? `${label.foundAt(name, report.count)} ${label.credited.note}`
+        : report.status === 'found' ? label.foundAt(name, report.count) + (shape ? ` ${label.shape.unjudged}` : '')
+          : report.status === 'absent' ? label.absent(name) : `${name}: ${report.note ?? label.status[report.status]}`,
+      ...(credited ? { remediation: label.credited.fix }
+        : verdict === 'FIX_NOW' || verdict === 'RISK' || (shape && report.status === 'found') ? { remediation: entry.check.remediation } : {}),
     });
   }
 

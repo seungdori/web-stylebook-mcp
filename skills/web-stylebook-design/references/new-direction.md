@@ -92,7 +92,7 @@ The existing-UI implementation and comparison workflow in SKILL.md takes precede
    `NOT_APPLICABLE` / `NOT_VERIFIED`; every `PASS` needs observed evidence, and missing evidence is
    `NOT_VERIFIED`, never an inferred pass. Include the opening's **furniture-check** when applicable:
    if the visual is generic
-   furniture (a stock photo, an abstract shape, or a card you could paste onto another product)
+   furniture (an unrelated stock photo, an abstract shape, or a card you could paste onto another product)
    rather than a bespoke product demonstration, or the copy column is the full quartet, recompose.
    Run **`audit_page_structure`** on each built page's rendered HTML and CSS with the chosen `styleId`
    and the same `productType` you passed to `recommend_design_direction`. Replace every finding with the
@@ -179,8 +179,10 @@ reflex with a method plus a gate that targets genericness, not column count.
    - **horizon / architectural** — a structural line or grid organizes above/below, not copy-vs-visual.
 3. **Furniture-check: does the visual earn its half?** (mandatory; gate at step 11). A two-column
    "copy + visual" opening is fine — *only* when the visual earns it. It **FAILS** if the other side
-   is **generic furniture**: a stock photo, an abstract blob / gradient / 3D shape, generic app
-   chrome, or a card / panel you could paste onto a *different* product by swapping the logo. It
+   is **generic furniture**: an unrelated stock photo, an abstract blob / gradient / 3D shape, generic app
+   chrome, or a card / panel you could paste onto a *different* product by swapping the logo. A credited
+   photo of this product's own place, material or use (a restaurant's dishes and room, the product in use)
+   is not furniture; `audit_page_structure` reports it as an observation for you to judge. It
    **passes** only if that side is a **bespoke demonstration of THIS product's core mechanic** — its
    actual input→output with realistic domain content, such that swapping the product would make the
    visual nonsensical. A decorative bridge (a "seam", a connecting thread, an overlapping chip) does
@@ -224,7 +226,7 @@ The fastest "AI smell" is filler content dressed as substance. Hold the line:
   representatives + "see all →"). A headline number with three cards reads as a lie.
 - **No formulaic opening.** Compose the first screen via *the one thing* + the furniture-check
   (above). Two columns are fine when the visual is a **bespoke product demonstration**; they fail when
-  it's **generic furniture** (stock photo / abstract blob / a card you could paste onto another
+  it's **generic furniture** (unrelated stock photo / abstract blob / a card you could paste onto another
   product) — and a decorative seam bridging the columns doesn't launder a generic visual. Avoid the
   all-text centered-stack and giant-word defaults too. Cap opening prose at a headline + one short
   line + one action.
@@ -301,7 +303,7 @@ do not turn a mnemonic or systems maxim into a scientific claim.
   drop them for a cleaner opening.
 - **Direction = starting tone, not a mold** — compose the components THIS brief needs and adapt the
   style (fonts, grid, structure) to fit; never ship a generic "page in style X."
-- **The opening's visual is a product demonstration, not furniture** — a stock photo, abstract blob,
+- **The opening's visual is a product demonstration, not furniture** — an unrelated stock photo, abstract blob,
   or a card you could paste onto another product fails (a decorative seam bridging it doesn't change
   that); two columns are fine when the visual earns its half. Keep the copy column off the full
   eyebrow + headline + sub + buttons quartet. Enumerate three structurally-distinct openings and

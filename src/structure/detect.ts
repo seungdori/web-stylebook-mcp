@@ -235,6 +235,38 @@ function proxiedUrls(url: string): string[] {
   return out;
 }
 
+/** Stock sites by host, with the name a credit uses. Placeholder services have none: they are never credited. */
+const STOCK_BRANDS: ReadonlyArray<readonly [string, RegExp]> = [
+  ['unsplash.com', /unsplash/i], ['pexels.com', /pexels/i], ['pixabay.com', /pixabay/i], ['shutterstock.com', /shutterstock/i],
+  ['istockphoto.com', /istock/i], ['gettyimages.com', /getty\s*images/i], ['gettyimages.co.uk', /getty\s*images/i],
+  ['stock.adobe.com', /adobe\s*stock/i], ['ftcdn.net', /adobe\s*stock/i], ['freepik.com', /freepik/i],
+  ['depositphotos.com', /depositphotos/i], ['dreamstime.com', /dreamstime/i], ['123rf.com', /123rf/i],
+  ['stocksnap.io', /stocksnap/i], ['burst.shopify.com', /burst/i],
+];
+const hostOf = (url: string) => /^(?:https?:)?\/\/([^/?#]+)/i.exec(url.trim())?.[1]?.toLowerCase().replace(/:\d+$/, '');
+const creditCache = new WeakMap<PageModel, { text: string; linkHosts: string[] }>();
+
+/**
+ * Whether the page names the stock site an image comes from: its name in the visible text ("Photo by … on Unsplash",
+ * "사진: Unsplash") or a link to the site. 2026-11-25 design-quality plan, 5.1: a credited stock photo is an
+ * observation to judge against the product, not a defect by its shape.
+ */
+export function creditsStockSource(page: PageModel, url: string): boolean {
+  const host = proxiedUrls(url).map(hostOf).find((candidate) => candidate && STOCK_BRANDS.some(([site]) => candidate === site || candidate.endsWith(`.${site}`)));
+  const brand = host ? STOCK_BRANDS.find(([site]) => host === site || host.endsWith(`.${site}`)) : undefined;
+  if (!brand) return false;
+  let seen = creditCache.get(page);
+  if (!seen) {
+    const body = page.html.elements.find((element) => element.tag === 'body') ?? page.html.root;
+    seen = {
+      text: textContent(body),
+      linkHosts: descendants(body).filter((element) => element.tag === 'a').map((element) => hostOf(element.attrs.get('href') ?? '') ?? ''),
+    };
+    creditCache.set(page, seen);
+  }
+  return brand[1].test(seen.text) || seen.linkHosts.some((linked) => linked === brand[0] || linked.endsWith(`.${brand[0]}`));
+}
+
 export function isStockSource(url: string): boolean {
   return proxiedUrls(url).some((candidate) => {
     const host = /^(?:https?:)?\/\/([^/?#]+)/i.exec(candidate)?.[1]?.toLowerCase().replace(/:\d+$/, '');
@@ -275,7 +307,7 @@ function detectStockPhoto(page: PageModel): DetectionStatus {
     const fills = isPositionedOut(page, media) && ['top', 'left'].every((side) => (lengthPx(page.styles.pick(media, [side, 'inset'])?.value?.split(/\s+/)[0], page.ctx) ?? 1) === 0);
     const dominant = node === opening || widthPx >= T.photoMinWidthPx || percent >= 50 || cover || fills
       || (node.tag !== 'img' && node.tag !== 'source' && (sizePx(page, node, 'height') ?? 0) >= 320);
-    if (dominant) matches.push({ element: media, observed: { source: stock.slice(0, 200), widthPx, cover, sectionBackground: node === opening } });
+    if (dominant) matches.push({ element: media, observed: { source: stock.slice(0, 200), widthPx, cover, sectionBackground: node === opening, credited: creditsStockSource(page, stock) } });
   }
   return found(matches.slice(0, 1));
 }
