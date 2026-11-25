@@ -6,34 +6,29 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.21.0] — 2026-11-25
+
 ### Added
 
-- Copy guidance: `webstylebook://copy/guide/{locale}` gives rules for buttons, empty states, errors,
-  loading, confirmations, numbers and register, and a voice for each of the 14 product types (Korean
-  register, person, sentence length, tone, a primary button, what to avoid, and a sample hero, empty
-  state and error). `webstylebook://copy/patterns/{locale}` lists 24 patterns to check page text
-  against in English, Korean and Japanese. Template lines that the 2026-11-25 landing pages shared,
-  such as a setup-in-minutes line or a stop-doing-it closing CTA, are observations; a user count or
-  percentage outcome without a source is fix-now. Tool responses are unchanged.
 - `start_ui_design`, the entry tool for a new page or screen. One call returns the top three
-  directions, the chosen style's hero, section order, signature moves and bans, the page's must-haves,
-  the authored fonts and two alternative pairings with `<link>` tags and CSS font stacks, a photo plan
-  (whether to use photos, what to look for on Unsplash or Pexels, and how to credit them; terms read on
-  2026-11-25), a copy brief and the next calls with their arguments. Pass `styleId` to build with
-  another style. The whole result stays within 16 KiB for every style, page role, language and
-  product type.
+  directions, the chosen style's structure and the page's must-haves, the fonts with loading code, a
+  photo plan (when to use photos, what to look for on Unsplash or Pexels, how to credit them), a copy
+  brief and the next calls. The result stays within 16 KiB (#51).
+- Copy guidance: `webstylebook://copy/guide/{locale}` gives rules for buttons, empty states, errors and
+  register and a voice for each of the 14 product types; `webstylebook://copy/patterns/{locale}` lists
+  24 patterns to check page text against in English, Korean and Japanese (#50).
 
 ### Changed
 
-- The on-init instructions, the `webstylebook://workflows/new-ui` resource and `manifest.newUiWorkflow`
-  send a new page to `start_ui_design` first. `recommend_design_direction` is unchanged and its
-  description now says to call it after `start_ui_design` for more directions.
-- `compose_design_tokens` is unchanged.
+- The on-init instructions, `webstylebook://workflows/new-ui` and `manifest.newUiWorkflow` send a new
+  page to `start_ui_design` first. `recommend_design_direction` works as before; call it after
+  `start_ui_design` for more directions (#51).
+- The server has 15 tools (was 14); the MCP bundle `manifest.json` lists the new one (#51).
 
-### For maintainers
+### Unchanged
 
-- `npm run visual:benchmark` checks the largest `start_ui_design` result (text and
-  `structuredContent`) against a 16 KiB budget.
+- `compose_design_tokens`, the catalog snapshot, its hashes and the dependencies are the same as in
+  0.20.0.
 
 ## [0.20.0] — 2026-11-25
 
