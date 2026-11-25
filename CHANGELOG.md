@@ -40,7 +40,7 @@ All notable changes to this project are documented here. The format follows
   JSON and markdown. CI runs it on the repository fixtures, and a snapshot test keeps the result.
   `--experiment <dir>` reads a before/after folder without writing to it (#63).
 - `npm run build` and `prepack` write the compressed snapshots (`scripts/pack-generated.mjs`). The packed
-  package is 1,171,830 B in CI (#64).
+  package is 1,171,832 B in CI (#64).
 
 ### Unchanged
 
