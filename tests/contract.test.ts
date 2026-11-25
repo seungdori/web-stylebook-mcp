@@ -30,10 +30,10 @@ describe('MCP contract', () => {
     expect(instructions).toContain('read-only');
   });
 
-  it('exposes exactly the 15 compute tools, all read-only and without an outputSchema', async () => {
+  it('exposes exactly the 16 compute tools, all read-only and without an outputSchema', async () => {
     const { tools } = await client.listTools();
     expect(tools.map((t) => t.name).sort()).toEqual([
-      'audit_page_structure',
+      'audit_copy', 'audit_page_structure',
       'compare_design_directions', 'compare_page_revisions', 'compose_design_tokens', 'get_design_audit_plan',
       'get_design_improvement_plan', 'get_design_principle_plan', 'get_design_reference', 'get_ui_state_plan',
       'get_ux_principle_plan',
@@ -78,7 +78,7 @@ describe('MCP contract', () => {
     expect(body.domains).toContain('design-principles');
     expect(body.domains).toContain('principles');
     expect(body.domains).toContain('references');
-    expect(body.tools).toHaveLength(15);
+    expect(body.tools).toHaveLength(16);
     expect(body.structure).toMatchObject({ schema: 'webstylebook.structure.v1', styles: 48, catalogStyles: 48, globalBannedPatterns: 9 });
     expect(body.structure.rulesetHash).toMatch(/^sha256:[0-9a-f]{64}$/);
     expect(body.resourceUriTemplates).toContain('webstylebook://design-principles/{id}');

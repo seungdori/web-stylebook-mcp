@@ -169,7 +169,7 @@ export function startUiDesign(input: StartUiDesignInput, repo: CatalogRepository
       { resource: `webstylebook://styles/${styleId}${locale === 'en' ? '' : `?locale=${locale}`}`, when: 'build steps of the moves and ban criteria' },
       { tool: 'get_ui_state_plan', arguments: { surfaceId: '<a webstylebook://states/surfaces id>', styleId, locale }, when: 'for each surface that loads data or takes input' },
       { tool: 'audit_page_structure', arguments: { html: '<rendered HTML>', css: ['<page CSS>'], styleId, ...(auditType ? { productType: auditType } : {}), locale }, when: 'after building' },
-      { resource: `webstylebook://copy/patterns/${locale}`, when: 'check the page text before finishing' },
+      { tool: 'audit_copy', arguments: { html: '<rendered HTML>', locale, productType: ctx.productType.value }, when: 'check the page text before finishing' },
       { tool: 'get_design_audit_plan', when: 'then validate_design_audit_result with real evidence' },
       { resource: NEW_UI_WORKFLOW_URI, when: 'full workflow; recommend_design_direction compares more directions' },
     ],

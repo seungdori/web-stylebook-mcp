@@ -38,6 +38,7 @@
     { "name": "get_ux_principle_plan", "description": "Plan relevant UX principles" },
     { "name": "get_design_audit_plan", "description": "Build an evidence-backed design audit plan" },
     { "name": "audit_page_structure", "description": "Audit a built page for banned structural patterns" },
+    { "name": "audit_copy", "description": "Audit page copy for template lines" },
     { "name": "compare_page_revisions", "description": "Check that a redesign kept the original page's content and behavior" },
     { "name": "validate_design_audit_result", "description": "Validate a design audit result contract" },
     { "name": "get_ui_state_plan", "description": "Plan UI states for a surface" },

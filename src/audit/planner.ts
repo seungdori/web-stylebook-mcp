@@ -22,13 +22,16 @@ import type {
   UxSurface,
 } from '../types.js';
 import { PRODUCT_TYPES } from '../types.js';
+import { copyChecks, type CopyCheckClaim } from '../copy/audit.js';
+import { assetChecks } from '../structure/assets.js';
 
 export const AUDIT_GROUP_IDS = [
-  'build', 'layout', 'fidelity', 'content', 'behavior', 'principles', 'docs', 'anti-patterns', 'structure',
+  'build', 'layout', 'fidelity', 'content', 'behavior', 'principles', 'docs', 'anti-patterns', 'structure', 'copy', 'assets',
 ] as const;
 export type AuditGroupId = (typeof AUDIT_GROUP_IDS)[number];
-/** `structure` is opt-in so that plans requested without includeGroups keep their earlier checks and hash. */
-export const DEFAULT_AUDIT_GROUP_IDS: readonly AuditGroupId[] = AUDIT_GROUP_IDS.filter((group) => group !== 'structure');
+/** The tool-answered groups are opt-in so that plans requested without includeGroups keep their earlier checks and hash. */
+const OPT_IN_GROUP_IDS: readonly AuditGroupId[] = ['structure', 'copy', 'assets'];
+export const DEFAULT_AUDIT_GROUP_IDS: readonly AuditGroupId[] = AUDIT_GROUP_IDS.filter((group) => !OPT_IN_GROUP_IDS.includes(group));
 export const REVISION_GROUP_IDS: readonly AuditGroupId[] = ['structure', 'behavior'];
 
 export const AUDIT_VERDICTS = [
@@ -66,6 +69,8 @@ export interface ResolvedAuditCheck {
   surfaceTags: UxSurface[];
   source: AuditCheckDefinition['source']
     | { kind: 'structure'; patternId: string; scope: 'global' | 'style' | 'must-have'; claim: StructureClaim }
+    | { kind: 'copy'; patternId: string; claim: CopyCheckClaim }
+    | { kind: 'assets'; checkId: string }
     | { kind: 'revision'; inventory: string }
     | { kind: 'principle'; principle: 'design' | 'ux'; principleId: string; verifyIndex: number; method: VerifyMethodClass };
   /** Present on principle verify checks: an asserted verdict needs conclusive evidence gathered by one of these methods. */
@@ -406,9 +411,9 @@ export function planDesignAudit(
     if (!(PRODUCT_TYPES as readonly string[]).includes(input.productType)) {
       throw new AuditPlanError(`productType must be one of: ${PRODUCT_TYPES.join(', ')}`);
     }
-    // Must-have checks are answered by audit_page_structure, so they belong to the structure group.
-    if (!includeGroups.includes('structure')) {
-      throw new AuditPlanError('productType adds must-have checks to the "structure" group; include "structure" in includeGroups');
+    // Must-have checks are answered by audit_page_structure (structure group); the product voice by audit_copy (copy group).
+    if (!includeGroups.includes('structure') && !includeGroups.includes('copy')) {
+      throw new AuditPlanError('productType adds must-have checks to the "structure" group and voice checks to the "copy" group; include one of them in includeGroups');
     }
   }
   try {
@@ -478,6 +483,36 @@ export function planDesignAudit(
       source: { kind: 'structure', patternId: check.patternId, scope: check.scope, claim: check.claim },
     }))
     : [];
+  const copy: ResolvedAuditCheck[] = !revision && includeGroups.includes('copy')
+    ? copyChecks(locale, input.productType).map((check) => ({
+      id: check.id,
+      groupId: 'copy',
+      criterion: check.criterion,
+      why: check.why,
+      remediation: check.remediation,
+      severity: check.severity,
+      evidenceTypes: [...check.evidenceTypes],
+      automation: check.claim === 'observation' ? 'assisted' : 'automated',
+      applicability: check.applicability,
+      surfaceTags: ['global'],
+      source: { kind: 'copy', patternId: check.patternId, claim: check.claim },
+    }))
+    : [];
+  const assets: ResolvedAuditCheck[] = !revision && includeGroups.includes('assets')
+    ? assetChecks(input.styleId, locale).map((check) => ({
+      id: check.id,
+      groupId: 'assets',
+      criterion: check.criterion,
+      why: check.why,
+      remediation: check.remediation,
+      severity: check.severity,
+      evidenceTypes: [...check.evidenceTypes],
+      automation: 'automated',
+      applicability: check.applicability,
+      surfaceTags: ['global'],
+      source: { kind: 'assets', checkId: check.id },
+    }))
+    : [];
   const revisionPlan: ResolvedAuditCheck[] = revision
     ? revisionChecks(input.productType).filter((check) => includeGroups.includes(check.groupId)).map((check) => ({
       id: check.id,
@@ -496,7 +531,7 @@ export function planDesignAudit(
     ...designPrincipleIds.map((id) => principleVerifyChecks('design', repo.getDesignPrinciple(id)!, locale, labels[locale].verificationFix)),
     ...uxPrincipleIds.map((id) => principleVerifyChecks('ux', repo.getPrinciple(id)!, locale, labels[locale].verificationFix)),
   ].flat();
-  const checks = [...catalogChecks, ...principleChecks, ...structure, ...revisionPlan];
+  const checks = [...catalogChecks, ...principleChecks, ...structure, ...copy, ...assets, ...revisionPlan];
 
   const stateAtlasUnmappedSurfaces: UxSurface[] = surfaces
     .filter((surface) => surface !== 'global' && !repo.getSurface(surface));

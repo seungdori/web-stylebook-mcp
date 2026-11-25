@@ -248,34 +248,60 @@ export interface CopyHit {
   count?: number;
 }
 
-/** Check page text, split into units (headings, sentences, buttons, labels), against the patterns for one language. */
-export function findCopyPatterns(units: readonly string[], locale: Lang): CopyHit[] {
-  const texts = units.map((unit) => unit.replace(/\s+/g, ' ').trim()).filter(Boolean);
-  const hits: CopyHit[] = [];
+/** A text unit and where it sits: a selector path for page markup, a line number for plain text. */
+export interface CopyUnit { text: string; where: string }
+
+export interface LocatedCopyHit {
+  patternId: string;
+  verdict: CopyVerdict;
+  kind: CopyMatch['kind'];
+  /** Matching units for a unit pattern; occurrences for a count pattern; sentences in either register for a mix. */
+  count: number;
+  matches: Array<{ where: string; text: string; match: string }>;
+}
+
+const normalize = (text: string) => text.replace(/\s+/g, ' ').trim();
+const SENTENCE = /(?<=[.!?。！？])\s*/u;
+
+/** Every pattern of one language that the units show, with where each match is, in pattern order. */
+export function locateCopyPatterns(units: readonly CopyUnit[], locale: Lang): LocatedCopyHit[] {
+  const texts = units.map((unit) => ({ ...unit, text: normalize(unit.text) })).filter((unit) => unit.text);
+  const hits: LocatedCopyHit[] = [];
   for (const entry of COPY_PATTERNS) {
     if (!entry.locales.includes(locale)) continue;
     const { match } = entry;
+    const base = { patternId: entry.id, verdict: entry.verdict, kind: match.kind };
     if (match.kind === 'unit') {
       const re = new RegExp(match.pattern, `u${match.flags ?? ''}`);
       const exempt = match.exempt ? new RegExp(match.exempt, 'iu') : undefined;
-      for (const text of texts) {
-        if (re.test(text) && !exempt?.test(text)) hits.push({ patternId: entry.id, verdict: entry.verdict, units: [text] });
-      }
+      const matches = texts.flatMap((unit) => {
+        const found = re.exec(unit.text);
+        return found && !exempt?.test(unit.text) ? [{ where: unit.where, text: unit.text, match: found[0] }] : [];
+      });
+      if (matches.length) hits.push({ ...base, count: matches.length, matches });
     } else if (match.kind === 'count') {
       const re = new RegExp(match.pattern, 'gu');
-      const carrying = texts.map((text) => [text, text.match(re)?.length ?? 0] as const).filter(([, n]) => n > 0);
-      const count = carrying.reduce((sum, [, n]) => sum + n, 0);
-      if (count > match.maxPerPage) hits.push({ patternId: entry.id, verdict: entry.verdict, units: carrying.map(([text]) => text), count });
+      const matches = texts.flatMap((unit) => [...unit.text.matchAll(re)].map((found) => ({ where: unit.where, text: unit.text, match: found[0] })));
+      if (matches.length > match.maxPerPage) hits.push({ ...base, count: matches.length, matches });
     } else {
       const skip = match.skip ? new RegExp(match.skip, 'u') : undefined;
-      const sentences = texts.flatMap((text) => (skip?.test(text) ? [] : text.split(/(?<=[.!?。！？])\s*/u))).filter(Boolean);
-      const first = sentences.filter((text) => new RegExp(match.first, 'u').test(text));
-      const second = sentences.filter((text) => new RegExp(match.second, 'u').test(text));
+      const sentences = texts.flatMap((unit) => (skip?.test(unit.text) ? [] : unit.text.split(SENTENCE).filter(Boolean).map((text) => ({ where: unit.where, text }))));
+      const first = sentences.filter((sentence) => new RegExp(match.first, 'u').test(sentence.text));
+      const second = sentences.filter((sentence) => new RegExp(match.second, 'u').test(sentence.text));
       const minority = Math.min(first.length, second.length);
       if (minority >= match.minEach && minority / (first.length + second.length) >= match.minShare) {
-        hits.push({ patternId: entry.id, verdict: entry.verdict, units: [...first, ...second], count: first.length + second.length });
+        // The less used register is what to rewrite, so its sentences come first.
+        const [few, many] = first.length <= second.length ? [first, second] : [second, first];
+        hits.push({ ...base, count: first.length + second.length, matches: [...few, ...many].map((sentence) => ({ ...sentence, match: sentence.text })) });
       }
     }
   }
   return hits;
+}
+
+/** Check page text, split into units (headings, sentences, buttons, labels), against the patterns for one language. */
+export function findCopyPatterns(units: readonly string[], locale: Lang): CopyHit[] {
+  return locateCopyPatterns(units.map((text, index) => ({ text, where: String(index) })), locale).flatMap((hit) => (hit.kind === 'unit'
+    ? hit.matches.map((found) => ({ patternId: hit.patternId, verdict: hit.verdict, units: [found.text] }))
+    : [{ patternId: hit.patternId, verdict: hit.verdict, units: [...new Set(hit.matches.map((found) => found.text))], count: hit.count }]));
 }
