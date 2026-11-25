@@ -475,6 +475,25 @@ cursor://anysphere.cursor-deeplink/mcp/install?name=web-stylebook&config=eyJjb21
 
 스킬을 지원하지 않는 에이전트라면 [`skills/AGENTS.md`](../skills/AGENTS.md)(Codex)나
 [`skills/CLAUDE.md`](../skills/CLAUDE.md)(Claude Code와 기타 rules 파일)를 프로젝트의 rules 파일에 복사하세요.
+두 블록 모두 새 페이지 흐름을 `start_ui_design`으로 시작합니다. Claude Code는 MCP 도구를 불러오기 전까지
+이름만 보여 줍니다. 그래서 `skills/CLAUDE.md`의 첫 줄에 `mcp__web-stylebook__start_ui_design`을 적었습니다.
+
+Cursor에서는 아래 규칙을 `.cursor/rules/web-stylebook.mdc`로 추가하세요. `alwaysApply: true`이면 Cursor가
+모든 채팅에 이 규칙을 넣고 `globs`는 무시합니다. 그래서 규칙에 `globs`를 넣지 않았습니다.
+
+```markdown
+---
+description: Call Web Stylebook before writing UI code
+alwaysApply: true
+---
+
+Before writing HTML, CSS, JSX or other UI code for a new page or screen, call `start_ui_design`
+(web-stylebook MCP server) once with the product context and `pageRole`. If tools are listed by
+name only, load it first. For dashboards and charts, use it with your chart skill. Call
+`compose_design_tokens` when you write CSS or a theme. After building, run `audit_page_structure`
+and `audit_copy` on the rendered page, fix what they find, then call `get_design_audit_plan` and
+`validate_design_audit_result`.
+```
 
 ## 툴
 
@@ -595,7 +614,10 @@ webstylebook://copy/guide/{locale} · /copy/patterns/{locale}
 
 자주 쓰는 워크플로우용 MCP 프롬프트:
 
-`improve-ui` · `design-product` · `design-screen` · `complete-ui-states` · `redesign-with-style` · `audit-design-direction` · `audit-design-principles` · `audit-ux-principles`
+`build-page` · `improve-ui` · `design-product` · `design-screen` · `complete-ui-states` · `redesign-with-style` · `audit-design-direction` · `audit-design-principles` · `audit-ux-principles`
+
+`build-page`는 `product`, `pageRole`, `locale`을 받아 새 페이지 하나를 `start_ui_design`부터
+`audit_page_structure`, `audit_copy`를 거쳐 `validate_design_audit_result`까지 진행합니다.
 
 `improve-ui`는 기존 화면의 구현·전후 비교 흐름을 시작합니다. 일상적인 재승인 대신 실행을
 막는 정보만 질문합니다. `audit-design-direction`은 명시적인 검토용이며 범위를 생략하면

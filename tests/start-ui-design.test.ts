@@ -9,7 +9,7 @@ import { createWebStylebookServer } from '../src/server.js';
 import { ENTRY_TOOL, SERVER_INSTRUCTIONS } from '../src/server-info.js';
 import { PAGE_ROLES } from '../src/recommendation/page-roles.js';
 import { COPY_PATTERNS } from '../src/copy/lexicon.js';
-import { START_UI_DESIGN_BUDGET_BYTES, startUiDesign } from '../src/start/start-ui-design.js';
+import { START_UI_DESIGN_BUDGET_BYTES, renderStartUiDesign, startUiDesign } from '../src/start/start-ui-design.js';
 import { PHOTO_PLANS } from '../src/start/photos.js';
 
 const repo = CatalogRepository.load();
@@ -94,13 +94,26 @@ describe('start_ui_design results', () => {
     expect(startUiDesign({ productDescription: 'A product page', productType: 'developer-tool', pageRole: 'product-detail' }, repo).photos.use).toBe(false);
     const shop = startUiDesign({ productDescription: 'A product page for a hand blender', productType: 'commerce', pageRole: 'product-detail', locale: 'ja' }, repo).photos;
     expect(shop.use).toBe(true);
-    if (!('slots' in shop)) throw new Error('expected photo slots');
+    if (!shop.use) throw new Error('expected photo slots');
     expect(shop.slots.map((slot) => slot.slot)).toEqual(['hero', 'detail', 'scale']);
     expect(shop.credit).toContain('Photo by {name} on {Source}');
     expect(shop.termsChecked).toBe('2026-11-25');
     const portfolio = startUiDesign({ productDescription: 'My design portfolio', productType: 'portfolio', pageRole: 'portfolio' }, repo).photos;
-    if (!('slots' in portfolio)) throw new Error('expected photo slots');
+    if (!portfolio.use) throw new Error('expected photo slots');
     expect(portfolio.slots.every((slot) => slot.own && !slot.query)).toBe(true);
+  });
+
+  it('write the photo rules in the requested language, in both channels', () => {
+    const script = { en: /^[\x20-\x7e]+$/, ko: /[가-힣]/, ja: /[ぁ-んァ-ン]/ } as const;
+    for (const locale of LOCALES) {
+      const result = startUiDesign({ productDescription: 'A product page for a hand blender', productType: 'commerce', pageRole: 'product-detail', locale }, repo);
+      if (!result.photos.use) throw new Error('expected photo slots');
+      for (const field of ['pick', 'credit', 'dont', 'markup', 'fallback'] as const) {
+        expect(result.photos[field], `${locale} ${field}`).toMatch(script[locale]);
+      }
+      expect(result.photos.credit).toContain('Photo by {name} on {Source}');
+      expect(renderStartUiDesign(result)).toContain(result.photos.credit);
+    }
   });
 
   it('keep the product must-haves off pages that are not the product main page', () => {

@@ -5,6 +5,7 @@ import { createWebStylebookServer } from '../src/server.js';
 import { CatalogRepository } from '../src/catalog/repository.js';
 import { recommendDesignDirection } from '../src/recommendation/index.js';
 import { planDesignAudit } from '../src/audit/planner.js';
+import { PROMPT_NAMES } from '../src/server-info.js';
 
 let client: Client;
 
@@ -594,16 +595,30 @@ describe('MCP contract', () => {
     }
   });
 
-  it('lists 8 prompts and renders one', async () => {
+  it('lists 9 prompts and renders one', async () => {
     const { prompts } = await client.listPrompts();
     expect(prompts.map((p) => p.name).sort()).toEqual([
-      'audit-design-direction', 'audit-design-principles', 'audit-ux-principles',
+      'audit-design-direction', 'audit-design-principles', 'audit-ux-principles', 'build-page',
       'complete-ui-states', 'design-product', 'design-screen', 'improve-ui', 'redesign-with-style',
     ]);
+    expect([...PROMPT_NAMES].sort()).toEqual(prompts.map((p) => p.name).sort());
     const got = await client.getPrompt({ name: 'design-product', arguments: { product: 'SRE dashboard' } });
     expect(got.messages[0]!.content.type).toBe('text');
-    expect((got.messages[0]!.content as any).text).toContain('recommend_design_direction');
+    expect((got.messages[0]!.content as any).text).toMatch(/^1\. start_ui_design/m);
     expect((got.messages[0]!.content as any).text).toContain('get_design_principle_plan');
     expect((got.messages[0]!.content as any).text).toContain('get_ux_principle_plan');
+  });
+
+  it('build-page walks one page from start_ui_design to validate_design_audit_result', async () => {
+    const got = await client.getPrompt({ name: 'build-page', arguments: { product: 'a payments API', pageRole: 'marketing-landing', locale: 'ko' } });
+    const text = (got.messages[0]!.content as any).text as string;
+    const order = ['start_ui_design', 'compose_design_tokens', 'audit_page_structure', 'audit_copy', 'get_design_audit_plan', 'validate_design_audit_result'];
+    const at = order.map((tool) => text.indexOf(tool));
+    expect(at.every((index) => index >= 0), text).toBe(true);
+    expect([...at].sort((a, b) => a - b)).toEqual(at);
+    expect(text).toContain('"a payments API"');
+    expect(text).toContain('marketing-landing');
+    expect(text).toContain('locale "ko"');
+    await expect(client.getPrompt({ name: 'build-page', arguments: { product: 'x', pageRole: 'homepage' } })).rejects.toThrow();
   });
 });

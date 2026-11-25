@@ -55,7 +55,7 @@ describe('stock-photo hero with a credited source', () => {
   });
 
   it('keeps start_ui_design, the asset check and the pattern criteria saying the same thing', () => {
-    expect(PHOTO_RULES.credit).toMatch(/uncredited stock hero is a defect; a credited one, an observation/);
+    expect(PHOTO_RULES.credit.en).toMatch(/uncredited stock hero is a defect; a credited one, an observation/);
     const result = stock(R3).result;
     const report = result.checks.find((entry) => entry.patternId === 'stock-photo-hero')!;
     expect(report).toMatchObject({ claim: 'shape-observation', status: 'found' });

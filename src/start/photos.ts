@@ -194,12 +194,33 @@ export const SOFTWARE_PRODUCT_TYPES: ReadonlySet<ProductType> = new Set([
   'healthcare-portal', 'ai-chat', 'knowledge-base',
 ]);
 
+/** The licence terms read on termsChecked, and how a page credits and marks up a stock photo. */
 export const PHOTO_RULES = {
   termsChecked: '2026-11-25',
   licenses: { unsplash: 'https://unsplash.com/license', pexels: 'https://www.pexels.com/license/' },
-  pick: 'Pick photos on unsplash.com or pexels.com and download them; their APIs add attribution, hotlink and tracking duties.',
-  credit: 'Credit each stock photo as "Photo by {name} on {Source}", linking the photographer and the photo, in a figcaption or the footer credits. The licences ask it only through the APIs. An uncredited stock hero is a defect; a credited one, an observation.',
-  dont: 'Do not imply that people or brands shown endorse the product, use a photo as a logo, or show identifiable people in a bad light.',
-  markup: 'Give every <img> a width and height and an alt that says what it shows; a decorative image gets alt="".',
-  fallback: 'No fitting photo: leave the slot out and use the product screen or type, never a gray box.',
-};
+  pick: {
+    en: 'Pick photos on unsplash.com or pexels.com and download them; their APIs add attribution, hotlink and tracking duties.',
+    ko: 'unsplash.com이나 pexels.com에서 사진을 골라 내려받으세요. API로 받으면 출처 표기, 핫링크, 추적 의무가 생깁니다.',
+    ja: 'unsplash.com か pexels.com で写真を選んでダウンロードしてください。API で取得すると、クレジット、ホットリンク、トラッキングの義務が加わります。',
+  },
+  credit: {
+    en: 'Credit each stock photo as "Photo by {name} on {Source}", linking the photographer and the photo, in a figcaption or the footer credits. The licences ask it only through the APIs. An uncredited stock hero is a defect; a credited one, an observation.',
+    ko: '스톡 사진마다 "Photo by {name} on {Source}"로 출처를 적고 사진가와 사진에 링크를 거세요. figcaption이나 푸터 크레딧에 둡니다. 라이선스는 API로 받을 때만 이를 요구합니다. 출처가 없는 스톡 히어로는 결함이고, 출처가 있으면 관찰 항목입니다.',
+    ja: 'ストック写真ごとに「Photo by {name} on {Source}」とクレジットを入れ、撮影者と写真にリンクしてください。figcaption かフッターのクレジットに置きます。ライセンスがこれを求めるのは API 経由のときだけです。クレジットのないストック写真のヒーローは欠陥で、クレジットがあれば観察項目です。',
+  },
+  dont: {
+    en: 'Do not imply that people or brands shown endorse the product, use a photo as a logo, or show identifiable people in a bad light.',
+    ko: '사진 속 사람이나 브랜드가 제품을 보증하는 것처럼 보이게 하지 마세요. 사진을 로고로 쓰거나 알아볼 수 있는 사람을 나쁘게 보이게 하지도 마세요.',
+    ja: '写っている人やブランドが製品を推薦しているように見せないでください。写真をロゴに使ったり、特定できる人を悪く見せたりもしないでください。',
+  },
+  markup: {
+    en: 'Give every <img> a width and height and an alt that says what it shows; a decorative image gets alt="".',
+    ko: '모든 <img>에 width, height와 무엇을 보여 주는지 적은 alt를 주세요. 장식용 이미지는 alt=""입니다.',
+    ja: 'すべての <img> に width と height、写っているものを説明する alt を付けてください。装飾用の画像は alt="" にします。',
+  },
+  fallback: {
+    en: 'No fitting photo: leave the slot out and use the product screen or type, never a gray box.',
+    ko: '맞는 사진이 없으면 그 자리를 빼고 제품 화면이나 글자로 채우세요. 회색 상자는 쓰지 마세요.',
+    ja: '合う写真がなければその枠を外し、製品の画面か文字で組んでください。灰色の箱は使わないでください。',
+  },
+} satisfies { termsChecked: string; licenses: Record<'unsplash' | 'pexels', string> } & Record<'pick' | 'credit' | 'dont' | 'markup' | 'fallback', LocalizedText>;

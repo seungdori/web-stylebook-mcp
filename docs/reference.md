@@ -471,7 +471,26 @@ candidates; earn trust, don't fake it; land on reusable components). [Install](#
 
 If your agent has no skill support, copy [`skills/AGENTS.md`](../skills/AGENTS.md) (Codex) or
 [`skills/CLAUDE.md`](../skills/CLAUDE.md) (Claude Code and other rules files) into your project's
-rules file.
+rules file. Both start the new-page flow with `start_ui_design`. Claude Code shows MCP tools by name
+only until it loads them, so the first line of `skills/CLAUDE.md` names
+`mcp__web-stylebook__start_ui_design`.
+
+In Cursor, add this rule as `.cursor/rules/web-stylebook.mdc`. With `alwaysApply: true`, Cursor
+includes it in every chat and ignores `globs`, so the rule has none:
+
+```markdown
+---
+description: Call Web Stylebook before writing UI code
+alwaysApply: true
+---
+
+Before writing HTML, CSS, JSX or other UI code for a new page or screen, call `start_ui_design`
+(web-stylebook MCP server) once with the product context and `pageRole`. If tools are listed by
+name only, load it first. For dashboards and charts, use it with your chart skill. Call
+`compose_design_tokens` when you write CSS or a theme. After building, run `audit_page_structure`
+and `audit_copy` on the rendered page, fix what they find, then call `get_design_audit_plan` and
+`validate_design_audit_result`.
+```
 
 ## Tools
 
@@ -590,7 +609,10 @@ Foundation detail accepts one optional `locale=en|ko|ja` parameter. `manifest.de
 
 Ready-made MCP prompts for common workflows:
 
-`improve-ui` · `design-product` · `design-screen` · `complete-ui-states` · `redesign-with-style` · `audit-design-direction` · `audit-design-principles` · `audit-ux-principles`
+`build-page` · `improve-ui` · `design-product` · `design-screen` · `complete-ui-states` · `redesign-with-style` · `audit-design-direction` · `audit-design-principles` · `audit-ux-principles`
+
+`build-page` takes `product`, `pageRole` and `locale` and walks one new page from `start_ui_design`
+through `audit_page_structure` and `audit_copy` to `validate_design_audit_result`.
 
 `improve-ui` starts the implementation/comparison workflow for existing interfaces. It asks only for
 missing information that blocks execution, not routine reapproval. `audit-design-direction` is an

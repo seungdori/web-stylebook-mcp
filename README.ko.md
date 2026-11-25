@@ -156,9 +156,9 @@ Windsurf, Claude Desktop 설정은 [레퍼런스](./docs/reference.ko.md#설치)
 마무리합니다. 전후 스크린샷, 바꾼 점과 이유, 실행한 확인, 확인하지 못한 부분을 받게 됩니다.
 
 새 페이지라면 제품을 설명하세요. 예를 들어 *"결제 API의 랜딩 페이지"*처럼요. 에이전트는
-`start_ui_design`으로 시작합니다. 이 도구는 상위 방향, 페이지 구조, 로딩 코드가 붙은 글꼴, 사진 계획,
-문구 지침을 한 번에 줍니다. `recommend_design_direction`은 순위를 매긴 후보 전체와 제외한 후보를 이유와
-함께 보여 줍니다.
+`start_ui_design`으로 방향, 페이지 구조, 글꼴, 사진 계획, 문구 지침을 받고, 테마가 필요하면
+`compose_design_tokens`를 호출합니다. 페이지를 만든 뒤에는 `audit_page_structure`와 `audit_copy`로
+페이지를 점검하고, `validate_design_audit_result`로 확인 결과를 기록합니다.
 
 리뷰만 요청하면 에이전트는 아무것도 고치지 않고 점검 결과만 보고합니다.
 
