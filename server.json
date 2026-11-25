@@ -8,7 +8,7 @@
     "url": "https://github.com/seungdori/web-stylebook-mcp",
     "source": "github"
   },
-  "version": "0.18.1",
+  "version": "0.19.0",
   "icons": [
     {
       "src": "https://webstylebook.com/favicon.svg",
@@ -21,7 +21,7 @@
       "registryType": "npm",
       "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "web-stylebook-mcp",
-      "version": "0.18.1",
+      "version": "0.19.0",
       "runtimeHint": "npx",
       "transport": {
         "type": "stdio"

@@ -6,28 +6,30 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
-### Changed
-
-- The on-init server instructions are 1,414 characters (were 7,111; Claude Code shows the first
-  4,096). They open with the rule for any new page or screen, including dashboards, docs and
-  settings: call `recommend_design_direction` first. The existing-UI flow is one sentence that
-  points to `webstylebook://workflows/improve-ui`.
-- The full new-page workflow and composition guidance moved, unchanged, to the new resource
-  `webstylebook://workflows/new-ui` (`manifest.newUiWorkflow`). The existing-UI guidance is served
-  as `guidance` in `webstylebook://workflows/improve-ui`.
-- Every tool description starts with when to call the tool.
+## [0.19.0] — 2026-11-25
 
 ### Added
 
 - `pageRole` on `recommend_design_direction` and `compare_design_directions` says what the page or
-  screen does (`marketing-landing`, `app-promo`, `product-detail`, `pricing`, `signup`,
-  `dashboard`, `data-table`, `settings`, `docs`, `blog-article`, `portfolio`,
-  `restaurant-local`). Without a stated `density` or `usageFrequency`, the page role sets them
-  instead of the product type, and product fit also counts the product type whose job the page
-  does (a landing page does a `campaign`'s). When omitted, it is inferred from page names in the
-  description in English, Korean and Japanese. A marketing landing page for an `operational-saas`
-  product no longer gets an operations-dashboard style first. Briefs that name no page rank as
-  before.
+  screen does, such as `marketing-landing`, `dashboard`, `docs` or `settings` (12 roles). When
+  omitted, it is inferred from a page name in the description (English, Korean, Japanese). The page
+  role sets the default density and usage frequency and adds the product type the page serves, so
+  a landing page for an `operational-saas` product no longer gets a dashboard style first. Briefs
+  that name no page rank as before (#46).
+- The resource `webstylebook://workflows/new-ui` (`manifest.newUiWorkflow`) holds the new-page
+  workflow and the composition guidance, and `webstylebook://workflows/improve-ui` has a
+  `guidance` field with the existing-UI guidance (#45).
+
+### Changed
+
+- The on-init server instructions are 1,424 characters (were 7,111). They open with the rule for
+  any new page or screen: call `recommend_design_direction` first. The detailed guidance moved,
+  unchanged, to the two workflow resources above (#45).
+- Every tool description starts with when to call the tool (#45).
+
+### Unchanged
+
+- The catalog snapshot, its hashes and the dependencies are the same as in 0.18.1.
 
 ## [0.18.1] — 2026-11-25
 
