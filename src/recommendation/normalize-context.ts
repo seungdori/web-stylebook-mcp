@@ -4,6 +4,7 @@ import type {
 import type { CatalogRepository } from '../catalog/repository.js';
 import type { ProductContext, ResolvedContext, ResolvedFacet, FacetSource } from './types.js';
 import { contentKeys } from './lexicon.js';
+import { PAGE_ROLES, PAGE_ROLE_PROFILES, type PageRole } from './page-roles.js';
 
 function norm(s: string): string {
   return s.normalize('NFKC').toLowerCase();
@@ -83,6 +84,18 @@ export function normalizeContext(raw: ProductContext, repo: CatalogRepository): 
 
   const archetype = repo.getProduct(productType.value);
 
+  let pageRole: ResolvedFacet<PageRole> | undefined;
+  if (raw.pageRole) {
+    pageRole = facet(raw.pageRole, 'explicit');
+  } else {
+    const m = matchPageRole(norm(raw.productDescription));
+    if (m) {
+      pageRole = facet(m.value, 'inferred', `matched "${m.alias}"`);
+      assumptions.push(`pageRole inferred as ${m.value} (from "${m.alias}")`);
+    }
+  }
+  const role = pageRole ? PAGE_ROLE_PROFILES[pageRole.value] : undefined;
+
   let tones: ResolvedFacet<Tone[]>;
   if (raw.tone && raw.tone.length) {
     tones = facet(raw.tone, 'explicit');
@@ -96,11 +109,14 @@ export function normalizeContext(raw: ProductContext, repo: CatalogRepository): 
     }
   }
 
+  // A page role decides how dense the page is and how often it is used before the product type does: a landing page
+  // for an operational product is read once, not worked in all day.
   const density = resolveOrdinal<Density>(
-    raw.density, archetype?.defaultDensity, 'medium', 'density', assumptions, !!archetype,
+    raw.density, archetype?.defaultDensity, 'medium', 'density', assumptions, !!archetype, role && pageRole && { value: role.density, role: pageRole.value },
   );
   const usageFrequency = resolveOrdinal<UsageFrequency>(
     raw.usageFrequency, archetype?.defaultUsageFrequency, 'occasional', 'usageFrequency', assumptions, !!archetype,
+    role && pageRole && { value: role.usageFrequency, role: pageRole.value },
   );
   const trustSensitivity = resolveOrdinal<TrustLevel>(
     raw.trustSensitivity, archetype?.defaultTrust, 'medium', 'trustSensitivity', assumptions, !!archetype,
@@ -127,17 +143,33 @@ export function normalizeContext(raw: ProductContext, repo: CatalogRepository): 
   const requestKeys = contentKeys([raw.productDescription, ...(raw.audience ?? []), ...(raw.primaryTasks ?? [])].join(' '));
 
   return {
-    productType, tones, density, usageFrequency, trustSensitivity, primaryTaskTags,
+    productType, ...(pageRole ? { pageRole } : {}), tones, density, usageFrequency, trustSensitivity, primaryTaskTags,
     constraints, avoidStyleIds, avoidAestheticTerms, avoidedStyleIdsViaAesthetic, requestKeys,
     assumptions, missingInformation,
   };
 }
 
+/** The page role whose aliases the description names, preferring the longest (most specific) alias. */
+function matchPageRole(text: string): { value: PageRole; alias: string } | null {
+  let best: { value: PageRole; alias: string; len: number } | null = null;
+  for (const value of PAGE_ROLES) {
+    for (const alias of PAGE_ROLE_PROFILES[value].aliases) {
+      const nn = norm(alias);
+      if (needleMatches(nn, text) && (!best || nn.length > best.len)) best = { value, alias, len: nn.length };
+    }
+  }
+  return best ? { value: best.value, alias: best.alias } : null;
+}
+
 function resolveOrdinal<T extends string>(
   explicit: T | undefined, archetypeDefault: T | undefined, globalDefault: T,
-  name: string, assumptions: string[], hasArchetype: boolean,
+  name: string, assumptions: string[], hasArchetype: boolean, roleDefault?: { value: T; role: PageRole } | false,
 ): ResolvedFacet<T> {
   if (explicit) return { value: explicit, source: 'explicit' };
+  if (roleDefault) {
+    assumptions.push(`${name} defaulted to ${roleDefault.value} (page role ${roleDefault.role})`);
+    return { value: roleDefault.value, source: 'inferred', evidence: `page role ${roleDefault.role}` };
+  }
   if (archetypeDefault && hasArchetype) {
     assumptions.push(`${name} defaulted to ${archetypeDefault} (product archetype)`);
     return { value: archetypeDefault, source: 'inferred', evidence: 'archetype default' };

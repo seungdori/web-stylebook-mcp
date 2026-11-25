@@ -17,6 +17,18 @@ All notable changes to this project are documented here. The format follows
   as `guidance` in `webstylebook://workflows/improve-ui`.
 - Every tool description starts with when to call the tool.
 
+### Added
+
+- `pageRole` on `recommend_design_direction` and `compare_design_directions` says what the page or
+  screen does (`marketing-landing`, `app-promo`, `product-detail`, `pricing`, `signup`,
+  `dashboard`, `data-table`, `settings`, `docs`, `blog-article`, `portfolio`,
+  `restaurant-local`). Without a stated `density` or `usageFrequency`, the page role sets them
+  instead of the product type, and product fit also counts the product type whose job the page
+  does (a landing page does a `campaign`'s). When omitted, it is inferred from page names in the
+  description in English, Korean and Japanese. A marketing landing page for an `operational-saas`
+  product no longer gets an operations-dashboard style first. Briefs that name no page rank as
+  before.
+
 ## [0.18.1] — 2026-11-25
 
 ### Changed

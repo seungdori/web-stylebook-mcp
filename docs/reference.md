@@ -176,6 +176,8 @@ and [research record](./research/design-foundations.md) (in Korean). The machine
 
 Notice what it does: the candidates get separate scores (0.87, 0.86, 0.80), and `ranking` says why #1 beat #2 — here by one cent, because `runtime-signal` shares dark and tech traits with the avoided `cyberpunk-glitch`. A lead that small is still reported as a lead, and the agent weighs it against the product context. When the top two really do score alike, `ranking.tied` says so instead of inventing a winner. Rejected styles come with reason codes, and pairings are suggestions rather than a mandate. The server provides evidence; the agent decides.
 
+Tell it what the page does with `pageRole` (for example `marketing-landing`, `dashboard`, `settings`, `docs`, `product-detail`). A landing page for an `operational-saas` product is read once by a buyer, so without a stated `density` or `usageFrequency` the page role sets them instead of the product type, and the product fit also counts the job the page does (`campaign` for a landing page). When `pageRole` is omitted, it is inferred from page names in the description, such as "landing page", "랜딩 페이지" or "ランディングページ".
+
 Then turn the chosen direction into real tokens:
 
 ```jsonc

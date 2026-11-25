@@ -3,6 +3,7 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { PAGE_ROLES } from '../src/recommendation/page-roles.js';
 import { describe, expect, it } from 'vitest';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
@@ -67,9 +68,11 @@ describe('1. public contract stays backward compatible', () => {
     const tool = (await client.listTools()).tools.find((t) => t.name === 'recommend_design_direction')!;
     const schema = tool.inputSchema as { properties: Record<string, any>; required?: string[] };
     expect(Object.keys(schema.properties).sort()).toEqual([
-      'audience', 'avoid', 'candidateLimit', 'constraints', 'density', 'locale', 'primaryTasks',
+      'audience', 'avoid', 'candidateLimit', 'constraints', 'density', 'locale', 'pageRole', 'primaryTasks',
       'productDescription', 'productType', 'tone', 'trustSensitivity', 'usageFrequency',
     ]);
+    // pageRole (2026-11-25 plan PR 2) is optional, so existing calls keep validating.
+    expect(schema.properties.pageRole.enum).toEqual([...PAGE_ROLES]);
     expect(schema.required).toEqual(['productDescription']);
     expect(schema.properties.tone.items.enum).toEqual(['calm', 'technical', 'trustworthy', 'premium', 'editorial', 'playful', 'bold', 'experimental']);
     expect(schema.properties.candidateLimit).toMatchObject({ type: 'integer', minimum: 1, maximum: 10 });
