@@ -50,6 +50,7 @@ export const TOOL_NAMES = [
 ] as const;
 
 export const PROMPT_NAMES = [
+  'build-page',
   'improve-ui',
   'design-product',
   'design-screen',

@@ -337,7 +337,7 @@ export function registerTools(server: McpServer, repo: CatalogRepository): void 
 
   server.registerTool('compare_design_directions', {
     title: 'Compare design directions',
-    description: 'Call after recommend_design_direction when two to four candidate directions need a side-by-side comparison before you pick one. Compare 2-4 directions across product fit, repeated-use suitability, density, trust, distinctiveness, accessibility risk, motion and maintenance. Returns each direction\'s favorable conditions and likely failure mode — never a single winner.',
+    description: 'Call after start_ui_design or recommend_design_direction when two to four candidate directions need a side-by-side comparison before you pick one. Compare 2-4 directions across product fit, repeated-use suitability, density, trust, distinctiveness, accessibility risk, motion and maintenance. Returns each direction\'s favorable conditions and likely failure mode — never a single winner.',
     inputSchema: {
       directions: z.array(z.object({ primaryStyleId: z.string(), secondaryStyleId: z.string().optional() })).min(2).max(4),
       product: z.object(productContextShape).optional(),
@@ -511,7 +511,7 @@ export function registerTools(server: McpServer, repo: CatalogRepository): void 
       html: z.string().min(1).max(PAGE_LIMITS.htmlChars),
       css: z.array(z.string().max(PAGE_LIMITS.cssChars)).max(PAGE_LIMITS.cssFiles).optional(),
       styleId: z.string().min(1).max(100).optional(),
-      productType: z.enum(PRODUCT_TYPES).describe('the product type passed to recommend_design_direction; adds its must-have checks').optional(),
+      productType: z.enum(PRODUCT_TYPES).describe('the product type passed to start_ui_design; adds its must-have checks').optional(),
       mustHaveConditions: mustHaveConditionsSchema.optional(),
       targetId: z.string().trim().min(1).max(160).optional(),
       viewportWidth: z.number().int().min(PAGE_LIMITS.viewportMin).max(PAGE_LIMITS.viewportMax).optional(),

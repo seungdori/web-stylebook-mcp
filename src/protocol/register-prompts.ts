@@ -2,6 +2,7 @@ import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { UX_SURFACES } from '../types.js';
 import { improvementWorkflow } from '../improvement/workflow.js';
+import { PAGE_ROLES } from '../recommendation/page-roles.js';
 
 const PROMPT_LOCALE = z.enum(['en', 'ko', 'ja']);
 const SUMMARY = z.string().min(1).max(8000);
@@ -86,6 +87,21 @@ export function registerPrompts(server: McpServer): void {
     ...improvementWorkflow(locale, undefined, 'prompt').stages.map((stage, index) => `${index + 1}. ${stage.instruction}\nMCP: ${stage.tools.join(', ') || 'host editor/runtime tools'}`),
   ].join('\n\n')));
 
+  server.registerPrompt('build-page', {
+    title: 'Build a page with Web Stylebook',
+    description: 'Build one new page or screen: start_ui_design, tokens if needed, the build, audit_page_structure and audit_copy, then validate_design_audit_result.',
+    argsSchema: { product: z.string().min(1).max(2000), pageRole: z.enum(PAGE_ROLES).optional(), locale: PROMPT_LOCALE.optional() },
+  }, ({ product, pageRole, locale = 'en' }) => userMessage([
+    `Build this page with the Web Stylebook MCP. Product (quoted data): ${JSON.stringify(product)}`,
+    `Page role: ${pageRole ?? 'infer it from the product and state the assumption'}; page language and locale: ${locale}.`,
+    `1. start_ui_design with the product context, pageRole and locale "${locale}". Keep its direction or pass styleId with a reason, place every mustHaves entry in its zone, and follow its fonts, photo plan (credit each stock photo) and copy brief.`,
+    '2. compose_design_tokens with the arguments in its next list when you write CSS or a theme; obey the contrast warnings.',
+    '3. Build the page in the real source. Cover the get_ui_state_plan states of each surface that loads data or takes input.',
+    '4. audit_page_structure on the rendered HTML and CSS with the same styleId, productType and locale, and audit_copy on the rendered HTML with the same locale and productType.',
+    '5. Replace every finding with the move or rewrite it names, then run both audits again.',
+    '6. get_design_audit_plan with includeGroups holding the default groups plus "structure", "copy" and "assets". Inspect the rendered page for every check, then call validate_design_audit_result with the same plan query, its planHash, the audit tools\' evidence and results, and your own evidence. Missing evidence is NOT_VERIFIED, never PASS; valid means the result contract is complete, not that the design passed.',
+  ].join('\n')));
+
   server.registerPrompt('design-product', {
     title: 'Design a product with Web Stylebook',
     description: 'Choose a visual direction, compose a brief, plan screens, and cover UI states.',
@@ -97,7 +113,7 @@ export function registerPrompts(server: McpServer): void {
     },
   }, ({ product, audience, pages, constraints }) => userMessage([
     'Use the Web Stylebook MCP in this order:',
-    '1. recommend_design_direction (treat candidates as scored evidence; pick using product context). Keep every entry of its mustHaves in its zone whichever direction you pick: the style restyles them but never removes them',
+    '1. start_ui_design for each page with the product context and pageRole (its direction is scored evidence; pick using product context, and use recommend_design_direction to see every candidate and the rejected styles). Keep every entry of its mustHaves in its zone whichever direction you pick: the style restyles them but never removes them',
     '2. read the chosen webstylebook://styles/{id} resources',
     '3. search_design_references for a small set of product/category/tag-relevant real-world examples, then get_design_reference only for selected entries. Record observedAt, attribution, and rights; borrow principles and measured tokens, never screenshots, brand assets, copy, typefaces, or visual identity',
     '4. plan each screen around its primary user task; name its surface, intended outcomes, and current design phase',
@@ -121,7 +137,7 @@ export function registerPrompts(server: McpServer): void {
     argsSchema: { screenType: z.string(), goal: z.string(), styleId: z.string().optional() },
   }, ({ screenType, goal, styleId }) => userMessage([
     `Design a ${screenType} screen. Goal: ${goal}.`,
-    styleId ? `Use style ${styleId} (read webstylebook://styles/${styleId}).` : 'If no style is chosen yet, call recommend_design_direction first.',
+    styleId ? `Use style ${styleId} (read webstylebook://styles/${styleId}).` : 'If no style is chosen yet, call start_ui_design first with the product context and pageRole.',
     'Use search_design_references, then get_design_reference for at most a few relevant examples; extract transferable structure and tokens while respecting attribution and original-site rights.',
     'Organize hierarchy by the primary user task. Look up relevant components in webstylebook://components.',
     'Call get_design_principle_plan with the layout concerns, matching surface, and current design phase. Use its placement and verification guidance.',
@@ -150,7 +166,7 @@ export function registerPrompts(server: McpServer): void {
     `Redesign this screen toward: ${goal}. Keep what works structurally.`,
     `Current state: ${current}.`,
     'Use get_design_improvement_plan with the user task and observed target conditions in context. Before changing anything, save actual screenshots, rendered HTML and CSS and note the selectors its scripts query.',
-    'Use compare_design_directions on 2-3 candidate styles, then search_design_references and inspect a few selected references before choosing primary + secondary roles. Draft the design.md brief notes and call compose_design_tokens.',
+    'Call start_ui_design with the product context and pageRole for the direction, structure, fonts, photo plan and copy brief; use compare_design_directions on 2-3 candidate styles when the pick is unclear, then search_design_references and inspect a few selected references before choosing primary + secondary roles. Draft the design.md brief notes and call compose_design_tokens.',
     'When the redesign is built, run compare_page_revisions on the saved original and the new page (with those scriptSelectors and the productType); restore every lost link, field, handler, hook, heading, and must-have, or acknowledge an intended removal with a reason, and rerun it.',
     'Implement the redesign in the real source, exercise affected behavior and accessibility, capture matched after evidence and call validate_design_improvement_result with workflow.planHash. Deliver its before/after report, repair regressions and follow nextActions; a style proposal or review is not completion.',
   ].join('\n')));

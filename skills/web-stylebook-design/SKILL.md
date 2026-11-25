@@ -1,11 +1,12 @@
 ---
 name: web-stylebook-design
-description: Improve existing web UIs with researched design judgment, real source edits, verification, and an honest before/after report. Use when asked to improve, fix, polish, or redesign a page, screen, or component, or when a UI looks generic or AI-made. Also covers explicitly requested design reviews and new visual directions. Works with the Web Stylebook MCP server or, without it, its offline CLI.
+description: Build any page or screen, including dashboards, docs and settings, and improve existing web UIs with researched design judgment, real source edits, verification, and an honest report. A new page starts with start_ui_design, then compose_design_tokens if needed, the build, audit_page_structure and audit_copy, and validate_design_audit_result. Use before writing HTML, CSS or JSX for a page, screen, or component; when asked to improve, fix, polish, or redesign one; or when a UI looks generic or AI-made. Also covers explicitly requested design reviews. Works with the Web Stylebook MCP server or, without it, its offline CLI.
 ---
 
-# Improve the UI, compare the result, then report
+# Build or improve the UI, verify it, then report
 
-Use **Web Stylebook** before changing an existing UI. The default for an improvement or
+Use **Web Stylebook** before writing or changing UI. A new page or screen starts with
+`start_ui_design` ([below](#new-page-or-screen)). The default for an improvement or
 fix request is **inspect → decide → implement → verify → compare/report**. The host agent edits
 and runs the product with its available tools. Web Stylebook supplies knowledge and validates
 submitted evidence; it cannot access the repository, edit files, inspect pixels, or run
@@ -18,6 +19,7 @@ shell. The results are identical, and nothing leaves the machine:
 
 ```bash
 npx -y web-stylebook-mcp@latest tools                      # list the tools
+npx -y web-stylebook-mcp@latest call start_ui_design --input start-args.json
 npx -y web-stylebook-mcp@latest schema get_design_improvement_plan
 npx -y web-stylebook-mcp@latest call get_design_improvement_plan --input plan-args.json > plan.json
 npx -y web-stylebook-mcp@latest read webstylebook://workflows/improve-ui
@@ -157,9 +159,22 @@ The absence of internal jargon is not a pass. Inspect what the actual visible co
   scope, edit the real strings, re-check wrapping and hierarchy at target locales/viewports, and
   collect fresh evidence.
 
-## New builds and explicitly requested new directions
+## New page or screen
 
-Only for that mode, read [the new-direction workflow](references/new-direction.md): choose a
-product-fit direction, resolve material open decisions, build, and verify it. Honor an already
-chosen direction and existing authorization. Do not import that mode's composition or candidate
-approval steps into routine improvements of an existing UI.
+In Claude Code the tool is `mcp__web-stylebook__start_ui_design`; if tools are listed by name only,
+load it first (ToolSearch `select:mcp__web-stylebook__start_ui_design`). For dashboards and charts,
+use it with a chart skill.
+
+1. `start_ui_design` with the product context and `pageRole`: the direction, page structure,
+   must-haves, fonts, photo plan, copy brief and the next calls with their arguments.
+2. `compose_design_tokens` when you write CSS or a theme.
+3. Build, covering the `get_ui_state_plan` states of each surface that loads data or takes input.
+4. `audit_page_structure` on the rendered HTML and CSS and `audit_copy` on the rendered HTML; fix
+   every finding and run both again.
+5. `get_design_audit_plan` with the `structure`, `copy` and `assets` groups added, then
+   `validate_design_audit_result` with the real evidence.
+
+Read [the new-direction workflow](references/new-direction.md) for the full steps, the composition
+rules and when to show candidate directions. Honor an already chosen direction and existing
+authorization. Do not import that mode's composition or candidate approval steps into routine
+improvements of an existing UI.

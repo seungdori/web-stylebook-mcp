@@ -97,20 +97,26 @@ function fontsBlock(repo: CatalogRepository, styleId: string, ctx: ResolvedConte
 function photoPlan(role: PageRole | undefined, productType: ProductType, locale: Lang) {
   const base = role ? PHOTO_PLANS[role] : undefined;
   if (!base) {
-    return { use: false, reason: text({ en: 'No page role was given or found in the description; pass pageRole to get a photo plan.', ko: '페이지 역할이 없고 설명에서도 찾지 못했습니다. 사진 계획을 받으려면 pageRole을 주세요.', ja: 'ページの役割が指定されず、説明からも見つかりませんでした。写真の計画を受け取るには pageRole を指定してください。' }, locale) };
+    return { use: false as const, reason: text({ en: 'No page role was given or found in the description; pass pageRole to get a photo plan.', ko: '페이지 역할이 없고 설명에서도 찾지 못했습니다. 사진 계획을 받으려면 pageRole을 주세요.', ja: 'ページの役割が指定されず、説明からも見つかりませんでした。写真の計画を受け取るには pageRole を指定してください。' }, locale) };
   }
   if (role === 'product-detail' && SOFTWARE_PRODUCT_TYPES.has(productType)) {
-    return { use: false, reason: text({ en: 'A software product page shows the product screen, not a photo.', ko: '소프트웨어 제품 페이지는 사진 대신 제품 화면을 보여 줍니다.', ja: 'ソフトウェアの製品ページでは、写真ではなく製品の画面を見せます。' }, locale) };
+    return { use: false as const, reason: text({ en: 'A software product page shows the product screen, not a photo.', ko: '소프트웨어 제품 페이지는 사진 대신 제품 화면을 보여 줍니다.', ja: 'ソフトウェアの製品ページでは、写真ではなく製品の画面を見せます。' }, locale) };
   }
-  if (!base.use) return { use: false, reason: base.reason[locale] };
+  if (!base.use) return { use: false as const, reason: base.reason[locale] };
   return {
-    use: true,
+    use: true as const,
     reason: base.reason[locale],
     slots: base.slots.map((slot) => ({
       slot: slot.slot, subject: slot.subject[locale], avoid: slot.avoid[locale], orientation: slot.orientation,
       minWidth: slot.minWidth, ...(slot.query ? { query: slot.query } : {}), crop: slot.crop, alt: slot.alt[locale], own: slot.own,
     })),
-    ...PHOTO_RULES,
+    termsChecked: PHOTO_RULES.termsChecked,
+    licenses: PHOTO_RULES.licenses,
+    pick: PHOTO_RULES.pick[locale],
+    credit: PHOTO_RULES.credit[locale],
+    dont: PHOTO_RULES.dont[locale],
+    markup: PHOTO_RULES.markup[locale],
+    fallback: PHOTO_RULES.fallback[locale],
   };
 }
 
@@ -197,7 +203,7 @@ export function renderStartUiDesign(result: StartUiDesignResult): string {
     fence('html', [fonts.preconnect ?? '', fonts.authored.head].filter(Boolean).join('\n')), fence('css', fonts.authored.css),
     `Photos: ${photos.use ? 'yes' : 'no'}. ${photos.reason}`,
   ];
-  if (photos.use && 'slots' in photos) {
+  if (photos.use) {
     for (const slot of photos.slots) lines.push(`- ${slot.slot}${slot.own ? ' (own photo)' : ''}: ${slot.subject}${slot.query ? ` Search: "${slot.query.unsplash}"` : ''}`);
     lines.push(photos.credit);
   }

@@ -83,6 +83,7 @@ describe('audit M7 — unknown secondaryStyleId is rejected, not silently ignore
 describe('audit L12 — all workflow prompts render a non-empty user message', () => {
   let client: Client;
   const args: Record<string, Record<string, string>> = {
+    'build-page': { product: 'a payments API', pageRole: 'marketing-landing' },
     'improve-ui': { target: 'a cluttered form', goal: 'make errors recoverable' },
     'design-product': { product: 'a billing dashboard' },
     'design-screen': { screenType: 'data-table', goal: 'triage incidents' },
@@ -103,7 +104,7 @@ describe('audit L12 — all workflow prompts render a non-empty user message', (
       const res = await client.getPrompt({ name, arguments: a });
       const text = (res.messages[0]?.content as { text?: string }).text ?? '';
       expect(text.length, name).toBeGreaterThan(40);
-      expect(text, name).toMatch(/webstylebook:\/\/|recommend_design_direction|get_design_principle_plan|get_ux_principle_plan|get_ui_state_plan|get_design_audit_plan|compare_design_directions|compose_design_tokens|anti-patterns/);
+      expect(text, name).toMatch(/webstylebook:\/\/|start_ui_design|recommend_design_direction|get_design_principle_plan|get_ux_principle_plan|get_ui_state_plan|get_design_audit_plan|compare_design_directions|compose_design_tokens|anti-patterns/);
     }
   });
 

@@ -5,15 +5,17 @@ The existing-UI implementation and comparison workflow in SKILL.md takes precede
 
 ## New visual direction workflow
 
-1. **`recommend_design_direction`** — pass the product context (productType, tone, density,
-   usageFrequency, trustSensitivity, constraints, avoid). It returns **scored candidates** with
-   reason codes, **rejected** styles with reasons, secondary **pairings**, assumptions, and a
-   confidence. Treat `candidates` as evidence — *you* pick using product context; `candidates[0]`
-   is the strongest match, not a mandate. `ranking` says why #1 beat #2, or reports a tie; list the
-   most important tone first. Each candidate also carries **`structure`**: a layout archetype (hero
-   composition, grid, section order, density, type-scale use), 2-3 signature moves with their purpose
-   (the style resource in step 2 has their build steps), and the generic and style-specific patterns the
-   page audit will flag. Build the page from it. The top-level **`mustHaves`** lists the elements the
+1. **`start_ui_design`** — pass the product context (productType, tone, density, usageFrequency,
+   trustSensitivity, constraints, avoid) and `pageRole`, once per page. It returns the top three
+   directions, the chosen style's hero, section order, signature moves and bans, fonts with loading
+   code, a photo plan, a copy brief and the `next` calls with their arguments. Treat the direction as
+   evidence — *you* pick using product context; pass `styleId` to build with another style.
+   **`recommend_design_direction`** lists every **scored candidate** with reason codes, the
+   **rejected** styles with reasons, secondary **pairings** and each candidate's full **`structure`**;
+   `ranking` says why #1 beat #2, or reports a tie, and the most important tone goes first. The
+   structure is a layout archetype (hero composition, grid, section order, density, type-scale use),
+   2-3 signature moves with their purpose (the style resource in step 2 has their build steps), and the
+   generic and style-specific patterns the page audit will flag. Build the page from it. The top-level **`mustHaves`** lists the elements the
    product type requires and the zone each must sit in (a commerce product page needs price, variant
    choice, add to cart, and delivery/guarantee details on the first screen; a dashboard needs the
    current status and what changed; docs need search and a quickstart). The style restyles them but
@@ -26,9 +28,9 @@ The existing-UI implementation and comparison workflow in SKILL.md takes precede
    redistribute upstream screenshots, brand assets, copy, typefaces, or visual identity.
 3. **Intake, then get direction approval — before component work.** First run a short intake so the
    previews use the right material (ask, don't assume):
-   - **Assets** — do they have images/brand assets to use (and which)? If not, may you pull
-     **license-free** sample imagery (e.g. Unsplash, free for commercial use) for the example, or is
-     no imagery needed? *(A: provided — they say which · B: none — you source license-free samples ·
+   - **Assets** — do they have images/brand assets to use (and which)? If not, may you use stock
+     photos from Unsplash or Pexels as `start_ui_design`'s photo plan describes, each credited, or is
+     no imagery needed? *(A: provided — they say which · B: none — you pick credited stock photos ·
      C: not needed)*
    - **Emphasis** — anything they specifically want emphasized, or any must-have / non-negotiable?
    Then, for open-ended UI requests, compose and show 2-3 distinct candidate directions or page
@@ -95,11 +97,12 @@ The existing-UI implementation and comparison workflow in SKILL.md takes precede
    furniture (an unrelated stock photo, an abstract shape, or a card you could paste onto another product)
    rather than a bespoke product demonstration, or the copy column is the full quartet, recompose.
    Run **`audit_page_structure`** on each built page's rendered HTML and CSS with the chosen `styleId`
-   and the same `productType` you passed to `recommend_design_direction`. Replace every finding with the
+   and the same `productType` you passed to `start_ui_design`. Replace every finding with the
    signature move or archetype step it names, add every must-have listed in `mustHaves.missing`, move
    every one in `mustHaves.misplaced` onto the first screen, rebuild, and rerun it; then include
    `structure` in `includeGroups` (with the same `productType`) and submit its `evidence` and `results`
-   with the rest of the audit.
+   with the rest of the audit. Run **`audit_copy`** on the same rendered HTML with the same `locale` and
+   `productType`, rewrite what it flags, and add `copy` and `assets` to `includeGroups` the same way.
    Do not skip the checklist's **`principles` group**: run each principle's recorded verification
    check against the built UI and write down the outcome (pass / fail / n-a + why). A principle name
    in `design.md` with no placement decision and no observed check is the `principle-as-decoration`

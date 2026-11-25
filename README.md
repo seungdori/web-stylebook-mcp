@@ -158,9 +158,9 @@ checks what the edit kept with `compare_page_revisions`, and finishes with
 reason, the checks that ran, and what was not verified.
 
 For a new page, describe the product instead, for example *"a landing page for a payments API"*.
-The agent starts with `start_ui_design`, which returns the top directions, the page structure, fonts
-with loading code, a photo plan and a copy brief. `recommend_design_direction` shows every candidate
-it ranked, plus the ones it rejected and why.
+The agent calls `start_ui_design` for the direction, page structure, fonts, photo plan and copy
+brief, and `compose_design_tokens` if it needs a theme. After building, `audit_page_structure` and
+`audit_copy` check the page, and `validate_design_audit_result` records the checks.
 
 If you ask for a review only, the agent audits and reports without editing anything.
 

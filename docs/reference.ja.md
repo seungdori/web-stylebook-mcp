@@ -441,7 +441,23 @@ cursor://anysphere.cursor-deeplink/mcp/install?name=web-stylebook&config=eyJjb21
 
 [`skills/web-stylebook-design/`](../skills/web-stylebook-design/SKILL.md) にあるスキルは、いつどのツールを呼ぶか、結果をどう使うかをエージェントに伝えます（色を変えるのではなく組み立てる、候補を複数提示する、信頼は見せかけでなく実際に得る、再利用できるコンポーネントに落とし込む）。[インストール](#インストール) では `npx skills add` と Claude Code プラグインを扱います。スキルは npm パッケージの `skills/` 配下にも含まれています。
 
-スキルに対応していないエージェントの場合は、[`skills/AGENTS.md`](../skills/AGENTS.md)（Codex）または [`skills/CLAUDE.md`](../skills/CLAUDE.md)（Claude Code などのルールファイル）の内容を、プロジェクトのルールファイルにコピーしてください。
+スキルに対応していないエージェントの場合は、[`skills/AGENTS.md`](../skills/AGENTS.md)（Codex）または [`skills/CLAUDE.md`](../skills/CLAUDE.md)（Claude Code などのルールファイル）の内容を、プロジェクトのルールファイルにコピーしてください。どちらのブロックも、新しいページの手順を `start_ui_design` から始めます。Claude Code は MCP ツールを読み込むまで名前だけを表示するため、`skills/CLAUDE.md` の先頭行に `mcp__web-stylebook__start_ui_design` を書いています。
+
+Cursor では、次のルールを `.cursor/rules/web-stylebook.mdc` として追加します。`alwaysApply: true` にすると、Cursor はすべてのチャットにこのルールを含め、`globs` を無視します。そのため、このルールには `globs` を書いていません。
+
+```markdown
+---
+description: Call Web Stylebook before writing UI code
+alwaysApply: true
+---
+
+Before writing HTML, CSS, JSX or other UI code for a new page or screen, call `start_ui_design`
+(web-stylebook MCP server) once with the product context and `pageRole`. If tools are listed by
+name only, load it first. For dashboards and charts, use it with your chart skill. Call
+`compose_design_tokens` when you write CSS or a theme. After building, run `audit_page_structure`
+and `audit_copy` on the rendered page, fix what they find, then call `get_design_audit_plan` and
+`validate_design_audit_result`.
+```
 
 ## ツール
 
@@ -560,7 +576,9 @@ webstylebook://copy/guide/{locale} · /copy/patterns/{locale}
 
 よく使うワークフロー向けの、すぐに使える MCP プロンプト:
 
-`improve-ui` · `design-product` · `design-screen` · `complete-ui-states` · `redesign-with-style` · `audit-design-direction` · `audit-design-principles` · `audit-ux-principles`
+`build-page` · `improve-ui` · `design-product` · `design-screen` · `complete-ui-states` · `redesign-with-style` · `audit-design-direction` · `audit-design-principles` · `audit-ux-principles`
+
+`build-page` は `product`、`pageRole`、`locale` を受け取り、新しいページひとつを `start_ui_design` から `audit_page_structure` と `audit_copy` を経て `validate_design_audit_result` まで進めます。
 
 `improve-ui` は、既存のインターフェースの実装と比較のワークフローを開始します。実行を妨げる不足情報だけを尋ね、定型的な再承認は求めません。`audit-design-direction` は、明示的なレビュー用のプロンプトです。対象範囲を省略すると、既定では読み取り専用の見た目とコンテンツの検査になります。`auditScope` と `changeScope` のパラメーターで、より狭いレビュー、提案、実装を指定できます。`implement-and-verify` は、改善ワークフローを最後まで進めます。
 
