@@ -6,6 +6,7 @@ import { validateDesignAuditResult, type AuditEvidence } from '../src/audit/eval
 import { planDesignAudit } from '../src/audit/planner.js';
 import { auditPageStructure } from '../src/structure/audit.js';
 import { ASSET_CHECK_IDS, assetChecks } from '../src/structure/assets.js';
+import { startUiDesign } from '../src/start/start-ui-design.js';
 
 const repo = CatalogRepository.load();
 const target = [{ id: 'page', surface: 'global' as const }];
@@ -58,6 +59,37 @@ describe('asset checks', () => {
     expect(verdicts(page(interOnly, '<p>x</p>'), korean, undefined, 'ko')['assets-font-loading']).toMatchObject({ verdict: 'FIX_NOW', items: ['Pretendard Variable'] });
     const pretendard = '<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css">';
     expect(verdicts(page(interOnly + pretendard, '<p>x</p>'), korean, undefined, 'ko')['assets-font-loading']!.verdict).toBe('PASS');
+  });
+
+  it('do not ask to load a Korean or Japanese web font that a system face before it already draws', () => {
+    // The 2026-11-25 experiment pages that named Noto Sans KR after Apple SD Gothic Neo were flagged although no system
+    // with Apple SD Gothic Neo or Malgun Gothic ever reaches it (eval:static, 12 of 23 flagged pages).
+    const systemFirst = ["body { font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif; }"];
+    expect(verdicts(page('', '<p>x</p>'), systemFirst, undefined, 'ko')['assets-font-loading']!.verdict).toBe('NOT_APPLICABLE');
+    const webFirst = ["body { font-family: 'Inter', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif; }"];
+    const inter = '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap">';
+    expect(verdicts(page(inter, '<p>x</p>'), webFirst, undefined, 'ko')['assets-font-loading']).toMatchObject({ verdict: 'FIX_NOW', items: ['Noto Sans KR'] });
+    const japanese = ["body { font-family: 'Inter', 'Hiragino Sans', 'Noto Sans JP', sans-serif; }"];
+    expect(verdicts(page(inter, '<p>x</p>'), japanese, undefined, 'ja')['assets-font-loading']!.verdict).toBe('PASS');
+  });
+
+  it('pass the font code start_ui_design gives, for every style, language and pairing', () => {
+    for (const style of repo.allStyles()) for (const locale of ['en', 'ko', 'ja'] as const) {
+      const start = startUiDesign({ productDescription: 'A page', productType: 'operational-saas', locale, styleId: style.id }, repo);
+      for (const set of [start.fonts.authored, ...start.fonts.alternatives]) {
+        const html = `<html lang="${locale}"><head>${start.fonts.preconnect ?? ''}${set.head}<style>${set.css} body{font-family:var(--font-body)} h1{font-family:var(--font-display)}</style></head><body><main><h1>Title</h1><p>Body</p></main></body></html>`;
+        const checks = Object.fromEntries(auditPageStructure({ html, locale, styleId: style.id }, repo).assets.checks.map((check) => [check.checkId, check.verdict]));
+        expect(['PASS', 'NOT_APPLICABLE'], `${style.id} ${locale} loading`).toContain(checks['assets-font-loading']);
+        expect(checks['assets-font-display'], `${style.id} ${locale} display`).not.toBe('RISK');
+      }
+    }
+  });
+
+  it('read the family of a font shorthand that starts with a weight', () => {
+    const weighted = ['body { font: 400 1rem/1.75 "Noto Sans KR", sans-serif; }'];
+    expect(verdicts(page('', '<p>x</p>'), weighted, undefined, 'ko')['assets-font-loading']).toMatchObject({ verdict: 'FIX_NOW', items: ['Noto Sans KR'] });
+    const italic = ["h1 { font: italic 600 clamp(2rem, 4vw, 3rem)/1.1 'Playfair Display', serif; }"];
+    expect(verdicts(page('', '<p>x</p>'), italic)['assets-font-loading']).toMatchObject({ verdict: 'FIX_NOW', items: ['Playfair Display'] });
   });
 
   it('leave checks with nothing to check not applicable, and an unknown font stylesheet unverified', () => {

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { CatalogRepository } from '../src/catalog/repository.js';
 import { planUiStates } from '../src/state-atlas/planner.js';
-import { composeDesignTokens } from '../src/tokens/compile.js';
+import { composeDesignTokens, tokenFileText } from '../src/tokens/compile.js';
 import { compareDirections } from '../src/recommendation/compare.js';
 import { contrastRatio, checkContrast } from '../src/tokens/contrast.js';
 
@@ -54,7 +54,7 @@ describe('token compiler', () => {
   it('emits all 4 formats with role-based color tokens', () => {
     for (const format of ['json', 'css-variables', 'tailwind', 'typescript'] as const) {
       const r = composeDesignTokens({ primaryStyleId: 'runtime-signal', format }, repo);
-      expect(r.rendered.length).toBeGreaterThan(50);
+      expect(tokenFileText(r).length).toBeGreaterThan(50);
       expect(r.notes.length).toBeGreaterThan(0);
     }
   });

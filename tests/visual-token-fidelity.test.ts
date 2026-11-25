@@ -4,7 +4,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { VISUAL_SOURCE_FILES, validateDependencies } from '../scripts/sync-visual-contract.mjs';
 import { CatalogRepository } from '../src/catalog/repository.js';
 import { VisualContractRepository, type VisualLibrary } from '../src/catalog/visual.js';
-import { composeDesignTokens } from '../src/tokens/compile.js';
+import { composeDesignTokens, tokenFileText } from '../src/tokens/compile.js';
 import { stableVisualJson, visualContentHash } from '../src/visual-canonical/hash.js';
 import { resolveContract } from '../src/visual-canonical/resolve.js';
 import { typographyRoleStyle, visualContractToCss } from '../src/visual-canonical/export.js';
@@ -27,6 +27,25 @@ function exportedJson(source: string, name: string) {
   const marker = `export const ${name} = `;
   return JSON.parse(source.slice(source.indexOf(marker) + marker.length).replace(/ as const;\s*$/, '').replace(/;\s*$/, ''));
 }
+
+describe('compose_design_tokens json output carries its JSON once', () => {
+  it('omits rendered for format json, and the text channel prints the same JSON as before', () => {
+    const repo = CatalogRepository.load();
+    for (const contract of [undefined, { schema: 'webstylebook.visual.v1' as const }]) {
+      const result = composeDesignTokens({ primaryStyleId: 'macos-liquid-glass', format: 'json', locale: 'ko', ...(contract ? { contract } : {}) }, repo);
+      expect(result).not.toHaveProperty('rendered');
+      const text = tokenFileText(result);
+      expect(JSON.parse(text)).toEqual(contract ? result.visualContract : result.tokens);
+    }
+  });
+
+  it('tells the agent to load each external font, which the 2026-11-25 pages that declared Pretendard did not', () => {
+    const result = composeDesignTokens({ primaryStyleId: 'quiet-utility', format: 'css-variables', locale: 'ko', contract: { schema: 'webstylebook.visual.v1' } }, CatalogRepository.load());
+    expect(result.notes.join(' ')).toMatch(/load each external family in visualContract\.typography\.fonts from its stylesheetUrl/);
+    const fonts = (result.visualContract as { typography: { fonts: Array<{ source: string; stylesheetUrl?: string }> } }).typography.fonts;
+    for (const font of fonts.filter((entry) => entry.source === 'external')) expect(font.stylesheetUrl).toMatch(/^https:\/\//);
+  });
+});
 
 describe('pinned visual contract fidelity', () => {
   it('has a complete approved offline artifact with exact source provenance', () => {
@@ -105,10 +124,10 @@ describe('pinned visual contract fidelity', () => {
         expect(spec.origins['typography.roles.display.fontFamily']).toBe('locale');
         expect(spec.typography.roles.body.fontFamily).toContain(locale === 'ko' ? 'Noto Sans KR' : 'Noto Sans JP');
       }
-      if (format === 'json') expect(JSON.parse(result.rendered).typography.roles.display.fontFamily).toBe(family);
-      if (format === 'typescript') expect(exportedJson(result.rendered, 'visualContract').typography.roles.display.fontFamily).toBe(family);
-      if (format === 'tailwind') expect(exportedJson(result.rendered, 'theme').roleStyles.display.fontFamily).toBe(family);
-      if (format === 'css-variables') expect(result.rendered).toContain(`--type-display-font-family: ${family};`);
+      if (format === 'json') expect(JSON.parse(tokenFileText(result)).typography.roles.display.fontFamily).toBe(family);
+      if (format === 'typescript') expect(exportedJson(tokenFileText(result), 'visualContract').typography.roles.display.fontFamily).toBe(family);
+      if (format === 'tailwind') expect(exportedJson(tokenFileText(result), 'theme').roleStyles.display.fontFamily).toBe(family);
+      if (format === 'css-variables') expect(tokenFileText(result)).toContain(`--type-display-font-family: ${family};`);
     }
   });
 
@@ -130,22 +149,22 @@ describe('pinned visual contract fidelity', () => {
       const result = compose({ format, locale: 'ko', overrides: { typography: { body: { fontWeight: 550, lineHeight: 1.87, letterSpacingEm: 0, paragraphSpacingEm: 0 } } } });
       const spec = result.visualContract as ResolvedVisualContract;
       expect(spec.typography.roles.body).toMatchObject({ fontWeight: 550, lineHeight: 1.87, wordBreak: 'keep-all' });
-      if (format === 'json') expect(JSON.parse(result.rendered)).toEqual(spec);
-      if (format === 'typescript') expect(exportedJson(result.rendered, 'visualContract')).toEqual(spec);
+      if (format === 'json') expect(JSON.parse(tokenFileText(result))).toEqual(spec);
+      if (format === 'typescript') expect(exportedJson(tokenFileText(result), 'visualContract')).toEqual(spec);
       if (format === 'tailwind') {
-        const theme = exportedJson(result.rendered, 'theme');
+        const theme = exportedJson(tokenFileText(result), 'theme');
         expect(theme.metadata).toEqual(spec);
         expect(theme.roleStyles.body).toEqual(typographyRoleStyle(spec.typography.roles.body));
         expect(theme.extend.fontSize.body[1]).toMatchObject({ lineHeight: '1.87', fontWeight: '550' });
       }
       if (format === 'css-variables') {
-        expect(result.rendered).toContain('--type-body-line-height: 1.87;');
-        expect(result.rendered).toContain('--type-body-letter-spacing: 0em;');
-        expect(result.rendered).toContain('--type-body-margin-block-end: 0em;');
-        expect(result.rendered).toContain('--type-body-word-break: keep-all;');
-        expect(result.rendered).toContain('.ws-type-data');
-        expect(result.rendered).toContain('--shadow-md: none;');
-        expect(result.rendered).toBe(visualContractToCss(spec));
+        expect(tokenFileText(result)).toContain('--type-body-line-height: 1.87;');
+        expect(tokenFileText(result)).toContain('--type-body-letter-spacing: 0em;');
+        expect(tokenFileText(result)).toContain('--type-body-margin-block-end: 0em;');
+        expect(tokenFileText(result)).toContain('--type-body-word-break: keep-all;');
+        expect(tokenFileText(result)).toContain('.ws-type-data');
+        expect(tokenFileText(result)).toContain('--shadow-md: none;');
+        expect(tokenFileText(result)).toBe(visualContractToCss(spec));
       }
     }
   });
@@ -162,14 +181,14 @@ describe('pinned visual contract fidelity', () => {
       expect(both.light.typography.roles.body.lineHeight).not.toBe(2);
       expect(both.dark.motion.duration).toBe(0);
       expect(both.dark.borders.width).toBe(0);
-      if (format === 'tailwind') expect(exportedJson(result.rendered, 'themes').dark.metadata).toEqual(both.dark);
-      if (format === 'typescript') expect(exportedJson(result.rendered, 'visualContract')).toEqual(both);
-      if (format === 'json') expect(JSON.parse(result.rendered)).toEqual(both);
+      if (format === 'tailwind') expect(exportedJson(tokenFileText(result), 'themes').dark.metadata).toEqual(both.dark);
+      if (format === 'typescript') expect(exportedJson(tokenFileText(result), 'visualContract')).toEqual(both);
+      if (format === 'json') expect(JSON.parse(tokenFileText(result))).toEqual(both);
       if (format === 'css-variables') {
-        expect(result.rendered).toContain('[data-theme="dark"]');
-        expect(result.rendered).toContain('--type-body-line-height: 2;');
-        expect(result.rendered).toContain('--motion-duration: 0ms;');
-        expect(result.rendered).toContain('--border-width: 0px;');
+        expect(tokenFileText(result)).toContain('[data-theme="dark"]');
+        expect(tokenFileText(result)).toContain('--type-body-line-height: 2;');
+        expect(tokenFileText(result)).toContain('--motion-duration: 0ms;');
+        expect(tokenFileText(result)).toContain('--border-width: 0px;');
       }
     }
   });

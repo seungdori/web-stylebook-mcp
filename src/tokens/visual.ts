@@ -68,7 +68,7 @@ export function composeContractTokens(input: ComposeDesignTokensInput, repo: Cat
     ...spec.warnings,
     ...assessContrast(spec).filter((pair) => pair.status === 'fail' || pair.status === 'needs-rendered-review').map((pair) => `${spec.mode}: ${pair.context} — ${pair.status === 'fail' ? `${pair.ratio!.toFixed(2)}:1; requires ${pair.threshold}:1` : 'requires rendered contrast review'}`),
   ]))];
-  let rendered: string;
+  let rendered: string | undefined;
   if (input.format === 'css-variables') {
     rendered = 'light' in visual
       ? `${visualContractToCss(visual.light)}\n${visualContractToCss(visual.dark, '[data-theme="dark"]')}\n@media (prefers-color-scheme: dark) {\n${visualContractToCss(visual.dark, ':root:not([data-theme="light"])')}\n}\n`
@@ -78,17 +78,15 @@ export function composeContractTokens(input: ComposeDesignTokensInput, repo: Cat
     rendered = `// Use extend in the theme and roleStyles for full typography; metadata is the lossless companion.\nexport const ${both ? 'themes' : 'theme'} = ${serializeVisualJson(themes)};\n`;
   } else if (input.format === 'typescript') {
     rendered = `export const visualContract = ${serializeVisualJson(visual)} as const;\n`;
-  } else if (input.format === 'json') {
-    rendered = serializeVisualJson(visual, 0);
-  } else {
+  } else if (input.format !== 'json') {
     throw new TokenError(`Unsupported token format '${input.format}'`);
   }
   return {
-    primaryStyleId: input.primaryStyleId, format: input.format, colorMode, tokens, rendered, warnings,
+    primaryStyleId: input.primaryStyleId, format: input.format, colorMode, tokens, ...(rendered !== undefined ? { rendered } : {}), warnings,
     notes: [
       'Values resolve from the pinned website contract, locale adjustments, then validated overrides; no palette-position or family inference is used.',
       'visualContract is the complete companion for component color pairs, font provenance, responsive roles, usage, field origins and accepted repairs. tokens contains compatibility aliases.',
-      'Contrast repair proposals are inert until supplied in acceptedRepairs. Identity accents remain unchanged. Font files are not bundled or loaded by MCP.',
+      'Contrast repair proposals are inert until supplied in acceptedRepairs. Identity accents remain unchanged. Font files are not bundled or loaded by MCP: load each external family in visualContract.typography.fonts from its stylesheetUrl (start_ui_design gives the <link> tags), or the page shows a fallback face.',
     ],
     contract: metadata,
     visualContract: visual,

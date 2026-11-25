@@ -1,12 +1,12 @@
 // Load and verify the pinned, website-authored visual artifact once; no network fallback.
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { join } from 'node:path';
 import { visualContractSchema } from '../visual-canonical/schema.js';
 import { stableVisualJson, visualContentHash } from '../visual-canonical/hash.js';
 import { resolveContract } from '../visual-canonical/resolve.js';
 import type { ResolvedVisualContract, VisualContract, VisualResolutionOptions } from '../visual-canonical/types.js';
+import { GENERATED_DIR, readGenerated } from './generated.js';
 
 export const VISUAL_SCHEMA = 'webstylebook.visual.v1';
 export const VISUAL_LIBRARY_SCHEMA = 'webstylebook.visual-library.v1';
@@ -25,7 +25,6 @@ export interface VisualSourceProvenance {
   artifactHash: string;
 }
 const sha256 = (bytes: string | Buffer) => `sha256:${createHash('sha256').update(bytes).digest('hex')}`;
-const generated = () => join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'generated');
 
 export class VisualContractRepository {
   constructor(readonly library: VisualLibrary, readonly provenance?: VisualSourceProvenance) {
@@ -43,9 +42,11 @@ export class VisualContractRepository {
     }
   }
 
-  static load(directory = generated()): VisualContractRepository {
+  /** The bundled contracts, or the snapshot in `directory`. */
+  static load(directory?: string): VisualContractRepository {
     try {
-      const raw = readFileSync(join(directory, 'visual-contracts.v1.json'));
+      const raw = directory === undefined ? readGenerated('visual-contracts.v1.json') : readFileSync(join(directory, 'visual-contracts.v1.json'));
+      directory ??= GENERATED_DIR;
       const provenance = JSON.parse(readFileSync(join(directory, 'visual-contract-source.v1.json'), 'utf8')) as VisualSourceProvenance;
       if (provenance.schema !== 'webstylebook.visual-source.v1' || provenance.license !== 'MIT' || provenance.artifactHash !== sha256(raw)) throw new Error('Visual artifact provenance or byte hash mismatch');
       return new VisualContractRepository(JSON.parse(raw.toString('utf8')) as VisualLibrary, provenance);

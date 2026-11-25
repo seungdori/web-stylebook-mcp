@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { CatalogRepository } from '../src/catalog/repository.js';
-import { composeDesignTokens } from '../src/tokens/compile.js';
+import { composeDesignTokens, tokenFileText } from '../src/tokens/compile.js';
 import type { DesignTokens } from '../src/types.js';
 import type { ResolvedVisualContract } from '../src/visual-canonical/types.js';
 
@@ -49,14 +49,14 @@ describe('issue 1 fidelity regressions', () => {
       expect(spec.colors.accent.toLowerCase()).toBe('#d72600');
       expect(spec.shadows).toEqual({ sm: 'none', md: 'none', lg: 'none' });
       expect((result.tokens as DesignTokens).shadow).toEqual(spec.shadows);
-      for (const shadow of genericSoftShadows) expect(result.rendered).not.toContain(shadow);
-      if (format === 'json') expect(JSON.parse(result.rendered).shadows).toEqual(spec.shadows);
-      if (format === 'typescript') expect(exportedJson(result.rendered, 'visualContract').shadows).toEqual(spec.shadows);
-      if (format === 'tailwind') expect(exportedJson(result.rendered, 'theme').extend.boxShadow).toEqual(spec.shadows);
+      for (const shadow of genericSoftShadows) expect(tokenFileText(result)).not.toContain(shadow);
+      if (format === 'json') expect(JSON.parse(tokenFileText(result)).shadows).toEqual(spec.shadows);
+      if (format === 'typescript') expect(exportedJson(tokenFileText(result), 'visualContract').shadows).toEqual(spec.shadows);
+      if (format === 'tailwind') expect(exportedJson(tokenFileText(result), 'theme').extend.boxShadow).toEqual(spec.shadows);
       if (format === 'css-variables') {
-        expect(result.rendered).toContain('--shadow-sm: none;');
-        expect(result.rendered).toContain('--shadow-md: none;');
-        expect(result.rendered).toContain('--shadow-lg: none;');
+        expect(tokenFileText(result)).toContain('--shadow-sm: none;');
+        expect(tokenFileText(result)).toContain('--shadow-md: none;');
+        expect(tokenFileText(result)).toContain('--shadow-lg: none;');
       }
     }
   });
@@ -83,14 +83,14 @@ describe('issue 1 fidelity regressions', () => {
       expect(comfortableSpec.spacing).toMatchObject({ density: 'comfortable', row: 44, gutter: 24, stack: 20 });
       expect((compact.tokens as DesignTokens).density).toEqual({ row: '32px', gutter: '12px' });
       expect((comfortable.tokens as DesignTokens).density).toEqual({ row: '44px', gutter: '24px' });
-      expect(compact.rendered).not.toContain('99px');
-      expect(compact.rendered).not.toContain('77px');
+      expect(tokenFileText(compact)).not.toContain('99px');
+      expect(tokenFileText(compact)).not.toContain('77px');
       if (format === 'css-variables') {
-        expect(compact.rendered).toContain('--density-row: 32px;');
-        expect(compact.rendered).toContain('--density-gutter: 12px;');
-        expect(compact.rendered).toContain('--spacing-row: 32px;');
-        expect(comfortable.rendered).toContain('--density-row: 44px;');
-        expect(comfortable.rendered).toContain('--spacing-gutter: 24px;');
+        expect(tokenFileText(compact)).toContain('--density-row: 32px;');
+        expect(tokenFileText(compact)).toContain('--density-gutter: 12px;');
+        expect(tokenFileText(compact)).toContain('--spacing-row: 32px;');
+        expect(tokenFileText(comfortable)).toContain('--density-row: 44px;');
+        expect(tokenFileText(comfortable)).toContain('--spacing-gutter: 24px;');
       }
     }
   });
@@ -108,24 +108,24 @@ describe('issue 1 fidelity regressions', () => {
           expect(expected.typography.lineHeight).toEqual(legacyLineHeight);
         }
         if (format === 'json') {
-          const parsed = JSON.parse(result.rendered);
+          const parsed = JSON.parse(tokenFileText(result));
           const rendered = colorMode === 'both' ? [parsed.light, parsed.dark] : [parsed];
           for (const item of rendered) expect(item.typography.lineHeight).toEqual(legacyLineHeight);
         }
         if (format === 'typescript') {
-          const parsed = exportedJson(result.rendered, 'tokens');
+          const parsed = exportedJson(tokenFileText(result), 'tokens');
           const rendered = colorMode === 'both' ? [parsed.light, parsed.dark] : [parsed];
           for (const item of rendered) expect(item.typography.lineHeight).toEqual(legacyLineHeight);
         }
         if (format === 'css-variables') {
           for (const [key, value] of Object.entries(legacyLineHeight)) {
-            expect(result.rendered).toContain(`--line-height-${key}: ${value};`);
+            expect(tokenFileText(result)).toContain(`--line-height-${key}: ${value};`);
           }
         }
         if (format === 'tailwind') {
-          const theme = exportedJson(result.rendered, 'theme');
+          const theme = exportedJson(tokenFileText(result), 'theme');
           if (colorMode === 'both') {
-            const themes = exportedJson(result.rendered, 'themes');
+            const themes = exportedJson(tokenFileText(result), 'themes');
             expect(themes.light.lineHeight).toEqual(legacyLineHeight);
             expect(themes.dark.lineHeight).toEqual(legacyLineHeight);
           } else {
@@ -153,23 +153,23 @@ describe('issue 1 fidelity regressions', () => {
         relaxed: spec.typography.roles.small.lineHeight,
       });
       if (format === 'json') {
-        const parsed = JSON.parse(result.rendered);
+        const parsed = JSON.parse(tokenFileText(result));
         expect(parsed.typography.roles.display.lineHeight).toBe(display);
         expect(parsed.typography.roles.body.lineHeight).toBe(body);
       }
       if (format === 'typescript') {
-        const parsed = exportedJson(result.rendered, 'visualContract');
+        const parsed = exportedJson(tokenFileText(result), 'visualContract');
         expect(parsed.typography.roles.display.lineHeight).toBe(display);
         expect(parsed.typography.roles.body.lineHeight).toBe(body);
       }
       if (format === 'css-variables') {
-        expect(result.rendered).toContain(`--line-height-tight: ${display};`);
-        expect(result.rendered).toContain(`--line-height-normal: ${body};`);
-        expect(result.rendered).toContain(`--type-display-line-height: ${display};`);
-        expect(result.rendered).toContain(`--type-body-line-height: ${body};`);
+        expect(tokenFileText(result)).toContain(`--line-height-tight: ${display};`);
+        expect(tokenFileText(result)).toContain(`--line-height-normal: ${body};`);
+        expect(tokenFileText(result)).toContain(`--type-display-line-height: ${display};`);
+        expect(tokenFileText(result)).toContain(`--type-body-line-height: ${body};`);
       }
       if (format === 'tailwind') {
-        const theme = exportedJson(result.rendered, 'theme');
+        const theme = exportedJson(tokenFileText(result), 'theme');
         expect(theme.roleStyles.display.lineHeight).toBe(display);
         expect(theme.roleStyles.body.lineHeight).toBe(body);
         expect(theme.extend.fontSize.display[1].lineHeight).toBe(String(display));
@@ -201,7 +201,7 @@ describe('issue 1 fidelity regressions', () => {
       expect(tokens.motion.duration).toBe('0ms');
       expect(tokens.shadow).toEqual(spec.shadows);
       if (format === 'json') {
-        const parsed = JSON.parse(result.rendered);
+        const parsed = JSON.parse(tokenFileText(result));
         expect(parsed.radii.lg).toBe(0);
         expect(parsed.motion.duration).toBe(0);
         expect(parsed.shadows.sm).toBe('none');
@@ -211,26 +211,26 @@ describe('issue 1 fidelity regressions', () => {
         expect(parsed.typography.roles.display.textTransform).toBe('none');
       }
       if (format === 'typescript') {
-        const parsed = exportedJson(result.rendered, 'visualContract');
+        const parsed = exportedJson(tokenFileText(result), 'visualContract');
         expect(parsed.radii).toEqual({ sm: 0, md: 0, lg: 0 });
         expect(parsed.motion.duration).toBe(0);
         expect(parsed.shadows.lg).toBe('none');
         expect(parsed.typography.roles.body.paragraphSpacingEm).toBe(0);
       }
       if (format === 'css-variables') {
-        expect(result.rendered).toContain('--radius-sm: 0px;');
-        expect(result.rendered).toContain('--radius-md: 0px;');
-        expect(result.rendered).toContain('--radius-lg: 0px;');
-        expect(result.rendered).toContain('--motion-duration: 0ms;');
-        expect(result.rendered).toContain('--motion-reduced: none;');
-        expect(result.rendered).toContain('--shadow-md: none;');
-        expect(result.rendered).toContain('--type-body-letter-spacing: 0em;');
-        expect(result.rendered).toContain('--type-body-margin-block-end: 0em;');
-        expect(result.rendered).toContain('--type-body-text-transform: none;');
-        expect(result.rendered).toContain(`--type-display-line-height: ${spec.typography.roles.display.lineHeight};`);
+        expect(tokenFileText(result)).toContain('--radius-sm: 0px;');
+        expect(tokenFileText(result)).toContain('--radius-md: 0px;');
+        expect(tokenFileText(result)).toContain('--radius-lg: 0px;');
+        expect(tokenFileText(result)).toContain('--motion-duration: 0ms;');
+        expect(tokenFileText(result)).toContain('--motion-reduced: none;');
+        expect(tokenFileText(result)).toContain('--shadow-md: none;');
+        expect(tokenFileText(result)).toContain('--type-body-letter-spacing: 0em;');
+        expect(tokenFileText(result)).toContain('--type-body-margin-block-end: 0em;');
+        expect(tokenFileText(result)).toContain('--type-body-text-transform: none;');
+        expect(tokenFileText(result)).toContain(`--type-display-line-height: ${spec.typography.roles.display.lineHeight};`);
       }
       if (format === 'tailwind') {
-        const theme = exportedJson(result.rendered, 'theme');
+        const theme = exportedJson(tokenFileText(result), 'theme');
         expect(theme.extend.borderRadius).toEqual({ sm: '0px', md: '0px', lg: '0px' });
         expect(theme.extend.boxShadow).toEqual({ sm: 'none', md: 'none', lg: 'none' });
         expect(theme.extend.transitionDuration.DEFAULT).toBe('0ms');
@@ -272,7 +272,7 @@ describe('issue 1 fidelity regressions', () => {
           expect(after.density).toEqual(before.density);
         }
         expect(overlaid.notes.some((note) => note.includes("editorial-silence's accent"))).toBe(true);
-        expect(overlaid.rendered).not.toMatch(/Fraunces|Playfair|Georgia/);
+        expect(tokenFileText(overlaid)).not.toMatch(/Fraunces|Playfair|Georgia/);
       }
     }
   });

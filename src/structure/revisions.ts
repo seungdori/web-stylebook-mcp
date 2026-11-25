@@ -138,7 +138,7 @@ export interface RevisionEvidence {
   outcome?: 'passed' | 'failed' | 'cant-tell' | 'inapplicable';
   contentHash: string;
   actual: Record<string, string | number | boolean>;
-  producer: { name: string; version: string; configHash: string };
+  /** The producer is identity.producer and the ruleset identity.rulesetHash; neither is repeated on each item. */
 }
 
 export interface RevisionResult {
@@ -158,6 +158,8 @@ export interface ComparePageRevisionsResult {
     rulesetHash: string;
     beforeHash: string;
     afterHash: string;
+    /** The tool that produced every evidence item. */
+    producer: { name: string; version: string };
   };
   target: { id: string; viewportWidth: number };
   verdict: 'PASS' | 'FIX_NOW' | 'RISK';
@@ -938,7 +940,6 @@ export function comparePageRevisions(input: ComparePageRevisionsInput, repo: Cat
 
   const evidence: RevisionEvidence[] = [];
   const results: RevisionResult[] = [];
-  const producer = { name: 'web-stylebook-mcp compare_page_revisions', version: SERVER_VERSION, configHash: revisionRulesetHash() };
   for (const check of revisionChecks(productType)) {
     const checkFindings: RevisionFinding[] = [];
     const finding = (verdict: 'FIX_NOW' | 'RISK', change: RevisionFinding['change'], keys: string[], fix: string, locations: string[] = [], kind: RevisionFinding['kind'] = check.kind) => {
@@ -1021,12 +1022,12 @@ export function comparePageRevisions(input: ComparePageRevisionsInput, repo: Cat
     evidence.push({
       id: beforeId, targetId, type: 'dom', phase: 'before',
       summary: label.summary(name, check.inventory === 'words' ? before.words : inventory[check.inventory].before),
-      contentHash: before.hash, actual: counts.before, producer,
+      contentHash: before.hash, actual: counts.before,
     }, {
       id: afterId, targetId, type: 'dom', phase: 'after',
       summary: `${rationale}${notVerified.length ? ` ${notVerified.join(' ')}` : ''}${notApplicable ? ` ${notApplicable}` : ''}`.slice(0, 1990),
       outcome: verdict === 'PASS' ? 'passed' : verdict === 'NOT_VERIFIED' ? 'cant-tell' : verdict === 'NOT_APPLICABLE' ? 'inapplicable' : 'failed',
-      contentHash: after.hash, actual: counts.after, producer,
+      contentHash: after.hash, actual: counts.after,
     });
     const remediation = [...new Set(checkFindings.map((entry) => entry.fix))].join(' ');
     results.push({
@@ -1051,6 +1052,7 @@ export function comparePageRevisions(input: ComparePageRevisionsInput, repo: Cat
       rulesetHash: revisionRulesetHash(),
       beforeHash: before.hash,
       afterHash: after.hash,
+      producer: { name: 'web-stylebook-mcp compare_page_revisions', version: SERVER_VERSION },
     },
     target: { id: targetId, viewportWidth },
     verdict: fixNow ? 'FIX_NOW' : findings.length || notVerifiedCount ? 'RISK' : 'PASS',

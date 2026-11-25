@@ -105,8 +105,7 @@ export interface StructureEvidence {
   contentHash: string;
   actual?: Record<string, string | number | boolean>;
   location?: { selector: string };
-  /** The ruleset is identity.rulesetHash; it is not repeated on each item. */
-  producer: { name: string; version: string; configHash?: string };
+  /** The producer is identity.producer and the ruleset identity.rulesetHash; neither is repeated on each item. */
 }
 
 export interface StructureResult {
@@ -151,6 +150,8 @@ export interface StructureAuditResult {
     catalogContentHash: string;
     rulesetHash: string;
     inputHash: string;
+    /** The tool that produced every evidence item, structure and assets alike. */
+    producer: { name: string; version: string };
   };
   styleId: string | null;
   target: { id: string; viewportWidth: number };
@@ -553,7 +554,6 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
 
   const evidence: StructureEvidence[] = [];
   const results: StructureResult[] = [];
-  const producer = { name: 'web-stylebook-mcp audit_page_structure', version: SERVER_VERSION };
   for (const report of reports) {
     const entry = statuses.get(report.checkId);
     const first = report.status === 'found' && entry?.status.status === 'found' ? entry.status.matches[0] : undefined;
@@ -578,7 +578,6 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
       outcome,
       contentHash: inputHash,
       ...(first ? { location: { selector: selectorPath(first.element) } } : {}),
-      producer,
     });
     if (!entry?.check) continue;
     const verdict = credited ? 'NOT_VERIFIED' : verdictFor(report.status, entry.check);
@@ -611,7 +610,6 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
       outcome,
       contentHash: inputHash,
       ...(first ? { location: { selector: first } } : {}),
-      producer,
     });
     const check = checkDefs.get(item.checkId);
     if (!check) continue;
@@ -643,7 +641,7 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
     assets.evidence.push({
       id: evidenceIdFor(targetId, `assets-${outcome}`).replace(/^structure:/, 'assets:'), targetId, type: 'dom', phase: 'static',
       summary: group.map((check) => `${check.checkId}: ${check.verdict}${check.count ? ` (${check.count})` : ''}`).join('; '),
-      outcome, contentHash: inputHash, producer,
+      outcome, contentHash: inputHash,
     });
   }
   for (const check of assetChecks) {
@@ -688,6 +686,7 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
       catalogContentHash: repo.contentHash,
       rulesetHash,
       inputHash,
+      producer: { name: 'web-stylebook-mcp audit_page_structure', version: SERVER_VERSION },
     },
     styleId: styleId ?? null,
     target: { id: targetId, viewportWidth },

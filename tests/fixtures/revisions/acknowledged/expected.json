@@ -5,7 +5,11 @@
     "catalogContentHash": "<catalog hash>",
     "rulesetHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec",
     "beforeHash": "sha256:cb77ababffee5c497230c1a0b2fc0a663f16969ace24d3fc9f138d3e31c3ae21",
-    "afterHash": "sha256:7f85c117954096f58547fe1e5b84a4b317a8b5041ff6294934c42e6bb9efeaa7"
+    "afterHash": "sha256:7f85c117954096f58547fe1e5b84a4b317a8b5041ff6294934c42e6bb9efeaa7",
+    "producer": {
+      "name": "web-stylebook-mcp compare_page_revisions",
+      "version": "<server version>"
+    }
   },
   "target": {
     "id": "page",
@@ -129,11 +133,6 @@
       "contentHash": "sha256:cb77ababffee5c497230c1a0b2fc0a663f16969ace24d3fc9f138d3e31c3ae21",
       "actual": {
         "count": 9
-      },
-      "producer": {
-        "name": "web-stylebook-mcp compare_page_revisions",
-        "version": "<server version>",
-        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -150,11 +149,6 @@
         "lost": 0,
         "acknowledged": 3,
         "reworded": 0
-      },
-      "producer": {
-        "name": "web-stylebook-mcp compare_page_revisions",
-        "version": "<server version>",
-        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -168,11 +162,6 @@
         "count": 0,
         "options": 0,
         "controls": 0
-      },
-      "producer": {
-        "name": "web-stylebook-mcp compare_page_revisions",
-        "version": "<server version>",
-        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -193,11 +182,6 @@
         "optionsLost": 0,
         "controls": 0,
         "controlsLost": 0
-      },
-      "producer": {
-        "name": "web-stylebook-mcp compare_page_revisions",
-        "version": "<server version>",
-        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -209,11 +193,6 @@
       "contentHash": "sha256:cb77ababffee5c497230c1a0b2fc0a663f16969ace24d3fc9f138d3e31c3ae21",
       "actual": {
         "count": 0
-      },
-      "producer": {
-        "name": "web-stylebook-mcp compare_page_revisions",
-        "version": "<server version>",
-        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -230,11 +209,6 @@
         "lost": 0,
         "acknowledged": 0,
         "reworded": 0
-      },
-      "producer": {
-        "name": "web-stylebook-mcp compare_page_revisions",
-        "version": "<server version>",
-        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -246,11 +220,6 @@
       "contentHash": "sha256:cb77ababffee5c497230c1a0b2fc0a663f16969ace24d3fc9f138d3e31c3ae21",
       "actual": {
         "count": 0
-      },
-      "producer": {
-        "name": "web-stylebook-mcp compare_page_revisions",
-        "version": "<server version>",
-        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -267,11 +236,6 @@
         "lost": 0,
         "acknowledged": 0,
         "reworded": 0
-      },
-      "producer": {
-        "name": "web-stylebook-mcp compare_page_revisions",
-        "version": "<server version>",
-        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -283,11 +247,6 @@
       "contentHash": "sha256:cb77ababffee5c497230c1a0b2fc0a663f16969ace24d3fc9f138d3e31c3ae21",
       "actual": {
         "count": 0
-      },
-      "producer": {
-        "name": "web-stylebook-mcp compare_page_revisions",
-        "version": "<server version>",
-        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -304,11 +263,6 @@
         "lost": 0,
         "acknowledged": 0,
         "reworded": 0
-      },
-      "producer": {
-        "name": "web-stylebook-mcp compare_page_revisions",
-        "version": "<server version>",
-        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -320,11 +274,6 @@
       "contentHash": "sha256:cb77ababffee5c497230c1a0b2fc0a663f16969ace24d3fc9f138d3e31c3ae21",
       "actual": {
         "count": 2
-      },
-      "producer": {
-        "name": "web-stylebook-mcp compare_page_revisions",
-        "version": "<server version>",
-        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -341,11 +290,6 @@
         "lost": 0,
         "acknowledged": 1,
         "reworded": 0
-      },
-      "producer": {
-        "name": "web-stylebook-mcp compare_page_revisions",
-        "version": "<server version>",
-        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -357,11 +301,6 @@
       "contentHash": "sha256:cb77ababffee5c497230c1a0b2fc0a663f16969ace24d3fc9f138d3e31c3ae21",
       "actual": {
         "count": 0
-      },
-      "producer": {
-        "name": "web-stylebook-mcp compare_page_revisions",
-        "version": "<server version>",
-        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -378,11 +317,6 @@
         "lost": 0,
         "acknowledged": 0,
         "reworded": 0
-      },
-      "producer": {
-        "name": "web-stylebook-mcp compare_page_revisions",
-        "version": "<server version>",
-        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -394,11 +328,6 @@
       "contentHash": "sha256:cb77ababffee5c497230c1a0b2fc0a663f16969ace24d3fc9f138d3e31c3ae21",
       "actual": {
         "count": 3
-      },
-      "producer": {
-        "name": "web-stylebook-mcp compare_page_revisions",
-        "version": "<server version>",
-        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -415,11 +344,6 @@
         "lost": 0,
         "acknowledged": 0,
         "reworded": 0
-      },
-      "producer": {
-        "name": "web-stylebook-mcp compare_page_revisions",
-        "version": "<server version>",
-        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -431,11 +355,6 @@
       "contentHash": "sha256:cb77ababffee5c497230c1a0b2fc0a663f16969ace24d3fc9f138d3e31c3ae21",
       "actual": {
         "words": 68
-      },
-      "producer": {
-        "name": "web-stylebook-mcp compare_page_revisions",
-        "version": "<server version>",
-        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     },
     {
@@ -449,11 +368,6 @@
       "actual": {
         "words": 36,
         "ratio": 0.53
-      },
-      "producer": {
-        "name": "web-stylebook-mcp compare_page_revisions",
-        "version": "<server version>",
-        "configHash": "sha256:27d51ca2acf64585c4a5cab40787a34f6f49d5319fe264c355895222d40db4ec"
       }
     }
   ],

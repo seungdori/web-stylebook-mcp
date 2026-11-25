@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { CatalogRepository } from '../src/catalog/repository.js';
 import { recommendDesignDirection } from '../src/recommendation/index.js';
-import { composeDesignTokens } from '../src/tokens/compile.js';
+import { composeDesignTokens, tokenFileText } from '../src/tokens/compile.js';
 import { compareDirections } from '../src/recommendation/compare.js';
 import { planUiStates } from '../src/state-atlas/planner.js';
 import { contrastRatio, parseHex } from '../src/tokens/contrast.js';
@@ -151,7 +151,7 @@ describe('hardening sweep regressions', () => {
     expect(() => composeDesignTokens({ primaryStyleId: 'brutalist-grid', format: 'css-variables', accentOverride: '' }, repo)).toThrow();
     expect(() => composeDesignTokens({ primaryStyleId: 'brutalist-grid', format: 'json', accentOverride: 'red' }, repo)).toThrow();
     const t = composeDesignTokens({ primaryStyleId: 'brutalist-grid', format: 'css-variables', accentOverride: '#abc' }, repo);
-    expect(t.rendered).not.toContain('--color-accent: ;');
+    expect(tokenFileText(t)).not.toContain('--color-accent: ;');
   });
 
   it('facet wins over a fuzzy notIdealFor phrase — consumer-app keeps its declared pool (#3)', () => {
@@ -204,8 +204,8 @@ describe('round 3 — inference, locale, token-render', () => {
 
   it('tailwind colorMode:both keeps BOTH themes, not just light (r3 #3)', () => {
     const r = composeDesignTokens({ primaryStyleId: 'bento-bloom', format: 'tailwind', colorMode: 'both' }, repo);
-    expect(r.rendered).toContain('"dark"');
-    expect(r.rendered).toContain('"light"');
+    expect(tokenFileText(r)).toContain('"dark"');
+    expect(tokenFileText(r)).toContain('"light"');
   });
 
   it('save-conflict recipe exists for the form surface and is well-formed (r3 #7)', () => {
@@ -351,7 +351,7 @@ describe('round 6 — compare safety axes + token typography', () => {
     expect(miss.notes.some((n) => n.includes('suggests a serif'))).toBe(true);
     // risograph-print is monospace-led, so the default output uses the authored faces.
     const authored = composeDesignTokens({ primaryStyleId: 'risograph-print', format: 'json' }, repo);
-    expect(authored.rendered).toContain('Anonymous Pro');
+    expect(tokenFileText(authored)).toContain('Anonymous Pro');
     expect(authored.notes.some((n) => n.includes('suggests a serif'))).toBe(false);
     expect(authored.notes.some((n) => n.includes('authored faces'))).toBe(true);
     // fusion-grain-mono: authored mono faces, no family-serif mismatch note

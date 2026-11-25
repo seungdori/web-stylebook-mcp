@@ -226,7 +226,8 @@ describe('DESIGN.md format', () => {
   it('rejects designMd options for the other formats and leaves those formats unchanged', () => {
     expect(() => composeDesignTokens({ primaryStyleId: 'quiet-utility', format: 'json', designMd: {} }, repo)).toThrow(TokenError);
     const json = composeDesignTokens({ primaryStyleId: 'quiet-utility', format: 'json' }, repo);
-    expect(json).toHaveProperty('rendered');
+    expect(json).toHaveProperty('tokens');
+    expect(composeDesignTokens({ primaryStyleId: 'quiet-utility', format: 'css-variables' }, repo)).toHaveProperty('rendered');
     expect(json).not.toHaveProperty('content');
     expect(json).not.toHaveProperty('lossy');
   });

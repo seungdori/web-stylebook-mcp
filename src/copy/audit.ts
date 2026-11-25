@@ -284,7 +284,6 @@ export function auditCopy(input: AuditCopyInput, repo: CatalogRepository) {
     }];
   });
 
-  const producer = { name: 'web-stylebook-mcp audit_copy', version: SERVER_VERSION, configHash: rulesetHash };
   const evidenceId = (name: string) => {
     const id = `copy:${targetId}:${name}`;
     return id.length <= EVIDENCE_ID_MAX ? id : `copy:${stableHashOf(targetId).slice(7, 23)}:${name}`;
@@ -314,7 +313,6 @@ export function auditCopy(input: AuditCopyInput, repo: CatalogRepository) {
         outcome: group.outcome, contentHash: inputHash,
         actual: { units: units.length, patterns: group.checks.length },
         ...(first ? { location: { selector: first } } : {}),
-        producer,
       });
       for (const check of group.checks) {
         const hit = byPattern.get(check.patternId);
@@ -331,7 +329,7 @@ export function auditCopy(input: AuditCopyInput, repo: CatalogRepository) {
   }
 
   return {
-    identity: { schema: COPY_AUDIT_SCHEMA, catalogVersion: repo.catalogVersion, rulesetHash, inputHash },
+    identity: { schema: COPY_AUDIT_SCHEMA, catalogVersion: repo.catalogVersion, rulesetHash, inputHash, producer: { name: 'web-stylebook-mcp audit_copy', version: SERVER_VERSION } },
     locale,
     target: { id: targetId, source: fromPage ? 'html' as const : 'text' as const },
     ...(voice ? { voice: { productType: voice.productType, ...(locale === 'ko' ? { register: voice.koRegister } : {}), maxWords: voice.maxWords } } : {}),

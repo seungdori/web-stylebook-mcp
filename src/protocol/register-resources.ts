@@ -15,6 +15,7 @@ import { localizeFoundation, localizeProtocol, localizeSources } from '../founda
 import { IMPROVEMENT_WORKFLOW_SCHEMA, IMPROVEMENT_WORKFLOW_URI, improvementWorkflow } from '../improvement/workflow.js';
 import { TYPE_PAIRINGS_URI, styleTypePairings, typePairingsResource } from '../typography/loading.js';
 import { COPY_GUIDE_URI, COPY_PATTERNS_URI, copyGuide, copyPatterns } from '../copy/guide.js';
+import { PHOTO_RULES_URI, photoRules } from '../start/photos.js';
 
 const JSON_MIME = 'application/json';
 function json(uri: string, value: unknown) {
@@ -92,6 +93,7 @@ export function registerResources(server: McpServer, repo: CatalogRepository): v
       'webstylebook://typography/pairings/{id}',
       'webstylebook://copy/guide/{locale}',
       'webstylebook://copy/patterns/{locale}',
+      'webstylebook://photos/rules/{locale}',
     ],
   }));
 
@@ -278,6 +280,9 @@ export function registerResources(server: McpServer, repo: CatalogRepository): v
   byLocale('copy-patterns', COPY_PATTERNS_URI, 'Copy patterns to check',
     'Copy patterns to check page text against in one language (en, ko or ja): template lines seen on generated pages and unsourced claims, each with its regular expression, verdict, related catalog anti-patterns and a rewrite.',
     copyPatterns);
+  byLocale('photo-rules', PHOTO_RULES_URI, 'Stock photo rules',
+    'The stock photo rules start_ui_design photo plans refer to, in one language (en, ko or ja): the licence pages and the date they were read, where to pick photos, how to credit them, what a photo must not imply, the image markup, and what to do without a fitting photo.',
+    photoRules);
 
   server.registerResource('design-md', new ResourceTemplate('webstylebook://design-md/{styleId}', {
     list: async () => ({ resources: repo.allStyles().map((s) => ({ uri: `webstylebook://design-md/${s.id}`, name: `${s.id} DESIGN.md`, mimeType: 'text/markdown' })) }),

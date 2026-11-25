@@ -35,7 +35,7 @@
   "notes": [
     "Values resolve from the pinned website contract, locale adjustments, then validated overrides; no palette-position or family inference is used.",
     "visualContract is the complete companion for component color pairs, font provenance, responsive roles, usage, field origins and accepted repairs. tokens contains compatibility aliases.",
-    "Contrast repair proposals are inert until supplied in acceptedRepairs. Identity accents remain unchanged. Font files are not bundled or loaded by MCP."
+    "Contrast repair proposals are inert until supplied in acceptedRepairs. Identity accents remain unchanged. Font files are not bundled or loaded by MCP: load each external family in visualContract.typography.fonts from its stylesheetUrl (start_ui_design gives the <link> tags), or the page shows a fallback face."
   ],
   "structure": {
     "schema": "webstylebook.structure.v1",

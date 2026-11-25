@@ -12,7 +12,7 @@ import { TYPE_PAIRINGS } from '../typography/pairings.js';
 import { PRECONNECT, TYPE_PAIRINGS_URI, catalogFonts, firstFamily, loadingCode } from '../typography/loading.js';
 import { NEW_UI_WORKFLOW_URI } from '../server-info.js';
 import { copyBrief } from './copy-brief.js';
-import { PHOTO_PLANS, PHOTO_RULES, SOFTWARE_PRODUCT_TYPES } from './photos.js';
+import { PHOTO_PLANS, PHOTO_RULES, PHOTO_RULES_URI, SOFTWARE_PRODUCT_TYPES } from './photos.js';
 
 /**
  * The entry tool for a new page or screen (2026-11-25 design-quality plan, 3.3 and 8). In the 0.16.0 runs, 7 of the
@@ -110,13 +110,11 @@ function photoPlan(role: PageRole | undefined, productType: ProductType, locale:
       slot: slot.slot, subject: slot.subject[locale], avoid: slot.avoid[locale], orientation: slot.orientation,
       minWidth: slot.minWidth, ...(slot.query ? { query: slot.query } : {}), crop: slot.crop, alt: slot.alt[locale], own: slot.own,
     })),
-    termsChecked: PHOTO_RULES.termsChecked,
-    licenses: PHOTO_RULES.licenses,
-    pick: PHOTO_RULES.pick[locale],
+    // The credit and fallback rules every photo page needs; the licence terms, where to pick, what not to imply and the
+    // markup rule are the same for every plan and live in the resource.
     credit: PHOTO_RULES.credit[locale],
-    dont: PHOTO_RULES.dont[locale],
-    markup: PHOTO_RULES.markup[locale],
     fallback: PHOTO_RULES.fallback[locale],
+    rulesUri: `${PHOTO_RULES_URI}/${locale}`,
   };
 }
 
@@ -205,7 +203,7 @@ export function renderStartUiDesign(result: StartUiDesignResult): string {
   ];
   if (photos.use) {
     for (const slot of photos.slots) lines.push(`- ${slot.slot}${slot.own ? ' (own photo)' : ''}: ${slot.subject}${slot.query ? ` Search: "${slot.query.unsplash}"` : ''}`);
-    lines.push(photos.credit);
+    lines.push(`${photos.credit} Rules: ${photos.rulesUri}`);
   }
   if (copy.voice) lines.push(`Copy voice (${copy.voice.register ?? copy.voice.person}, ≤${copy.voice.maxWords} words): ${copy.voice.tone} Button: "${copy.voice.cta}".`);
   lines.push(`Buttons: ${copy.rules.button}`, ...copy.watch.map((entry) => `- Watch ${entry.id}${'verdict' in entry ? ' (fix-now)' : ''}: "${entry.flagged}"`));

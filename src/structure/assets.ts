@@ -45,6 +45,21 @@ const BROKEN_SRC = /^(?:#|about:blank|undefined|null|javascript:.*)?$/i;
 const FILENAME_ALT = /^(?:.*\.(?:jpe?g|png|webp|gif|avif|svg)|image|img|photo|picture|사진|이미지|画像|写真)\s*\d*$/iu;
 const GENERIC_FAMILIES = new Set(['serif', 'sans-serif', 'monospace', 'cursive', 'fantasy', 'system-ui', 'ui-serif', 'ui-sans-serif', 'ui-monospace', 'ui-rounded', 'math', 'emoji', 'fangsong', 'inherit', 'initial', 'unset', 'revert']);
 const PRETENDARD = /pretendard/i;
+/**
+ * System faces that draw Korean or Japanese on macOS, iOS or Windows. Browsers fall back glyph by glyph through the
+ * stack, so a web font listed after one of these is never reached where it is installed, and the page does not depend
+ * on loading it: `-apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR'` names Noto Sans KR only for other systems.
+ */
+const SYSTEM_SCRIPT_FACES: Record<'hangul' | 'japanese', ReadonlySet<string>> = {
+  hangul: new Set(['apple sd gothic neo', 'applesdgothicneo', 'applegothic', 'applemyungjo', 'malgun gothic', '맑은 고딕', 'dotum', '돋움', 'gulim', '굴림', 'batang', '바탕', 'gungsuh', '궁서']),
+  japanese: new Set([
+    'hiragino sans', 'hiragino kaku gothic pron', 'hiragino kaku gothic pro', 'ヒラギノ角ゴ pron', 'ヒラギノ角ゴ pro', 'ヒラギノ角ゴシック', 'hiragino mincho pron',
+    'hiragino mincho pro', 'ヒラギノ明朝 pron', 'yu gothic', 'yugothic', '游ゴシック', '游ゴシック体', 'yu mincho', 'yumincho', '游明朝', '游明朝体', 'meiryo', 'メイリオ',
+    'ms gothic', 'ｍｓ ゴシック', 'ms pgothic', 'ｍｓ ｐゴシック', 'ms mincho', 'osaka',
+  ]),
+};
+/** The size (and line height) in the font shorthand, after any style, variant or numeric weight. */
+const SHORTHAND = /(?:^|\s)(?:[\d.]+(?:px|r?em|%|pt|pc|vw|vh|vmin|vmax|ch|ex|cm|mm|in|q)|(?:xx?-)?(?:small|large)|medium|smaller|larger|(?:calc|clamp|min|max)\([^)]*\))(?:\s*\/\s*\S+)?\s+(.+)$/i;
 
 const say: Record<Lang, Record<AssetCheckId, { criterion: string; why: string; fix: string }> & { found: (n: number) => string; clean: string; none: string; unknownSheet: string; limit: string; record: string }> = {
   en: {
@@ -129,7 +144,7 @@ function declaredStacks(sources: readonly string[]): string[] {
     for (const match of body.matchAll(/(?:^|[;{\s])(font-family|--font[\w-]*|font)\s*:\s*([^;}]+)/gi)) {
       let value = match[2]!.trim().replace(/\s*!important$/i, '');
       if (match[1]!.toLowerCase() === 'font') {
-        const shorthand = /\d[\w.%]*(?:\s*\/\s*[\w.%]+)?\s+(.+)$/.exec(value);
+        const shorthand = SHORTHAND.exec(value);
         if (!shorthand) continue;
         value = shorthand[1]!;
       }
@@ -184,6 +199,15 @@ function loadedFonts(page: PageModel, sources: readonly string[]) {
   return { families, google, faces, unknownSheet };
 }
 
+/** The face that draws the page's script: the first in the stack that covers it, unless a system face comes first. */
+function scriptFace(families: readonly string[], script: 'hangul' | 'japanese'): string | undefined {
+  for (const family of families) {
+    if (SYSTEM_SCRIPT_FACES[script].has(lower(family))) return undefined;
+    if (FONT_SCRIPT_COVERAGE[canonical(family)]?.includes(script)) return family;
+  }
+  return undefined;
+}
+
 const knownWebFont = (family: string) => FONT_LICENSES[family] !== undefined || PRETENDARD.test(family);
 const canonical = (family: string) => Object.keys(FONT_LICENSES).find((name) => lower(name) === lower(family)) ?? family;
 
@@ -230,7 +254,7 @@ export function assetReports(page: PageModel, css: readonly string[], styleId: s
     const first = families[0];
     if (first && (knownWebFont(first) || loaded.families.has(lower(first)))) used.add(canonical(first));
     if (first && knownWebFont(first)) needed.add(canonical(first));
-    const local = script ? families.find((family) => FONT_SCRIPT_COVERAGE[canonical(family)]?.includes(script)) : undefined;
+    const local = script ? scriptFace(families, script) : undefined;
     if (local && knownWebFont(local)) needed.add(canonical(local));
   }
   const missing = [...needed].filter((family) => !loaded.families.has(lower(family)) && !(PRETENDARD.test(family) && loaded.families.has('pretendard'))).sort();

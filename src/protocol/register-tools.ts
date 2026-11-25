@@ -42,7 +42,7 @@ import {
 } from '../audit/evaluator.js';
 import { viewportWidthLabel } from '../audit/check-scope.js';
 import {
-  composeDesignTokens, TokenError, type ComposeDesignTokensResult, type DesignMdTokensResult,
+  composeDesignTokens, TokenError, tokenFileText, type ComposeDesignTokensResult, type DesignMdTokensResult,
 } from '../tokens/compile.js';
 import { HEX_COLOR_INPUT } from '../tokens/contrast.js';
 import { DESIGN_MD_PLACEMENTS } from '../tokens/design-md.js';
@@ -1168,7 +1168,7 @@ function renderTokens(r: ComposeDesignTokensResult, repo: CatalogRepository): st
   const lines = [`# Tokens — ${r.primaryStyleId} (${r.format}, ${r.colorMode})`];
   if (r.warnings.length) lines.push('', '⚠ Contrast warnings:', ...r.warnings.map((w) => `- ${w}`));
   if (r.notes.length) lines.push('', 'Notes:', ...r.notes.map((n) => `- ${n}`));
-  lines.push('', '```', r.rendered, '```');
+  lines.push('', '```', tokenFileText(r), '```');
   if (r.structure) {
     const structure = styleStructure(r.structure.styleId, repo);
     lines.push('', `Structure (${structure.styleId}, full detail at ${r.structure.resourceUri}): ${structure.archetype.hero}`,
