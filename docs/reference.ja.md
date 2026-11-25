@@ -441,7 +441,7 @@ cursor://anysphere.cursor-deeplink/mcp/install?name=web-stylebook&config=eyJjb21
 
 [`skills/web-stylebook-design/`](../skills/web-stylebook-design/SKILL.md) にあるスキルは、いつどのツールを呼ぶか、結果をどう使うかをエージェントに伝えます（色を変えるのではなく組み立てる、候補を複数提示する、信頼は見せかけでなく実際に得る、再利用できるコンポーネントに落とし込む）。[インストール](#インストール) では `npx skills add` と Claude Code プラグインを扱います。スキルは npm パッケージの `skills/` 配下にも含まれています。
 
-スキルに対応していないエージェントの場合は、[`skills/AGENTS.md`](../skills/AGENTS.md)（Codex）または [`skills/CLAUDE.md`](../skills/CLAUDE.md)（Claude Code などのルールファイル）の内容を、プロジェクトのルールファイルにコピーしてください。どちらのブロックも、新しいページの手順を `start_ui_design` から始めます。Claude Code は MCP ツールを読み込むまで名前だけを表示するため、`skills/CLAUDE.md` の先頭行に `mcp__web-stylebook__start_ui_design` を書いています。
+スキルに対応していないエージェントの場合は、[`skills/AGENTS.md`](../skills/AGENTS.md)（Codex）または [`skills/CLAUDE.md`](../skills/CLAUDE.md)（Claude Code などのルールファイル）の内容を、プロジェクトのルールファイルにコピーしてください。どちらのブロックも、新しいページの手順を `start_ui_design` から始めます。Claude Code は MCP ツールを読み込むまで名前だけを表示するため、`skills/CLAUDE.md` の先頭行にツールの名前を両方とも書いています。`claude mcp add` でサーバーを追加した場合は `mcp__web-stylebook__start_ui_design`、プラグインでインストールした場合は `mcp__plugin_web-stylebook_web-stylebook__start_ui_design` です。ブロックは、ToolSearch で `start_ui_design` をキーワード検索してツールを読み込むよう案内します。この検索はどちらの名前も見つけます。
 
 Cursor では、次のルールを `.cursor/rules/web-stylebook.mdc` として追加します。`alwaysApply: true` にすると、Cursor はすべてのチャットにこのルールを含め、`globs` を無視します。そのため、このルールには `globs` を書いていません。
 

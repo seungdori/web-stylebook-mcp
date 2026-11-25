@@ -472,8 +472,10 @@ candidates; earn trust, don't fake it; land on reusable components). [Install](#
 If your agent has no skill support, copy [`skills/AGENTS.md`](../skills/AGENTS.md) (Codex) or
 [`skills/CLAUDE.md`](../skills/CLAUDE.md) (Claude Code and other rules files) into your project's
 rules file. Both start the new-page flow with `start_ui_design`. Claude Code shows MCP tools by name
-only until it loads them, so the first line of `skills/CLAUDE.md` names
-`mcp__web-stylebook__start_ui_design`.
+only until it loads them, so the first line of `skills/CLAUDE.md` names the tool under both names:
+`mcp__web-stylebook__start_ui_design` when you add the server with `claude mcp add`, and
+`mcp__plugin_web-stylebook_web-stylebook__start_ui_design` from the plugin. The block also tells the agent to
+load it with a ToolSearch keyword query for `start_ui_design`, which finds either name.
 
 In Cursor, add this rule as `.cursor/rules/web-stylebook.mdc`. With `alwaysApply: true`, Cursor
 includes it in every chat and ignores `globs`, so the rule has none:

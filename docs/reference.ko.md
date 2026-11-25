@@ -476,7 +476,10 @@ cursor://anysphere.cursor-deeplink/mcp/install?name=web-stylebook&config=eyJjb21
 스킬을 지원하지 않는 에이전트라면 [`skills/AGENTS.md`](../skills/AGENTS.md)(Codex)나
 [`skills/CLAUDE.md`](../skills/CLAUDE.md)(Claude Code와 기타 rules 파일)를 프로젝트의 rules 파일에 복사하세요.
 두 블록 모두 새 페이지 흐름을 `start_ui_design`으로 시작합니다. Claude Code는 MCP 도구를 불러오기 전까지
-이름만 보여 줍니다. 그래서 `skills/CLAUDE.md`의 첫 줄에 `mcp__web-stylebook__start_ui_design`을 적었습니다.
+이름만 보여 줍니다. 그래서 `skills/CLAUDE.md`의 첫 줄에 도구 이름 두 개를 모두 적었습니다.
+`claude mcp add`로 서버를 추가하면 `mcp__web-stylebook__start_ui_design`이고, 플러그인으로 설치하면
+`mcp__plugin_web-stylebook_web-stylebook__start_ui_design`입니다. 블록은 ToolSearch에서 `start_ui_design`을
+키워드로 검색해 도구를 불러오라고 안내합니다. 이 검색은 두 이름을 모두 찾습니다.
 
 Cursor에서는 아래 규칙을 `.cursor/rules/web-stylebook.mdc`로 추가하세요. `alwaysApply: true`이면 Cursor가
 모든 채팅에 이 규칙을 넣고 `globs`는 무시합니다. 그래서 규칙에 `globs`를 넣지 않았습니다.

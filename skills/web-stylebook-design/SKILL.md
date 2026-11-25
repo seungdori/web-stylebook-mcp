@@ -161,9 +161,11 @@ The absence of internal jargon is not a pass. Inspect what the actual visible co
 
 ## New page or screen
 
-In Claude Code the tool is `mcp__web-stylebook__start_ui_design`; if tools are listed by name only,
-load it first (ToolSearch `select:mcp__web-stylebook__start_ui_design`). For dashboards and charts,
-use it with a chart skill.
+In Claude Code the tool is `mcp__plugin_web-stylebook_web-stylebook__start_ui_design` from the plugin and
+`mcp__web-stylebook__start_ui_design` when you add the server yourself (`mcp__<server key>__start_ui_design`
+under another key). If tools are listed by name only, load it first: ToolSearch with the query
+`start_ui_design` finds it under any of these names. For dashboards and charts, use it with a chart
+skill.
 
 1. `start_ui_design` with the product context and `pageRole`: the direction, page structure,
    must-haves, fonts, photo plan, copy brief and the next calls with their arguments.

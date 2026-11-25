@@ -1,9 +1,9 @@
-## Web Stylebook: call `mcp__web-stylebook__start_ui_design` before writing UI code
+## Web Stylebook: call `mcp__web-stylebook__start_ui_design` (plugin: `mcp__plugin_web-stylebook_web-stylebook__start_ui_design`) before writing UI code
 
 Before you write HTML, CSS, JSX or other UI code for a new page or screen (landing page, dashboard,
-docs, settings, product page, form), call `mcp__web-stylebook__start_ui_design` once with the product
-context and `pageRole`. If tools are listed by name only, load it first with ToolSearch
-`select:mcp__web-stylebook__start_ui_design`. For dashboards and charts, use it with your chart skill.
+docs, settings, product page, form), call `start_ui_design` once with the product context and
+`pageRole`. If tools are listed by name only, load it first: ToolSearch with the query
+`start_ui_design` finds it under either name. For dashboards and charts, use it with your chart skill.
 
 Without MCP, run the same tools from a shell: `npx -y web-stylebook-mcp@latest call <tool> --input
 args.json` (`tools` lists them, `schema <tool>` shows the arguments, `read <uri>` opens a resource).
@@ -84,5 +84,7 @@ primitive's own states.
 The catalog is the source of truth; read the live resources instead of copying them here. Output is
 deterministic and offline; the server never sees your repository.
 
-<!-- Copy this block into your project's CLAUDE.md. If you registered the server under another name,
-     the tool is mcp__<that name>__start_ui_design. For Codex, use skills/AGENTS.md. -->
+<!-- Copy this block into your project's CLAUDE.md. Claude Code names a tool mcp__<server key>__<tool>,
+     and a plugin's tool mcp__plugin_<plugin>_<server key>__<tool>. If you added the server under a key
+     other than web-stylebook, the tool is mcp__<your key>__start_ui_design; the plugin's name stays
+     mcp__plugin_web-stylebook_web-stylebook__start_ui_design. For Codex, use skills/AGENTS.md. -->
