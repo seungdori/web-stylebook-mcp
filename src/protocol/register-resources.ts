@@ -1,7 +1,7 @@
 import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { CatalogRepository } from '../catalog/repository.js';
 import type { VisualResolutionOptions } from '../visual-canonical/types.js';
-import { REFERENCE_CATEGORIES } from '../types.js';
+import { REFERENCE_CATEGORIES, type Lang } from '../types.js';
 import { IMPROVEMENT_GUIDANCE, NEW_UI_GUIDANCE, NEW_UI_WORKFLOW_URI, SERVER_NAME, SERVER_VERSION, TOOL_NAMES } from '../server-info.js';
 import { ERROR_CODES } from './errors.js';
 import { bannedPatternCatalog, styleStructure, structureManifest, structureRulesetHash } from '../structure/guidance.js';
@@ -13,6 +13,7 @@ import { FOUNDATIONS, FOUNDATION_IDENTITY, foundationManifest } from '../foundat
 import { FOUNDATION_SOURCES } from '../foundations/sources.js';
 import { localizeFoundation, localizeProtocol, localizeSources } from '../foundations/planner.js';
 import { IMPROVEMENT_WORKFLOW_SCHEMA, IMPROVEMENT_WORKFLOW_URI, improvementWorkflow } from '../improvement/workflow.js';
+import { TYPE_PAIRINGS_URI, styleTypePairings, typePairingsResource } from '../typography/loading.js';
 
 const JSON_MIME = 'application/json';
 function json(uri: string, value: unknown) {
@@ -20,6 +21,19 @@ function json(uri: string, value: unknown) {
 }
 function notFound(uri: string, kind: string, id: string) {
   return { contents: [{ uri, mimeType: JSON_MIME, text: JSON.stringify({ error: `${kind} '${id}' not found` }) }] };
+}
+/** The one optional locale=en|ko|ja query parameter, or the error resource to return. */
+function localeQuery(u: URL): Lang | ReturnType<typeof json> {
+  for (const key of new Set(u.searchParams.keys())) {
+    if (key !== 'locale' || u.searchParams.getAll(key).length !== 1) {
+      return json(u.href, { error: { code: 'INVALID_INPUT', message: 'only one locale query parameter is supported' } });
+    }
+  }
+  const locale = u.searchParams.get('locale') ?? 'en';
+  if (locale !== 'en' && locale !== 'ko' && locale !== 'ja') {
+    return json(u.href, { error: { code: 'INVALID_INPUT', message: 'locale must be en, ko or ja' } });
+  }
+  return locale;
 }
 
 export function registerResources(server: McpServer, repo: CatalogRepository): void {
@@ -74,6 +88,7 @@ export function registerResources(server: McpServer, repo: CatalogRepository): v
       'webstylebook://products/{id}',
       'webstylebook://references/{id}',
       'webstylebook://design-md/{id}',
+      'webstylebook://typography/pairings/{id}',
     ],
   }));
 
@@ -125,15 +140,8 @@ export function registerResources(server: McpServer, repo: CatalogRepository): v
     const id = String(v.foundationId).split('?')[0] ?? '';
     const entry = FOUNDATIONS.find((foundation) => foundation.id === id);
     if (!entry) return notFound(u.href, 'design foundation', id);
-    for (const key of new Set(u.searchParams.keys())) {
-      if (key !== 'locale' || u.searchParams.getAll(key).length !== 1) {
-        return json(u.href, { error: { code: 'INVALID_INPUT', message: 'only one locale query parameter is supported' } });
-      }
-    }
-    const locale = u.searchParams.get('locale') ?? 'en';
-    if (locale !== 'en' && locale !== 'ko' && locale !== 'ja') {
-      return json(u.href, { error: { code: 'INVALID_INPUT', message: 'locale must be en, ko or ja' } });
-    }
+    const locale = localeQuery(u);
+    if (typeof locale !== 'string') return locale;
     return json(u.href, {
       identity: FOUNDATION_IDENTITY, foundation: localizeFoundation(entry, locale),
       sources: localizeSources(entry.sourceIds, locale), protocol: localizeProtocol(locale),
@@ -180,6 +188,12 @@ export function registerResources(server: McpServer, repo: CatalogRepository): v
     MUST_HAVE_RESOURCE_URI,
     'Elements each product type requires and the zone each must sit in, with the criteria audit_page_structure uses to find them',
     () => ({ ...mustHaveCatalog(), rulesetHash: structureRulesetHash() }),
+  );
+  fixed(
+    'type-pairings',
+    TYPE_PAIRINGS_URI,
+    "Index of alternative font pairings for every style, with page roles and licences; the style's authored fonts stay the default. Read /typography/pairings/{styleId} for one style's Korean and Japanese faces and loading code",
+    () => typePairingsResource(repo),
   );
 
   server.registerResource('style', new ResourceTemplate('webstylebook://styles/{styleId}', {
@@ -229,6 +243,19 @@ export function registerResources(server: McpServer, repo: CatalogRepository): v
         error: { code: 'INVALID_INPUT', message: error instanceof Error ? error.message : String(error) },
       });
     }
+  });
+
+  server.registerResource('style-type-pairings', new ResourceTemplate(`${TYPE_PAIRINGS_URI}/{styleId}`, {
+    list: async () => ({ resources: repo.allStyles().map((s) => ({ uri: `${TYPE_PAIRINGS_URI}/${s.id}`, name: `${s.id} type pairings`, mimeType: JSON_MIME })) }),
+  }), {
+    title: 'Type pairings for one style',
+    description: "One style's authored display and body fonts and its alternative pairings, with paste-ready <link> tags and CSS font stacks for a page in the requested language, and licences. Optional query: locale=en|ko|ja.",
+    mimeType: JSON_MIME,
+  }, async (u, v) => {
+    const styleId = String(v.styleId).split('?')[0] ?? '';
+    if (!repo.getStyle(styleId)) return notFound(u.href, 'style', styleId);
+    const locale = localeQuery(u);
+    return typeof locale === 'string' ? json(u.href, styleTypePairings(repo, styleId, locale)) : locale;
   });
 
   server.registerResource('design-md', new ResourceTemplate('webstylebook://design-md/{styleId}', {
