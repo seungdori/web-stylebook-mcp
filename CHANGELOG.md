@@ -6,27 +6,31 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.23.0] — 2026-11-25
+
 ### Breaking
 
-- Since 0.22.1, `audit_page_structure` returns a different finding shape: `finding.replaceWith.moves`
-  lists `{ id, name }` only, `finding.replaceWith.archetype` is the string `"hero"` or `"sectionOrder"`,
-  and the purpose and build steps of each named move and the hero or section order are in the new
-  `replacements` field. Evidence items no longer carry `actual` or `producer.configHash`. Code that read
-  `replaceWith.moves[].build` or `replaceWith.archetype.hero` reads `replacements` instead. 0.22.1 listed
-  this under Changed.
+- Since 0.22.1, `audit_page_structure` findings have a new shape: `replaceWith.moves` lists
+  `{ id, name }`, `replaceWith.archetype` is the string `"hero"` or `"sectionOrder"`, and each named
+  move's purpose and build steps and the hero or section order are in the `replacements` field. Evidence
+  items no longer carry `actual` or `producer.configHash`. Code that read `replaceWith.moves[].build` or
+  `replaceWith.archetype.hero` reads `replacements` instead. 0.22.1 listed this under Changed (#55).
 
 ### Changed
 
-- A stock-photo hero is an observation when the page names the photo's stock site, as in "Photo by … on
-  Unsplash" or a link to the site: `audit_page_structure` returns `NOT_VERIFIED` with `cant-tell`
-  evidence and a `shape-observation` finding even with a `styleId`, and asks whether the photo shows the
-  product's own place, material or use. Without the credit it stays a defect (`FIX_NOW` with a
-  `styleId`), and placeholder services are never credited. `assets-image-credit` uses the same rule,
-  and the `start_ui_design` photo rules and the skill's furniture check say the same.
-  The structure ruleset hash changes (a criterion is added); structure plan hashes do not.
-- `ko-buzzwords` also matches the verb forms 혁신하세요/혁신합니다/혁신하는 and 가속화하세요, and growth
-  nouns with 가속화 (비즈니스 성장을 가속화, 디지털 전환 가속화). Plain nouns (혁신 사례, 하드웨어 가속) still
-  pass, and none of the 72 saved run pages matches. A Korean `copy` plan hash changes with the check text.
+- A stock-photo hero is an observation when the page names the photo's stock site ("Photo by … on
+  Unsplash" or a link to it): `audit_page_structure` returns `NOT_VERIFIED` even with a `styleId` and
+  asks whether the photo shows the product's own place, material or use. Without the credit it stays a
+  defect, and placeholder services are never credited. `assets-image-credit`, the `start_ui_design`
+  photo rules and the bundled skill use the same rule. The structure ruleset hash changes; structure
+  plan hashes do not (#57).
+- `ko-buzzwords` also matches verb forms such as 혁신하세요 and 가속화합니다; plain nouns such as 혁신 사례
+  still pass. A Korean `copy` plan hash changes (#57).
+
+### Unchanged
+
+- Tool inputs, `compose_design_tokens`, the catalog snapshot and the dependencies are the same as in
+  0.22.1.
 
 ## [0.22.1] — 2026-11-25
 
