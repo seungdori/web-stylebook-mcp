@@ -6,30 +6,31 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.22.0] — 2026-11-25
+
 ### Added
 
-- `audit_copy` checks the visible text of a page (or plain copy) against the 24 copy patterns of
-  `webstylebook://copy/patterns/{locale}` and, with `productType`, the product voice (Korean register,
-  sentence length). Each finding has its selector or line, the matched text and the fix. Its evidence
-  and results answer the new opt-in `copy` group of `get_design_audit_plan`. A template line is an
-  observation (`NOT_VERIFIED` until judged); an unsourced user count or percentage outcome is
-  `FIX_NOW`. The whole result stays within 16 KiB.
-- `audit_page_structure` returns an `assets` section: declared web fonts are loaded and use
-  `font-display: swap` and, with `styleId`, are the style's fonts or its pairings; images are not
-  placeholders or empty sources, come from Unsplash, Pexels or the product itself, credit Unsplash and
-  Pexels photos, and have alt text and a reserved size. Its `assets.evidence` and `assets.results`
-  answer the new opt-in `assets` group; the existing `evidence` and `results` are unchanged. A missing
-  photo credit is `RISK`, because the Unsplash and Pexels licences require it only through their APIs.
+- `audit_copy` checks the visible text of a page, or plain copy, against the 24 copy patterns and,
+  with `productType`, the product voice. Each finding has its selector or line, the matched text and
+  the fix, and the results answer the new opt-in `copy` audit group. The result stays within 16 KiB
+  (#53).
+- `audit_page_structure` returns an `assets` section with 8 font and image checks: web fonts loaded,
+  swapped and matching the style or its pairings; images that are not placeholders, come from Unsplash,
+  Pexels or the product, are credited, and have alt text and a reserved size. Its results answer the
+  new opt-in `assets` audit group (#53).
 
 ### Changed
 
-- The on-init instructions, `webstylebook://workflows/new-ui` and the `start_ui_design` next calls
-  include `audit_copy`. `get_design_audit_plan` accepts `productType` with the `copy` group alone.
-  Plans without the new groups keep their checks and hash.
+- The server has 16 tools (was 15). The on-init instructions, `webstylebook://workflows/new-ui` and the
+  `start_ui_design` next calls include `audit_copy` (#53).
+- `get_design_audit_plan` accepts `productType` with the `copy` group alone. Plans without the new
+  groups keep their checks and hash, and `audit_page_structure` keeps its `evidence` and `results`
+  (#53).
 
-### For maintainers
+### Unchanged
 
-- `npm run visual:benchmark` checks the largest `audit_copy` result against a 16 KiB budget.
+- `compose_design_tokens`, the catalog snapshot, its hashes and the dependencies are the same as in
+  0.21.0.
 
 ## [0.21.0] — 2026-11-25
 
