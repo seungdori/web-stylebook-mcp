@@ -530,6 +530,7 @@ webstylebook://structure/banned-patterns · /structure/must-haves
 webstylebook://design-md/{id}
 webstylebook://workflows/improve-ui · /workflows/new-ui
 webstylebook://typography/pairings · /typography/pairings/{id}
+webstylebook://copy/guide/{locale} · /copy/patterns/{locale}
 ```
 
 スタイルの詳細は、省略可能な `locale`、`mode`、期待される `revision` のクエリパラメーターを受け付けます（例: `webstylebook://styles/brutalist-grid?locale=ko&mode=light`）。解決された 1 つのロケールとモードを返します。対応していない値、重複したパラメーター、未知のクエリ名は、明示的なエラーを返します。
@@ -539,6 +540,8 @@ webstylebook://typography/pairings · /typography/pairings/{id}
 `webstylebook://workflows/new-ui` には、新しいページや画面を作る流れと構成の指針がすべて入っています。起動時の instructions は短くしてこのリソースを指し、`manifest.newUiWorkflow` が入口のツールを示します。
 
 `webstylebook://typography/pairings` は、代わりのフォントの組み合わせの一覧と、スタイルごとの既定のフォントと合う組み合わせを示します。`/typography/pairings/{id}?locale=ko` は、1 つのスタイルの組み合わせを、韓国語または日本語の書体、貼り付けて使う `<link>` タグと CSS のフォントスタック、ライセンスとともに返します。既定は引き続き `compose_design_tokens` が返すフォントです。
+
+`webstylebook://copy/guide/{locale}` は、ボタン・空の状態・エラー・読み込み・確認ダイアログ・数字・文体の規則と、製品タイプごとの文章の声、hero・空の状態・エラーの例を返します。`webstylebook://copy/patterns/{locale}` は、ページの文言を確かめるパターンの一覧です。生成されたページで繰り返された型は `observation`、出典のないユーザー数や成果の割合は `fix-now` です。
 
 ## プロンプト
 

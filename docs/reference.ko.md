@@ -565,6 +565,7 @@ webstylebook://structure/banned-patterns · /structure/must-haves
 webstylebook://design-md/{id}
 webstylebook://workflows/improve-ui · /workflows/new-ui
 webstylebook://typography/pairings · /typography/pairings/{id}
+webstylebook://copy/guide/{locale} · /copy/patterns/{locale}
 ```
 
 스타일 상세에는 `locale`, `mode`, 기대하는 `revision`을 쿼리로 지정할 수 있습니다. 예: `webstylebook://styles/brutalist-grid?locale=ko&mode=light`. 선택한 언어와 모드 1개의 명세를 반환하며, 지원하지 않는 값·중복 인자·알 수 없는 쿼리 이름은 명확한 오류로 반환합니다.
@@ -574,6 +575,8 @@ webstylebook://typography/pairings · /typography/pairings/{id}
 `webstylebook://workflows/new-ui`에는 새 페이지나 화면을 만드는 전체 흐름과 구성 지침이 있습니다. 시작할 때 받는 instructions는 짧게 두고 이 리소스를 가리키며, `manifest.newUiWorkflow`가 진입 도구를 알려 줍니다.
 
 `webstylebook://typography/pairings`는 대안 글꼴 짝의 목록과, 스타일마다 저작된 글꼴과 어울리는 짝을 보여 줍니다. `/typography/pairings/{id}?locale=ko`는 한 스타일의 짝을 한국어 또는 일본어 글꼴, 붙여 넣을 `<link>` 태그와 CSS 글꼴 스택, 라이선스와 함께 반환합니다. 기본값은 계속 `compose_design_tokens`가 주는 저작 글꼴입니다.
+
+`webstylebook://copy/guide/{locale}`는 버튼, 빈 상태, 오류, 로딩, 확인 대화상자, 숫자, 존댓말 체계의 규칙과, 제품 유형마다 문장 보이스와 hero·빈 상태·오류 예시를 줍니다. `webstylebook://copy/patterns/{locale}`은 페이지 문구를 검사할 패턴 목록입니다. 생성된 페이지에서 반복된 틀은 `observation`이고, 출처 없는 사용자 수나 성과 비율은 `fix-now`입니다.
 
 ## 프롬프트
 
