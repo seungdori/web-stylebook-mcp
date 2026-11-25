@@ -165,7 +165,8 @@ describe('audit_page_structure finds missing and misplaced must-haves', () => {
     expect(price.locations[0]).toMatch(/section#buy/);
     expect(price.observed).toMatchObject({ status: 'misplaced', zone: 'first-screen', inZone: 0 });
     expect(price.replaceWith.instruction).toMatch(/^Move it onto the first screen/);
-    expect(price.replaceWith.archetype?.hero).toBe(structureGuide('editorial-silence').hero);
+    expect(price.replaceWith.archetype).toBe('hero');
+    expect(result.replacements.hero).toBe(structureGuide('editorial-silence').hero);
     const assurance = result.findings.find((finding) => finding.patternId === 'must-have/purchase-assurance')!;
     expect(assurance.replaceWith.moves.map((move) => move.id))
       .toEqual(structureGuide('editorial-silence').moves.filter((move) => move.jobs.includes('proof')).map((move) => move.id));

@@ -30,6 +30,8 @@ export const PAGE_LIMITS = {
   viewportMax: 3840,
 } as const;
 const LOCATIONS = 5;
+/** The whole tool result (text and structuredContent) stays under this; scripts/benchmark-visual.mjs checks it. */
+export const STRUCTURE_AUDIT_BUDGET_BYTES = 48 * 1024;
 const VIEWPORT_HEIGHT = 900;
 // validate_design_audit_result accepts ids up to 160 characters.
 const EVIDENCE_ID_MAX = 160;
@@ -57,7 +59,8 @@ export class StructureAuditError extends Error {
 
 export type StructureCheckStatus = 'found' | 'absent' | 'not-applicable' | 'not-verified' | 'allowed-by-style';
 
-export interface ReplacementMove { id: string; name: string; build: string; purpose: string }
+/** A move a finding points to; its purpose and build steps are in StructureAuditResult.replacements.moves, once per move. */
+export interface ReplacementMove { id: string; name: string }
 
 export interface StructureFinding {
   patternId: string;
@@ -76,7 +79,8 @@ export interface StructureFinding {
   replaceWith: {
     instruction: string;
     moves: ReplacementMove[];
-    archetype?: { hero?: string; sectionOrder?: string[] };
+    /** The part of the archetype that takes the pattern's place, given once in StructureAuditResult.replacements. */
+    archetype?: 'hero' | 'sectionOrder';
   };
   relatedAuditCheckIds: string[];
 }
@@ -99,9 +103,10 @@ export interface StructureEvidence {
   summary: string;
   outcome: 'passed' | 'failed' | 'cant-tell' | 'inapplicable';
   contentHash: string;
-  actual: Record<string, string | number | boolean>;
+  actual?: Record<string, string | number | boolean>;
   location?: { selector: string };
-  producer: { name: string; version: string; configHash: string };
+  /** The ruleset is identity.rulesetHash; it is not repeated on each item. */
+  producer: { name: string; version: string; configHash?: string };
 }
 
 export interface StructureResult {
@@ -160,6 +165,11 @@ export interface StructureAuditResult {
     claims: Record<StructureClaim, number>;
   };
   findings: StructureFinding[];
+  /**
+   * The text the findings point to, once each: the build steps of every move they name, and the hero composition or
+   * section order when one of them names it. Findings repeat moves, so the steps are not copied into each.
+   */
+  replacements: { moves: Record<string, { name: string; purpose: string; build: string }>; hero?: string; sectionOrder?: string[] };
   checks: StructureCheckReport[];
   outline: Array<{ index: number; selector: string; patterns: string[] }>;
   /** Present when productType was passed. */
@@ -177,7 +187,8 @@ export interface StructureAuditResult {
 
 const labels: Record<Lang, {
   status: Record<StructureCheckStatus, string>;
-  foundAt: (name: string, where: string, count: number) => string;
+  /** The location is the evidence's; the rationale names the pattern and the count. */
+  foundAt: (name: string, count: number) => string;
   absent: (name: string) => string;
   noStyle: string;
   limits: { heuristics: string; notAPass: string; truncated: (n: number) => string; unparsed: (n: number) => string; exhausted: string };
@@ -199,7 +210,7 @@ const labels: Record<Lang, {
 }> = {
   en: {
     status: { found: 'found', absent: 'absent', 'not-applicable': 'not applicable', 'not-verified': 'not verified', 'allowed-by-style': 'allowed by the style' },
-    foundAt: (name, where, count) => `${name} found at ${where}${count > 1 ? ` and ${count - 1} more location(s)` : ''}.`,
+    foundAt: (name, count) => `${name} found${count > 1 ? ` at ${count} locations` : ''}.`,
     absent: (name) => `${name} was not found in the submitted HTML and CSS.`,
     noStyle: 'Pass styleId to get the chosen style’s replacement moves and its style-specific bans.',
     limits: {
@@ -237,7 +248,7 @@ const labels: Record<Lang, {
   },
   ko: {
     status: { found: '발견', absent: '없음', 'not-applicable': '해당 없음', 'not-verified': '확인 못 함', 'allowed-by-style': '스타일이 허용' },
-    foundAt: (name, where, count) => `${where}에서 '${name}'을(를) 찾았습니다${count > 1 ? `. 다른 위치 ${count - 1}곳에도 있습니다` : ''}.`,
+    foundAt: (name, count) => `'${name}'을(를) 찾았습니다${count > 1 ? `(${count}곳)` : ''}.`,
     absent: (name) => `제출한 HTML과 CSS에서 '${name}'을(를) 찾지 못했습니다.`,
     noStyle: 'styleId를 넘기면 고른 스타일의 대체 무브와 스타일 전용 금지 항목을 받을 수 있습니다.',
     limits: {
@@ -275,7 +286,7 @@ const labels: Record<Lang, {
   },
   ja: {
     status: { found: '検出', absent: 'なし', 'not-applicable': '該当なし', 'not-verified': '未確認', 'allowed-by-style': 'スタイルが許可' },
-    foundAt: (name, where, count) => `${where}で「${name}」を検出しました${count > 1 ? `。ほかに${count - 1}か所あります` : ''}。`,
+    foundAt: (name, count) => `「${name}」を検出しました${count > 1 ? `（${count}か所）` : ''}。`,
     absent: (name) => `提出されたHTMLとCSSに「${name}」は見つかりませんでした。`,
     noStyle: 'styleIdを渡すと、選んだスタイルの置き換えムーブとスタイル固有の禁止項目が返ります。',
     limits: {
@@ -341,16 +352,28 @@ function movesFor(job: StructureJob | 'page', styleId: string | undefined): Repl
   if (!styleId || job === 'page') return [];
   return structureGuide(styleId).moves
     .filter((move) => move.jobs.includes(job))
-    .map(({ id, name, build, purpose }) => ({ id, name, build, purpose }));
+    .map(({ id, name }) => ({ id, name }));
 }
 
 /** The archetype step that takes the pattern's place; the section order stands in when no move does the same job. */
 function archetypeFor(pattern: GlobalPatternDef, styleId: string | undefined, moves: readonly ReplacementMove[]): StructureFinding['replaceWith']['archetype'] {
   if (!styleId) return undefined;
-  const guide = structureGuide(styleId);
-  if (pattern.job === 'opening') return { hero: guide.hero };
-  if (pattern.job === 'page' || !moves.length) return { sectionOrder: [...guide.sectionOrder] };
+  if (pattern.job === 'opening') return 'hero';
+  if (pattern.job === 'page' || !moves.length) return 'sectionOrder';
   return undefined;
+}
+
+/** The build steps and archetype text the findings point to, each once. */
+function replacementsFor(findings: readonly StructureFinding[], styleId: string | undefined): StructureAuditResult['replacements'] {
+  if (!styleId) return { moves: {} };
+  const guide = structureGuide(styleId);
+  const named = new Set(findings.flatMap((finding) => finding.replaceWith.moves.map((move) => move.id)));
+  const archetypes = new Set(findings.map((finding) => finding.replaceWith.archetype));
+  return {
+    moves: Object.fromEntries(guide.moves.filter((move) => named.has(move.id)).map((move) => [move.id, { name: move.name, purpose: move.purpose, build: move.build }])),
+    ...(archetypes.has('hero') ? { hero: guide.hero } : {}),
+    ...(archetypes.has('sectionOrder') ? { sectionOrder: [...guide.sectionOrder] } : {}),
+  };
 }
 
 function evidenceIdFor(targetId: string, patternId: string): string {
@@ -506,7 +529,7 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
           : actsFirst(item) ? label.mustHave.beforeAction(actionName(item), build) : label.mustHave.misplaced(build))
           + (styleId ? '' : ` ${label.noStyle}`),
         moves,
-        ...(styleId && item.zone === 'first-screen' ? { archetype: { hero: structureGuide(styleId).hero } } : {}),
+        ...(styleId && item.zone === 'first-screen' ? { archetype: 'hero' as const } : {}),
       },
       relatedAuditCheckIds: [],
     });
@@ -514,7 +537,7 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
 
   const evidence: StructureEvidence[] = [];
   const results: StructureResult[] = [];
-  const producer = { name: 'web-stylebook-mcp audit_page_structure', version: SERVER_VERSION, configHash: rulesetHash };
+  const producer = { name: 'web-stylebook-mcp audit_page_structure', version: SERVER_VERSION };
   for (const report of reports) {
     const entry = statuses.get(report.checkId);
     const first = report.status === 'found' && entry?.status.status === 'found' ? entry.status.matches[0] : undefined;
@@ -531,22 +554,21 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
       targetId,
       type: 'dom',
       phase: 'static',
-      summary: `${name}: ${label.status[report.status]}${report.count ? ` (${report.count})` : ''}${report.note ? ` — ${report.note}` : ''}`.slice(0, 1990),
+      // The status, count and note are in checks and the result rationale; the evidence keeps the observation.
+      summary: `${report.patternId}: ${label.status[report.status]}${report.count ? ` (${report.count})` : ''}`,
       outcome,
       contentHash: inputHash,
-      actual: { status: report.status, count: report.count, ...(first ? { selector: selectorPath(first.element) } : {}) },
       ...(first ? { location: { selector: selectorPath(first.element) } } : {}),
       producer,
     });
     if (!entry?.check) continue;
     const verdict = verdictFor(report.status, entry.check);
-    const where = first ? selectorPath(first.element) : '';
     results.push({
       checkId: report.checkId,
       targetId,
       verdict,
       evidenceRefs: [evidenceId],
-      rationale: report.status === 'found' ? label.foundAt(name, where, report.count) + (shape ? ` ${label.shape.unjudged}` : '')
+      rationale: report.status === 'found' ? label.foundAt(name, report.count) + (shape ? ` ${label.shape.unjudged}` : '')
         : report.status === 'absent' ? label.absent(name) : `${name}: ${report.note ?? label.status[report.status]}`,
       ...(verdict === 'FIX_NOW' || verdict === 'RISK' || (shape && report.status === 'found') ? { remediation: entry.check.remediation } : {}),
     });
@@ -564,10 +586,9 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
       targetId,
       type: 'dom',
       phase: 'static',
-      summary: `${item.name}: ${label.mustHave.status[item.status]}${item.count ? ` (${item.count})` : ''}${item.note ? ` — ${item.note}` : ''}`.slice(0, 1990),
+      summary: `${mustHavePatternId(item.id)}: ${label.mustHave.status[item.status]}${item.count ? ` (${item.count})` : ''}`,
       outcome,
       contentHash: inputHash,
-      actual: { status: item.status, zone: item.zone, count: item.count, inZone: detection.inZone.length, ...(first ? { selector: first } : {}) },
       ...(first ? { location: { selector: first } } : {}),
       producer,
     });
@@ -580,7 +601,7 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
       targetId,
       verdict,
       evidenceRefs: [evidenceId],
-      rationale: item.status === 'present' ? label.foundAt(item.name, first ?? '', detection.inZone.length)
+      rationale: item.status === 'present' ? label.foundAt(item.name, detection.inZone.length)
         : item.status === 'missing' ? label.absent(item.name)
           : item.status === 'misplaced' ? label.mustHave.misplacedAt(item.name, first ?? '')
             : `${item.name}: ${item.note ?? label.mustHave.status[item.status]}`,
@@ -592,22 +613,24 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
   const assetSay = assetText(locale);
   const assetChecks = assetReports(page, css, styleId, locale, repo);
   const assets: StructureAuditResult['assets'] = { checks: assetChecks, evidence: [], results: [] };
-  for (const check of assetChecks) {
-    const id = evidenceIdFor(targetId, check.checkId).replace(/^structure:/, 'assets:');
-    const listed = check.items.join(', ');
-    const summary = check.verdict === 'NOT_APPLICABLE' ? assetSay.none
-      : check.count ? assetSay.found(check.count, listed) : assetSay.clean;
-    // The items are listed once, in assets.checks and the result rationale; the evidence records the observation.
+  // One scan observed every check, so one evidence item per outcome records it; the items are listed in assets.checks.
+  const outcomeOf = (verdict: AssetCheckReport['verdict']): StructureEvidence['outcome'] => (verdict === 'PASS' ? 'passed'
+    : verdict === 'NOT_APPLICABLE' ? 'inapplicable' : verdict === 'NOT_VERIFIED' ? 'cant-tell' : 'failed');
+  for (const outcome of ['failed', 'cant-tell', 'passed', 'inapplicable'] as const) {
+    const group = assetChecks.filter((check) => outcomeOf(check.verdict) === outcome);
+    if (!group.length) continue;
     assets.evidence.push({
-      id, targetId, type: 'dom', phase: 'static',
-      summary: `${check.checkId}: ${check.verdict}${check.count ? ` (${check.count})` : ''}`,
-      outcome: check.verdict === 'PASS' ? 'passed' : check.verdict === 'NOT_APPLICABLE' ? 'inapplicable' : check.verdict === 'NOT_VERIFIED' ? 'cant-tell' : 'failed',
-      contentHash: inputHash,
-      actual: { verdict: check.verdict, count: check.count },
-      producer,
+      id: evidenceIdFor(targetId, `assets-${outcome}`).replace(/^structure:/, 'assets:'), targetId, type: 'dom', phase: 'static',
+      summary: group.map((check) => `${check.checkId}: ${check.verdict}${check.count ? ` (${check.count})` : ''}`).join('; '),
+      outcome, contentHash: inputHash, producer,
     });
+  }
+  for (const check of assetChecks) {
+    const summary = check.verdict === 'NOT_APPLICABLE' ? assetSay.none
+      : check.count ? assetSay.found(check.count) : assetSay.clean;
     assets.results.push({
-      checkId: check.checkId, targetId, verdict: check.verdict, evidenceRefs: [id],
+      checkId: check.checkId, targetId, verdict: check.verdict,
+      evidenceRefs: [evidenceIdFor(targetId, `assets-${outcomeOf(check.verdict)}`).replace(/^structure:/, 'assets:')],
       rationale: `${summary}${check.note ? ` ${check.note}` : ''}`,
       ...(check.verdict === 'FIX_NOW' || check.verdict === 'RISK' ? { remediation: assetSay[check.checkId].fix } : {}),
     });
@@ -658,6 +681,7 @@ export function auditPageStructure(input: AuditPageStructureInput, repo: Catalog
       claims,
     },
     findings,
+    replacements: replacementsFor(findings, styleId),
     checks: reports,
     outline,
     mustHaves: productType ? {

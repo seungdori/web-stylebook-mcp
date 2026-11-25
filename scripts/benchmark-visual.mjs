@@ -1,6 +1,6 @@
 // Run after npm run build. Timing is local observational evidence, not a CI wall-clock gate.
 import { performance } from 'node:perf_hooks';
-import { statSync } from 'node:fs';
+import { readFileSync, statSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 const began = performance.now();
 const { CatalogRepository } = await import('../dist/catalog/repository.js');
@@ -64,19 +64,37 @@ for (const locale of ['en', 'ko', 'ja']) {
   }
 }
 const auditCopyMs = (performance.now() - copyBegan) / copyCalls;
+// audit_page_structure: the whole MCP tool result for the fixed problem page (tests/fixtures/page-structure/
+// benchmark-problem-page.html) with every style and none, every language, and every product type and none.
+const { auditPageStructure, STRUCTURE_AUDIT_BUDGET_BYTES } = await import('../dist/structure/audit.js');
+const { renderStructureAudit } = await import('../dist/structure/render.js');
+const problemPage = readFileSync(new URL('../tests/fixtures/page-structure/benchmark-problem-page.html', import.meta.url), 'utf8');
+let structureMaximum = { bytes: 0, structuredBytes: 0, styleId: '', locale: '', productType: '' };
+let structureCalls = 0;
+const structureBegan = performance.now();
+for (const styleId of [undefined, ...repo.allStyles().map((style) => style.id)]) {
+  for (const locale of ['en', 'ko', 'ja']) for (const productType of [undefined, ...PRODUCT_TYPES]) {
+    const result = auditPageStructure({ html: problemPage, locale, ...(styleId ? { styleId } : {}), ...(productType ? { productType } : {}) }, repo);
+    const bytes = Buffer.byteLength(JSON.stringify(ok(result, renderStructureAudit(result, locale), result.styleId ? [`webstylebook://styles/${result.styleId}`] : [])));
+    structureCalls++;
+    if (bytes > structureMaximum.bytes) structureMaximum = { bytes, structuredBytes: Buffer.byteLength(JSON.stringify(result)), styleId: styleId ?? '', locale, productType: productType ?? '' };
+  }
+}
+const structureAuditMs = (performance.now() - structureBegan) / structureCalls;
 const packed = JSON.parse(execFileSync('npm', ['pack', '--dry-run', '--json'], { encoding: 'utf8' }))[0];
 const report = {
   schema: 'webstylebook.visual-benchmark.v1', runtime: process.version, platform: process.platform,
   catalogHash: repo.contentHash, visualHash: repo.visualContractMetadata.contentHash,
   startupMs, firstContractCallMs, warmContractCallMs, warmLegacyCallMs,
-  measurement: 'composeDesignTokens return object, excluding the MCP text fallback and envelope; start_ui_design and audit_copy whole MCP tool result',
+  measurement: 'composeDesignTokens return object, excluding the MCP text fallback and envelope; start_ui_design, audit_copy and audit_page_structure whole MCP tool result',
   maximumSelectedComposedJsonResult: maximum,
   maximumStartUiDesignToolResult: { ...startMaximum, calls: startCalls, warmCallMs: startUiDesignMs },
   maximumAuditCopyToolResult: { ...copyMaximum, calls: copyCalls, warmCallMs: auditCopyMs },
+  maximumAuditPageStructureToolResult: { ...structureMaximum, calls: structureCalls, warmCallMs: structureAuditMs },
   visualArtifactBytes: statSync(new URL('../generated/visual-contracts.v1.json', import.meta.url)).size,
   catalogBytes: statSync(new URL('../generated/catalog.v1.json', import.meta.url)).size,
   packageBytes: packed.size, packageUnpackedBytes: packed.unpackedSize,
-  budgets: { selectedComposedJsonResultBytes: 48 * 1024, startUiDesignToolResultBytes: START_UI_DESIGN_BUDGET_BYTES, auditCopyToolResultBytes: COPY_AUDIT_BUDGET_BYTES, visualArtifactBytes: 1024 * 1024, packageBytes: 1536 * 1024 },
+  budgets: { selectedComposedJsonResultBytes: 48 * 1024, startUiDesignToolResultBytes: START_UI_DESIGN_BUDGET_BYTES, auditCopyToolResultBytes: COPY_AUDIT_BUDGET_BYTES, auditPageStructureToolResultBytes: STRUCTURE_AUDIT_BUDGET_BYTES, visualArtifactBytes: 1024 * 1024, packageBytes: 1536 * 1024 },
 };
 process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
-if (maximum.bytes > report.budgets.selectedComposedJsonResultBytes || startMaximum.bytes > report.budgets.startUiDesignToolResultBytes || copyMaximum.bytes > report.budgets.auditCopyToolResultBytes || report.visualArtifactBytes > report.budgets.visualArtifactBytes || report.packageBytes > report.budgets.packageBytes) process.exitCode = 1;
+if (maximum.bytes > report.budgets.selectedComposedJsonResultBytes || startMaximum.bytes > report.budgets.startUiDesignToolResultBytes || copyMaximum.bytes > report.budgets.auditCopyToolResultBytes || structureMaximum.bytes > report.budgets.auditPageStructureToolResultBytes || report.visualArtifactBytes > report.budgets.visualArtifactBytes || report.packageBytes > report.budgets.packageBytes) process.exitCode = 1;

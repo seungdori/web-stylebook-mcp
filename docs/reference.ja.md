@@ -197,8 +197,8 @@ MCP が検証するのは、提供されたカバレッジと整合性だけで�
       "replaceWith": {
         "instruction": "実際の顧客名を出す許可と理由がなければ削除してください。代わりに、訪問者が確かめられる根拠(実際の結果・成果物・名前のある事例)をこのスタイルの根拠ムーブで見せてください。",
         "moves": [
-          { "id": "grouped-approval-queue", "name": "Queue grouped by who has to act", "purpose": "Triage: the person sees first what waits on them and what it is worth, then everything else in the same rhythm." },
-          { "id": "three-way-match-strip", "name": "Three-way match strip and approval trail", "purpose": "Proof: the reason to approve or dispute is on screen as figures and a sequence, not as a summary sentence." }
+          { "id": "grouped-approval-queue", "name": "Queue grouped by who has to act" },
+          { "id": "three-way-match-strip", "name": "Three-way match strip and approval trail" }
         ]
       }
     },
@@ -206,23 +206,28 @@ MCP が検証するのは、提供されたカバレッジと整合性だけで�
       "patternId": "generic-saas-skeleton",
       "observed": { "sections": "opening → proof → features → testimonials → cta", "templateSections": 5 },
       "replaceWith": {
-        "archetype": {
-          "sectionOrder": [
-            "Top bar with the product mark, the organisation and the signed-in person",
-            "Head: the screen title and brief beside the month total, stacked bar and status legend",
-            "The queue: segmented view switch, filter token and count, then rows grouped by who has to act",
-            "The open record: properties, the three-way match strip and the line items with the one line that differs",
-            "The approval trail as a real sequence, with approve and dispute actions and a reason field"
-          ]
-        }
+        "archetype": "sectionOrder"
       }
     }
     // 残り7件: centered-stack-hero, trusted-by-band, icon-feature-grid, testimonial-carousel, closing-cta-banner, quiet-utility/shadow-blur, quiet-utility/corner-radius
-  ]
+  ],
+  "replacements": {
+    "moves": {
+      "grouped-approval-queue": { "name": "Queue grouped by who has to act", "purpose": "Triage: the person sees first what waits on them and what it is worth, then everything else in the same rhythm.", "build": "Split the list into collapsible groups whose 40px head buttons sit on …" },
+      "three-way-match-strip": { "name": "Three-way match strip and approval trail", "purpose": "Proof: the reason to approve or dispute is on screen as figures and a sequence, not as a summary sentence.", "build": "Show Ordered, Received and Invoiced as three equal cells (repeat(3, …" }
+    },
+    "sectionOrder": [
+      "Top bar with the product mark, the organisation and the signed-in person",
+      "Head: the screen title and brief beside the month total, stacked bar and status legend",
+      "The queue: segmented view switch, filter token and count, then rows grouped by who has to act",
+      "The open record: properties, the three-way match strip and the line items with the one line that differs",
+      "The approval trail as a real sequence, with approve and dispute actions and a reason field"
+    ]
+  }
 }
 ```
 
-各検出結果は、パターンがどこにあるか、何が観察されたか、その場所に代わりに何を置くべきかを示します。代わりに置くのは、同じ役割を果たす選んだスタイルのシグネチャームーブ（ロゴの帯の場合は証拠を示すムーブ）、ヒーローの構成、またはセクションの順序です。ページを作り直して監査を再実行し、`get_design_audit_plan.includeGroups` に `"structure"` を加えてから、返された `evidence` と `results` を `validate_design_audit_result` に渡してください。ビューポートごとに、それぞれの `targetId` で監査します。evidence の ID にはそれが含まれるので、実行結果がまとめて検証されます。この検査は、提出された HTML と CSS に対する決定的なヒューリスティックで、ブラウザでのレンダリングではありません。そのため `clean` は、すべての検査が実行され、これらのパターンが見つからなかったことを意味します。デザインが合格したことを意味するわけではありません。スタイルごとのガイダンス（アーキタイプとムーブ）は、カタログの `layout` や `typography` フィールドと同じく英語で書かれています。パターン名と指示は `locale` に従います。
+各検出結果は、パターンがどこにあるか、何が観察されたか、その場所に代わりに何を置くべきかを示します。代わりに置くのは、同じ役割を果たす選んだスタイルのシグネチャームーブ（ロゴの帯の場合は証拠を示すムーブ）、ヒーローの構成、またはセクションの順序です。検出結果にはムーブとアーキタイプの部分の名前だけがあり、その目的・作り方・ヒーロー・セクションの順序は `replacements` に 1 回ずつあります。複数の検出結果が同じムーブを指すためです。ページを作り直して監査を再実行し、`get_design_audit_plan.includeGroups` に `"structure"` を加えてから、返された `evidence` と `results` を `validate_design_audit_result` に渡してください。ビューポートごとに、それぞれの `targetId` で監査します。evidence の ID にはそれが含まれるので、実行結果がまとめて検証されます。この検査は、提出された HTML と CSS に対する決定的なヒューリスティックで、ブラウザでのレンダリングではありません。そのため `clean` は、すべての検査が実行され、これらのパターンが見つからなかったことを意味します。デザインが合格したことを意味するわけではありません。スタイルごとのガイダンス（アーキタイプとムーブ）は、カタログの `layout` や `typography` フィールドと同じく英語で書かれています。パターン名と指示は `locale` に従います。
 
 すべての検出結果と検査には `claim` があり、`summary.claims` は claim ごとに検出結果を数えます。形状があるというだけでは、タスクの欠陥とは限らないからです。
 
@@ -296,13 +301,19 @@ MCP が検証するのは、提供されたカバレッジと整合性だけで�
       "replaceWith": {
         "instruction": "ファーストビューに移してください。検査ではページのもっと下でしか見つかりませんでしたが、「カートに追加」はファーストビューにあるため、この情報を見る前に行動できてしまいます。商品名の横に通貨付きで価格を表示します。サイズで価格が変わる場合は、選択中のサイズの価格を表示します。",
         "moves": [
-          {"id":"gold-chosen-slot-book","name":"Appointment book with one gold slot","build":"Under a 1px ivory top rule, each day is a row of minmax(0, 2.6fr) for the date (bold day over a muted date) and eight 1fr slots, each 64px tall with a 1px left rule and its time in Bodoni Moda 500 at 1.3125rem with tabular numerals; a stronger 50% ivory rule marks the lunch gap. Taken times go #7f7b73 with a 1px strike-through, hover tints a slot to 7% ivory over 160ms, and the chosen slot alone gets a 12% gold wash, a 1px inset gold line and gold text. Below, the chosen time repeats large at clamp(2rem, 3.4vw, 2.75rem) in columns 1-5 beside a form in columns 7-12 (name and phone side by side, the watch on a full-width line) with underlined inputs and one solid ivory rectangular button.","purpose":"Makes booking a choice of a real free time, with the choice confirmed in gold and restated large before anyone types."}
+          { "id": "gold-chosen-slot-book", "name": "Appointment book with one gold slot" }
         ],
-        "archetype": { "hero": "A one-line headline naming the actual service, Bodoni Moda …" }
+        "archetype": "hero"
       }
     }
     // 残り2件: must-have/variant-choice, must-have/purchase-assurance
-  ]
+  ],
+  "replacements": {
+    "moves": {
+      "gold-chosen-slot-book": { "name": "Appointment book with one gold slot", "purpose": "Makes booking a choice of a real free time, with the choice confirmed in gold and restated large before anyone types.", "build": "Under a 1px ivory top rule, each day is a row of minmax(0, 2.6fr) for …" }
+    },
+    "hero": "A one-line headline naming the actual service, Bodoni Moda 500 at …"
+  }
 }
 ```
 
