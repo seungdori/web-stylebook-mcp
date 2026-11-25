@@ -147,7 +147,9 @@ Windsurf と Claude Desktop の設定は[リファレンス](./docs/reference.ja
 変更前後のスクリーンショット、変更ごとの理由、実行した確認、未検証の項目が得られます。
 
 新しいページの場合は、代わりに製品を説明してください。例えば *「決済 API のランディングページ」* のように書きます。
-エージェントは `recommend_design_direction` から始め、順位を付けた候補と、除外した候補および除外の理由を示します。
+エージェントは `start_ui_design` から始めます。このツールは、上位の方向性、ページの構成、読み込みコード付きの
+フォント、写真の計画、文言の指針を一度に返します。`recommend_design_direction` は、順位を付けた候補すべてと、
+除外した候補および除外の理由を示します。
 
 レビューだけを依頼した場合、エージェントは点検して報告するだけで、何も編集しません。
 
@@ -169,7 +171,7 @@ npx -y web-stylebook-mcp call get_design_improvement_plan --input plan-args.json
 |---|---|
 | 既存 UI の改善 | `get_design_improvement_plan`, `compare_page_revisions`, `validate_design_improvement_result` |
 | レビュー | `get_design_audit_plan`, `audit_page_structure`, `validate_design_audit_result` |
-| 方向性の選択 | `recommend_design_direction`, `compare_design_directions`, `search_design_references`, `get_design_reference` |
+| 方向性の選択 | `start_ui_design`, `recommend_design_direction`, `compare_design_directions`, `search_design_references`, `get_design_reference` |
 | 原則と状態 | `get_design_principle_plan`, `get_ux_principle_plan`, `get_ui_state_plan` |
 | 実装 | `compose_design_tokens`（JSON、CSS 変数、Tailwind、TypeScript、DESIGN.md） |
 

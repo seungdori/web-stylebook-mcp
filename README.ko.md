@@ -156,7 +156,9 @@ Windsurf, Claude Desktop 설정은 [레퍼런스](./docs/reference.ko.md#설치)
 마무리합니다. 전후 스크린샷, 바꾼 점과 이유, 실행한 확인, 확인하지 못한 부분을 받게 됩니다.
 
 새 페이지라면 제품을 설명하세요. 예를 들어 *"결제 API의 랜딩 페이지"*처럼요. 에이전트는
-`recommend_design_direction`으로 시작해, 순위를 매긴 후보와 제외한 후보를 이유와 함께 보여 줍니다.
+`start_ui_design`으로 시작합니다. 이 도구는 상위 방향, 페이지 구조, 로딩 코드가 붙은 글꼴, 사진 계획,
+문구 지침을 한 번에 줍니다. `recommend_design_direction`은 순위를 매긴 후보 전체와 제외한 후보를 이유와
+함께 보여 줍니다.
 
 리뷰만 요청하면 에이전트는 아무것도 고치지 않고 점검 결과만 보고합니다.
 
@@ -178,7 +180,7 @@ npx -y web-stylebook-mcp call get_design_improvement_plan --input plan-args.json
 |---|---|
 | 기존 UI 개선 | `get_design_improvement_plan`, `compare_page_revisions`, `validate_design_improvement_result` |
 | 리뷰 | `get_design_audit_plan`, `audit_page_structure`, `validate_design_audit_result` |
-| 방향 고르기 | `recommend_design_direction`, `compare_design_directions`, `search_design_references`, `get_design_reference` |
+| 방향 고르기 | `start_ui_design`, `recommend_design_direction`, `compare_design_directions`, `search_design_references`, `get_design_reference` |
 | 원칙과 상태 | `get_design_principle_plan`, `get_ux_principle_plan`, `get_ui_state_plan` |
 | 구현 | `compose_design_tokens` (JSON, CSS 변수, Tailwind, TypeScript, DESIGN.md) |
 

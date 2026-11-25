@@ -15,6 +15,25 @@ All notable changes to this project are documented here. The format follows
   against in English, Korean and Japanese. Template lines that the 2026-11-25 landing pages shared,
   such as a setup-in-minutes line or a stop-doing-it closing CTA, are observations; a user count or
   percentage outcome without a source is fix-now. Tool responses are unchanged.
+- `start_ui_design`, the entry tool for a new page or screen. One call returns the top three
+  directions, the chosen style's hero, section order, signature moves and bans, the page's must-haves,
+  the authored fonts and two alternative pairings with `<link>` tags and CSS font stacks, a photo plan
+  (whether to use photos, what to look for on Unsplash or Pexels, and how to credit them; terms read on
+  2026-11-25), a copy brief and the next calls with their arguments. Pass `styleId` to build with
+  another style. The whole result stays within 16 KiB for every style, page role, language and
+  product type.
+
+### Changed
+
+- The on-init instructions, the `webstylebook://workflows/new-ui` resource and `manifest.newUiWorkflow`
+  send a new page to `start_ui_design` first. `recommend_design_direction` is unchanged and its
+  description now says to call it after `start_ui_design` for more directions.
+- `compose_design_tokens` is unchanged.
+
+### For maintainers
+
+- `npm run visual:benchmark` checks the largest `start_ui_design` result (text and
+  `structuredContent`) against a 16 KiB budget.
 
 ## [0.20.0] — 2026-11-25
 

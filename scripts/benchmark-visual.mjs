@@ -23,17 +23,36 @@ for (const style of repo.allStyles()) for (const locale of ['en', 'ko', 'ja']) {
   const bytes = Buffer.byteLength(JSON.stringify(result));
   if (bytes > maximum.bytes) maximum = { bytes, styleId: style.id, locale };
 }
+// start_ui_design: the whole MCP tool result (text fallback and structuredContent), for every style, page role, locale
+// and product type, plus every page role, locale and product type with the top-ranked style.
+const { startUiDesign, renderStartUiDesign, START_UI_DESIGN_BUDGET_BYTES } = await import('../dist/start/start-ui-design.js');
+const { ok } = await import('../dist/protocol/result.js');
+const { PAGE_ROLES } = await import('../dist/recommendation/page-roles.js');
+const { PRODUCT_TYPES } = await import('../dist/types.js');
+let startMaximum = { bytes: 0, styleId: '', pageRole: '', locale: '', productType: '' };
+let startCalls = 0;
+const startBegan = performance.now();
+for (const styleId of [undefined, ...repo.allStyles().map((style) => style.id)]) {
+  for (const pageRole of [undefined, ...PAGE_ROLES]) for (const locale of ['en', 'ko', 'ja']) for (const productType of PRODUCT_TYPES) {
+    const result = startUiDesign({ productDescription: 'A page', productType, locale, ...(pageRole ? { pageRole } : {}), ...(styleId ? { styleId } : {}) }, repo);
+    const bytes = Buffer.byteLength(JSON.stringify(ok(result, renderStartUiDesign(result))));
+    startCalls++;
+    if (bytes > startMaximum.bytes) startMaximum = { bytes, styleId: result.style.styleId, pageRole: pageRole ?? '', locale, productType };
+  }
+}
+const startUiDesignMs = (performance.now() - startBegan) / startCalls;
 const packed = JSON.parse(execFileSync('npm', ['pack', '--dry-run', '--json'], { encoding: 'utf8' }))[0];
 const report = {
   schema: 'webstylebook.visual-benchmark.v1', runtime: process.version, platform: process.platform,
   catalogHash: repo.contentHash, visualHash: repo.visualContractMetadata.contentHash,
   startupMs, firstContractCallMs, warmContractCallMs, warmLegacyCallMs,
-  measurement: 'composeDesignTokens return object; excludes MCP protocol text fallback/envelope',
+  measurement: 'composeDesignTokens return object, excluding the MCP text fallback and envelope; start_ui_design whole MCP tool result',
   maximumSelectedComposedJsonResult: maximum,
+  maximumStartUiDesignToolResult: { ...startMaximum, calls: startCalls, warmCallMs: startUiDesignMs },
   visualArtifactBytes: statSync(new URL('../generated/visual-contracts.v1.json', import.meta.url)).size,
   catalogBytes: statSync(new URL('../generated/catalog.v1.json', import.meta.url)).size,
   packageBytes: packed.size, packageUnpackedBytes: packed.unpackedSize,
-  budgets: { selectedComposedJsonResultBytes: 48 * 1024, visualArtifactBytes: 1024 * 1024, packageBytes: 1536 * 1024 },
+  budgets: { selectedComposedJsonResultBytes: 48 * 1024, startUiDesignToolResultBytes: START_UI_DESIGN_BUDGET_BYTES, visualArtifactBytes: 1024 * 1024, packageBytes: 1536 * 1024 },
 };
 process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
-if (maximum.bytes > report.budgets.selectedComposedJsonResultBytes || report.visualArtifactBytes > report.budgets.visualArtifactBytes || report.packageBytes > report.budgets.packageBytes) process.exitCode = 1;
+if (maximum.bytes > report.budgets.selectedComposedJsonResultBytes || startMaximum.bytes > report.budgets.startUiDesignToolResultBytes || report.visualArtifactBytes > report.budgets.visualArtifactBytes || report.packageBytes > report.budgets.packageBytes) process.exitCode = 1;

@@ -183,7 +183,7 @@ export const COPY_PATTERNS: readonly CopyPattern[] = [
 
   // Japanese
   {
-    id: 'ja-smarter', locales: ['ja'],
+    id: 'ja-buzzwords', locales: ['ja'],
     match: { kind: 'unit', pattern: 'もっと\\s*スマートに|スマートに(?:しよう|します|変える)' },
     verdict: 'observation', antiPatternIds: ['abstract-consultancy-copy'],
     why: '「〜をもっとスマートに」 promises a feeling instead of a result and fits any product.',
@@ -191,7 +191,7 @@ export const COPY_PATTERNS: readonly CopyPattern[] = [
     example: { flagged: '会議をもっとスマートに。', better: '会議が終わると、担当者と期限つきのタスクが Slack に届きます。' },
   },
   {
-    id: 'ja-all-in-one', locales: ['ja'],
+    id: 'ja-one-place', locales: ['ja'],
     match: { kind: 'unit', pattern: 'すべて(?:を|が)\\s*(?:一つ|ひとつ)に|オールインワン|一[か箇ヶ]所で|ひとつの場所で' },
     verdict: 'observation', antiPatternIds: ['abstract-consultancy-copy'],
     why: '「すべてを一つに」 fits every product page.',
