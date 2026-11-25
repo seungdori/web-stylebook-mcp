@@ -560,6 +560,7 @@ webstylebook://structure/banned-patterns · /structure/must-haves
 webstylebook://design-md/{id}
 webstylebook://workflows/improve-ui · /workflows/new-ui
 webstylebook://typography/pairings · /typography/pairings/{id}
+webstylebook://copy/guide/{locale} · /copy/patterns/{locale}
 ```
 
 Style detail accepts optional `locale`, `mode`, and expected `revision` query parameters, for example `webstylebook://styles/brutalist-grid?locale=ko&mode=light`. It returns one resolved locale and mode; unsupported values, duplicate parameters, and unknown query names return an explicit error.
@@ -569,6 +570,8 @@ Foundation detail accepts one optional `locale=en|ko|ja` parameter. `manifest.de
 `webstylebook://workflows/new-ui` holds the full workflow and composition guidance for a new page or screen. The on-init instructions stay short and point to it, and `manifest.newUiWorkflow` names its entry tool.
 
 `webstylebook://typography/pairings` lists alternative font pairings and, for each style, its authored fonts and the pairings that fit it. `/typography/pairings/{id}?locale=ko` returns one style's pairings with their Korean or Japanese faces, the `<link>` tags and CSS font stacks to paste, and the licences. The authored fonts from `compose_design_tokens` stay the default.
+
+`webstylebook://copy/guide/{locale}` gives the rules for buttons, empty states, errors, loading, confirmations, numbers and register, and a writing voice for each product type with a sample hero, empty state and error. `webstylebook://copy/patterns/{locale}` lists the patterns to check page text against: a template line seen on generated pages is an `observation`, and a user count or percentage outcome without a source is `fix-now`.
 
 ## Prompts
 

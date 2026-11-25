@@ -6,6 +6,16 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Copy guidance: `webstylebook://copy/guide/{locale}` gives rules for buttons, empty states, errors,
+  loading, confirmations, numbers and register, and a voice for each of the 14 product types (Korean
+  register, person, sentence length, tone, a primary button, what to avoid, and a sample hero, empty
+  state and error). `webstylebook://copy/patterns/{locale}` lists 24 patterns to check page text
+  against in English, Korean and Japanese. Template lines that the 2026-11-25 landing pages shared,
+  such as a setup-in-minutes line or a stop-doing-it closing CTA, are observations; a user count or
+  percentage outcome without a source is fix-now. Tool responses are unchanged.
+
 ## [0.20.0] — 2026-11-25
 
 ### Added

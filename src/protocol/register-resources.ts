@@ -14,6 +14,7 @@ import { FOUNDATION_SOURCES } from '../foundations/sources.js';
 import { localizeFoundation, localizeProtocol, localizeSources } from '../foundations/planner.js';
 import { IMPROVEMENT_WORKFLOW_SCHEMA, IMPROVEMENT_WORKFLOW_URI, improvementWorkflow } from '../improvement/workflow.js';
 import { TYPE_PAIRINGS_URI, styleTypePairings, typePairingsResource } from '../typography/loading.js';
+import { COPY_GUIDE_URI, COPY_PATTERNS_URI, copyGuide, copyPatterns } from '../copy/guide.js';
 
 const JSON_MIME = 'application/json';
 function json(uri: string, value: unknown) {
@@ -89,6 +90,8 @@ export function registerResources(server: McpServer, repo: CatalogRepository): v
       'webstylebook://references/{id}',
       'webstylebook://design-md/{id}',
       'webstylebook://typography/pairings/{id}',
+      'webstylebook://copy/guide/{locale}',
+      'webstylebook://copy/patterns/{locale}',
     ],
   }));
 
@@ -257,6 +260,22 @@ export function registerResources(server: McpServer, repo: CatalogRepository): v
     const locale = localeQuery(u);
     return typeof locale === 'string' ? json(u.href, styleTypePairings(repo, styleId, locale)) : locale;
   });
+
+  const byLocale = (name: string, base: string, title: string, description: string, build: (locale: Lang) => unknown) =>
+    server.registerResource(name, new ResourceTemplate(`${base}/{locale}`, {
+      list: async () => ({ resources: (['en', 'ko', 'ja'] as const).map((locale) => ({ uri: `${base}/${locale}`, name: `${name} (${locale})`, mimeType: JSON_MIME })) }),
+    }), { title, description, mimeType: JSON_MIME }, async (u, v) => {
+      const locale = String(v.locale).split('?')[0] ?? '';
+      if (locale !== 'en' && locale !== 'ko' && locale !== 'ja') return json(u.href, { error: { code: 'INVALID_INPUT', message: 'locale must be en, ko or ja' } });
+      if (u.search) return json(u.href, { error: { code: 'INVALID_INPUT', message: `${name} takes no query parameters` } });
+      return json(u.href, build(locale));
+    });
+  byLocale('copy-guide', COPY_GUIDE_URI, 'Copy rules and product voices',
+    'Rules for buttons, empty states, errors, loading, confirmations, numbers and register, and a voice for each product type with a sample hero, empty state and error, in one language (en, ko or ja).',
+    copyGuide);
+  byLocale('copy-patterns', COPY_PATTERNS_URI, 'Copy patterns to check',
+    'Copy patterns to check page text against in one language (en, ko or ja): template lines seen on generated pages and unsourced claims, each with its regular expression, verdict, related catalog anti-patterns and a rewrite.',
+    copyPatterns);
 
   server.registerResource('design-md', new ResourceTemplate('webstylebook://design-md/{styleId}', {
     list: async () => ({ resources: repo.allStyles().map((s) => ({ uri: `webstylebook://design-md/${s.id}`, name: `${s.id} DESIGN.md`, mimeType: 'text/markdown' })) }),
