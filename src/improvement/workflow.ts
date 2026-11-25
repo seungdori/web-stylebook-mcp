@@ -20,8 +20,8 @@ const stages = [
     id: 'decide',
     instruction: L(
       'Use the selected foundations to connect an observed task obstacle to a conditional remedy and an observable success check. Record baseline strengths in context.constraints and compare each gain against losses in group membership, useful visible information, continuity and reading comfort. Keep the original as a valid alternative. Consider counterexamples, working behavior and product identity. Prioritize task completion, information hierarchy and legibility before decoration. Do not force a new style, wider spacing, fewer cards or a font change without evidence. Retrieve omitted relevant foundations as needed.',
-      '선택된 디자인 지식으로 관찰한 과업 장애, 조건에 맞는 수정, 확인할 성공 기준을 연결합니다. 원본의 장점을 context.constraints에 기록하고 이득과 그룹 구분·실제로 보이는 정보·연속성·읽기 편안함의 손실을 비교합니다. 원본 유지도 대안에 포함합니다. 반례·정상 동작·제품 정체성을 고려하고 장식보다 과업 완수·정보 위계·읽기를 우선합니다. 근거 없이 새 스타일·넓은 여백·카드 제거·폰트 교체를 강요하지 않습니다. 누락된 관련 지식은 추가 조회합니다.',
-      '選んだ知識から観察した障害、条件に合う修正、確認可能な成功条件を結びます。原本の長所をcontext.constraintsに記録し、利点と所属、見える情報、連続性、読み心地の損失を比較します。原本維持も選択肢とします。反例、正常動作、製品らしさを考慮し、装飾よりタスク完了、情報階層、可読性を優先します。根拠なく新スタイル、余白拡大、カード削除、書体変更を強いません。必要な未取得知識を追加取得します。'),
+      '선택된 디자인 지식으로 관찰한 과업의 문제, 조건에 맞는 수정, 확인할 성공 기준을 연결합니다. 원본의 장점을 context.constraints에 기록하고 이득과 그룹 구분·실제로 보이는 정보·연속성·읽기 편안함의 손실을 비교합니다. 원본 유지도 대안에 포함합니다. 반례·정상 동작·제품 정체성을 고려하고 장식보다 과업 완수·정보 위계·읽기를 우선합니다. 근거 없이 새 스타일·넓은 여백·카드 제거·폰트 교체를 강요하지 않습니다. 누락된 관련 지식은 추가 조회합니다.',
+      '選んだ知識から観察した問題、条件に合う修正、確認可能な成功条件を結びます。原本の長所をcontext.constraintsに記録し、利点と所属、見える情報、連続性、読み心地の損失を比較します。原本維持も選択肢とします。反例、正常動作、製品らしさを考慮し、装飾よりタスク完了、情報階層、可読性を優先します。根拠なく新スタイル、余白拡大、カード削除、書体変更を強いません。必要な未取得知識を追加取得します。'),
     tools: ['get_design_improvement_plan', 'get_design_principle_plan', 'get_ux_principle_plan', 'get_ui_state_plan'],
   },
   {
@@ -44,8 +44,8 @@ const stages = [
     id: 'report',
     instruction: L(
       'Call validate_design_improvement_result with this plan query and workflow.planHash, actual captures, implemented changes, observed checks, per-target outcomes and limitations. Follow nextActions until in-scope work is done or a concrete blocker remains. Deliver the before/after artifact links, what changed and why, measured or expert-observed differences, verification, tradeoffs and remaining unverified work. A side-by-side or toggle viewer helps when many screenshots are involved. Never invent scores, time savings or user-study results. complete describes submitted evidence coverage, not an independent quality certification; no-change must never be marketed as an improvement.',
-      '이 계획 입력과 workflow.planHash, 실제 캡처·구현된 변경·관찰한 검사·대상별 결과·한계를 validate_design_improvement_result에 제출합니다. 범위 안의 작업을 끝내거나 구체적인 장애가 남을 때까지 nextActions를 수행합니다. 전후 이미지 링크, 무엇을 왜 고쳤는지, 측정 또는 전문가 관찰 차이, 검증·상충점·미검증 항목을 보고합니다. 이미지가 많으면 나란히 보기나 전환형 보고서가 유용합니다. 점수·시간 절감·사용자 조사 결과를 꾸며내지 않습니다. complete는 제출 증거의 충족 상태이며 독립적 품질 인증이 아닙니다. no-change를 개선했다고 표현하지 않습니다.',
-      'この計画入力とworkflow.planHash、実画像、実装変更、観察した検査、対象別結果、制約をvalidate_design_improvement_resultへ提出します。範囲内作業を完了するか具体的障害が残るまでnextActionsを実行します。前後画像、何をなぜ変更したか、測定または専門家観察による差、検証、トレードオフ、未検証事項を報告します。画像が多ければ並列・切替表示が便利です。点数、時間短縮、利用者調査を捏造しません。completeは提出証拠の充足であり独立品質認証ではなく、no-changeを改善と呼びません。'),
+      '이 계획 입력과 workflow.planHash, 실제 캡처·구현된 변경·관찰한 검사·대상별 결과·한계를 validate_design_improvement_result에 제출합니다. 범위 안의 작업을 끝내거나 작업을 막는 구체적인 문제가 남을 때까지 nextActions를 수행합니다. 전후 이미지 링크, 무엇을 왜 고쳤는지, 측정 또는 전문가 관찰 차이, 검증·상충점·미검증 항목을 보고합니다. 이미지가 많으면 나란히 보기나 전환형 보고서가 유용합니다. 점수·시간 절감·사용자 조사 결과를 꾸며내지 않습니다. complete는 제출 증거의 충족 상태이며 독립적 품질 인증이 아닙니다. no-change를 개선했다고 표현하지 않습니다.',
+      'この計画入力とworkflow.planHash、実画像、実装変更、観察した検査、対象別結果、制約をvalidate_design_improvement_resultへ提出します。範囲内作業を完了するか作業を妨げる具体的な問題が残るまでnextActionsを実行します。前後画像、何をなぜ変更したか、測定または専門家観察による差、検証、トレードオフ、未検証事項を報告します。画像が多ければ並列・切替表示が便利です。点数、時間短縮、利用者調査を捏造しません。completeは提出証拠の充足であり独立品質認証ではなく、no-changeを改善と呼びません。'),
     tools: ['validate_design_improvement_result'],
   },
 ];

@@ -118,4 +118,14 @@ describe('project wording rule', () => {
     const offenders = MARKDOWN.filter((doc) => /장애|障害/.test(read(doc)));
     expect(offenders).toEqual([]);
   });
+
+  it('no Korean or Japanese tool text in src uses 장애 or 障害; only the status detector still matches them', () => {
+    // Pages still label outages with these words, so the must-have status detector and its documented
+    // vocabulary keep them. Everything else the tools say uses 문제 / 問題 or 서비스 중단 / サービス停止.
+    const detector = new Set(['src/structure/must-have-detect.ts', 'src/structure/must-haves.ts']);
+    const sources = execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard', '--', 'src/*.ts'], { cwd: root, encoding: 'utf8' })
+      .split('\n').filter((p) => p && !detector.has(p) && existsSync(join(root, p)));
+    expect(sources.length).toBeGreaterThan(0);
+    expect(sources.filter((path) => /장애|障害/.test(read(path)))).toEqual([]);
+  });
 });
