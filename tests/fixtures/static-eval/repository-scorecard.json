@@ -1,0 +1,2426 @@
+{
+  "schema": "webstylebook.static-eval.v1",
+  "corpus": "repository fixtures",
+  "pages": [
+    {
+      "id": "must-haves/ai-chat",
+      "source": "tests/fixtures/must-haves/ai-chat.html",
+      "input": {
+        "locale": "en",
+        "productType": "ai-chat",
+        "structureProductType": "ai-chat"
+      },
+      "structure": {
+        "findings": 0,
+        "shapes": 0,
+        "styleBans": 0,
+        "mustHavesMissing": [],
+        "mustHavesMisplaced": [],
+        "patterns": {}
+      },
+      "copy": {
+        "findings": 0,
+        "claims": 0,
+        "observations": 0,
+        "patterns": {}
+      },
+      "assets": {
+        "assets-font-loading": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-font-display": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-placeholder": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-source": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-credit": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-alt": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-dimensions": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        }
+      },
+      "facts": {
+        "firstFont": "system-ui",
+        "fontSources": [],
+        "images": 0,
+        "externalImageHosts": [],
+        "freeStart": false,
+        "emDashes": 0
+      },
+      "flags": 0
+    },
+    {
+      "id": "must-haves/campaign",
+      "source": "tests/fixtures/must-haves/campaign.html",
+      "input": {
+        "locale": "en",
+        "productType": "campaign",
+        "structureProductType": "campaign"
+      },
+      "structure": {
+        "findings": 0,
+        "shapes": 0,
+        "styleBans": 0,
+        "mustHavesMissing": [],
+        "mustHavesMisplaced": [],
+        "patterns": {}
+      },
+      "copy": {
+        "findings": 0,
+        "claims": 0,
+        "observations": 0,
+        "patterns": {}
+      },
+      "assets": {
+        "assets-font-loading": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-font-display": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-placeholder": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-source": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-credit": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-alt": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-dimensions": {
+          "verdict": "PASS",
+          "count": 0
+        }
+      },
+      "facts": {
+        "firstFont": "system-ui",
+        "fontSources": [],
+        "images": 1,
+        "externalImageHosts": [],
+        "freeStart": false,
+        "emDashes": 0
+      },
+      "flags": 0
+    },
+    {
+      "id": "must-haves/commerce",
+      "source": "tests/fixtures/must-haves/commerce.html",
+      "input": {
+        "locale": "en",
+        "productType": "commerce",
+        "structureProductType": "commerce"
+      },
+      "structure": {
+        "findings": 0,
+        "shapes": 0,
+        "styleBans": 0,
+        "mustHavesMissing": [],
+        "mustHavesMisplaced": [],
+        "patterns": {}
+      },
+      "copy": {
+        "findings": 0,
+        "claims": 0,
+        "observations": 0,
+        "patterns": {}
+      },
+      "assets": {
+        "assets-font-loading": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-font-display": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-placeholder": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-source": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-credit": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-alt": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-dimensions": {
+          "verdict": "PASS",
+          "count": 0
+        }
+      },
+      "facts": {
+        "firstFont": "system-ui",
+        "fontSources": [],
+        "images": 1,
+        "externalImageHosts": [],
+        "freeStart": false,
+        "emDashes": 0
+      },
+      "flags": 0
+    },
+    {
+      "id": "must-haves/commerce-buy-button-only",
+      "source": "tests/fixtures/must-haves/commerce-buy-button-only.html",
+      "input": {
+        "locale": "en",
+        "productType": "commerce",
+        "structureProductType": "commerce"
+      },
+      "structure": {
+        "findings": 3,
+        "shapes": 0,
+        "styleBans": 0,
+        "mustHavesMissing": [],
+        "mustHavesMisplaced": [
+          "price",
+          "variant-choice",
+          "purchase-assurance"
+        ],
+        "patterns": {
+          "must-have/price": 1,
+          "must-have/purchase-assurance": 1,
+          "must-have/variant-choice": 2
+        }
+      },
+      "copy": {
+        "findings": 0,
+        "claims": 0,
+        "observations": 0,
+        "patterns": {}
+      },
+      "assets": {
+        "assets-font-loading": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-font-display": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-placeholder": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-source": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-credit": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-alt": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-dimensions": {
+          "verdict": "PASS",
+          "count": 0
+        }
+      },
+      "facts": {
+        "firstFont": "Georgia",
+        "fontSources": [],
+        "images": 1,
+        "externalImageHosts": [],
+        "freeStart": false,
+        "emDashes": 0
+      },
+      "flags": 3
+    },
+    {
+      "id": "must-haves/commerce-ko",
+      "source": "tests/fixtures/must-haves/commerce-ko.html",
+      "input": {
+        "locale": "ko",
+        "productType": "commerce",
+        "structureProductType": "commerce"
+      },
+      "structure": {
+        "findings": 0,
+        "shapes": 0,
+        "styleBans": 0,
+        "mustHavesMissing": [],
+        "mustHavesMisplaced": [],
+        "patterns": {}
+      },
+      "copy": {
+        "findings": 0,
+        "claims": 0,
+        "observations": 0,
+        "patterns": {}
+      },
+      "assets": {
+        "assets-font-loading": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-font-display": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-placeholder": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-source": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-credit": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-alt": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-dimensions": {
+          "verdict": "PASS",
+          "count": 0
+        }
+      },
+      "facts": {
+        "firstFont": null,
+        "fontSources": [],
+        "images": 1,
+        "externalImageHosts": [],
+        "freeStart": false,
+        "emDashes": 0
+      },
+      "flags": 0
+    },
+    {
+      "id": "must-haves/consumer-app",
+      "source": "tests/fixtures/must-haves/consumer-app.html",
+      "input": {
+        "locale": "en",
+        "productType": "consumer-app",
+        "structureProductType": "consumer-app"
+      },
+      "structure": {
+        "findings": 0,
+        "shapes": 0,
+        "styleBans": 0,
+        "mustHavesMissing": [],
+        "mustHavesMisplaced": [],
+        "patterns": {}
+      },
+      "copy": {
+        "findings": 0,
+        "claims": 0,
+        "observations": 0,
+        "patterns": {}
+      },
+      "assets": {
+        "assets-font-loading": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-font-display": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-placeholder": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-source": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-credit": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-alt": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-dimensions": {
+          "verdict": "PASS",
+          "count": 0
+        }
+      },
+      "facts": {
+        "firstFont": "system-ui",
+        "fontSources": [],
+        "images": 1,
+        "externalImageHosts": [],
+        "freeStart": false,
+        "emDashes": 0
+      },
+      "flags": 0
+    },
+    {
+      "id": "must-haves/content-editorial",
+      "source": "tests/fixtures/must-haves/content-editorial.html",
+      "input": {
+        "locale": "en",
+        "productType": "content-editorial",
+        "structureProductType": "content-editorial"
+      },
+      "structure": {
+        "findings": 0,
+        "shapes": 0,
+        "styleBans": 0,
+        "mustHavesMissing": [],
+        "mustHavesMisplaced": [],
+        "patterns": {}
+      },
+      "copy": {
+        "findings": 0,
+        "claims": 0,
+        "observations": 0,
+        "patterns": {}
+      },
+      "assets": {
+        "assets-font-loading": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-font-display": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-placeholder": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-source": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-credit": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-alt": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-dimensions": {
+          "verdict": "PASS",
+          "count": 0
+        }
+      },
+      "facts": {
+        "firstFont": "system-ui",
+        "fontSources": [],
+        "images": 1,
+        "externalImageHosts": [],
+        "freeStart": false,
+        "emDashes": 0
+      },
+      "flags": 0
+    },
+    {
+      "id": "must-haves/data-analytics",
+      "source": "tests/fixtures/must-haves/data-analytics.html",
+      "input": {
+        "locale": "en",
+        "productType": "data-analytics",
+        "structureProductType": "data-analytics"
+      },
+      "structure": {
+        "findings": 0,
+        "shapes": 0,
+        "styleBans": 0,
+        "mustHavesMissing": [],
+        "mustHavesMisplaced": [],
+        "patterns": {}
+      },
+      "copy": {
+        "findings": 0,
+        "claims": 0,
+        "observations": 0,
+        "patterns": {}
+      },
+      "assets": {
+        "assets-font-loading": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-font-display": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-placeholder": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-source": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-credit": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-alt": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-dimensions": {
+          "verdict": "PASS",
+          "count": 0
+        }
+      },
+      "facts": {
+        "firstFont": "system-ui",
+        "fontSources": [],
+        "images": 1,
+        "externalImageHosts": [],
+        "freeStart": false,
+        "emDashes": 0
+      },
+      "flags": 0
+    },
+    {
+      "id": "must-haves/developer-tool",
+      "source": "tests/fixtures/must-haves/developer-tool.html",
+      "input": {
+        "locale": "en",
+        "productType": "developer-tool",
+        "structureProductType": "developer-tool"
+      },
+      "structure": {
+        "findings": 0,
+        "shapes": 0,
+        "styleBans": 0,
+        "mustHavesMissing": [],
+        "mustHavesMisplaced": [],
+        "patterns": {}
+      },
+      "copy": {
+        "findings": 0,
+        "claims": 0,
+        "observations": 0,
+        "patterns": {}
+      },
+      "assets": {
+        "assets-font-loading": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-font-display": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-placeholder": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-source": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-credit": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-alt": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-dimensions": {
+          "verdict": "PASS",
+          "count": 0
+        }
+      },
+      "facts": {
+        "firstFont": "system-ui",
+        "fontSources": [],
+        "images": 1,
+        "externalImageHosts": [],
+        "freeStart": false,
+        "emDashes": 0
+      },
+      "flags": 0
+    },
+    {
+      "id": "must-haves/documentation",
+      "source": "tests/fixtures/must-haves/documentation.html",
+      "input": {
+        "locale": "en",
+        "productType": "documentation",
+        "structureProductType": "documentation"
+      },
+      "structure": {
+        "findings": 0,
+        "shapes": 0,
+        "styleBans": 0,
+        "mustHavesMissing": [],
+        "mustHavesMisplaced": [],
+        "patterns": {}
+      },
+      "copy": {
+        "findings": 0,
+        "claims": 0,
+        "observations": 0,
+        "patterns": {}
+      },
+      "assets": {
+        "assets-font-loading": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-font-display": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-placeholder": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-source": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-credit": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-alt": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-dimensions": {
+          "verdict": "PASS",
+          "count": 0
+        }
+      },
+      "facts": {
+        "firstFont": "system-ui",
+        "fontSources": [],
+        "images": 1,
+        "externalImageHosts": [],
+        "freeStart": false,
+        "emDashes": 0
+      },
+      "flags": 0
+    },
+    {
+      "id": "must-haves/documentation-ja",
+      "source": "tests/fixtures/must-haves/documentation-ja.html",
+      "input": {
+        "locale": "ja",
+        "productType": "documentation",
+        "structureProductType": "documentation"
+      },
+      "structure": {
+        "findings": 0,
+        "shapes": 0,
+        "styleBans": 0,
+        "mustHavesMissing": [],
+        "mustHavesMisplaced": [],
+        "patterns": {}
+      },
+      "copy": {
+        "findings": 0,
+        "claims": 0,
+        "observations": 0,
+        "patterns": {}
+      },
+      "assets": {
+        "assets-font-loading": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-font-display": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-placeholder": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-source": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-credit": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-alt": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-dimensions": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        }
+      },
+      "facts": {
+        "firstFont": null,
+        "fontSources": [],
+        "images": 0,
+        "externalImageHosts": [],
+        "freeStart": false,
+        "emDashes": 0
+      },
+      "flags": 0
+    },
+    {
+      "id": "must-haves/finance-admin",
+      "source": "tests/fixtures/must-haves/finance-admin.html",
+      "input": {
+        "locale": "en",
+        "productType": "finance-admin",
+        "structureProductType": "finance-admin"
+      },
+      "structure": {
+        "findings": 0,
+        "shapes": 0,
+        "styleBans": 0,
+        "mustHavesMissing": [],
+        "mustHavesMisplaced": [],
+        "patterns": {}
+      },
+      "copy": {
+        "findings": 0,
+        "claims": 0,
+        "observations": 0,
+        "patterns": {}
+      },
+      "assets": {
+        "assets-font-loading": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-font-display": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-placeholder": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-source": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-credit": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-alt": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-dimensions": {
+          "verdict": "PASS",
+          "count": 0
+        }
+      },
+      "facts": {
+        "firstFont": "system-ui",
+        "fontSources": [],
+        "images": 1,
+        "externalImageHosts": [],
+        "freeStart": false,
+        "emDashes": 0
+      },
+      "flags": 0
+    },
+    {
+      "id": "must-haves/healthcare-portal",
+      "source": "tests/fixtures/must-haves/healthcare-portal.html",
+      "input": {
+        "locale": "en",
+        "productType": "healthcare-portal",
+        "structureProductType": "healthcare-portal"
+      },
+      "structure": {
+        "findings": 0,
+        "shapes": 0,
+        "styleBans": 0,
+        "mustHavesMissing": [],
+        "mustHavesMisplaced": [],
+        "patterns": {}
+      },
+      "copy": {
+        "findings": 1,
+        "claims": 0,
+        "observations": 1,
+        "patterns": {
+          "en-one-place": 1
+        }
+      },
+      "assets": {
+        "assets-font-loading": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-font-display": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-placeholder": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-source": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-credit": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-alt": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-dimensions": {
+          "verdict": "PASS",
+          "count": 0
+        }
+      },
+      "facts": {
+        "firstFont": "system-ui",
+        "fontSources": [],
+        "images": 1,
+        "externalImageHosts": [],
+        "freeStart": false,
+        "emDashes": 0
+      },
+      "flags": 1
+    },
+    {
+      "id": "must-haves/knowledge-base",
+      "source": "tests/fixtures/must-haves/knowledge-base.html",
+      "input": {
+        "locale": "en",
+        "productType": "knowledge-base",
+        "structureProductType": "knowledge-base"
+      },
+      "structure": {
+        "findings": 0,
+        "shapes": 0,
+        "styleBans": 0,
+        "mustHavesMissing": [],
+        "mustHavesMisplaced": [],
+        "patterns": {}
+      },
+      "copy": {
+        "findings": 0,
+        "claims": 0,
+        "observations": 0,
+        "patterns": {}
+      },
+      "assets": {
+        "assets-font-loading": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-font-display": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-placeholder": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-source": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-credit": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-alt": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-dimensions": {
+          "verdict": "PASS",
+          "count": 0
+        }
+      },
+      "facts": {
+        "firstFont": "system-ui",
+        "fontSources": [],
+        "images": 1,
+        "externalImageHosts": [],
+        "freeStart": false,
+        "emDashes": 0
+      },
+      "flags": 0
+    },
+    {
+      "id": "must-haves/operational-saas",
+      "source": "tests/fixtures/must-haves/operational-saas.html",
+      "input": {
+        "locale": "en",
+        "productType": "operational-saas",
+        "structureProductType": "operational-saas"
+      },
+      "structure": {
+        "findings": 0,
+        "shapes": 0,
+        "styleBans": 0,
+        "mustHavesMissing": [],
+        "mustHavesMisplaced": [],
+        "patterns": {}
+      },
+      "copy": {
+        "findings": 0,
+        "claims": 0,
+        "observations": 0,
+        "patterns": {}
+      },
+      "assets": {
+        "assets-font-loading": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-font-display": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-placeholder": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-source": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-credit": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-alt": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-dimensions": {
+          "verdict": "PASS",
+          "count": 0
+        }
+      },
+      "facts": {
+        "firstFont": "system-ui",
+        "fontSources": [],
+        "images": 1,
+        "externalImageHosts": [],
+        "freeStart": false,
+        "emDashes": 0
+      },
+      "flags": 0
+    },
+    {
+      "id": "must-haves/portfolio",
+      "source": "tests/fixtures/must-haves/portfolio.html",
+      "input": {
+        "locale": "en",
+        "productType": "portfolio",
+        "structureProductType": "portfolio"
+      },
+      "structure": {
+        "findings": 0,
+        "shapes": 0,
+        "styleBans": 0,
+        "mustHavesMissing": [],
+        "mustHavesMisplaced": [],
+        "patterns": {}
+      },
+      "copy": {
+        "findings": 0,
+        "claims": 0,
+        "observations": 0,
+        "patterns": {}
+      },
+      "assets": {
+        "assets-font-loading": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-font-display": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-placeholder": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-source": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-credit": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-alt": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-dimensions": {
+          "verdict": "PASS",
+          "count": 0
+        }
+      },
+      "facts": {
+        "firstFont": "system-ui",
+        "fontSources": [],
+        "images": 1,
+        "externalImageHosts": [],
+        "freeStart": false,
+        "emDashes": 0
+      },
+      "flags": 0
+    },
+    {
+      "id": "must-haves/security-console",
+      "source": "tests/fixtures/must-haves/security-console.html",
+      "input": {
+        "locale": "en",
+        "productType": "security-console",
+        "structureProductType": "security-console"
+      },
+      "structure": {
+        "findings": 0,
+        "shapes": 0,
+        "styleBans": 0,
+        "mustHavesMissing": [],
+        "mustHavesMisplaced": [],
+        "patterns": {}
+      },
+      "copy": {
+        "findings": 0,
+        "claims": 0,
+        "observations": 0,
+        "patterns": {}
+      },
+      "assets": {
+        "assets-font-loading": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-font-display": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-placeholder": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-source": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-credit": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-alt": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-dimensions": {
+          "verdict": "PASS",
+          "count": 0
+        }
+      },
+      "facts": {
+        "firstFont": "system-ui",
+        "fontSources": [],
+        "images": 1,
+        "externalImageHosts": [],
+        "freeStart": false,
+        "emDashes": 0
+      },
+      "flags": 0
+    },
+    {
+      "id": "page-structure/fp-aurora-field",
+      "source": "tests/fixtures/page-structure/fp-aurora-field.html",
+      "input": {
+        "locale": "en"
+      },
+      "structure": {
+        "findings": 0,
+        "shapes": 0,
+        "styleBans": 0,
+        "mustHavesMissing": [],
+        "mustHavesMisplaced": [],
+        "patterns": {}
+      },
+      "copy": {
+        "findings": 0,
+        "claims": 0,
+        "observations": 0,
+        "patterns": {}
+      },
+      "assets": {
+        "assets-font-loading": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-font-display": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-placeholder": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-source": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-credit": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-alt": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-dimensions": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        }
+      },
+      "facts": {
+        "firstFont": null,
+        "fontSources": [],
+        "images": 0,
+        "externalImageHosts": [],
+        "freeStart": false,
+        "emDashes": 0
+      },
+      "flags": 0
+    },
+    {
+      "id": "page-structure/fp-cards-without-icons",
+      "source": "tests/fixtures/page-structure/fp-cards-without-icons.html",
+      "input": {
+        "locale": "en"
+      },
+      "structure": {
+        "findings": 0,
+        "shapes": 0,
+        "styleBans": 0,
+        "mustHavesMissing": [],
+        "mustHavesMisplaced": [],
+        "patterns": {}
+      },
+      "copy": {
+        "findings": 0,
+        "claims": 0,
+        "observations": 0,
+        "patterns": {}
+      },
+      "assets": {
+        "assets-font-loading": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-font-display": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-placeholder": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-source": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-credit": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-alt": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-dimensions": {
+          "verdict": "PASS",
+          "count": 0
+        }
+      },
+      "facts": {
+        "firstFont": null,
+        "fontSources": [],
+        "images": 4,
+        "externalImageHosts": [],
+        "freeStart": false,
+        "emDashes": 0
+      },
+      "flags": 0
+    },
+    {
+      "id": "page-structure/fp-centered-auth",
+      "source": "tests/fixtures/page-structure/fp-centered-auth.html",
+      "input": {
+        "locale": "en"
+      },
+      "structure": {
+        "findings": 0,
+        "shapes": 0,
+        "styleBans": 0,
+        "mustHavesMissing": [],
+        "mustHavesMisplaced": [],
+        "patterns": {}
+      },
+      "copy": {
+        "findings": 0,
+        "claims": 0,
+        "observations": 0,
+        "patterns": {}
+      },
+      "assets": {
+        "assets-font-loading": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-font-display": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-placeholder": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-source": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-credit": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-alt": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-dimensions": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        }
+      },
+      "facts": {
+        "firstFont": null,
+        "fontSources": [],
+        "images": 0,
+        "externalImageHosts": [],
+        "freeStart": false,
+        "emDashes": 0
+      },
+      "flags": 0
+    },
+    {
+      "id": "page-structure/fp-closing-with-form",
+      "source": "tests/fixtures/page-structure/fp-closing-with-form.html",
+      "input": {
+        "locale": "en"
+      },
+      "structure": {
+        "findings": 0,
+        "shapes": 0,
+        "styleBans": 0,
+        "mustHavesMissing": [],
+        "mustHavesMisplaced": [],
+        "patterns": {}
+      },
+      "copy": {
+        "findings": 0,
+        "claims": 0,
+        "observations": 0,
+        "patterns": {}
+      },
+      "assets": {
+        "assets-font-loading": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-font-display": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-placeholder": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-source": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-credit": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-alt": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-dimensions": {
+          "verdict": "PASS",
+          "count": 0
+        }
+      },
+      "facts": {
+        "firstFont": null,
+        "fontSources": [],
+        "images": 1,
+        "externalImageHosts": [],
+        "freeStart": false,
+        "emDashes": 0
+      },
+      "flags": 0
+    },
+    {
+      "id": "page-structure/fp-functional-logo-rows",
+      "source": "tests/fixtures/page-structure/fp-functional-logo-rows.html",
+      "input": {
+        "locale": "en"
+      },
+      "structure": {
+        "findings": 0,
+        "shapes": 0,
+        "styleBans": 0,
+        "mustHavesMissing": [],
+        "mustHavesMisplaced": [],
+        "patterns": {}
+      },
+      "copy": {
+        "findings": 0,
+        "claims": 0,
+        "observations": 0,
+        "patterns": {}
+      },
+      "assets": {
+        "assets-font-loading": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-font-display": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-placeholder": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-source": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-credit": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-alt": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-dimensions": {
+          "verdict": "PASS",
+          "count": 0
+        }
+      },
+      "facts": {
+        "firstFont": null,
+        "fontSources": [],
+        "images": 13,
+        "externalImageHosts": [],
+        "freeStart": false,
+        "emDashes": 0
+      },
+      "flags": 0
+    },
+    {
+      "id": "page-structure/fp-left-hero-product-ui",
+      "source": "tests/fixtures/page-structure/fp-left-hero-product-ui.html",
+      "input": {
+        "locale": "en"
+      },
+      "structure": {
+        "findings": 0,
+        "shapes": 0,
+        "styleBans": 0,
+        "mustHavesMissing": [],
+        "mustHavesMisplaced": [],
+        "patterns": {}
+      },
+      "copy": {
+        "findings": 0,
+        "claims": 0,
+        "observations": 0,
+        "patterns": {}
+      },
+      "assets": {
+        "assets-font-loading": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-font-display": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-placeholder": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-source": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-credit": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-alt": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-dimensions": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        }
+      },
+      "facts": {
+        "firstFont": null,
+        "fontSources": [],
+        "images": 0,
+        "externalImageHosts": [],
+        "freeStart": false,
+        "emDashes": 0
+      },
+      "flags": 0
+    },
+    {
+      "id": "page-structure/fp-static-quotes-and-gallery",
+      "source": "tests/fixtures/page-structure/fp-static-quotes-and-gallery.html",
+      "input": {
+        "locale": "en"
+      },
+      "structure": {
+        "findings": 0,
+        "shapes": 0,
+        "styleBans": 0,
+        "mustHavesMissing": [],
+        "mustHavesMisplaced": [],
+        "patterns": {}
+      },
+      "copy": {
+        "findings": 0,
+        "claims": 0,
+        "observations": 0,
+        "patterns": {}
+      },
+      "assets": {
+        "assets-font-loading": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-font-display": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-placeholder": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-source": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-credit": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-alt": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-dimensions": {
+          "verdict": "PASS",
+          "count": 0
+        }
+      },
+      "facts": {
+        "firstFont": null,
+        "fontSources": [],
+        "images": 2,
+        "externalImageHosts": [],
+        "freeStart": false,
+        "emDashes": 0
+      },
+      "flags": 0
+    },
+    {
+      "id": "page-structure/fp-technical-copy",
+      "source": "tests/fixtures/page-structure/fp-technical-copy.html",
+      "input": {
+        "locale": "en"
+      },
+      "structure": {
+        "findings": 0,
+        "shapes": 0,
+        "styleBans": 0,
+        "mustHavesMissing": [],
+        "mustHavesMisplaced": [],
+        "patterns": {}
+      },
+      "copy": {
+        "findings": 0,
+        "claims": 0,
+        "observations": 0,
+        "patterns": {}
+      },
+      "assets": {
+        "assets-font-loading": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-font-display": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-placeholder": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-source": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-credit": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-alt": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-dimensions": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        }
+      },
+      "facts": {
+        "firstFont": null,
+        "fontSources": [],
+        "images": 0,
+        "externalImageHosts": [],
+        "freeStart": false,
+        "emDashes": 0
+      },
+      "flags": 0
+    },
+    {
+      "id": "page-structure/fp-unsplash-gallery",
+      "source": "tests/fixtures/page-structure/fp-unsplash-gallery.html",
+      "input": {
+        "locale": "en"
+      },
+      "structure": {
+        "findings": 0,
+        "shapes": 0,
+        "styleBans": 0,
+        "mustHavesMissing": [],
+        "mustHavesMisplaced": [],
+        "patterns": {}
+      },
+      "copy": {
+        "findings": 0,
+        "claims": 0,
+        "observations": 0,
+        "patterns": {}
+      },
+      "assets": {
+        "assets-font-loading": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-font-display": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-placeholder": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-source": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-credit": {
+          "verdict": "RISK",
+          "count": 3
+        },
+        "assets-image-alt": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-dimensions": {
+          "verdict": "PASS",
+          "count": 0
+        }
+      },
+      "facts": {
+        "firstFont": null,
+        "fontSources": [],
+        "images": 4,
+        "externalImageHosts": [
+          "images.unsplash.com"
+        ],
+        "freeStart": false,
+        "emDashes": 0
+      },
+      "flags": 1
+    },
+    {
+      "id": "page-structure/generic-saas-tailwind",
+      "source": "tests/fixtures/page-structure/generic-saas-tailwind.html",
+      "input": {
+        "locale": "en",
+        "styleId": "quiet-utility"
+      },
+      "structure": {
+        "findings": 9,
+        "shapes": 0,
+        "styleBans": 9,
+        "mustHavesMissing": [],
+        "mustHavesMisplaced": [],
+        "patterns": {
+          "centered-stack-hero": 1,
+          "closing-cta-banner": 1,
+          "generic-saas-skeleton": 1,
+          "icon-feature-grid": 1,
+          "logo-strip": 1,
+          "quiet-utility/corner-radius": 4,
+          "quiet-utility/shadow-blur": 4,
+          "testimonial-carousel": 1,
+          "trusted-by-band": 1
+        }
+      },
+      "copy": {
+        "findings": 2,
+        "claims": 0,
+        "observations": 2,
+        "patterns": {
+          "en-generic-cta": 1,
+          "en-one-place": 1
+        }
+      },
+      "assets": {
+        "assets-font-loading": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-font-display": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-font-choice": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-placeholder": {
+          "verdict": "FIX_NOW",
+          "count": 1
+        },
+        "assets-image-source": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-credit": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-alt": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-dimensions": {
+          "verdict": "RISK",
+          "count": 5
+        }
+      },
+      "facts": {
+        "firstFont": null,
+        "fontSources": [],
+        "images": 6,
+        "externalImageHosts": [
+          "randomuser.me"
+        ],
+        "freeStart": false,
+        "emDashes": 1
+      },
+      "flags": 13
+    },
+    {
+      "id": "page-structure/gradient-blob-hero",
+      "source": "tests/fixtures/page-structure/gradient-blob-hero.html",
+      "input": {
+        "locale": "en"
+      },
+      "structure": {
+        "findings": 1,
+        "shapes": 1,
+        "styleBans": 0,
+        "mustHavesMissing": [],
+        "mustHavesMisplaced": [],
+        "patterns": {
+          "gradient-blob-hero": 1
+        }
+      },
+      "copy": {
+        "findings": 1,
+        "claims": 0,
+        "observations": 1,
+        "patterns": {
+          "en-generic-cta": 1
+        }
+      },
+      "assets": {
+        "assets-font-loading": {
+          "verdict": "FIX_NOW",
+          "count": 1
+        },
+        "assets-font-display": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-placeholder": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-source": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-credit": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-alt": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-dimensions": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        }
+      },
+      "facts": {
+        "firstFont": "Inter",
+        "fontSources": [],
+        "images": 0,
+        "externalImageHosts": [],
+        "freeStart": false,
+        "emDashes": 0
+      },
+      "flags": 3
+    },
+    {
+      "id": "page-structure/gradient-blob-pseudo",
+      "source": "tests/fixtures/page-structure/gradient-blob-pseudo.html",
+      "input": {
+        "locale": "en"
+      },
+      "structure": {
+        "findings": 1,
+        "shapes": 1,
+        "styleBans": 0,
+        "mustHavesMissing": [],
+        "mustHavesMisplaced": [],
+        "patterns": {
+          "gradient-blob-hero": 1
+        }
+      },
+      "copy": {
+        "findings": 0,
+        "claims": 0,
+        "observations": 0,
+        "patterns": {}
+      },
+      "assets": {
+        "assets-font-loading": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-font-display": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-placeholder": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-source": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-credit": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-alt": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-dimensions": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        }
+      },
+      "facts": {
+        "firstFont": null,
+        "fontSources": [],
+        "images": 0,
+        "externalImageHosts": [],
+        "freeStart": false,
+        "emDashes": 0
+      },
+      "flags": 1
+    },
+    {
+      "id": "page-structure/icon-cards-css",
+      "source": "tests/fixtures/page-structure/icon-cards-css.html",
+      "input": {
+        "locale": "en"
+      },
+      "structure": {
+        "findings": 1,
+        "shapes": 1,
+        "styleBans": 0,
+        "mustHavesMissing": [],
+        "mustHavesMisplaced": [],
+        "patterns": {
+          "icon-feature-grid": 1
+        }
+      },
+      "copy": {
+        "findings": 0,
+        "claims": 0,
+        "observations": 0,
+        "patterns": {}
+      },
+      "assets": {
+        "assets-font-loading": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-font-display": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-placeholder": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-source": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-credit": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-alt": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-dimensions": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        }
+      },
+      "facts": {
+        "firstFont": null,
+        "fontSources": [],
+        "images": 0,
+        "externalImageHosts": [],
+        "freeStart": false,
+        "emDashes": 0
+      },
+      "flags": 1
+    },
+    {
+      "id": "page-structure/korean-saas",
+      "source": "tests/fixtures/page-structure/korean-saas.html",
+      "input": {
+        "locale": "ko"
+      },
+      "structure": {
+        "findings": 4,
+        "shapes": 4,
+        "styleBans": 0,
+        "mustHavesMissing": [],
+        "mustHavesMisplaced": [],
+        "patterns": {
+          "centered-stack-hero": 1,
+          "closing-cta-banner": 1,
+          "generic-saas-skeleton": 1,
+          "trusted-by-band": 1
+        }
+      },
+      "copy": {
+        "findings": 3,
+        "claims": 1,
+        "observations": 2,
+        "patterns": {
+          "ko-generic-cta": 2,
+          "ko-one-place": 1,
+          "ko-social-proof-count": 1
+        }
+      },
+      "assets": {
+        "assets-font-loading": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-font-display": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-placeholder": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-source": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-credit": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-alt": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-dimensions": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        }
+      },
+      "facts": {
+        "firstFont": null,
+        "fontSources": [],
+        "images": 0,
+        "externalImageHosts": [],
+        "freeStart": true,
+        "emDashes": 0
+      },
+      "flags": 7
+    },
+    {
+      "id": "page-structure/logo-marquee",
+      "source": "tests/fixtures/page-structure/logo-marquee.html",
+      "input": {
+        "locale": "en"
+      },
+      "structure": {
+        "findings": 1,
+        "shapes": 1,
+        "styleBans": 0,
+        "mustHavesMissing": [],
+        "mustHavesMisplaced": [],
+        "patterns": {
+          "logo-strip": 1
+        }
+      },
+      "copy": {
+        "findings": 0,
+        "claims": 0,
+        "observations": 0,
+        "patterns": {}
+      },
+      "assets": {
+        "assets-font-loading": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-font-display": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-placeholder": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-source": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-credit": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-alt": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-dimensions": {
+          "verdict": "RISK",
+          "count": 5
+        }
+      },
+      "facts": {
+        "firstFont": null,
+        "fontSources": [],
+        "images": 5,
+        "externalImageHosts": [],
+        "freeStart": false,
+        "emDashes": 0
+      },
+      "flags": 2
+    },
+    {
+      "id": "page-structure/replaced-quiet-utility",
+      "source": "tests/fixtures/page-structure/replaced-quiet-utility.html",
+      "input": {
+        "locale": "en",
+        "styleId": "quiet-utility"
+      },
+      "structure": {
+        "findings": 0,
+        "shapes": 0,
+        "styleBans": 0,
+        "mustHavesMissing": [],
+        "mustHavesMisplaced": [],
+        "patterns": {}
+      },
+      "copy": {
+        "findings": 0,
+        "claims": 0,
+        "observations": 0,
+        "patterns": {}
+      },
+      "assets": {
+        "assets-font-loading": {
+          "verdict": "FIX_NOW",
+          "count": 1
+        },
+        "assets-font-display": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-font-choice": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-placeholder": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-source": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-credit": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-alt": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-dimensions": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        }
+      },
+      "facts": {
+        "firstFont": "Inter",
+        "fontSources": [],
+        "images": 0,
+        "externalImageHosts": [],
+        "freeStart": false,
+        "emDashes": 1
+      },
+      "flags": 1
+    },
+    {
+      "id": "page-structure/stock-photo-hero",
+      "source": "tests/fixtures/page-structure/stock-photo-hero.html",
+      "input": {
+        "locale": "en"
+      },
+      "structure": {
+        "findings": 1,
+        "shapes": 1,
+        "styleBans": 0,
+        "mustHavesMissing": [],
+        "mustHavesMisplaced": [],
+        "patterns": {
+          "stock-photo-hero": 1
+        }
+      },
+      "copy": {
+        "findings": 1,
+        "claims": 0,
+        "observations": 1,
+        "patterns": {
+          "en-generic-cta": 1
+        }
+      },
+      "assets": {
+        "assets-font-loading": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-font-display": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-placeholder": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-source": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-credit": {
+          "verdict": "RISK",
+          "count": 1
+        },
+        "assets-image-alt": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-dimensions": {
+          "verdict": "PASS",
+          "count": 0
+        }
+      },
+      "facts": {
+        "firstFont": null,
+        "fontSources": [],
+        "images": 1,
+        "externalImageHosts": [
+          "images.unsplash.com"
+        ],
+        "freeStart": false,
+        "emDashes": 0
+      },
+      "flags": 3
+    },
+    {
+      "id": "page-structure/testimonial-carousel-plain",
+      "source": "tests/fixtures/page-structure/testimonial-carousel-plain.html",
+      "input": {
+        "locale": "en"
+      },
+      "structure": {
+        "findings": 1,
+        "shapes": 1,
+        "styleBans": 0,
+        "mustHavesMissing": [],
+        "mustHavesMisplaced": [],
+        "patterns": {
+          "testimonial-carousel": 1
+        }
+      },
+      "copy": {
+        "findings": 0,
+        "claims": 0,
+        "observations": 0,
+        "patterns": {}
+      },
+      "assets": {
+        "assets-font-loading": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-font-display": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-placeholder": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-source": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-credit": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-alt": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-dimensions": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        }
+      },
+      "facts": {
+        "firstFont": null,
+        "fontSources": [],
+        "images": 0,
+        "externalImageHosts": [],
+        "freeStart": false,
+        "emDashes": 0
+      },
+      "flags": 1
+    },
+    {
+      "id": "page-structure/trusted-by-avatars",
+      "source": "tests/fixtures/page-structure/trusted-by-avatars.html",
+      "input": {
+        "locale": "en"
+      },
+      "structure": {
+        "findings": 1,
+        "shapes": 1,
+        "styleBans": 0,
+        "mustHavesMissing": [],
+        "mustHavesMisplaced": [],
+        "patterns": {
+          "trusted-by-band": 1
+        }
+      },
+      "copy": {
+        "findings": 1,
+        "claims": 1,
+        "observations": 0,
+        "patterns": {
+          "en-social-proof-count": 1
+        }
+      },
+      "assets": {
+        "assets-font-loading": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-font-display": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-placeholder": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-source": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-credit": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-image-alt": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-dimensions": {
+          "verdict": "PASS",
+          "count": 0
+        }
+      },
+      "facts": {
+        "firstFont": null,
+        "fontSources": [],
+        "images": 4,
+        "externalImageHosts": [],
+        "freeStart": false,
+        "emDashes": 0
+      },
+      "flags": 2
+    },
+    {
+      "id": "runs-2026-11-25/restaurant-on-r2",
+      "source": "tests/fixtures/page-structure/runs-2026-11-25/restaurant-on-r2.html",
+      "input": {
+        "locale": "ko",
+        "pageRole": "restaurant-local",
+        "productType": "other"
+      },
+      "structure": {
+        "findings": 1,
+        "shapes": 1,
+        "styleBans": 0,
+        "mustHavesMissing": [],
+        "mustHavesMisplaced": [],
+        "patterns": {
+          "stock-photo-hero": 1
+        }
+      },
+      "copy": {
+        "findings": 0,
+        "claims": 0,
+        "observations": 0,
+        "patterns": {}
+      },
+      "assets": {
+        "assets-font-loading": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-font-display": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-placeholder": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-source": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-credit": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-alt": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-dimensions": {
+          "verdict": "PASS",
+          "count": 0
+        }
+      },
+      "facts": {
+        "firstFont": "Pretendard",
+        "fontSources": [
+          "google",
+          "pretendard"
+        ],
+        "images": 1,
+        "externalImageHosts": [
+          "images.unsplash.com"
+        ],
+        "freeStart": false,
+        "emDashes": 0
+      },
+      "flags": 1
+    },
+    {
+      "id": "runs-2026-11-25/restaurant-on-r3",
+      "source": "tests/fixtures/page-structure/runs-2026-11-25/restaurant-on-r3.html",
+      "input": {
+        "locale": "ko",
+        "pageRole": "restaurant-local",
+        "productType": "other"
+      },
+      "structure": {
+        "findings": 1,
+        "shapes": 1,
+        "styleBans": 0,
+        "mustHavesMissing": [],
+        "mustHavesMisplaced": [],
+        "patterns": {
+          "stock-photo-hero": 1
+        }
+      },
+      "copy": {
+        "findings": 0,
+        "claims": 0,
+        "observations": 0,
+        "patterns": {}
+      },
+      "assets": {
+        "assets-font-loading": {
+          "verdict": "NOT_APPLICABLE",
+          "count": 0
+        },
+        "assets-font-display": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-placeholder": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-source": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-credit": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-alt": {
+          "verdict": "PASS",
+          "count": 0
+        },
+        "assets-image-dimensions": {
+          "verdict": "PASS",
+          "count": 0
+        }
+      },
+      "facts": {
+        "firstFont": "Noto Sans KR",
+        "fontSources": [
+          "google"
+        ],
+        "images": 1,
+        "externalImageHosts": [
+          "images.unsplash.com"
+        ],
+        "freeStart": false,
+        "emDashes": 0
+      },
+      "flags": 1
+    }
+  ],
+  "totals": {
+    "fixtures": {
+      "pages": 38,
+      "pretendardVariableFirst": 0,
+      "webFontLoaded": 2,
+      "googleOrFontFace": 2,
+      "externalImages": 5,
+      "imagePages": 26,
+      "freeStart": 1,
+      "emDash": 2,
+      "noMcpCall": 0,
+      "structureFindings": 25,
+      "mustHaveGaps": 3,
+      "copyFindings": 9,
+      "copyClaims": 2,
+      "assetIssues": 7,
+      "flags": 41
+    }
+  },
+  "pairs": [],
+  "skipped": []
+}
