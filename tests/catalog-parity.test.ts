@@ -42,7 +42,7 @@ describe('bundled catalog integrity', () => {
     // Website compiler CATALOG_VERSION. The package version can move without rewriting this snapshot.
     expect(manifest.catalogVersion).toBe('0.10.1');
     expect(manifest.counts.stateRecipes).toBe(57);
-    expect(manifest.contentHash).toBe('sha256:459b93907237a561a15f57e1c9cc47314ab14b06e02053579c29e7035c87a179');
+    expect(manifest.contentHash).toBe('sha256:2773e919e989c9b5def88c354bd39a6816f677ab25b085357a039e67e20123a2');
     expect(manifest.contentHash).toBe(catalog.contentHash);
     expect(manifest.contentHash).toBe(repo.contentHash);
   });

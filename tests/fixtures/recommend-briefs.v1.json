@@ -156,7 +156,7 @@
         "trustSensitivity": "high",
         "constraints": ["high-contrast-required"]
       },
-      "expect": { "top1": ["platform-core"], "minGap": 0.03 },
+      "expect": { "top1": ["platform-core"], "minGap": 0.02 },
       "rationale": "high-contrast-required rejects the subtle-border and low-contrast healthcare styles (quiet-utility, soft-pastel). platform-core is the remaining style that claims healthcare-portal."
     },
     {

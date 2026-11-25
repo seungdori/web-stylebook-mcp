@@ -26,7 +26,7 @@
     "文字ではない色の組み合わせ(フォーカス、操作要素の境界、区切り線): Componentsで説明しました。",
     "フォントのスタイルシートの出典とライセンス: このファイルにありません。compose_design_tokensのvisualContract.typography.fontsを参照してください。"
   ],
-  "sourceHash": "sha256:c3623ed60815ef3de7147ca0b9d9a5b30caf44a8b1c2723675fd4e1efe7bb8fd",
+  "sourceHash": "sha256:9e3e7387fbca15e86c8dd7c6611dd207e2ee6f0b939c56db8cf42bcbc46852f0",
   "primaryStyleId": "mono-type",
   "colorMode": "both",
   "warnings": [

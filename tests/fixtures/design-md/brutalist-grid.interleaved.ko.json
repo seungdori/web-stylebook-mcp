@@ -25,7 +25,7 @@
     "글자가 아닌 색 쌍(포커스, 조작 요소 경계, 구분선): Components에 설명했습니다.",
     "폰트 스타일시트 출처와 라이선스: 이 파일에 없습니다. compose_design_tokens의 visualContract.typography.fonts를 보세요."
   ],
-  "sourceHash": "sha256:9ebb0200d6eed2edc7d8271a245c42c8b992fe835033325566795c04c8c7a9b7",
+  "sourceHash": "sha256:be810518e3362f6e1261b7f1dc10186ee6eb161ea6128f9b971848cc6172fa3e",
   "primaryStyleId": "brutalist-grid",
   "colorMode": "light",
   "warnings": [

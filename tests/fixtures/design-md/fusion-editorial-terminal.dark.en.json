@@ -25,7 +25,7 @@
     "Non-text color pairs (focus, control boundaries, separators): described under Components.",
     "Font stylesheet sources and licenses: not in this file; read visualContract.typography.fonts from compose_design_tokens."
   ],
-  "sourceHash": "sha256:a1a284d3f7347f7e0202a46bde924b4e6d05aa34e9a9c9c94c1dd979e9aca86b",
+  "sourceHash": "sha256:733e0d6915144a3644c1a239cb8b1231c359af851b732147d9c14d45db3e23ed",
   "primaryStyleId": "fusion-editorial-terminal",
   "colorMode": "dark",
   "warnings": [],

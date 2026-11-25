@@ -1,6 +1,6 @@
 {
   "catalogVersion": "0.10.1",
-  "contentHash": "sha256:459b93907237a561a15f57e1c9cc47314ab14b06e02053579c29e7035c87a179",
+  "contentHash": "sha256:2773e919e989c9b5def88c354bd39a6816f677ab25b085357a039e67e20123a2",
   "data": {
     "componentCategories": [
       {
@@ -8048,8 +8048,7 @@
         ],
         "recommendedPrimaryStyleIds": [
           "platform-core",
-          "quiet-utility",
-          "notion-style"
+          "quiet-utility"
         ],
         "recommendedSecondaryStyleIds": [
           "macos-liquid-glass"
