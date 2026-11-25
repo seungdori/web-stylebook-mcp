@@ -1,5 +1,7 @@
 # 결과
 
+[English](./RESULTS.md) · **한국어** · [日本語](./RESULTS.ja.md)
+
 브리프 10개에 군마다 빌드 하나씩, 같은 에이전트와 모델로 만든 10쌍입니다. 군은 MCP 없이 만든 대조군(`control`)과 MCP를 붙여 만든 MCP군(`mcp`)입니다. 측정이 아니라 눈으로 보기 위한 쇼케이스입니다. **먼저 [블라인드 비교 페이지](./compare/index.html)를 보세요.** 이 노트는 어느 쪽이 어느 군인지 밝힙니다.
 
 근거는 [`runs.json`](./runs.json), [`key.json`](./key.json), 제가 쓴 블라인드 메모([`blind-notes.md`](./blind-notes.md)), 독립 평가자 두 명([`blind-reads/`](./blind-reads/))입니다. 점수는 매기지 않았습니다.

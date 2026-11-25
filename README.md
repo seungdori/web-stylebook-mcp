@@ -10,7 +10,7 @@
 [![node](https://img.shields.io/node/v/web-stylebook-mcp?logo=nodedotjs&color=339933)](https://nodejs.org)
 [![MCP](https://img.shields.io/badge/MCP-server-6E56CF)](https://modelcontextprotocol.io)
 
-**English** · [한국어](./README.ko.md)
+**English** · [한국어](./README.ko.md) · [日本語](./README.ja.md)
 
 </div>
 

@@ -40,6 +40,20 @@ const text = {
       'screenshot-failed': '빌드 성공, 스크린샷 실패',
     },
   },
+  ja: {
+    builds: ['ブリーフ', '群', 'ステータス', '経過時間', 'ターン', 'コスト（推定）'],
+    total: '合計',
+    mcp: ['ブリーフ', 'MCP 呼び出し', '最初の呼び出し'],
+    none: 'なし',
+    status: {
+      ok: 'ビルド成功',
+      'built-timed-out': 'ビルド成功、90分の上限で停止',
+      'built-with-session-error': 'ビルド成功、セッションエラー',
+      'build-failed': 'ビルド失敗',
+      'blank-page': 'ビルド成功、空白ページ',
+      'screenshot-failed': 'ビルド成功、スクリーンショット失敗',
+    },
+  },
 }[lang];
 
 const duration = (seconds) => `${Math.floor(seconds / 60)}m ${String(Math.round(seconds % 60)).padStart(2, '0')}s`;
@@ -94,6 +108,7 @@ console.log(table([...text.mcp, ...TOOLS.map(([, label]) => label), 'resources']
 const words = {
   en: { brief: 'Brief', mine: 'My read', ship: 'ship', generic: 'less generic', tie: 'tie', slight: 'slight', clear: 'clear', lean: '(lean)', slightLean: '(slight lean)', missing: 'not assessed' },
   ko: { brief: '브리프', mine: '내 판단', ship: '출시', generic: '덜 뻔함', tie: '비슷함', slight: '약간', clear: '분명', lean: '쪽', slightLean: '쪽 (약간)', missing: '미평가' },
+  ja: { brief: 'ブリーフ', mine: '私の判断', ship: 'リリース', generic: 'ありきたりでない', tie: '同等', slight: 'わずか', clear: '明確', lean: '寄り', slightLean: '寄り (わずか)', missing: '未評価' },
 }[lang];
 const key = JSON.parse(readFileSync(join(SHOWCASE_DIR, 'key.json'), 'utf8')).assignments;
 const armLabel = { control: 'control', mcp: 'MCP' };
@@ -129,7 +144,8 @@ function readerVerdicts(file) {
   return out;
 }
 
-const readers = [[lang === 'ko' ? '평가자 A' : 'Reader A', 'reader-a.md'], [lang === 'ko' ? '평가자 B' : 'Reader B', 'reader-b.md']].filter(([, f]) => existsSync(join(SHOWCASE_DIR, 'blind-reads', f)));
+const readerName = { en: 'Reader', ko: '평가자', ja: '評価者' }[lang];
+const readers = [[`${readerName} A`, 'reader-a.md'], [`${readerName} B`, 'reader-b.md']].filter(([, f]) => existsSync(join(SHOWCASE_DIR, 'blind-reads', f)));
 const mine = myVerdicts();
 const parsed = readers.map(([name, file]) => [name, readerVerdicts(file)]);
 const readsHeader = [words.brief, words.mine, ...parsed.flatMap(([name]) => [`${name}: ${words.ship}`, `${name}: ${words.generic}`])];

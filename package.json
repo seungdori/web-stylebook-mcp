@@ -21,8 +21,10 @@
     "docs/research/design-foundations.md",
     "docs/reference.md",
     "docs/reference.ko.md",
+    "docs/reference.ja.md",
     "README.md",
-    "README.ko.md"
+    "README.ko.md",
+    "README.ja.md"
   ],
   "engines": {
     "node": ">=20"

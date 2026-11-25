@@ -5,7 +5,13 @@ import { dirname, join, resolve } from 'node:path';
 
 // The README is short and points into docs/; keep every relative link and heading anchor alive.
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const DOCS = ['README.md', 'README.ko.md', 'docs/reference.md', 'docs/reference.ko.md', 'docs/demo/README.md', 'docs/listings.md', 'skills/web-stylebook-design/SKILL.md'];
+const READMES = ['README.md', 'README.ko.md', 'README.ja.md'];
+const DOCS = [
+  ...READMES,
+  'docs/reference.md', 'docs/reference.ko.md', 'docs/reference.ja.md',
+  'docs/demo/README.md', 'docs/demo/README.ko.md', 'docs/demo/README.ja.md',
+  'docs/listings.md', 'skills/web-stylebook-design/SKILL.md',
+];
 
 const slug = (heading: string) => heading.trim().toLowerCase().replace(/[^\p{L}\p{N}\s_-]/gu, '').replace(/\s/g, '-');
 const anchors = (md: string) => new Set([...md.matchAll(/^#{1,6}\s+(.+)$/gm)].map((m) => slug(m[1]!.replace(/`/g, ''))));
@@ -29,7 +35,7 @@ describe('documentation links', () => {
   }
 
   it('the README leads with the before/after image and stays short', () => {
-    for (const doc of ['README.md', 'README.ko.md']) {
+    for (const doc of READMES) {
       const text = readFileSync(join(root, doc), 'utf8');
       expect(text.indexOf('docs/demo/before-after.png'), doc).toBeGreaterThan(-1);
       expect(text.indexOf('docs/demo/before-after.png'), doc).toBeLessThan(text.indexOf('## '));
@@ -40,7 +46,7 @@ describe('documentation links', () => {
 
   it('README images use absolute URLs, so npm renders them, and repository images exist here', () => {
     const RAW = 'https://raw.githubusercontent.com/seungdori/web-stylebook-mcp/master/';
-    for (const doc of ['README.md', 'README.ko.md']) {
+    for (const doc of READMES) {
       const images = [...readFileSync(join(root, doc), 'utf8').matchAll(/!\[[^\]]*\]\(([^)\s]+)\)/g)].map((m) => m[1]!);
       expect(images.length, doc).toBeGreaterThan(0);
       for (const src of images) {

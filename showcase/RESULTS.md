@@ -1,5 +1,7 @@
 # Results
 
+**English** · [한국어](./RESULTS.ko.md) · [日本語](./RESULTS.ja.md)
+
 Ten pairs, one build per arm per brief, from one agent and one model. The arms are `control` (built without the MCP) and `mcp` (built with it). This is a showcase to look at, not a measurement. **Look at [the blind comparison](./compare/index.html) first.** This note names the arms.
 
 It draws on [`runs.json`](./runs.json), [`key.json`](./key.json), my own blind notes ([`blind-notes.md`](./blind-notes.md)), and two independent readers ([`blind-reads/`](./blind-reads/)). It computes no score.

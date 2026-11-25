@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
@@ -298,10 +299,12 @@ describe.each(['en', 'ko'] as const)('showcase claims (%s)', (lang) => {
   });
 });
 
-describe('showcase claims: EN and KO say the same thing in the same shape', () => {
+describe('showcase claims: every translation says the same thing in the same shape', () => {
   const pairs = [
     ['README.md', 'README.ko.md'],
     ['RESULTS.md', 'RESULTS.ko.md'],
+    ['README.md', 'README.ja.md'],
+    ['RESULTS.md', 'RESULTS.ja.md'],
   ] as const;
 
   it.each(pairs)('%s and %s have the same headings, tables, links and commands', (en, ko) => {
@@ -310,7 +313,7 @@ describe('showcase claims: EN and KO say the same thing in the same shape', () =
     expect(headings(k)).toEqual(headings(e));
     expect(tablesOf(k).map((t) => [t.length, t[0]!.length])).toEqual(tablesOf(e).map((t) => [t.length, t[0]!.length]));
 
-    const normalize = (t: string) => t.replaceAll('.ko.md', '.md');
+    const normalize = (t: string) => t.replace(/\.(ko|ja)\.md/g, '.md');
     const links = (t: string) => [...normalize(t).matchAll(/\]\(([^)]+)\)/g)].map((m) => m[1]!).sort();
     expect(links(k)).toEqual(links(e));
 
@@ -319,10 +322,19 @@ describe('showcase claims: EN and KO say the same thing in the same shape', () =
     expect(blocks(k)).toEqual(blocks(e));
   });
 
+  it.each([['en', 'RESULTS.md'], ['ko', 'RESULTS.ko.md'], ['ja', 'RESULTS.ja.md']])('%s: %s shows exactly the tables harness/tables.mjs prints', (lang, file) => {
+    const printed = execFileSync(process.execPath, [join(dir, 'harness', 'tables.mjs'), '--lang', lang], { encoding: 'utf8' });
+    const shown = read(file);
+    const tables = printed.trim().split('\n\n');
+    expect(tables.every((table) => table.startsWith('| ')), 'tables.mjs printed tables').toBe(true);
+    for (const table of tables) expect(shown, file).toContain(table);
+  });
+
   it('adds one line to each root README, linking the matching language of the showcase', () => {
     const before = (name: string) => readFileSync(join(dir, '..', name), 'utf8');
     expect(before('README.md').match(/\(\.\/showcase\/\)/g)).toHaveLength(1);
     expect(before('README.ko.md').match(/\(\.\/showcase\/README\.ko\.md\)/g)).toHaveLength(1);
+    expect(before('README.ja.md').match(/\(\.\/showcase\/README\.ja\.md\)/g)).toHaveLength(1);
   });
 });
 

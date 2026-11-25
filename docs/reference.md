@@ -1,6 +1,6 @@
 # web-stylebook-mcp reference
 
-[← README](../README.md) · **English** · [한국어](./reference.ko.md)
+[← README](../README.md) · **English** · [한국어](./reference.ko.md) · [日本語](./reference.ja.md)
 
 Everything the [README](../README.md) leaves out: tool-by-tool examples, the result contracts, resources, prompts, the CLI and compatibility notes.
 

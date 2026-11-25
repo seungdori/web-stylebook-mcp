@@ -1,6 +1,6 @@
 # web-stylebook-mcp 레퍼런스
 
-[← README](../README.ko.md) · [English](./reference.md) · **한국어**
+[← README](../README.ko.md) · [English](./reference.md) · **한국어** · [日本語](./reference.ja.md)
 
 [README](../README.ko.md)에서 뺀 내용을 모았습니다. 툴별 예시, 결과 계약, 리소스, 프롬프트, CLI, 호환성 메모가 있습니다.
 
@@ -46,7 +46,7 @@ API 키 없음. 모델 호출 없음. 네트워크 없음. 프로젝트 파일�
   "limit": 6,
   "locale": "ko",
   "context": {
-    "userTask": "장애 목록에서 먼저 확인할 항목을 찾는다.",
+    "userTask": "인시던트 목록에서 먼저 확인할 항목을 찾는다.",
     "targets": [
       {
         "id": "incidents-desktop",
