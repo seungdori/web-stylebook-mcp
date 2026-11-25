@@ -265,7 +265,7 @@ MCP는 제출된 증거의 범위와 일관성을 검사하고 **실제 파일 �
 | `shape-observation` | `styleId` 없이 검사한 일반 금지 패턴 | `cant-tell` 증거와 함께 NOT_VERIFIED. 형태는 있지만 과업을 방해하는지는 확인하지 않았습니다. 과업에 비추어 판단하고(서로 다른 업무로 이동하는 카드 3개는 문제가 아닙니다), `manual` 증거와 함께 PASS, RISK, FIX_NOW를 제출하세요. 형태가 없으면 NOT_APPLICABLE입니다 |
 | `required-element` | `productType`의 필수 요소 | 없거나 첫 화면 밖에 있으면 FIX_NOW |
 
-`severity`는 주장이 확인됐을 때의 심각도입니다.
+`severity`는 주장이 확인됐을 때의 심각도입니다. 페이지가 사진의 스톡 사이트를 밝힌 `stock-photo-hero`("Photo by … on Unsplash"나 그 사이트 링크)는 `styleId`가 있어도 `shape-observation`입니다. 사진이 제품의 실제 장소·소재·쓰임을 보여 주는지 판단하세요. `styleId`가 있으면 도구 항목을 이유와 함께 `supersedes`하는 `dom` 증거로 PASS를 기록합니다. 출처 표기가 없으면 `style-fidelity`이고, 플레이스홀더 서비스는 출처 표기로 보지 않습니다.
 
 ### 스타일이 뺄 수 없는 필수 요소
 

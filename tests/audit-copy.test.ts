@@ -115,6 +115,14 @@ describe('Korean buzzwords (0.22.1)', () => {
     }
   });
 
+  it('flags the verb forms of 혁신 and 가속화 (0.23.0), and not the plain nouns', () => {
+    for (const line of ['지금 혁신하세요', '고객 경험을 혁신합니다', '업계를 혁신하는 플랫폼', '업무 속도를 가속화하세요', '비즈니스 성장을 가속화합니다', '디지털 전환 가속화']) {
+      expect(found({ text: line }), line).toEqual(['ko-buzzwords']);
+      expect(found({ html: `<main><h2>${line}</h2></main>`, productType: 'operational-saas' }), line).toEqual(['ko-buzzwords']);
+    }
+    for (const line of ['하드웨어 가속을 켜세요.', '혁신 사례 3건을 소개합니다.', '쓰기 지연, 복제 지연, 블로트 가속']) expect(found({ text: line }), line).toEqual([]);
+  });
+
   it('gives Korean every pattern topic that English or Japanese has', () => {
     const topic = (id: string) => id.replace(/^(?:en|ko|ja)-/, '');
     const topics = (locale: 'en' | 'ko' | 'ja') => new Set(COPY_PATTERNS.filter((entry) => entry.locales.includes(locale)).map((entry) => topic(entry.id)));

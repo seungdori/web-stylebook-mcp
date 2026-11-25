@@ -257,7 +257,7 @@ Every finding and check carries a `claim`, and `summary.claims` counts findings 
 | `shape-observation` | a global pattern checked without `styleId` | NOT_VERIFIED with `cant-tell` evidence: the shape is there, but whether it gets in the way of the task is not checked. Judge it against the task (three cards that lead to different tasks are fine), then submit PASS, RISK, or FIX_NOW with `manual` evidence. A shape that is not there is NOT_APPLICABLE |
 | `required-element` | a must-have for `productType` | FIX_NOW when missing or off the first screen |
 
-`severity` is the severity once the claim is confirmed.
+`severity` is the severity once the claim is confirmed. A `stock-photo-hero` whose page names the photo's stock site ("Photo by … on Unsplash", or a link to the site) is a `shape-observation` even with a `styleId`: judge whether the photo shows the product's own place, material or use; with a `styleId`, record a PASS as `dom` evidence that `supersedes` the tool's item with your reason. Without the credit it stays `style-fidelity`, and placeholder services are never credited.
 
 ### Must-haves a style can't remove
 

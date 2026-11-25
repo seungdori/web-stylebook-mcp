@@ -68,9 +68,9 @@ export const COPY_PATTERNS: readonly CopyPattern[] = [
   },
   {
     id: 'ko-buzzwords', locales: ['ko'],
-    match: { kind: 'unit', pattern: '혁신적(?:인|으로)|획기적(?:인|으로)|차원이\\s*다른|새로운\\s*(?:경험|차원|기준|패러다임)|쉽고\\s*빠르게|올인원|스마트(?:한|하게)|최적의\\s*(?:경험|솔루션|선택|방법|환경)|한\\s*단계\\s*(?:더\\s*)?(?:끌어올|높여|높이|업그레이드|도약)|(?:맞춤형|통합|토털|차세대)\\s*솔루션|솔루션으로|압도적(?:인|으로)|극대화|패러다임|게임\\s*체인저|놀라운\\s*(?:경험|변화|성과|결과)|완벽한\\s*(?:솔루션|경험|파트너|선택)' },
+    match: { kind: 'unit', pattern: '혁신적(?:인|으로)|혁신(?:하세요|합니다|하는|하고|하며|할|해\\s*보세요|해\\s*드립니다|하십시오|시키|시켜)|가속화(?:하세요|합니다|해\\s*보세요|하십시오|시키|시켜)|(?:성장|비즈니스|업무|매출|혁신|전환|도입|생산성)(?:을|를|의)?\\s*가속화|획기적(?:인|으로)|차원이\\s*다른|새로운\\s*(?:경험|차원|기준|패러다임)|쉽고\\s*빠르게|올인원|스마트(?:한|하게)|최적의\\s*(?:경험|솔루션|선택|방법|환경)|한\\s*단계\\s*(?:더\\s*)?(?:끌어올|높여|높이|업그레이드|도약)|(?:맞춤형|통합|토털|차세대)\\s*솔루션|솔루션으로|압도적(?:인|으로)|극대화|패러다임|게임\\s*체인저|놀라운\\s*(?:경험|변화|성과|결과)|완벽한\\s*(?:솔루션|경험|파트너|선택)' },
     verdict: 'observation', antiPatternIds: ['abstract-consultancy-copy'],
-    why: 'Words such as 혁신적인, 솔루션으로 and 한 단계 끌어올리세요 promise a feeling instead of a result and fit any product. Plain uses (솔루션 엔지니어, 한 단계 작은 목표, 스마트폰) do not match.',
+    why: 'Words such as 혁신적인, 혁신하세요, 가속화하세요, 솔루션으로 and 한 단계 끌어올리세요 promise a feeling instead of a result and fit any product. Plain uses (솔루션 엔지니어, 한 단계 작은 목표, 스마트폰, 혁신 사례, 하드웨어 가속) do not match.',
     instead: 'Say what the user can do now that they could not, with one concrete outcome.',
     example: { flagged: '혁신적인 솔루션으로 비즈니스를 한 단계 끌어올리세요', better: '화요일 오후 3시 미팅이 끝나면, 할 일과 담당자가 붙은 요약을 슬랙으로 보냅니다.' },
   },

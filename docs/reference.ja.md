@@ -237,7 +237,7 @@ MCP が検証するのは、提供されたカバレッジと整合性だけで�
 | `shape-observation` | `styleId` なしで確認したグローバルなパターン | `cant-tell` の証拠付きで NOT_VERIFIED: 形状は存在するが、それがタスクの妨げになるかは確認していない。タスクに照らして判断し（異なるタスクへ導く 3 枚のカードは問題ありません）、`manual` の証拠を付けて PASS、RISK、FIX_NOW のいずれかを提出します。形状が存在しない場合は NOT_APPLICABLE |
 | `required-element` | `productType` の必須要素 | 欠けている、またはファーストビューにない場合は FIX_NOW |
 
-`severity` は、claim が確定したあとの重大度です。
+`severity` は、claim が確定したあとの重大度です。ページが写真のストックサイトを示している `stock-photo-hero`（"Photo by … on Unsplash" やそのサイトへのリンク）は、`styleId` があっても `shape-observation` です。写真が製品の実際の場所・素材・使われ方を示しているか判断してください。`styleId` がある場合は、ツールの項目を理由付きで `supersedes` する `dom` 証拠として PASS を記録します。出典の表記がなければ `style-fidelity` のままで、プレースホルダーのサービスは出典の表記とみなしません。
 
 ### スタイルでは消せない必須要素
 

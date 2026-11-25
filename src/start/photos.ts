@@ -198,7 +198,7 @@ export const PHOTO_RULES = {
   termsChecked: '2026-11-25',
   licenses: { unsplash: 'https://unsplash.com/license', pexels: 'https://www.pexels.com/license/' },
   pick: 'Pick photos on unsplash.com or pexels.com and download them; their APIs add attribution, hotlink and tracking duties.',
-  credit: 'Credit each stock photo as "Photo by {name} on {Source}", linking the photographer and the photo, in a figcaption or the footer credits. The licences do not require it for photos picked on the websites; the APIs do.',
+  credit: 'Credit each stock photo as "Photo by {name} on {Source}", linking the photographer and the photo, in a figcaption or the footer credits. The licences ask it only through the APIs. An uncredited stock hero is a defect; a credited one, an observation.',
   dont: 'Do not imply that people or brands shown endorse the product, use a photo as a logo, or show identifiable people in a bad light.',
   markup: 'Give every <img> a width and height and an alt that says what it shows; a decorative image gets alt="".',
   fallback: 'No fitting photo: leave the slot out and use the product screen or type, never a gray box.',

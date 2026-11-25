@@ -6,6 +6,7 @@ import { firstFamily } from '../typography/loading.js';
 import { descendants, selectorPath, textContent, type DomElement } from './dom/html.js';
 import type { PageModel } from './dom/page.js';
 import { urlsIn } from './dom/values.js';
+import { creditsStockSource } from './detect.js';
 
 /**
  * The "assets" group of audit_page_structure (2026-11-25 design-quality plan, 4.4 and 5.3): fonts the page declares
@@ -260,11 +261,10 @@ export function assetReports(page: PageModel, css: readonly string[], styleId: s
   const external = urls.filter((url) => hostOf(url) && !hostIn(hostOf(url), PLACEHOLDER_HOSTS));
   const unknown = [...new Set(external.filter((url) => !hostIn(hostOf(url), STOCK_ALLOWED)).map((url) => hostOf(url)!))].sort();
   reports.push(!external.length ? report('assets-image-source', 'NOT_APPLICABLE') : report('assets-image-source', unknown.length ? 'RISK' : 'PASS', unknown));
+  // The same rule audit_page_structure applies to a stock-photo hero: the page names each photo's stock site.
   const stock = external.filter((url) => hostIn(hostOf(url), STOCK_ALLOWED));
-  const body = page.html.elements.find((element) => element.tag === 'body') ?? page.html.root;
-  const credited = /unsplash|pexels/i.test(textContent(body))
-    || descendants(body).some((element) => element.tag === 'a' && hostIn(hostOf(element.attrs.get('href') ?? ''), ['unsplash.com', 'pexels.com']));
-  reports.push(!stock.length ? report('assets-image-credit', 'NOT_APPLICABLE') : report('assets-image-credit', credited ? 'PASS' : 'RISK', credited ? [] : [...new Set(stock)]));
+  const uncredited = [...new Set(stock.filter((url) => !creditsStockSource(page, url)))];
+  reports.push(!stock.length ? report('assets-image-credit', 'NOT_APPLICABLE') : report('assets-image-credit', uncredited.length ? 'RISK' : 'PASS', uncredited));
   const noAlt = images.filter((image) => !image.attrs.has('alt'));
   const fileAlt = images.filter((image) => FILENAME_ALT.test((image.attrs.get('alt') ?? '').trim()));
   const fileAltItems = fileAlt.slice(0, ITEMS).map((image) => `${selectorPath(image)} alt="${image.attrs.get('alt')}"`);
