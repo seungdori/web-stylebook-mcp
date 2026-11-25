@@ -18,7 +18,7 @@ beforeAll(async () => {
 
 describe('MCP contract', () => {
   it('advertises server instructions and the packaged server version', () => {
-    expect(client.getServerVersion()).toEqual({ name: 'web-stylebook', version: '0.23.0' });
+    expect(client.getServerVersion()).toEqual({ name: 'web-stylebook', version: '0.24.0' });
     const instructions = client.getInstructions() ?? '';
     expect(instructions).toContain('recommend_design_direction');
     expect(instructions).toContain('get_design_principle_plan');

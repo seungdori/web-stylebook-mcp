@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "web-stylebook",
   "display_name": "Web Stylebook",
-  "version": "0.23.0",
+  "version": "0.24.0",
   "description": "Design judgment for coding agents. It improves the UI you already have and shows the evidence.",
   "author": {
     "name": "Web Stylebook",
