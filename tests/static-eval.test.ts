@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { CatalogRepository } from '../src/catalog/repository.js';
 import { startUiDesign } from '../src/start/start-ui-design.js';
 import {
-  EXPERIMENT_PAGES, buildScorecard, experimentPages, renderScorecard, repositoryPages, shorthandFamily, writeScorecard,
+  EXPERIMENT_PAGES, buildScorecard, experimentPages, parseRunName, renderScorecard, repositoryPages, shorthandFamily, writeScorecard,
 } from '../scripts/evaluate-design-static.js';
 
 const repo = CatalogRepository.load();
@@ -81,14 +81,15 @@ describe('eval:static on an experiment folder', () => {
       const card = buildScorecard('test', inputs, skipped, repo);
       expect(card.skipped.map((entry) => entry.source)).toEqual(['runs/docs-on-r2', 'runs/landing-off-interrupted']);
       expect(card.pairs).toHaveLength(1);
+      expect(card.pairs[0]).toMatchObject({ page: 'landing', round: 1, arms: ['off', 'on'] });
       const [off, on] = [card.pages.find((entry) => entry.id === 'landing-off')!, card.pages.find((entry) => entry.id === 'landing-on')!];
       expect(on.input).toMatchObject({ pageRole: 'marketing-landing', productType: 'operational-saas', structureProductType: 'campaign' });
-      expect(on.mcp).toEqual({ calls: 2, tools: ['start_ui_design', 'audit_copy'] });
-      expect(off.mcp).toEqual({ calls: 0, tools: [] });
+      expect(on.mcp).toEqual({ calls: 2, tools: ['start_ui_design', 'audit_copy'], startUiDesign: true, auditAfterStart: true });
+      expect(off.mcp).toEqual({ calls: 0, tools: [], startUiDesign: false, auditAfterStart: false });
       expect(off.facts).toMatchObject({ firstFont: 'Pretendard Variable', fontSources: [], freeStart: true, emDashes: 1 });
       expect(on.facts).toMatchObject({ firstFont: 'Inter', fontSources: ['google'], freeStart: false });
       expect(card.totals.off).toMatchObject({ pretendardVariableFirst: 1, webFontLoaded: 0, noMcpCall: 1, emDash: 1 });
-      expect(card.totals.on).toMatchObject({ googleOrFontFace: 1, noMcpCall: 0 });
+      expect(card.totals.on).toMatchObject({ googleOrFontFace: 1, noMcpCall: 0, startUiDesign: 1, auditAfterStart: 1 });
       expect(renderScorecard(card)).toContain('| landing r1 |');
     } finally {
       rmSync(dir, { recursive: true, force: true });
@@ -106,6 +107,52 @@ describe('eval:static on an experiment folder', () => {
       const files = writeScorecard(card, out, dir);
       expect(JSON.parse(readFileSync(files[0]!, 'utf8')).schema).toBe('webstylebook.static-eval.v1');
       rmSync(out, { recursive: true, force: true });
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('eval:static with more than two arms', () => {
+  it('reads <page>-<arm>[-r<n>] for the arms it is given, and nothing else', () => {
+    const arms = ['A', 'B', 'C', 'D'];
+    expect(parseRunName('admin-table-A-r2', arms)).toEqual({ page: 'admin-table', arm: 'A', round: 2 });
+    expect(parseRunName('app-promo-D', arms)).toEqual({ page: 'app-promo', arm: 'D', round: 1 });
+    expect(parseRunName('landing-on', arms)).toBeNull();
+    expect(parseRunName('landing-off-interrupted', ['off', 'on'])).toBeNull();
+    expect(parseRunName('landing-on-r3', ['off', 'on'])).toEqual({ page: 'landing', arm: 'on', round: 3 });
+  });
+
+  it('totals every arm, compares the requested pairs and counts the plan 7.2 measures', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'static-eval-arms-'));
+    const run = (name: string, html: string, calls: string[]) => {
+      mkdirSync(join(dir, 'runs', name, 'workspace'), { recursive: true });
+      writeFileSync(join(dir, 'runs', name, 'workspace', 'index.html'), html);
+      writeFileSync(join(dir, 'runs', name, 'mcp-calls.jsonl'), calls.map((tool) => JSON.stringify({ tool })).join('\n'));
+    };
+    const page = (h1Font: string, body = '') => `<!doctype html><html lang="ko"><head><style>body{font-family:'Pretendard Variable',sans-serif} h1{font:700 3rem/1.1 ${h1Font}}</style></head><body><main><h1>회의록</h1>${body}</main></body></html>`;
+    const photo = '<img src="https://images.unsplash.com/photo-1" alt="회의실" width="1600" height="900"><p>Photo by Ana on <a href="https://unsplash.com/photos/x">Unsplash</a></p>';
+    try {
+      run('landing-A', page("'Inter'"), []);
+      run('landing-B', page("'Inter'"), ['mcp__web-stylebook__recommend_design_direction']);
+      run('landing-C', page("'Fraunces', serif", photo), ['mcp__web-stylebook__start_ui_design', 'mcp__web-stylebook__compose_design_tokens', 'mcp__web-stylebook__audit_page_structure']);
+      run('landing-D', page("'Fraunces', serif"), ['mcp__web-stylebook__audit_copy', 'mcp__web-stylebook__start_ui_design']);
+      run('landing-on', page("'Inter'"), []);
+      const { inputs, skipped } = experimentPages(dir, ['A', 'B', 'C', 'D']);
+      expect(skipped).toEqual([{ source: 'runs/landing-on', reason: 'name is not <page>-<A|B|C|D>[-r<n>]' }]);
+      const card = buildScorecard('arms', inputs, skipped, repo, { arms: ['A', 'B', 'C', 'D'], compare: [['A', 'C'], ['B', 'C']] });
+      expect(Object.keys(card.totals)).toEqual(['A', 'B', 'C', 'D']);
+      expect(card.pairs.map((pair) => pair.arms.join('→'))).toEqual(['A→C', 'B→C']);
+      expect(card.totals.A).toMatchObject({ noMcpCall: 1, startUiDesign: 0, displayFonts: 1 });
+      expect(card.totals.C).toMatchObject({ noMcpCall: 0, startUiDesign: 1, auditAfterStart: 1, stockPhotoPages: 1, creditedStockPages: 1 });
+      // D called audit_copy only before start_ui_design, which is not an audit of the built page.
+      expect(card.totals.D).toMatchObject({ startUiDesign: 1, auditAfterStart: 0, stockPhotoPages: 0 });
+      expect(card.pages.find((entry) => entry.id === 'landing-C')!.facts).toMatchObject({ firstFont: 'Pretendard Variable', displayFont: 'Fraunces' });
+      expect(card.totals.C!.displayFontsByRound).toEqual({ r1: 1 });
+      const markdown = renderScorecard(card);
+      expect(markdown).toContain('## Pairs (A → C)');
+      expect(markdown).toContain('## Pairs (B → C)');
+      expect(markdown).toContain('| … then audit_page_structure or audit_copy | 0 | 0 | 1 | 0 |');
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
